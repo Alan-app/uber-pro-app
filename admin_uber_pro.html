@@ -1,0 +1,149 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin - Controle Uber PRO</title>
+
+<style>
+body{
+font-family:Arial,Helvetica,sans-serif;
+background:#0f172a;
+color:white;
+margin:0;
+padding:20px;
+}
+
+h1{
+margin-bottom:20px;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+background:#111827;
+}
+
+th,td{
+padding:10px;
+border:1px solid #374151;
+text-align:left;
+}
+
+button{
+padding:8px 12px;
+cursor:pointer;
+border-radius:6px;
+border:none;
+}
+
+.liberar{
+background:#16a34a;
+color:white;
+}
+
+.bloquear{
+background:#dc2626;
+color:white;
+}
+
+</style>
+</head>
+
+<body>
+
+<h1>Painel Admin - Controle Uber PRO</h1>
+
+<table id="tabela">
+<thead>
+<tr>
+<th>Email / User ID</th>
+<th>Status</th>
+<th>Fim do teste</th>
+<th>Ações</th>
+</tr>
+</thead>
+
+<tbody></tbody>
+</table>
+
+<script>
+
+const SUPABASE_URL="https://xoqlgwjpmdkiazwpwhmn.supabase.co"
+const SUPABASE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhvcWxnd2pwbWRraWF6d3B3aG1uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5NjY1OTksImV4cCI6MjA4NzU0MjU5OX0.txohC3MvvEDaCCVRouVPDrmVaAO1PJxY0LawUttj9PA"
+
+async function carregar(){
+
+const res=await fetch(SUPABASE_URL+"/rest/v1/user_access?select=*",{
+headers:{
+apikey:SUPABASE_KEY,
+Authorization:"Bearer "+SUPABASE_KEY
+}
+})
+
+const dados=await res.json()
+
+const tbody=document.querySelector("#tabela tbody")
+tbody.innerHTML=""
+
+dados.forEach(u=>{
+
+const tr=document.createElement("tr")
+
+tr.innerHTML=`
+<td>${u.user_id}</td>
+<td>${u.status}</td>
+<td>${u.trial_end || "-"}</td>
+<td>
+<button class="liberar" onclick="liberar('${u.user_id}')">Liberar</button>
+<button class="bloquear" onclick="bloquear('${u.user_id}')">Bloquear</button>
+</td>
+`
+
+tbody.appendChild(tr)
+
+})
+
+}
+
+async function liberar(id){
+
+await fetch(SUPABASE_URL+"/rest/v1/user_access?user_id=eq."+id,{
+method:"PATCH",
+headers:{
+apikey:SUPABASE_KEY,
+Authorization:"Bearer "+SUPABASE_KEY,
+"Content-Type":"application/json",
+Prefer:"return=minimal"
+},
+body:JSON.stringify({status:"active"})
+})
+
+carregar()
+
+}
+
+async function bloquear(id){
+
+await fetch(SUPABASE_URL+"/rest/v1/user_access?user_id=eq."+id,{
+method:"PATCH",
+headers:{
+apikey:SUPABASE_KEY,
+Authorization:"Bearer "+SUPABASE_KEY,
+"Content-Type":"application/json",
+Prefer:"return=minimal"
+},
+body:JSON.stringify({status:"blocked"})
+})
+
+carregar()
+
+}
+
+carregar()
+
+</script>
+
+</body>
+</html>
