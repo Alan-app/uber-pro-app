@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Controle Uber PRO (Gerenciar App)</title>
+<title>Controle Uber PRO (painel)</title>
 <style>
 :root { color-scheme: dark; }
 * { box-sizing: border-box; }
@@ -26,7 +26,7 @@ button.secondary { background:rgba(255,255,255,.06); color:#fff; border:1px soli
 <body>
 <div class="card">
   <h1>Controle Uber PRO</h1>
-  <div class="muted">Gerencie sua conta, status, renovação e acesso ao aplicativo.</div>
+  <div class="muted">Seu acesso e teste aparecem aqui. O app fica separado e intacto.</div>
   <div class="info"><div class="label">Status da conta</div><div class="value" id="statusValue">Carregando...</div></div>
   <div class="info"><div class="label">Plano atual</div><div class="value" id="planValue">-</div></div>
   <div class="info"><div class="label">Dias restantes do teste</div><div class="value" id="daysValue">-</div></div>
@@ -47,7 +47,7 @@ button.secondary { background:rgba(255,255,255,.06); color:#fff; border:1px soli
 (function(){
   var SUPABASE_URL = 'https://xoqlgwjpmdkiazwpwhmn.supabase.co';
   var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhvcWxnd2pwbWRraWF6d3B3aG1uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5NjY1OTksImV4cCI6MjA4NzU0MjU5OX0.txohC3MvvEDaCCVRouVPDrmVaAO1PJxY0LawUttj9PA';
-  var LOGIN_PAGE = "index.html";
+  var LOGIN_PAGE = "login.html";
   var APP_PAGE = "app30_app.html";
   function $(id) { return document.getElementById(id); }
   function setTechStatus(t) { $("techStatus").textContent = t; }
@@ -114,8 +114,9 @@ button.secondary { background:rgba(255,255,255,.06); color:#fff; border:1px soli
   }
   $("openAppBtn").addEventListener("click", function(){ location.href = APP_PAGE; }, true);
   $("logoutBtn").addEventListener("click", logout, true);
-  $("subscribeBtn").addEventListener("click", function(){ window.open("https://wa.me/5521920075291", "_blank"); }, true);
-  $("whatsBtn").addEventListener("click", function(){ window.open("https://wa.me/5521920075291", "_blank"); }, true);
+  var s=$("subscribeBtn"), w=$("whatsBtn");
+  if(s) s.addEventListener("click", function(){ window.open("https://wa.me/5521920075291", "_blank"); }, true);
+  if(w) w.addEventListener("click", function(){ window.open("https://wa.me/5521920075291", "_blank"); }, true);
   loadPanel();
 })();
 </script>
