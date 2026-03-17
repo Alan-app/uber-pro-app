@@ -10,12 +10,12 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Controle Uber">
+<meta name="apple-mobile-web-app-title" content="MetaDriver">
 
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>Controle Uber PRO v7.0.6</title>
+<title>MetaDriver v7.0.6</title>
 
 <style>
 :root{
@@ -1081,13 +1081,26 @@ button[onclick="salvarMeta()"]{
 }
 </style>
 
+
+<script id="auth-guard">
+(function(){
+  var LOGIN_PAGE = "login.html";
+  var token = "";
+  try { token = localStorage.getItem("sb_token") || ""; } catch(e) {}
+  if(!token){
+    location.replace(LOGIN_PAGE);
+    return;
+  }
+})();
+</script>
+
 </head>
 <body>
 
 <div id="uberClock" class="uber-clock">--/--/---- --:--:--</div>
 <div class="topbar">
   <div class="topbar-inner">
-    <div class="app-title">🚗 Controle Uber PRO</div>
+    <div class="app-title">🚗 MetaDriver</div>
     <button class="menu-btn" onclick="toggleMenu()" aria-label="Menu">☰</button>
   </div>
 </div>
@@ -1095,7 +1108,7 @@ button[onclick="salvarMeta()"]{
 
 <div class="tabs-wrap">
   <div class="tabs-bar" role="tablist" aria-label="Abas">
-    <button class="tab-btn active" id="tabBtnUber" type="button" role="tab" aria-selected="true">Controle Uber PRO</button>
+    <button class="tab-btn active" id="tabBtnUber" type="button" role="tab" aria-selected="true">MetaDriver</button>
     <button class="tab-btn" id="tabBtnCarro" type="button" role="tab" aria-selected="false">Manutenção do carro</button>
   </div>
 </div>
@@ -1128,7 +1141,7 @@ button[onclick="salvarMeta()"]{
       Escolha o que você quer zerar.
     </div>
     <div class="editvalor-actions" style="flex-direction:column">
-      <button type="button" class="secondary" onclick="confirmZerar('uber')">Zerar Controle Uber</button>
+      <button type="button" class="secondary" onclick="confirmZerar('uber')">Zerar MetaDriver</button>
       <button type="button" class="danger" onclick="confirmZerar('carro')">Zerar Manutenção</button>
       <button type="button" class="danger" onclick="confirmZerar('tudo')">Zerar Tudo</button>
       <button type="button" class="cancel" onclick="closeZerar()">Cancelar</button>
@@ -1378,8 +1391,8 @@ button[onclick="salvarMeta()"]{
 (function(){
   try{
     const manifest = {
-      name: "Controle Uber PRO",
-      short_name: "Controle Uber",
+      name: "MetaDriver",
+      short_name: "MetaDriver",
       start_url: "./",
       display: "standalone",
       background_color: "#0f172a",
@@ -1396,7 +1409,7 @@ button[onclick="salvarMeta()"]{
 
 const STORAGE_KEY = "controleUberProDados";
 
-// ===== Forçar aba inicial: sempre Controle Uber =====
+// ===== Forçar aba inicial: sempre MetaDriver =====
 try{
   localStorage.setItem("controleUberPro_activeTab_v7_2_6", "uber");
   localStorage.setItem("controleUberPro_activeTab_v7_2_0", "uber");
@@ -1947,7 +1960,7 @@ function excluirItem(tipo, index){
 function exportarBackup(){
   try{
     const payload = {
-      app: "Controle Uber PRO",
+      app: "MetaDriver",
       version: "6.3",
       exported_at: new Date().toISOString(),
       storage_key: STORAGE_KEY,
@@ -2179,7 +2192,7 @@ function exportarRelatorioPDF(){
     <head>
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width, initial-scale=1">
-      <title>Relatório - Controle Uber PRO</title>
+      <title>Relatório - MetaDriver</title>
       <style>
         *{box-sizing:border-box}
         body{font-family:Arial,Helvetica,sans-serif;margin:24px;color:#111;background:#fff}
@@ -2202,7 +2215,7 @@ function exportarRelatorioPDF(){
       </style>
     </head>
     <body>
-      <h1>Relatório - Controle Uber PRO</h1>
+      <h1>Relatório - MetaDriver</h1>
       <p class="sub">Gerado em ${d}/${m}/${y}</p>
 
       <div class="sec">
@@ -2251,7 +2264,48 @@ function exportarRelatorioPDF(){
       <script>
         setTimeout(()=>window.print(), 250);
       <\/script>
-    </body>
+    
+<!-- BLOQUEIO DE ACESSO -->
+<div id="blockOverlay" style="position:fixed;inset:0;background:#0b1220;display:none;z-index:9999;align-items:center;justify-content:center;padding:20px;">
+  <div style="max-width:420px;width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:20px;text-align:center;">
+    <h2 style="margin-bottom:10px;">Acesso bloqueado</h2>
+    <div style="opacity:.85;margin-bottom:16px;">Seu teste expirou ou sua assinatura não está ativa.</div>
+    <button style="width:100%;height:44px;margin-bottom:10px;" onclick="window.open('https://wa.me/5521920075291','_blank')">Renovar via WhatsApp</button>
+    <button style="width:100%;height:44px;" onclick="logoutApp()">Sair</button>
+  </div>
+</div>
+
+
+<script>
+async function verificarAcesso(){
+  try{
+    const token = localStorage.getItem("sb_token");
+    if(!token) return;
+
+    const res = await fetch("https://xoqlgwjpmdkiazwpwhmn.supabase.co/rest/v1/usuarios?select=trial_end,ativo",{
+      headers:{
+        "apikey":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhvcWxnd2pwbWRraWF6d3B3aG1uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5NjY1OTksImV4cCI6MjA4NzU0MjU5OX0.txohC3MvvEDaCCVRouVPDrmVaAO1PJxY0LawUttj9PA",
+        "Authorization":"Bearer "+token
+      }
+    });
+
+    const data = await res.json();
+    if(!data || !data.length) return;
+
+    const user = data[0];
+    const now = new Date();
+    const trialEnd = new Date(user.trial_end);
+
+    if(!user.ativo || now > trialEnd){
+      document.getElementById("blockOverlay").style.display="flex";
+    }
+  }catch(e){}
+}
+
+verificarAcesso();
+</script>
+
+</body>
     </html>
   `);
   w.document.close();
@@ -3407,7 +3461,7 @@ function confirmZerar(tipo){
   if(tipo === "uber"){
     zerarControleUber();
     salvar(); atualizar();
-    toast("✅ Controle Uber zerado.");
+    toast("✅ MetaDriver zerado.");
   }else if(tipo === "carro"){
     zerarManutencaoCarro();
     salvar();
@@ -3488,7 +3542,7 @@ function logoutApp(){
     localStorage.removeItem("sb_expires_at");
     sessionStorage.clear();
   }catch(e){}
-  location.replace("index.html");
+  location.replace("login.html");
 }
 
 </script>
