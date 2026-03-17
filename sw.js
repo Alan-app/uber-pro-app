@@ -7,5 +7,5 @@ self.addEventListener("activate", (event) => {
 });
 
 self.addEventListener("fetch", (event) => {
-  // fetch handler mínimo para permitir instalação PWA
+  // fetch handler mínimo para instalação PWA
 });

@@ -125,10 +125,12 @@ button.action {
   font-size:12px;
 }
 </style>
+
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0f172a">
+<link rel="apple-touch-icon" href="icon-192.png">
 </head>
 <body>
-<div class="badge">LOGIN 51</div>
-
 <div class="card">
   <h1>Controle Uber PRO</h1>
   <div class="subtle" id="subtitle">Entre para acessar.</div>
@@ -148,6 +150,10 @@ button.action {
   </div>
 
   <div id="msg"></div>
+
+  <div class="row" id="installRow" style="display:none;">
+    <button class="action secondary" id="installBtn" type="button">Instalar app</button>
+  </div>
   <div class="small">Status: <span id="status">pronto</span></div>
 </div>
 
@@ -155,7 +161,7 @@ button.action {
 (function(){
   var SUPABASE_URL = 'https://xoqlgwjpmdkiazwpwhmn.supabase.co';
   var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhvcWxnd2pwbWRraWF6d3B3aG1uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5NjY1OTksImV4cCI6MjA4NzU0MjU5OX0.txohC3MvvEDaCCVRouVPDrmVaAO1PJxY0LawUttj9PA';
-  var PANEL_PAGE = "painel.html";
+  var PANEL_PAGE = "app30_app.html";
   var REDIRECT_URL = 'https://uberalanoliveira-hue.github.io/uber-pro-app/reset.html';
   var mode = "login";
 
@@ -374,5 +380,42 @@ button.action {
   }
 })();
 </script>
+
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('./sw.js').catch(console.error);
+  });
+}
+</script>
+
+
+<script>
+let deferredPrompt = null;
+window.addEventListener('beforeinstallprompt', function(e){
+  e.preventDefault();
+  deferredPrompt = e;
+  var row = document.getElementById('installRow');
+  if (row) row.style.display = 'flex';
+});
+window.addEventListener('appinstalled', function(){
+  deferredPrompt = null;
+  var row = document.getElementById('installRow');
+  if (row) row.style.display = 'none';
+});
+document.addEventListener('DOMContentLoaded', function(){
+  var btn = document.getElementById('installBtn');
+  if (!btn) return;
+  btn.addEventListener('click', async function(){
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    try { await deferredPrompt.userChoice; } catch(e){}
+    deferredPrompt = null;
+    var row = document.getElementById('installRow');
+    if (row) row.style.display = 'none';
+  }, true);
+});
+</script>
+
 </body>
 </html>
