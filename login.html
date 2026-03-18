@@ -259,6 +259,21 @@ button.action {
   function updateAccess(userId, token, patch) {
     return api("/rest/v1/user_access?user_id=eq." + encodeURIComponent(userId), "PATCH", patch, token, {"Prefer":"return=representation","Accept":"application/json"});
   }
+  function cloudFetchRow(userId, token) {
+    return api("/rest/v1/app_cloud_data?select=payload,updated_at&user_id=eq." + encodeURIComponent(userId), "GET", null, token, {"Accept":"application/json"})
+      .then(function(rows) {
+        return (Array.isArray(rows) && rows.length) ? rows[0] : null;
+      });
+  }
+  function cloudRestoreToLocal(payload) {
+    try {
+      if (!payload || typeof payload !== "object") return false;
+      localStorage.setItem("controleUberProDados", JSON.stringify(payload));
+      return true;
+    } catch(e) {
+      return false;
+    }
+  }
   async function validateAndGo(session) {
     var user = await getUser(session.access_token);
     var access = await getAccess(user.id, session.access_token);
@@ -274,6 +289,14 @@ button.action {
       location.href = "painel.html?expired=1";
       return;
     }
+
+    try {
+      var cloudRow = await cloudFetchRow(user.id, session.access_token);
+      if (cloudRow && cloudRow.payload) {
+        cloudRestoreToLocal(cloudRow.payload);
+      }
+    } catch(e) {}
+
     location.href = PANEL_PAGE;
   }
   async function primaryAction() {
