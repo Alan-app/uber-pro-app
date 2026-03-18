@@ -363,7 +363,11 @@ button.action {
   $("forgotBtn").addEventListener("click", forgot, true);
 
   setMode("login");
-  if (hasToken()) {
+  var urlLogout = new URLSearchParams(location.search).get("logout") === "1";
+  if (urlLogout) {
+    clearSession();
+    setStatus("logout realizado");
+  } else if (hasToken()) {
     validateAndGo({ access_token: localStorage.getItem("sb_token") || "" })
       .catch(function() {
         clearSession();

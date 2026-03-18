@@ -3510,16 +3510,24 @@ function logoutApp(){
 /* ===== Logout robusto do app ===== */
 function forceLogout(){
   try{
-    localStorage.removeItem("sb_token");
-    localStorage.removeItem("sb_refresh_token");
-    localStorage.removeItem("sb_expires_at");
-    sessionStorage.clear();
+    const keysToRemove = [];
+    for(let i=0;i<localStorage.length;i++){
+      const k = localStorage.key(i);
+      if(k && (k === "sb_token" || k === "sb_refresh_token" || k === "sb_expires_at" || k.startsWith("sb-"))){
+        keysToRemove.push(k);
+      }
+    }
+    keysToRemove.forEach(function(k){ try{ localStorage.removeItem(k); }catch(e){} });
+    try{ sessionStorage.clear(); }catch(e){}
   }catch(e){}
   try{ closeMenu(); }catch(e){}
-  location.href = "login.html";
+  const target = "login.html?logout=1&t=" + Date.now();
+  try{ window.location.replace(target); }catch(e){}
+  setTimeout(function(){
+    try{ window.location.href = target; }catch(e){}
+  }, 120);
 }
 function logoutApp(){
   forceLogout();
 }
-
 </script>
