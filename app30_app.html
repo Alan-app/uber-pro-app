@@ -1176,6 +1176,50 @@ button[onclick="salvarMeta()"]{
   top:28px !important;
 }
 
+
+/* ===== V24 override: manutenção como antes, só checkbox pendente abaixo do menu ===== */
+#tabCarro #listaManut .table-row{
+  position:relative !important;
+  padding-right:78px !important;
+}
+#tabCarro #listaManut .action-menu.manut-actions{
+  position:absolute !important;
+  top:12px !important;
+  right:12px !important;
+  display:flex !important;
+  flex-direction:column !important;
+  align-items:center !important;
+  justify-content:flex-start !important;
+  gap:18px !important;
+  margin:0 !important;
+  padding:0 !important;
+  white-space:nowrap !important;
+}
+#tabCarro #listaManut .action-menu.manut-actions .kebab-btn{
+  margin:0 !important;
+  padding:4px 6px !important;
+  line-height:1 !important;
+}
+#tabCarro #listaManut .action-menu.manut-actions .manut-check-top{
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  margin:0 !important;
+}
+#tabCarro #listaManut .action-menu.manut-actions .manut-check-top input[type="checkbox"]{
+  width:18px !important;
+  height:18px !important;
+  margin:0 !important;
+}
+#tabCarro #listaManut .concluido-toggle input[type="checkbox"]{
+  width:18px !important;
+  height:18px !important;
+}
+#tabCarro #listaManut .action-menu.manut-actions .menu-pop{
+  right:0 !important;
+  top:28px !important;
+}
+
 </style>
 
 <style id="app30-auth-guard-style">
@@ -3139,17 +3183,22 @@ function atualizarCarro(){
       return `<div class="table-row${isOverdue ? " overdue" : ""}">
           <div>${fmtKm(m.km)} <span class="type-badge ${typeClass}">${(m.tipo||"P")}</span></div>
           <div style="min-width:0;">
-            <div style="font-weight:800;white-space:normal;line-height:1.15;min-width:0;">${escapeHtml(m.desc)}</div>
-            ${m.concluida ? '<div style="margin-top:8px;"><span class="concluido-tag">Concluído</span></div>' : ''}
+            <div class="concluido-line">
+              <div style="font-weight:800;white-space:normal;line-height:1.15;min-width:0;flex:1;">${escapeHtml(m.desc)}</div>
+              ${m.concluida ? `<label class="concluido-toggle" onclick="event.stopPropagation();">
+                <input type="checkbox" checked onchange="toggleManutConcluida('${m.id}', this.checked)" />
+                <span class="concluido-tag">Concluído</span>
+              </label>` : ``}
+            </div>
             ${tag}
           </div>
           <div>${m.data||""}</div>
           <div>${m.valor?fmtMoney(m.valor):""}</div>
           <div class="action-menu manut-actions" style="justify-self:end;">
             <button class="kebab-btn" type="button" onclick="event.stopPropagation(); toggleItemMenu('menu_manut_${m.id}', this)">≡</button>
-            <label class="concluido-toggle manut-check-top" onclick="event.stopPropagation();">
-              <input type="checkbox" ${m.concluida ? "checked" : ""} onchange="toggleManutConcluida('${m.id}', this.checked)" />
-            </label>
+            ${!m.concluida ? `<label class="concluido-toggle manut-check-top" onclick="event.stopPropagation();">
+              <input type="checkbox" onchange="toggleManutConcluida('${m.id}', this.checked)" />
+            </label>` : ``}
             <div class="menu-pop" id="menu_manut_${m.id}">
               ${planned ? `<button type="button" onclick="markDone('${m.id}')">Concluir</button>` : ``}
               <button type="button" onclick="editManut('${m.id}')">Editar</button>
