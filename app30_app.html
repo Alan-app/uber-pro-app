@@ -1401,6 +1401,8 @@ button[onclick="salvarMeta()"]{
   top:28px !important;
 }
 
+
+.negative{color:#ff0000 !important;}
 </style>
 
 <style id="app30-auth-guard-style">
@@ -1409,6 +1411,8 @@ button[onclick="salvarMeta()"]{
   padding:10px 12px; border-radius:999px; border:1px solid rgba(255,255,255,.18);
   background:rgba(0,0,0,.55); color:#fff; font:600 14px system-ui, Arial, sans-serif;
 }
+
+.negative{color:#ff0000 !important;}
 </style>
 
 
@@ -2733,7 +2737,9 @@ function exportarRelatorioPDF(){
         @media print{
           body{margin:0.8cm}
         }
-      </style>
+      
+.negative{color:#ff0000 !important;}
+</style>
     </head>
     <body>
       <h1>Relatório - MetaDriver</h1>
@@ -2785,7 +2791,23 @@ function exportarRelatorioPDF(){
       <script>
         setTimeout(()=>window.print(), 250);
       <\/script>
-    </body>
+    
+<script>
+function applyNegativeStyle(){
+  const elements = document.querySelectorAll('body *');
+  elements.forEach(el=>{
+    if(el.children.length===0){
+      const txt = el.textContent.trim();
+      if(/^[-−]/.test(txt)){
+        el.classList.add('negative');
+      }
+    }
+  });
+}
+setInterval(applyNegativeStyle,500);
+</script>
+
+</body>
     </html>
   `);
   w.document.close();
