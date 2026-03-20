@@ -2859,12 +2859,17 @@ let diasCalendario = 0;
       diasCalendario = Math.floor(diffMs / (24*60*60*1000)) + 1;
     }
     diasNaoTrabalhadosNoPeriodo = (dados.naoTrabalhados || []).filter(n => {
-      if(!n || !n.data) rconst diasRestantes = Math.max(0, diasCalendario - diasNaoTrabalhadosNoPeriodo);
+      if(!n || !n.data) return false;
+      const dt = new Date(n.data + "T00:00:00");
+      return dt.getTime() >= hoje.getTime() && dt.getTime() <= limite.getTime();
+    }).length;
+  }
+  const diasRestantes = Math.max(0, diasCalendario - diasNaoTrabalhadosNoPeriodo);
   const box = document.getElementById("diasRestantesBox");
   if(box){
     box.textContent = diasNaoTrabalhadosNoPeriodo > 0 ? (diasRestantes + " (−" + diasNaoTrabalhadosNoPeriodo + ")") : String(diasRestantes);
   }
-  const combustivelDisponivel = bruto * 0.30; // cálculo interno
+const combustivelDisponivel = bruto * 0.30; // cálculo interno
   const totalAbastecido = dados.abastecimentos.reduce((s,a)=>s+a.valor,0);
   const saldoCombustivel = combustivelDisponivel - totalAbastecido;
 
@@ -2882,11 +2887,10 @@ let diasCalendario = 0;
   // quanto ainda falta em bruto para completar a meta total necessária
   const metaRestante = Math.max(0, metaBrutaComGastos - bruto);
 
-  // Meta diária automática da seção "Horas necessárias":
-  // ignora completamente os lançamentos de ganhos da data de hoje.
   const ganhosHoje = (dados.ganhos || [])
     .filter(g => isHojeRegistro(g && g.data))
     .reduce((s, g) => s + Number(g.valor || 0), 0);
+
   const brutoSemHoje = Math.max(0, bruto - ganhosHoje);
   const combustivelSemHoje = brutoSemHoje * 0.30;
   const liquidoSemHoje = brutoSemHoje - combustivelSemHoje - gastosExtras;
@@ -2900,10 +2904,6 @@ let diasCalendario = 0;
       metaDiaInput.value = metaDiariaAuto.toFixed(2);
       metaDiaInput.readOnly = true;
     }
-  }catch(e){}
-
-  const metaDia = Math.max(0, metaDiariaAuto || 0);entById("metaDiariaManual");
-    if(metaDiaInput) metaDiaInput.value = metaDiariaAuto.toFixed(2);
   }catch(e){}
 
   const metaDia = Math.max(0, metaDiariaAuto || 0);
