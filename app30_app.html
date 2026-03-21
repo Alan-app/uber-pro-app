@@ -3063,6 +3063,61 @@ function limparDadosGanhoHora(){
   dados.ganhoHoraSessoes = [];
 }
 
+function getViradaOperacional(refDate){
+  const d = refDate instanceof Date ? new Date(refDate.getTime()) : new Date();
+  d.setHours(4,0,0,0);
+  return d;
+}
+
+function recalcularSessaoGanhoHora(sessao, indice){
+  if(!sessao) return sessao;
+  const inicio = String(sessao.inicio || '').trim();
+  const fim = String(sessao.fim || '').trim();
+  const parseHM = (hm) => {
+    const [h,m] = String(hm || '00:00').split(':').map(v => Number(v || 0));
+    return {h,m};
+  };
+  const ini = parseHM(inicio);
+  const end = parseHM(fim || inicio || '00:00');
+  const base = new Date();
+  const dIni = new Date(base.getTime());
+  dIni.setHours(ini.h, ini.m, 0, 0);
+  const dFim = new Date(base.getTime());
+  dFim.setHours(end.h, end.m, 0, 0);
+  if(dFim.getTime() < dIni.getTime()) dFim.setDate(dFim.getDate() + 1);
+  const horas = Math.max(0, (dFim.getTime() - dIni.getTime()) / 3600000);
+  const sessoes = Array.isArray(dados.ganhoHoraSessoes) ? dados.ganhoHoraSessoes : [];
+  const anterior = indice > 0 ? Number((sessoes[indice-1] || {}).valorTotal || 0) : 0;
+  const ganhoSessao = Number(sessao.ganhoSessao != null ? sessao.ganhoSessao : (Number(sessao.valorTotal || 0) - anterior));
+  sessao.saldoAnterior = Number(sessao.saldoAnterior != null ? sessao.saldoAnterior : anterior);
+  sessao.ganhoSessao = ganhoSessao;
+  sessao.tempoDecorrido = horas;
+  sessao.ganhoHora = horas > 0 ? (ganhoSessao / horas) : 0;
+  return sessao;
+}
+
+function abrirMenuSessaoFinalizada(indice){
+  if(!Array.isArray(dados.ganhoHoraSessoes) || !dados.ganhoHoraSessoes[indice]) return;
+  const sessao = dados.ganhoHoraSessoes[indice];
+  const acao = prompt('Menu da sessão\n1 = Editar hora de início\n2 = Editar hora de término', '1');
+  if(acao !== '1' && acao !== '2') return;
+  const campo = acao === '1' ? 'inicio' : 'fim';
+  const rotulo = acao === '1' ? 'hora de início' : 'hora de término';
+  const atual = String(sessao[campo] || '').trim() || '00:00';
+  const novo = prompt('Digite a nova ' + rotulo + ' no formato HH:MM', atual);
+  if(novo == null) return;
+  const valor = String(novo).trim();
+  if(!/^([01]?\d|2[0-3]):[0-5]\d$/.test(valor)){
+    toast('Hora inválida. Use HH:MM.');
+    return;
+  }
+  sessao[campo] = valor;
+  recalcularSessaoGanhoHora(sessao, indice);
+  salvar();
+  atualizar();
+  toast('✅ Sessão atualizada.');
+}
+
 function finalizarSessaoGanhoHoraInterno(opcoes){
   const opts = opcoes || {};
   if(!Array.isArray(dados.ganhoHoraSessoes)) dados.ganhoHoraSessoes = [];
@@ -3099,6 +3154,8 @@ function finalizarSessaoGanhoHoraInterno(opcoes){
     inicio: horarioInicio,
     fim: horaFim,
     valorTotal,
+    saldoAnterior,
+    ganhoSessao,
     ganhoHora,
     tempoDecorrido: horas
   });
@@ -3135,7 +3192,8 @@ function ensureGanhoHoraDiaAtual(){
 
   const tinhaSessaoAtiva = !!String(dados.horarioInicioFora || "").trim();
   if(tinhaSessaoAtiva){
-    finalizarSessaoGanhoHoraInterno({ silent:true, skipSave:true, skipUpdate:true, dataFim:new Date() });
+    const virada = getViradaOperacional(new Date());
+    finalizarSessaoGanhoHoraInterno({ silent:true, skipSave:true, skipUpdate:true, dataFim:virada, horaFim:'04:00' });
   }
 
   limparDadosGanhoHora();
@@ -3143,7 +3201,7 @@ function ensureGanhoHoraDiaAtual(){
   salvar();
   atualizar();
   try{
-    toast(tinhaSessaoAtiva ? "✅ Virou 4h: sessão anterior encerrada e novo dia iniciado." : "✅ Virou 4h: ganho por hora reiniciado para um novo dia.");
+    toast("✅ Virou 4h: sessões do dia anterior apagadas e novo dia iniciado.");
   }catch(e){}
   return true;
 }
@@ -3487,11 +3545,12 @@ function atualizar(){
       if(!sessoes.length){
         sessoesEl.innerHTML = "";
       }else{
-        sessoesEl.innerHTML = sessoes.map((s, idx) => {
+        sessoesEl.innerHTML = sessoes.map((sessaoBruta, idx) => {
+          const s = recalcularSessaoGanhoHora(sessaoBruta, idx);
           const valorClass = Number(s.valorTotal || 0) < 0 ? "dangerText" : "warning";
           const horaClass = Number(s.ganhoHora || 0) < 0 ? "dangerText" : "warning";
           const tempoDecorrido = Number(s.tempoDecorrido || 0);
-          return "<div style='margin-top:8px;padding-top:8px;border-top:1px solid var(--line)'><b>" + getNomeSessao(idx + 1) + " sessão</b><br>Hora de início: " + (s.inicio || "-") + "<br>Hora de término: " + (s.fim || "-") + "<br>Valor total: <span class='" + valorClass + "'>R$ " + Number(s.valorTotal || 0).toFixed(2) + "</span><br>Ganho por hora: <span class='" + horaClass + "'>R$ " + Number(s.ganhoHora || 0).toFixed(2) + "</span><br>Tempo decorrido: <span class='warning'>" + tempoDecorrido.toFixed(2) + "h</span></div>";
+          return "<div style='margin-top:8px;padding-top:8px;border-top:1px solid var(--line);position:relative;padding-right:40px'><button type='button' onclick='abrirMenuSessaoFinalizada(" + idx + ")' style='position:absolute;top:8px;right:0;background:transparent;border:0;color:var(--text);font-size:20px;line-height:1;cursor:pointer;padding:4px 8px'>☰</button><b>" + getNomeSessao(idx + 1) + " sessão</b><br>Hora de início: " + (s.inicio || "-") + "<br>Hora de término: " + (s.fim || "-") + "<br>Valor total: <span class='" + valorClass + "'>R$ " + Number(s.valorTotal || 0).toFixed(2) + "</span><br>Ganho por hora: <span class='" + horaClass + "'>R$ " + Number(s.ganhoHora || 0).toFixed(2) + "</span><br>Tempo decorrido: <span class='warning'>" + tempoDecorrido.toFixed(2) + "h</span></div>";
         }).join("");
       }
     }
