@@ -2318,7 +2318,6 @@ function cloudApplyRemoteData(remoteData){
   try{
     if(!remoteData || typeof remoteData !== "object") return;
     dados = Object.assign({}, dados || {}, remoteData || {});
-    try{ ensureGanhoHoraDiaAtual(); }catch(e){}
     if(window.__salvarLocalOriginal) window.__salvarLocalOriginal();
     try{ atualizar(); }catch(e){}
     try{ initTabs(); }catch(e){}
@@ -3073,57 +3072,6 @@ function getViradaOperacional(refDate){
   return d;
 }
 
-function getHoraHM(dateRef){
-  const d = dateRef instanceof Date ? dateRef : new Date();
-  return String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
-}
-
-function getDiaOperacionalAtual(){
-  return String(dataUberISO());
-}
-
-function getDiaOperacionalDeData(dateRef){
-  const d = dateRef instanceof Date ? new Date(dateRef.getTime()) : new Date();
-  if(d.getHours() < 4){
-    d.setDate(d.getDate() - 1);
-  }
-  const yyyy = d.getFullYear();
-  const mm = String(d.getMonth()+1).padStart(2,'0');
-  const dd = String(d.getDate()).padStart(2,'0');
-  return `${yyyy}-${mm}-${dd}`;
-}
-
-function getViradaDoDiaOperacionalAtual(){
-  const agora = new Date();
-  const virada = new Date(agora.getTime());
-  virada.setHours(4,0,0,0);
-  return virada;
-}
-
-function apagarSessaoFinalizada(indice, opts){
-  const opcoes = opts || {};
-  if(!Array.isArray(dados.ganhoHoraSessoes) || !dados.ganhoHoraSessoes[indice]) return false;
-  dados.ganhoHoraSessoes.splice(indice, 1);
-  dados.ganhoHoraSessoes.forEach((sessao, idx) => recalcularSessaoGanhoHora(sessao, idx));
-  const ultimoValorTotal = dados.ganhoHoraSessoes.length ? Number((dados.ganhoHoraSessoes[dados.ganhoHoraSessoes.length - 1] || {}).valorTotal || 0) : 0;
-  if(String(dados.horarioInicioFora || '').trim()){
-    dados.saldoAnteriorFora = ultimoValorTotal;
-  }
-  if(!opcoes.skipSave) salvar();
-  if(!opcoes.skipUpdate) atualizar();
-  if(!opcoes.silent) toast('✅ Sessão apagada.');
-  return true;
-}
-
-function resetTotalGanhoHoraNovoDia(opcoes){
-  const opts = opcoes || {};
-  const novoDiaRef = String(opts.novoDiaRef || getDiaOperacionalAtual());
-  limparDadosGanhoHora();
-  dados.ganhoHoraDiaRef = novoDiaRef;
-  if(!opts.skipSave) salvar();
-  if(!opts.skipUpdate) atualizar();
-}
-
 function recalcularSessaoGanhoHora(sessao, indice){
   if(!sessao) return sessao;
   const inicio = String(sessao.inicio || '').trim();
@@ -3171,7 +3119,8 @@ function editarHorarioSessaoFinalizada(indice, campo){
 }
 
 function fecharMenuSessaoFinalizada(indice){
-  apagarSessaoFinalizada(indice);
+  const el = document.getElementById('menu_sessao_' + indice);
+  if(el) el.classList.remove('show');
 }
 
 function finalizarSessaoGanhoHoraInterno(opcoes){
@@ -3241,47 +3190,30 @@ function finalizarSessaoGanhoHoraInterno(opcoes){
 }
 
 function ensureGanhoHoraDiaAtual(){
+  const diaAtualUber = dataUberISO();
   const agora = new Date();
-  const diaAtualUber = getDiaOperacionalAtual();
-  if(!Array.isArray(dados.ganhoHoraSessoes)) dados.ganhoHoraSessoes = [];
-  if(!dados.ganhoHoraDiaRef) dados.ganhoHoraDiaRef = diaAtualUber;
-
-  const sessoes = dados.ganhoHoraSessoes;
-  const sessaoEmAndamentoDia = String(dados.ganhoHoraSessaoDiaRef || '').trim();
+  const sessoes = Array.isArray(dados.ganhoHoraSessoes) ? dados.ganhoHoraSessoes : [];
   const temSessaoLegadaSemDia = sessoes.some(s => s && !String(s.diaRef || '').trim());
-  const temSessaoDeOutroDia = sessoes.some(s => {
-    const diaRef = String((s && s.diaRef) || '').trim();
-    return !!diaRef && diaRef !== diaAtualUber;
-  });
-  const sessaoAtualEhDeOutroDia = !!sessaoEmAndamentoDia && sessaoEmAndamentoDia !== diaAtualUber;
-  const mudouDia = String(dados.ganhoHoraDiaRef || '').trim() !== diaAtualUber;
+  const sessaoEmAndamentoDia = String(dados.ganhoHoraSessaoDiaRef || '').trim();
 
-  if(!mudouDia && !temSessaoLegadaSemDia && !temSessaoDeOutroDia && !sessaoAtualEhDeOutroDia) return false;
-
-  const haviaSessaoEmAndamento = !!String(dados.horarioInicioFora || '').trim();
-  if(haviaSessaoEmAndamento && (mudouDia || sessaoAtualEhDeOutroDia)){
-    const virada = getViradaDoDiaOperacionalAtual();
-    try{
-      finalizarSessaoGanhoHoraInterno({
-        dataFim: virada,
-        horaFim: '04:00',
-        saldoAtual: Number(dados.saldoAtualFora || 0),
-        horarioInicio: String(dados.horarioInicioFora || '').trim(),
-        silent: true,
-        skipSave: true,
-        skipUpdate: true
-      });
-    }catch(e){}
+  if(!dados.ganhoHoraDiaRef){
+    dados.ganhoHoraDiaRef = diaAtualUber;
   }
 
-  resetTotalGanhoHoraNovoDia({
-    novoDiaRef: diaAtualUber,
-    skipSave: false,
-    skipUpdate: false
-  });
+  const mudouDia = dados.ganhoHoraDiaRef !== diaAtualUber;
+  const precisaCorrigirLegado = agora.getHours() >= 4 && (
+    temSessaoLegadaSemDia ||
+    (sessaoEmAndamentoDia && sessaoEmAndamentoDia !== diaAtualUber)
+  );
 
+  if(!mudouDia && !precisaCorrigirLegado) return false;
+
+  limparDadosGanhoHora();
+  dados.ganhoHoraDiaRef = diaAtualUber;
+  salvar();
+  atualizar();
   try{
-    toast('✅ Virou 4h: novo dia iniciado e sessões do dia anterior apagadas.');
+    toast("✅ Virou 4h: novo dia iniciado e sessões do dia anterior apagadas.");
   }catch(e){}
   return true;
 }
@@ -3626,19 +3558,19 @@ function atualizar(){
       if(!sessoes.length){
         sessoesEl.innerHTML = "";
       }else{
-        const sessoesVisiveis = sessoes.map((s, idxOriginal) => ({ s, idxOriginal })).filter(item => {
-          const diaRef = String((item.s && item.s.diaRef) || '').trim();
+        const sessoesVisiveis = sessoes.filter(s => {
+          const diaRef = String((s && s.diaRef) || '').trim();
           return !diaRef || diaRef === String(dados.ganhoHoraDiaRef || dataUberISO());
         });
         if(!sessoesVisiveis.length){
           sessoesEl.innerHTML = "";
         }else{
-          sessoesEl.innerHTML = sessoesVisiveis.map((item, idxVisivel) => {
-            const s = recalcularSessaoGanhoHora(item.s, item.idxOriginal);
+          sessoesEl.innerHTML = sessoesVisiveis.map((sessaoBruta, idx) => {
+            const s = recalcularSessaoGanhoHora(sessaoBruta, idx);
             const valorClass = Number(s.valorTotal || 0) < 0 ? "dangerText" : "warning";
             const horaClass = Number(s.ganhoHora || 0) < 0 ? "dangerText" : "warning";
             const tempoDecorrido = Number(s.tempoDecorrido || 0);
-            return `<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--line);position:relative;padding-right:40px"><div class="action-menu" style="position:absolute;top:8px;right:0"><button class="kebab-btn" type="button" onclick="event.stopPropagation(); toggleItemMenu('menu_sessao_${item.idxOriginal}', this)">≡</button><div class="menu-pop" id="menu_sessao_${item.idxOriginal}"><button type="button" onclick="editarHorarioSessaoFinalizada(${item.idxOriginal}, 'inicio')">Editar hora de início</button><button type="button" onclick="editarHorarioSessaoFinalizada(${item.idxOriginal}, 'fim')">Editar hora de término</button><button type="button" onclick="fecharMenuSessaoFinalizada(${item.idxOriginal})">Fechar</button></div></div><b>${getNomeSessao(idxVisivel + 1)} sessão</b><br>Hora de início: ${s.inicio || "-"}<br>Hora de término: ${s.fim || "-"}<br>Valor total: <span class="${valorClass}">R$ ${Number(s.valorTotal || 0).toFixed(2)}</span><br>Ganho por hora: <span class="${horaClass}">R$ ${Number(s.ganhoHora || 0).toFixed(2)}</span><br>Tempo decorrido: <span class="warning">${tempoDecorrido.toFixed(2)}h</span></div>`;
+            return `<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--line);position:relative;padding-right:40px"><div class="action-menu" style="position:absolute;top:8px;right:0"><button class="kebab-btn" type="button" onclick="event.stopPropagation(); toggleItemMenu('menu_sessao_${idx}', this)">≡</button><div class="menu-pop" id="menu_sessao_${idx}"><button type="button" onclick="editarHorarioSessaoFinalizada(${idx}, 'inicio')">Editar hora de início</button><button type="button" onclick="editarHorarioSessaoFinalizada(${idx}, 'fim')">Editar hora de término</button><button type="button" onclick="fecharMenuSessaoFinalizada(${idx})">Fechar</button></div></div><b>${getNomeSessao(idx + 1)} sessão</b><br>Hora de início: ${s.inicio || "-"}<br>Hora de término: ${s.fim || "-"}<br>Valor total: <span class="${valorClass}">R$ ${Number(s.valorTotal || 0).toFixed(2)}</span><br>Ganho por hora: <span class="${horaClass}">R$ ${Number(s.ganhoHora || 0).toFixed(2)}</span><br>Tempo decorrido: <span class="warning">${tempoDecorrido.toFixed(2)}h</span></div>`;
           }).join("");
         }
       }
