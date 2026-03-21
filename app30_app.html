@@ -583,7 +583,7 @@ input.negative-value, input.negative-value::placeholder{
   position:fixed;
   right:12px;
   left:12px;
-  bottom:82px;
+  bottom:42px;
   z-index:1201;
   background:rgba(15,23,42,.985);
   border:1px solid rgba(255,255,255,.12);
@@ -613,9 +613,9 @@ input.negative-value, input.negative-value::placeholder{
   justify-content:center;
   height:40vh;
   border-radius:22px;
-  border:2px solid rgba(255,255,255,.34);
-  background:linear-gradient(180deg, rgba(255,255,255,.09), rgba(255,255,255,.04));
-  box-shadow:0 0 0 1px rgba(255,255,255,.10), inset 0 0 0 1px rgba(255,255,255,.06);
+  border:2px solid rgba(255,255,255,.38);
+  background:linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.04));
+  box-shadow:0 0 0 1px rgba(255,255,255,.12), inset 0 0 0 1px rgba(255,255,255,.06);
   margin-bottom:10px;
   overflow:hidden;
 }
@@ -626,19 +626,22 @@ input.negative-value, input.negative-value::placeholder{
   flex-direction:column;
   border-radius:20px;
   overflow:hidden;
-  border:2px solid rgba(255,255,255,.22);
+  border:2px solid rgba(255,255,255,.24);
   background:rgba(255,255,255,.03);
 }
 .quick-balance-display-top{
   padding:12px 14px;
-  border-top:2px solid rgba(255,255,255,.30);
-  border-bottom:2px solid rgba(255,255,255,.18);
-  background:rgba(255,255,255,.10);
+  border-top:2px solid rgba(255,255,255,.34);
+  border-bottom:2px solid rgba(255,255,255,.20);
+  background:rgba(255,255,255,.12);
   font-size:13px;
   font-weight:900;
   letter-spacing:.3px;
   opacity:.98;
   text-align:center;
+  border-top-left-radius:18px;
+  border-top-right-radius:18px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.18);
 }
 .quick-balance-display-bottom{
   flex:1;
@@ -711,7 +714,7 @@ input.negative-value, input.negative-value::placeholder{
   .quick-balance-panel{
     right:8px;
     left:8px;
-    bottom:76px;
+    bottom:34px;
     padding:14px;
   }
   .quick-balance-display{
@@ -2078,6 +2081,7 @@ const CLOUD_TABLE = "app_cloud_data";
 const CLOUD_SUPABASE_URL = "https://xoqlgwjpmdkiazwpwhmn.supabase.co";
 const CLOUD_SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhvcWxnd2pwbWRraWF6d3B3aG1uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5NjY1OTksImV4cCI6MjA4NzU0MjU5OX0.txohC3MvvEDaCCVRouVPDrmVaAO1PJxY0LawUttj9PA";
 const FIRST_INSTALL_COLLAPSED_KEY = "metadriver_first_install_collapsed_v1";
+const FAB_PREF_KEY = "metadriver_quick_balance_fab_enabled";
 let __cloudSaveTimer = null;
 let __cloudBootStarted = false;
 
@@ -2187,7 +2191,7 @@ let dados = loadDados() || {
   }
 };
 
-if(typeof dados.saldoAtualButtonAtivo !== "boolean"){ dados.saldoAtualButtonAtivo = true; }
+if(typeof dados.saldoAtualButtonAtivo !== "boolean"){ dados.saldoAtualButtonAtivo = getQuickBalanceFabPref ? getQuickBalanceFabPref() : true; }
 if(!dados.saldoAtualButtonPos || typeof dados.saldoAtualButtonPos !== "object"){
   dados.saldoAtualButtonPos = null;
 }
@@ -3677,14 +3681,37 @@ function setQuickBalanceFabEnabled(ativo){
 }
 
 
+
+
+function getQuickBalanceFabPref(){
+  try{
+    const raw = localStorage.getItem(FAB_PREF_KEY);
+    if(raw === "0") return false;
+    if(raw === "1") return true;
+  }catch(e){}
+  if(window.dados && typeof dados.saldoAtualButtonAtivo === "boolean") return dados.saldoAtualButtonAtivo;
+  return true;
+}
+
+function persistQuickBalanceFabPref(ativo){
+  try{ localStorage.setItem(FAB_PREF_KEY, ativo ? "1" : "0"); }catch(e){}
+  if(window.dados){
+    dados.saldoAtualButtonAtivo = !!ativo;
+    try{ salvar(); }catch(e){}
+  }
+}
+
 function applyQuickBalanceFabStateHard(){
   const fab = document.getElementById("quickBalanceFab");
   if(!fab) return;
 
-  const ativo = !(window.dados && dados.saldoAtualButtonAtivo === false);
+  const ativo = getQuickBalanceFabPref();
+
+  if(window.dados){
+    dados.saldoAtualButtonAtivo = !!ativo;
+  }
 
   if(ativo){
-    fab.dataset.disabled = "0";
     fab.hidden = false;
     fab.setAttribute("aria-hidden", "false");
     fab.classList.remove("hidden");
@@ -3693,7 +3720,6 @@ function applyQuickBalanceFabStateHard(){
     fab.style.setProperty("pointer-events", "auto", "important");
     fab.style.removeProperty("opacity");
   }else{
-    fab.dataset.disabled = "1";
     fab.hidden = true;
     fab.setAttribute("aria-hidden", "true");
     fab.classList.add("hidden");
@@ -3711,7 +3737,7 @@ function abrirSaldoAtualButtonMenu(){
   const checkbox = document.getElementById("toggleSaldoAtualButtonCheckbox");
 
   if(checkbox){
-    checkbox.checked = !(window.dados && dados.saldoAtualButtonAtivo === false);
+    checkbox.checked = getQuickBalanceFabPref();
   }
 
   if(overlay) overlay.classList.add("show");
@@ -3729,14 +3755,7 @@ function salvarPreferenciaSaldoAtualButton(){
   const checkbox = document.getElementById("toggleSaldoAtualButtonCheckbox");
   const ativo = !!(checkbox && checkbox.checked);
 
-  dados.saldoAtualButtonAtivo = ativo;
-
-  try{
-    salvar();
-  }catch(e){
-    console.error("Erro ao salvar preferência do botão:", e);
-  }
-
+  persistQuickBalanceFabPref(ativo);
   applyQuickBalanceFabStateHard();
   fecharSaldoAtualButtonMenu();
   toast(ativo ? "💰 Botão de saldo atual ativado." : "💰 Botão de saldo atual desativado.");
@@ -3874,7 +3893,7 @@ function initQuickBalanceFab(){
 
   window.updateQuickBalanceFabUI = function(){
     applyQuickBalanceFabStateHard();
-    const isOff = !!(window.dados && dados.saldoAtualButtonAtivo === false);
+    const isOff = !getQuickBalanceFabPref();
     if(!isOff){
       applyPosition();
       scheduleIdle();
@@ -3884,12 +3903,12 @@ function initQuickBalanceFab(){
     }
   };
 
-  setQuickBalanceFabEnabled(!(window.dados && dados.saldoAtualButtonAtivo === false));
   window.updateQuickBalanceFabUI();
 }
 
 document.addEventListener("DOMContentLoaded", function(){ initQuickBalanceFab(); try{ applyQuickBalanceFabStateHard(); }catch(e){} });
-setInterval(function(){ try{ applyQuickBalanceFabStateHard(); }catch(e){} }, 1200);
+window.addEventListener("pageshow", function(){ try{ applyQuickBalanceFabStateHard(); }catch(e){} });
+setInterval(function(){ try{ applyQuickBalanceFabStateHard(); }catch(e){} }, 800);
 function bootApp(){
   try{ ensureFirstInstallCollapsed(); }catch(e){}
   try{ initSectionCollapse(); }catch(e){}
