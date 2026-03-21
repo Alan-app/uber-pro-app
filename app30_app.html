@@ -1842,8 +1842,10 @@ document.addEventListener("DOMContentLoaded", function(){
         <span class="collapse-arrow">▼</span>
       </div>
   <div class="card-body">
+<div id="saldoAnteriorForaWrap" style="display:none;">
 <label>Saldo anterior (R$)</label>
-<input type="number" id="saldoAnteriorFora" inputmode="decimal" placeholder="Se não preencher, fica zero" step="0.01">
+<input type="number" id="saldoAnteriorFora" inputmode="decimal" placeholder="Automático" step="0.01" readonly>
+</div>
 
 <label>Saldo atual (R$)</label>
 <input type="number" id="saldoAtualFora" inputmode="decimal" placeholder="Ex: 120" step="0.01">
@@ -3038,18 +3040,18 @@ function zerarTudo(){
 
 /* PDF Report: ONLY Ganhos, Gastos, Abastecimentos + valores disponíveis */
 function salvarGanhosForaTempoReal(){
-  const saldoAnterior = parseFloat(document.getElementById("saldoAnteriorFora").value) || 0;
+  if(!Array.isArray(dados.ganhoHoraSessoes)) dados.ganhoHoraSessoes = [];
+
+  const saldoAnterior = Number(dados.saldoAnteriorFora || 0);
   const saldoAtual = parseFloat(document.getElementById("saldoAtualFora").value) || 0;
   const horario = document.getElementById("horarioInicioFora").value || "";
-
-  if(!Array.isArray(dados.ganhoHoraSessoes)) dados.ganhoHoraSessoes = [];
 
   dados.saldoAnteriorFora = saldoAnterior;
   dados.saldoAtualFora = saldoAtual;
   dados.ganhoDiarioAtual = saldoAtual;
   dados.horarioInicioFora = horario;
 
-  const saldoBase = saldoAnterior > 0 ? (saldoAtual - saldoAnterior) : saldoAtual;
+  const saldoBase = saldoAtual - saldoAnterior;
 
   if(horario){
     const now = new Date();
@@ -3079,7 +3081,9 @@ function salvarGanhosForaTempoReal(){
 }
 
 function finalizarSessaoGanhoHora(){
-  const saldoAnterior = parseFloat(document.getElementById("saldoAnteriorFora")?.value) || 0;
+  if(!Array.isArray(dados.ganhoHoraSessoes)) dados.ganhoHoraSessoes = [];
+
+  const saldoAnterior = Number(dados.saldoAnteriorFora || 0);
   const saldoAtual = parseFloat(document.getElementById("saldoAtualFora")?.value) || 0;
   const horarioInicio = (document.getElementById("horarioInicioFora")?.value || "").trim();
   if(!horarioInicio){
@@ -3087,12 +3091,10 @@ function finalizarSessaoGanhoHora(){
     return;
   }
 
-  if(!Array.isArray(dados.ganhoHoraSessoes)) dados.ganhoHoraSessoes = [];
-
   const agora = new Date();
   const horaFim = String(agora.getHours()).padStart(2,'0') + ':' + String(agora.getMinutes()).padStart(2,'0');
   const valorTotal = saldoAtual;
-  const ganhoSessao = saldoAnterior > 0 ? (saldoAtual - saldoAnterior) : saldoAtual;
+  const ganhoSessao = saldoAtual - saldoAnterior;
 
   let ganhoHora = 0;
   if(horarioInicio){
@@ -3118,9 +3120,9 @@ function finalizarSessaoGanhoHora(){
   });
 
   dados.saldoAnteriorFora = valorTotal;
-  dados.saldoAtualFora = valorTotal;
-  dados.ganhoDiarioAtual = valorTotal;
-  dados.horarioInicioFora = horaFim;
+  dados.saldoAtualFora = 0;
+  dados.ganhoDiarioAtual = 0;
+  dados.horarioInicioFora = "";
   dados.horasDecorridasFora = 0;
   dados.ganhoHoraAtualFora = 0;
 
@@ -3129,8 +3131,8 @@ function finalizarSessaoGanhoHora(){
     const saldoAtualEl = document.getElementById("saldoAtualFora");
     const horarioInicioEl = document.getElementById("horarioInicioFora");
     if(saldoAnteriorEl) saldoAnteriorEl.value = String(valorTotal);
-    if(saldoAtualEl) saldoAtualEl.value = String(valorTotal);
-    if(horarioInicioEl) horarioInicioEl.value = horaFim;
+    if(saldoAtualEl) saldoAtualEl.value = "";
+    if(horarioInicioEl) horarioInicioEl.value = "";
   }catch(e){}
 
   salvar();
@@ -3395,7 +3397,7 @@ function atualizar(){
     const horario = dados.horarioInicioFora || "";
     const horas = Number(dados.horasDecorridasFora || 0);
     const ganhoHora = Number(dados.ganhoHoraAtualFora || 0);
-    const saldoBase = saldoAnterior > 0 ? (saldoAtual - saldoAnterior) : saldoAtual;
+    const saldoBase = saldoAtual - saldoAnterior;
 
     const saldoAnteriorInput = document.getElementById("saldoAnteriorFora");
     if(saldoAnteriorInput && document.activeElement !== saldoAnteriorInput){
@@ -3410,10 +3412,11 @@ function atualizar(){
 
     if(resumoEl){
       if(!horario){
-        resumoEl.innerHTML = "Preencha saldo atual e horário de início.";
+        resumoEl.innerHTML = "Saldo anterior automático: <span class='" + (saldoAnterior < 0 ? "dangerText" : "warning") + "'>R$ " + saldoAnterior.toFixed(2) + "</span><br>Preencha saldo atual e horário de início.";
       }else{
         resumoEl.innerHTML =
-          "Base usada no cálculo: <span class='" + (saldoBase < 0 ? "dangerText" : "warning") + "'>R$ " + saldoBase.toFixed(2) + "</span><br>" +
+          "Saldo anterior automático: <span class='" + (saldoAnterior < 0 ? "dangerText" : "warning") + "'>R$ " + saldoAnterior.toFixed(2) + "</span><br>" +
+          "Valor da sessão: <span class='" + (saldoBase < 0 ? "dangerText" : "warning") + "'>R$ " + saldoBase.toFixed(2) + "</span><br>" +
           "Tempo decorrido: <span class='warning'>" + horas.toFixed(2) + "h</span><br>" +
           "Ganho / hora: <span class='" + (ganhoHora < 0 ? "dangerText" : "warning") + "'>R$ " + ganhoHora.toFixed(2) + "</span>";
       }
