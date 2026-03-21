@@ -542,14 +542,13 @@ input.negative-value, input.negative-value::placeholder{
   top:70%;
   transform:translate(-50%, -50%);
   z-index:1200;
-  width:56px;
-  height:56px;
+  width:72px;
+  height:72px;
   border-radius:50%;
   border:none;
   box-shadow:0 12px 28px rgba(0,0,0,.35);
   background:#b8860b;
   color:#111827;
-  font-size:26px;
   font-weight:900;
   display:flex;
   align-items:center;
@@ -558,6 +557,8 @@ input.negative-value, input.negative-value::placeholder{
   user-select:none;
   -webkit-user-select:none;
   transition:opacity .22s ease, box-shadow .22s ease, transform .12s ease;
+  padding:0;
+  overflow:hidden;
 }
 .quick-balance-fab:active{
   transform:translate(-50%, -50%) scale(.98);
@@ -571,6 +572,30 @@ input.negative-value, input.negative-value::placeholder{
 .quick-balance-fab.idle-faded{
   opacity:.6;
 }
+
+.quick-balance-fab-inner{
+  width:100%;
+  height:100%;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  line-height:1;
+}
+.quick-balance-fab-icon{
+  font-size:16px;
+  font-weight:900;
+  margin-bottom:2px;
+}
+.quick-balance-fab-value{
+  font-size:10px;
+  font-weight:900;
+  max-width:54px;
+  text-align:center;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
 .quick-balance-overlay{
   position:fixed;
   inset:0;
@@ -583,7 +608,7 @@ input.negative-value, input.negative-value::placeholder{
   position:fixed;
   right:12px;
   left:12px;
-  bottom:42px;
+  bottom:24px;
   z-index:1201;
   background:rgba(15,23,42,.985);
   border:1px solid rgba(255,255,255,.12);
@@ -714,7 +739,7 @@ input.negative-value, input.negative-value::placeholder{
   .quick-balance-panel{
     right:8px;
     left:8px;
-    bottom:34px;
+    bottom:18px;
     padding:14px;
   }
   .quick-balance-display{
@@ -3353,6 +3378,7 @@ document.getElementById("metaDiariaManual").value = (dados.metaDiariaManual || d
 
   updateFuelModeUI();
   try{ applyQuickBalanceFabStateHard(); }catch(e){}
+  try{ refreshQuickBalanceFabMiniDisplay(); }catch(e){}
   if(!window.__fuelConfigInitialized){
     setFuelConfigCollapsed(true);
     window.__fuelConfigInitialized = true;
@@ -3574,6 +3600,13 @@ function refreshQuickBalanceDisplay(){
   }
 }
 
+function refreshQuickBalanceFabMiniDisplay(){
+  const mini = document.getElementById("quickBalanceFabValue");
+  if(!mini) return;
+  const n = Number((window.dados && dados.saldoAtualFora) || 0);
+  mini.textContent = "R$ " + n.toLocaleString("pt-BR", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+}
+
 function appendQuickBalanceKey(key){
   const input = document.getElementById("quickSaldoAtual");
   if(!input) return;
@@ -3632,6 +3665,7 @@ function salvarSaldoAtualRapido(){
     syncGanhoDoSaldoRapido(novoSaldo);
     salvar();
     atualizar();
+    refreshQuickBalanceFabMiniDisplay();
     toggleQuickBalancePanel(false);
     toast("💰 Saldo atual atualizado.");
   }catch(e){
@@ -3766,9 +3800,12 @@ function salvarPreferenciaSaldoAtualButton(){
 
 
 
+
+
 function initQuickBalanceFab(){
   if(window.__quickBalanceFabInitialized){
     if(typeof window.updateQuickBalanceFabUI === "function") window.updateQuickBalanceFabUI();
+    if(typeof refreshQuickBalanceFabMiniDisplay === "function") refreshQuickBalanceFabMiniDisplay();
     return;
   }
 
@@ -3855,6 +3892,7 @@ function initQuickBalanceFab(){
     document.removeEventListener("mouseup", onEnd);
     document.removeEventListener("touchmove", onMove);
     document.removeEventListener("touchend", onEnd);
+
     const rect = fab.getBoundingClientRect();
     if(moved){
       snapToEdge(rect.left, rect.top);
@@ -3901,14 +3939,16 @@ function initQuickBalanceFab(){
       clearIdle();
       wakeFab();
     }
+    refreshQuickBalanceFabMiniDisplay();
   };
 
   window.updateQuickBalanceFabUI();
 }
 
-document.addEventListener("DOMContentLoaded", function(){ initQuickBalanceFab(); try{ applyQuickBalanceFabStateHard(); }catch(e){} });
-window.addEventListener("pageshow", function(){ try{ applyQuickBalanceFabStateHard(); }catch(e){} });
-setInterval(function(){ try{ applyQuickBalanceFabStateHard(); }catch(e){} }, 800);
+document.addEventListener("DOMContentLoaded", function(){ initQuickBalanceFab(); try{ applyQuickBalanceFabStateHard(); }catch(e){} try{ refreshQuickBalanceFabMiniDisplay(); }catch(e){} });
+window.addEventListener("pageshow", function(){ try{ applyQuickBalanceFabStateHard(); }catch(e){} try{ refreshQuickBalanceFabMiniDisplay(); }catch(e){} });
+setInterval(function(){ try{ applyQuickBalanceFabStateHard(); }catch(e){} try{ refreshQuickBalanceFabMiniDisplay(); }catch(e){} }, 800);
+
 function bootApp(){
   try{ ensureFirstInstallCollapsed(); }catch(e){}
   try{ initSectionCollapse(); }catch(e){}
@@ -4967,7 +5007,7 @@ function logoutApp(){
 }
 </script>
 
-<button type="button" id="quickBalanceFab" class="quick-balance-fab" onclick="toggleQuickBalancePanel(true)" aria-label="Atualizar saldo atual rápido">$</button>
+<button type="button" id="quickBalanceFab" class="quick-balance-fab" onclick="toggleQuickBalancePanel(true)" aria-label="Atualizar saldo atual rápido"><span class="quick-balance-fab-inner"><span class="quick-balance-fab-icon">$</span><span id="quickBalanceFabValue" class="quick-balance-fab-value">R$ 0</span></span></button>
 
 <div id="quickBalanceOverlay" class="quick-balance-overlay" onclick="toggleQuickBalancePanel(false)"></div>
 
