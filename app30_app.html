@@ -578,34 +578,96 @@ input.negative-value, input.negative-value::placeholder{
 .quick-balance-overlay.show{display:block;}
 .quick-balance-panel{
   position:fixed;
-  right:16px;
-  left:16px;
-  bottom:92px;
+  right:12px;
+  left:12px;
+  bottom:82px;
   z-index:1201;
-  background:rgba(30,41,59,.98);
-  border:1px solid rgba(255,255,255,.10);
-  border-radius:18px;
-  box-shadow:0 18px 40px rgba(0,0,0,.45);
-  padding:14px;
+  background:rgba(15,23,42,.985);
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:22px;
+  box-shadow:0 24px 60px rgba(0,0,0,.5);
+  padding:16px;
   display:none;
-  max-width:380px;
+  max-width:460px;
   margin-left:auto;
 }
 .quick-balance-panel.show{display:block;}
 .quick-balance-title{
-  font-weight:800;
+  font-weight:900;
+  font-size:20px;
   margin-bottom:8px;
 }
 .quick-balance-sub{
   font-size:12px;
-  opacity:.88;
+  opacity:.9;
   line-height:1.35;
-  margin-bottom:8px;
+  margin-bottom:10px;
+}
+
+.quick-balance-display{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  height:40vh;
+  border-radius:18px;
+  border:1px solid rgba(255,255,255,.08);
+  background:rgba(255,255,255,.04);
+  margin-bottom:10px;
+}
+
+.quick-balance-value{
+  font-size:64px;
+  line-height:1;
+  font-weight:900;
+  letter-spacing:-1px;
+  text-align:center;
+  word-break:break-word;
+}
+
+.quick-balance-keypad{
+  display:grid;
+  grid-template-columns:repeat(3, 1fr);
+  gap:10px;
+  height:40vh;
+}
+
+
+.quick-balance-key{
+  border:none;
+  border-radius:18px;
+  font-size:32px;
+  font-weight:900;
+  background:rgba(255,255,255,.08);
+  color:#fff;
+  box-shadow:0 6px 16px rgba(0,0,0,.18);
+}
+.quick-balance-key:active{
+  transform:scale(.97);
+}
+
+.quick-balance-key:active{
+  transform:scale(.98);
 }
 .quick-balance-actions{
   display:grid;
   grid-template-columns:1fr 1fr;
   gap:10px;
+  margin-top:12px;
+}
+.quick-balance-hidden-input{
+  position:absolute !important;
+  width:1px;
+  height:1px;
+  opacity:0;
+  pointer-events:none;
+}
+@media (min-width:700px){
+  .quick-balance-panel{
+    max-width:520px;
+  }
+  .quick-balance-value{
+    font-size:48px;
+  }
 }
 @media (max-width:420px){
   .quick-balance-fab{
@@ -613,10 +675,40 @@ input.negative-value, input.negative-value::placeholder{
     height:56px;
   }
   .quick-balance-panel{
-    right:12px;
-    left:12px;
-    bottom:88px;
+    right:8px;
+    left:8px;
+    bottom:76px;
+    padding:14px;
   }
+  
+.quick-balance-display{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  height:40vh;
+  border-radius:18px;
+  border:1px solid rgba(255,255,255,.08);
+  background:rgba(255,255,255,.04);
+  margin-bottom:10px;
+}
+
+  .quick-balance-value{
+    font-size:40px;
+  }
+  
+.quick-balance-key{
+  border:none;
+  border-radius:18px;
+  font-size:32px;
+  font-weight:900;
+  background:rgba(255,255,255,.08);
+  color:#fff;
+  box-shadow:0 6px 16px rgba(0,0,0,.18);
+}
+.quick-balance-key:active{
+  transform:scale(.97);
+}
+
 }
   .quick-balance-panel{
     right:12px;
@@ -3405,6 +3497,46 @@ document.getElementById("listaGastos").innerHTML =
 
 
 
+
+function formatQuickBalanceDisplay(valueStr){
+  const n = parseFloat(String(valueStr || "").replace(",", ".")) || 0;
+  return "R$ " + n.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function refreshQuickBalanceDisplay(){
+  const input = document.getElementById("quickSaldoAtual");
+  const view = document.getElementById("quickBalanceValue");
+  if(input && view){
+    view.textContent = formatQuickBalanceDisplay(input.value);
+  }
+}
+
+function appendQuickBalanceKey(key){
+  const input = document.getElementById("quickSaldoAtual");
+  if(!input) return;
+  let current = String(input.value || "");
+  if(key === "."){
+    if(current.includes(".")) return;
+    if(!current) current = "0";
+  }
+  input.value = current + key;
+  refreshQuickBalanceDisplay();
+}
+
+function backspaceQuickBalance(){
+  const input = document.getElementById("quickSaldoAtual");
+  if(!input) return;
+  input.value = String(input.value || "").slice(0, -1);
+  refreshQuickBalanceDisplay();
+}
+
+function clearQuickBalance(){
+  const input = document.getElementById("quickSaldoAtual");
+  if(!input) return;
+  input.value = "";
+  refreshQuickBalanceDisplay();
+}
+
 function toggleQuickBalancePanel(forceOpen){
   const panel = document.getElementById("quickBalancePanel");
   const overlay = document.getElementById("quickBalanceOverlay");
@@ -3419,7 +3551,8 @@ function toggleQuickBalancePanel(forceOpen){
     const saldoAtual = Number(dados.saldoAtualFora || 0);
     if(input){
       input.value = saldoAtual ? String(saldoAtual) : "";
-      setTimeout(()=>{ try{ input.focus(); input.select(); }catch(e){} }, 30);
+      refreshQuickBalanceDisplay();
+      setTimeout(()=>{ try{ input.focus(); }catch(e){} }, 30);
     }
   }
 }
@@ -3429,7 +3562,7 @@ function salvarSaldoAtualRapido(){
   const saldoInput = document.getElementById("saldoAtualFora");
   if(!inputRapido || !saldoInput) return;
 
-  const novoSaldo = parseFloat(inputRapido.value) || 0;
+  const novoSaldo = parseFloat(String(inputRapido.value || "").replace(",", ".")) || 0;
   saldoInput.value = novoSaldo ? String(novoSaldo) : "";
 
   try{
@@ -3449,18 +3582,18 @@ window.addEventListener("keydown", function(e){
   if(e.key === "Escape"){
     toggleQuickBalancePanel(false);
   }
-  if(e.key === "Enter" && document.activeElement && document.activeElement.id === "quickSaldoAtual"){
+  if(e.key === "Enter"){
     e.preventDefault();
     salvarSaldoAtualRapido();
   }
 });
-
-
 function abrirSaldoAtualButtonMenu(){
   const overlay = document.getElementById("saldoAtualButtonMenuOverlay");
   const panel = document.getElementById("saldoAtualButtonMenuPanel");
   const checkbox = document.getElementById("toggleSaldoAtualButtonCheckbox");
-  if(checkbox) checkbox.checked = (dados.saldoAtualButtonAtivo !== false);
+  if(checkbox){
+    checkbox.checked = (dados.saldoAtualButtonAtivo !== false);
+  }
   if(overlay) overlay.classList.add("show");
   if(panel) panel.classList.add("show");
 }
@@ -4688,16 +4821,34 @@ function logoutApp(){
 
 <div id="quickBalanceOverlay" class="quick-balance-overlay" onclick="toggleQuickBalancePanel(false)"></div>
 
+
 <div id="quickBalancePanel" class="quick-balance-panel" role="dialog" aria-modal="true" aria-labelledby="quickBalanceTitle">
   <div id="quickBalanceTitle" class="quick-balance-title">Atualizar saldo atual</div>
-  <div class="quick-balance-sub">Atalho rápido para alterar o <b>Saldo atual</b> sem entrar no card de ganho por hora.</div>
-  <label for="quickSaldoAtual">Saldo atual (R$)</label>
-  <input type="number" id="quickSaldoAtual" inputmode="decimal" step="0.01" placeholder="Ex: 120">
+  <div class="quick-balance-sub">Atalho rápido para alterar o <b>Saldo atual</b> enquanto dirige.</div>
+  <div class="quick-balance-display">
+    <div id="quickBalanceValue" class="quick-balance-value">R$ 0,00</div>
+  </div>
+  <input type="number" id="quickSaldoAtual" class="quick-balance-hidden-input" inputmode="decimal" step="0.01" placeholder="Ex: 120">
+  <div class="quick-balance-keypad">
+    <button type="button" class="quick-balance-key" onclick="appendQuickBalanceKey('1')">1</button>
+    <button type="button" class="quick-balance-key" onclick="appendQuickBalanceKey('2')">2</button>
+    <button type="button" class="quick-balance-key" onclick="appendQuickBalanceKey('3')">3</button>
+    <button type="button" class="quick-balance-key" onclick="appendQuickBalanceKey('4')">4</button>
+    <button type="button" class="quick-balance-key" onclick="appendQuickBalanceKey('5')">5</button>
+    <button type="button" class="quick-balance-key" onclick="appendQuickBalanceKey('6')">6</button>
+    <button type="button" class="quick-balance-key" onclick="appendQuickBalanceKey('7')">7</button>
+    <button type="button" class="quick-balance-key" onclick="appendQuickBalanceKey('8')">8</button>
+    <button type="button" class="quick-balance-key" onclick="appendQuickBalanceKey('9')">9</button>
+    <button type="button" class="quick-balance-key" onclick="appendQuickBalanceKey('.')">.</button>
+    <button type="button" class="quick-balance-key" onclick="appendQuickBalanceKey('0')">0</button>
+    <button type="button" class="quick-balance-key" onclick="backspaceQuickBalance()">⌫</button>
+  </div>
   <div class="quick-balance-actions">
     <button type="button" onclick="salvarSaldoAtualRapido()">Salvar</button>
-    <button type="button" class="secondary" onclick="toggleQuickBalancePanel(false)">Fechar</button>
+    <button type="button" class="secondary" onclick="clearQuickBalance()">Limpar</button>
   </div>
 </div>
+
 
 <div id="saldoAtualButtonMenuOverlay" class="quick-balance-overlay" onclick="fecharSaldoAtualButtonMenu()"></div>
 <div id="saldoAtualButtonMenuPanel" class="quick-balance-panel" role="dialog" aria-modal="true" aria-labelledby="saldoAtualButtonMenuTitle">
