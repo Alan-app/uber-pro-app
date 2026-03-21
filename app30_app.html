@@ -613,11 +613,39 @@ input.negative-value, input.negative-value::placeholder{
   justify-content:center;
   height:40vh;
   border-radius:22px;
-  border:3px solid rgba(255,255,255,.28);
-  background:linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.04));
-  box-shadow:0 0 0 1px rgba(255,255,255,.08), inset 0 0 0 1px rgba(255,255,255,.05);
+  border:2px solid rgba(255,255,255,.34);
+  background:linear-gradient(180deg, rgba(255,255,255,.09), rgba(255,255,255,.04));
+  box-shadow:0 0 0 1px rgba(255,255,255,.10), inset 0 0 0 1px rgba(255,255,255,.06);
   margin-bottom:10px;
   overflow:hidden;
+}
+.quick-balance-display-inner{
+  width:100%;
+  height:100%;
+  display:flex;
+  flex-direction:column;
+  border-radius:20px;
+  overflow:hidden;
+  border:2px solid rgba(255,255,255,.22);
+  background:rgba(255,255,255,.03);
+}
+.quick-balance-display-top{
+  padding:12px 14px;
+  border-top:2px solid rgba(255,255,255,.30);
+  border-bottom:2px solid rgba(255,255,255,.18);
+  background:rgba(255,255,255,.10);
+  font-size:13px;
+  font-weight:900;
+  letter-spacing:.3px;
+  opacity:.98;
+  text-align:center;
+}
+.quick-balance-display-bottom{
+  flex:1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:10px 12px;
 }
 
 
@@ -686,42 +714,14 @@ input.negative-value, input.negative-value::placeholder{
     bottom:76px;
     padding:14px;
   }
-  
-.quick-balance-display{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  height:40vh;
-  border-radius:18px;
-  border:2px solid rgba(255,255,255,.18);
-  background:rgba(255,255,255,.05);
-  box-shadow:inset 0 0 0 1px rgba(255,255,255,.05);
-  margin-bottom:10px;
-  overflow:hidden;
-}
-
+  .quick-balance-display{
+    height:40vh;
+  }
   .quick-balance-value{
     font-size:40px;
   }
-  
-.quick-balance-key{
-  border:none;
-  border-radius:18px;
-  font-size:32px;
-  font-weight:900;
-  background:rgba(255,255,255,.08);
-  color:#fff;
-  box-shadow:0 6px 16px rgba(0,0,0,.18);
-}
-.quick-balance-key:active{
-  transform:scale(.97);
-}
-
-}
-  .quick-balance-panel{
-    right:12px;
-    left:12px;
-    bottom:148px;
+  .quick-balance-key{
+    font-size:32px;
   }
 }
 @media (max-width:680px){
@@ -2187,7 +2187,7 @@ let dados = loadDados() || {
   }
 };
 
-dados.saldoAtualButtonAtivo = (dados.saldoAtualButtonAtivo !== false);
+if(typeof dados.saldoAtualButtonAtivo !== "boolean"){ dados.saldoAtualButtonAtivo = true; }
 if(!dados.saldoAtualButtonPos || typeof dados.saldoAtualButtonPos !== "object"){
   dados.saldoAtualButtonPos = null;
 }
@@ -3348,6 +3348,7 @@ document.getElementById("metaDiariaManual").value = (dados.metaDiariaManual || d
   }
 
   updateFuelModeUI();
+  try{ applyQuickBalanceFabStateHard(); }catch(e){}
   if(!window.__fuelConfigInitialized){
     setFuelConfigCollapsed(true);
     window.__fuelConfigInitialized = true;
@@ -3675,13 +3676,44 @@ function setQuickBalanceFabEnabled(ativo){
   }
 }
 
+
+function applyQuickBalanceFabStateHard(){
+  const fab = document.getElementById("quickBalanceFab");
+  if(!fab) return;
+
+  const ativo = !(window.dados && dados.saldoAtualButtonAtivo === false);
+
+  if(ativo){
+    fab.dataset.disabled = "0";
+    fab.hidden = false;
+    fab.setAttribute("aria-hidden", "false");
+    fab.classList.remove("hidden");
+    fab.style.setProperty("display", "flex", "important");
+    fab.style.setProperty("visibility", "visible", "important");
+    fab.style.setProperty("pointer-events", "auto", "important");
+    fab.style.removeProperty("opacity");
+  }else{
+    fab.dataset.disabled = "1";
+    fab.hidden = true;
+    fab.setAttribute("aria-hidden", "true");
+    fab.classList.add("hidden");
+    fab.style.setProperty("display", "none", "important");
+    fab.style.setProperty("visibility", "hidden", "important");
+    fab.style.setProperty("pointer-events", "none", "important");
+    fab.style.setProperty("opacity", "0", "important");
+    try{ toggleQuickBalancePanel(false); }catch(e){}
+  }
+}
+
 function abrirSaldoAtualButtonMenu(){
   const overlay = document.getElementById("saldoAtualButtonMenuOverlay");
   const panel = document.getElementById("saldoAtualButtonMenuPanel");
   const checkbox = document.getElementById("toggleSaldoAtualButtonCheckbox");
+
   if(checkbox){
-    checkbox.checked = (dados.saldoAtualButtonAtivo !== false);
+    checkbox.checked = !(window.dados && dados.saldoAtualButtonAtivo === false);
   }
+
   if(overlay) overlay.classList.add("show");
   if(panel) panel.classList.add("show");
 }
@@ -3700,27 +3732,12 @@ function salvarPreferenciaSaldoAtualButton(){
   dados.saldoAtualButtonAtivo = ativo;
 
   try{
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(dados));
+    salvar();
   }catch(e){
     console.error("Erro ao salvar preferência do botão:", e);
   }
 
-  setQuickBalanceFabEnabled(ativo);
-
-  if(!ativo){
-    try{ toggleQuickBalancePanel(false); }catch(e){}
-  }
-
-  try{
-    if(typeof salvar === "function") salvar();
-  }catch(e){}
-
-  try{
-    if(typeof window.updateQuickBalanceFabUI === "function"){
-      window.updateQuickBalanceFabUI();
-    }
-  }catch(e){}
-
+  applyQuickBalanceFabStateHard();
   fecharSaldoAtualButtonMenu();
   toast(ativo ? "💰 Botão de saldo atual ativado." : "💰 Botão de saldo atual desativado.");
 }
@@ -3856,8 +3873,8 @@ function initQuickBalanceFab(){
   });
 
   window.updateQuickBalanceFabUI = function(){
+    applyQuickBalanceFabStateHard();
     const isOff = !!(window.dados && dados.saldoAtualButtonAtivo === false);
-    setQuickBalanceFabEnabled(!isOff);
     if(!isOff){
       applyPosition();
       scheduleIdle();
@@ -3871,7 +3888,8 @@ function initQuickBalanceFab(){
   window.updateQuickBalanceFabUI();
 }
 
-document.addEventListener("DOMContentLoaded", initQuickBalanceFab);
+document.addEventListener("DOMContentLoaded", function(){ initQuickBalanceFab(); try{ applyQuickBalanceFabStateHard(); }catch(e){} });
+setInterval(function(){ try{ applyQuickBalanceFabStateHard(); }catch(e){} }, 1200);
 function bootApp(){
   try{ ensureFirstInstallCollapsed(); }catch(e){}
   try{ initSectionCollapse(); }catch(e){}
@@ -3884,7 +3902,7 @@ if(document.readyState === "loading"){
   bootApp();
 }
 // Em alguns celulares, ao voltar para o app (bfcache), reaplica o estado
-window.addEventListener("pageshow", ()=>{ try{ initSectionCollapse(); }catch(e){} });
+window.addEventListener("pageshow", ()=>{ try{ initSectionCollapse(); }catch(e){} try{ applyQuickBalanceFabStateHard(); }catch(e){} });
 
 atualizar();
 
@@ -4939,9 +4957,9 @@ function logoutApp(){
   <div id="quickBalanceTitle" class="quick-balance-title">Atualizar saldo atual</div>
   <div class="quick-balance-sub">Atalho rápido para alterar o <b>Saldo atual</b> enquanto dirige.</div>
   <div class="quick-balance-display">
-    <div style="width:100%;height:100%;display:flex;flex-direction:column;border-radius:20px;overflow:hidden;">
-      <div style="padding:12px 14px;border-bottom:2px solid rgba(255,255,255,.18);background:rgba(255,255,255,.08);font-size:13px;font-weight:900;letter-spacing:.3px;opacity:.98;text-align:center;border-top-left-radius:20px;border-top-right-radius:20px;box-shadow:inset 0 1px 0 rgba(255,255,255,.12);">Saldo atual</div>
-      <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:10px 12px;">
+    <div class="quick-balance-display-inner">
+      <div class="quick-balance-display-top">Saldo atual</div>
+      <div class="quick-balance-display-bottom">
         <div id="quickBalanceValue" class="quick-balance-value">R$ 0,00</div>
       </div>
     </div>
