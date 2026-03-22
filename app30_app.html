@@ -156,6 +156,20 @@ input,select{background:var(--input);color:var(--text);outline:none;}
 button{background:var(--accent);color:#0b1220;font-weight:bold;}
 button.secondary{background:var(--accent2);}
 button:active{transform:scale(0.99);}
+.btn-historico-link{
+  background:transparent !important;
+  border:none !important;
+  padding:0 !important;
+  margin:0 !important;
+  color:var(--accent) !important;
+  font-weight:700;
+  text-decoration:underline;
+  min-height:auto !important;
+  border-radius:0 !important;
+  box-shadow:none !important;
+}
+.btn-historico-link:active{transform:none !important;}
+
 
 .list-item{
   background:rgba(255,255,255,0.06);
@@ -1860,7 +1874,7 @@ document.addEventListener("DOMContentLoaded", function(){
 <div id="ganhosForaResumo" class="muted" style="margin-top:10px;"></div>
 <div id="ganhosForaSessoes" class="muted" style="margin-top:10px;"></div>
 <div style="margin-top:10px;">
-  <button type="button" id="btnHistoricoGanhoHora" onclick="toggleHistoricoGanhoHora()">Histórico ▼</button>
+  <button type="button" id="btnHistoricoGanhoHora" class="btn-historico-link" onclick="toggleHistoricoGanhoHora()">Histórico</button>
   <div id="historicoGanhoHoraWrap" class="muted" style="display:none;margin-top:8px;"></div>
 </div>
 </div>
@@ -3790,7 +3804,7 @@ function atualizar(){
 
     const btnHistorico = document.getElementById("btnHistoricoGanhoHora");
     const historicoWrap = document.getElementById("historicoGanhoHoraWrap");
-    if(btnHistorico) btnHistorico.textContent = dados.ganhoHoraHistoricoAberto ? "Histórico ▲" : "Histórico ▼";
+    if(btnHistorico) btnHistorico.textContent = "Histórico";
     if(historicoWrap){
       const historico = (Array.isArray(dados.ganhoHoraHistorico) ? dados.ganhoHoraHistorico : []).filter(function(item){
         const dia = String((item && item.diaUber) || '').trim();
