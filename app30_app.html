@@ -2549,7 +2549,7 @@ function dataUberISO(){
 function isHojeRegistro(dataStr){
   try{
     if(!dataStr) return false;
-    return String(dataStr).slice(0,10) === hojeISO();
+    return String(dataStr).slice(0,10) === dataUberISO();
   }catch(e){
     return false;
   }
