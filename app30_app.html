@@ -3320,7 +3320,26 @@ function editarHorarioSessaoFinalizada(indice, campo){
 
 function fecharMenuSessaoFinalizada(indice){
   if(!Array.isArray(dados.ganhoHoraSessoes) || !dados.ganhoHoraSessoes[indice]) return;
+
+  const sessaoRemovida = dados.ganhoHoraSessoes[indice] || null;
+  const diaSessaoRemovida = String((sessaoRemovida && sessaoRemovida.diaRef) || '').trim();
+  const diaAtualGanhoHora = String(dados.ganhoHoraDiaRef || dataUberISO()).trim();
+  const temSessaoEmAndamento = !!String(dados.horarioInicioFora || '').trim();
+
   dados.ganhoHoraSessoes.splice(indice, 1);
+
+  if(temSessaoEmAndamento && diaSessaoRemovida === diaAtualGanhoHora){
+    const sessoesMesmoDia = (dados.ganhoHoraSessoes || []).filter(function(s){
+      return String((s && s.diaRef) || '').trim() === diaAtualGanhoHora;
+    });
+
+    if(sessoesMesmoDia.length){
+      dados.saldoAnteriorFora = Number((sessoesMesmoDia[sessoesMesmoDia.length - 1] || {}).valorTotal || 0);
+    }else{
+      dados.saldoAnteriorFora = 0;
+    }
+  }
+
   reprocessarSessoesGanhoHora();
   salvar();
   atualizar();
