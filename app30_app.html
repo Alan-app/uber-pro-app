@@ -270,11 +270,12 @@ button:active{transform:scale(0.99);}
 .muted{opacity:0.88;}
 
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.meta-tempo-fields{display:flex;flex-direction:column;gap:22px;margin-bottom:14px;}
+.meta-tempo-field{width:100%;}
+.meta-tempo-field label{display:block;margin-bottom:8px;}
+.meta-tempo-field input{width:100%;height:68px;margin:0;}
+
 @media (max-width: 420px){ .grid2{grid-template-columns:1fr;} }
-.tempo-meta-fields{display:flex;flex-direction:column;gap:16px;}
-.tempo-meta-fields > div{margin:0;}
-.tempo-meta-fields label{display:block;margin:0 0 8px 0;}
-.tempo-meta-fields input{width:100%;min-height:60px;}
 
 .section-title{font-weight:bold;margin-top:6px;margin-bottom:6px;opacity:0.98;}
 .divider{height:1px;background:var(--line);margin:12px 0;}
@@ -1894,16 +1895,16 @@ document.addEventListener("DOMContentLoaded", function(){
         <span class="collapse-arrow">▼</span>
       </div>
   <div class="card-body">
-    <div class="tempo-meta-fields">
-      <div>
+    <div class="meta-tempo-fields">
+      <div class="meta-tempo-field">
         <label>Meta diária (R$) — automática</label>
         <input type="number" id="metaDiariaManual" inputmode="decimal" placeholder="Meta diária automática" readonly />
       </div>
-      <div>
+      <div class="meta-tempo-field">
         <label>Ganho diário atual (R$) — automático</label>
         <input type="text" id="ganhoDiarioAtual" inputmode="text" placeholder="Automático pelo Saldo atual" autocomplete="off" autocapitalize="off" spellcheck="false" readonly>
       </div>
-      <div>
+      <div class="meta-tempo-field">
         <label>Ganho por hora (R$)</label>
         <input type="number" id="ganhoHoraManual" inputmode="decimal" placeholder="Ex: 40">
       </div>
