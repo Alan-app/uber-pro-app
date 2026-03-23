@@ -270,11 +270,6 @@ button:active{transform:scale(0.99);}
 .muted{opacity:0.88;}
 
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-.meta-tempo-fields{display:flex;flex-direction:column;gap:10px;margin-bottom:12px;}
-.meta-tempo-field{width:100%;}
-.meta-tempo-field label{display:block;margin:4px 0 6px;font-size:13px;}
-.meta-tempo-field input{width:100%;height:44px;margin:0;padding:10px 12px;border-radius:10px;font-size:15px;}
-
 @media (max-width: 420px){ .grid2{grid-template-columns:1fr;} }
 
 .section-title{font-weight:bold;margin-top:6px;margin-bottom:6px;opacity:0.98;}
@@ -1719,6 +1714,32 @@ input.negative-value, input.negative-value::placeholder{
 }
 
 
+/* Remove setas visuais dos campos nativos */
+#dataLimite::-webkit-calendar-picker-indicator,
+#horarioInicioFora::-webkit-calendar-picker-indicator{
+  opacity:0;
+  display:none;
+  -webkit-appearance:none;
+}
+#dataLimite,
+#horarioInicioFora{
+  -webkit-appearance:none;
+  appearance:none;
+  background-image:none !important;
+}
+
+/* Seção Tempo para atingir a meta diária compacta e alinhada ao padrão do app */
+.meta-tempo-stack > div{margin-bottom:6px;}
+.meta-tempo-stack label{margin-top:4px;}
+.meta-tempo-stack input{
+  width:100%;
+  box-sizing:border-box;
+  margin-top:6px;
+  margin-bottom:0;
+}
+.meta-tempo-stack + button[onclick="salvarHoras()"]{
+  margin-top:8px;
+}
 .gh-actions{display:flex;gap:8px;flex-wrap:nowrap;align-items:center;}
 .gh-actions button{flex:1 1 0;min-width:0;padding:10px 8px;font-size:14px;}
 
@@ -1895,16 +1916,16 @@ document.addEventListener("DOMContentLoaded", function(){
         <span class="collapse-arrow">▼</span>
       </div>
   <div class="card-body">
-    <div class="meta-tempo-fields">
-      <div class="meta-tempo-field">
+    <div class="meta-tempo-stack">
+      <div>
         <label>Meta diária (R$) — automática</label>
         <input type="number" id="metaDiariaManual" inputmode="decimal" placeholder="Meta diária automática" readonly />
       </div>
-      <div class="meta-tempo-field">
+      <div>
         <label>Ganho diário atual (R$) — automático</label>
         <input type="text" id="ganhoDiarioAtual" inputmode="text" placeholder="Automático pelo Saldo atual" autocomplete="off" autocapitalize="off" spellcheck="false" readonly>
       </div>
-      <div class="meta-tempo-field">
+      <div>
         <label>Ganho por hora (R$)</label>
         <input type="number" id="ganhoHoraManual" inputmode="decimal" placeholder="Ex: 40">
       </div>
