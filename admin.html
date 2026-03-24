@@ -207,8 +207,6 @@ button {
   .user-summary { grid-template-columns:34px 1fr; }
   .user-summary .badge { grid-column:2; justify-self:start; }
 }
-
-#quickBalanceFab,#quickBalanceOverlay,#quickBalancePanel,#saldoAtualButtonMenuOverlay,#saldoAtualButtonMenuPanel{display:none !important;visibility:hidden !important;pointer-events:none !important;}
 </style>
 </head>
 <body>
@@ -480,6 +478,196 @@ initAdmin();
 </script>
 
 
+
+<script>
+(function(){
+  const fab=document.getElementById("quickBalanceFab");
+  if(!fab) return;
+
+  let startX=0, startY=0, offsetX=0, offsetY=0, isDragging=false, moved=false;
+  let idleTimer=null;
+
+  function clamp(val,min,max){ return Math.max(min, Math.min(val,max)); }
+
+  function clearIdleTimer(){
+    if(idleTimer){
+      clearTimeout(idleTimer);
+      idleTimer=null;
+    }
+  }
+
+  function scheduleIdleFade(){
+    clearIdleTimer();
+    if(dados && dados.saldoAtualButtonAtivo === false) return;
+    idleTimer = setTimeout(function(){
+      fab.classList.add("idle-faded");
+    }, 1800);
+  }
+
+  function wakeFab(){
+    clearIdleTimer();
+    fab.classList.remove("idle-faded");
+  }
+
+  function applyFabVisibility(){
+    const hidden = !!(dados && dados.saldoAtualButtonAtivo === false);
+    fab.classList.toggle("hidden", hidden);
+    if(hidden){
+      clearIdleTimer();
+      fab.classList.remove("idle-faded");
+    }else{
+      scheduleIdleFade();
+    }
+  }
+
+  function applyFabPosition(){
+    if(dados && dados.saldoAtualButtonPos && typeof dados.saldoAtualButtonPos.x === "number" && typeof dados.saldoAtualButtonPos.y === "number"){
+      fab.style.left = dados.saldoAtualButtonPos.x + "px";
+      fab.style.top = dados.saldoAtualButtonPos.y + "px";
+      fab.style.transform = "none";
+    }else{
+      fab.style.left = "50%";
+      fab.style.top = "70%";
+      fab.style.transform = "translate(-50%, -50%)";
+    }
+  }
+
+  window.applyFabVisibility = applyFabVisibility;
+  window.applyFabPosition = applyFabPosition;
+
+  function saveFabPosition(x,y){
+    if(!window.dados) return;
+    dados.saldoAtualButtonPos = { x:x, y:y };
+    if(typeof salvar === "function") salvar();
+  }
+
+  function snapToEdge(x,y){
+    const maxX = window.innerWidth - fab.offsetWidth;
+    const maxY = window.innerHeight - fab.offsetHeight;
+    const snappedX = (x + fab.offsetWidth/2 < window.innerWidth/2) ? 12 : Math.max(12, maxX - 12);
+    const snappedY = clamp(y, 12, Math.max(12, maxY - 12));
+    fab.style.left = snappedX + "px";
+    fab.style.top = snappedY + "px";
+    fab.style.transform = "none";
+    saveFabPosition(snappedX, snappedY);
+  }
+
+  function getClient(e){
+    return e.touches ? {x:e.touches[0].clientX, y:e.touches[0].clientY} : {x:e.clientX, y:e.clientY};
+  }
+
+  fab.addEventListener("touchstart",startDrag,{passive:false});
+  fab.addEventListener("mousedown",startDrag);
+  fab.addEventListener("click", function(e){
+    wakeFab();
+    scheduleIdleFade();
+    if(moved){
+      e.preventDefault();
+      e.stopPropagation();
+      moved = false;
+    }
+  }, true);
+
+  fab.addEventListener("touchend", function(){ wakeFab(); scheduleIdleFade(); }, {passive:true});
+  fab.addEventListener("mouseenter", wakeFab);
+  fab.addEventListener("mouseleave", scheduleIdleFade);
+
+  function startDrag(e){
+    if(dados && dados.saldoAtualButtonAtivo === false) return;
+    wakeFab();
+    const rect=fab.getBoundingClientRect();
+    const client=getClient(e);
+    startX = client.x;
+    startY = client.y;
+    offsetX=client.x-rect.left;
+    offsetY=client.y-rect.top;
+    isDragging=true;
+    moved=false;
+
+    document.addEventListener("touchmove",onDrag,{passive:false});
+    document.addEventListener("mousemove",onDrag);
+    document.addEventListener("touchend",endDrag);
+    document.addEventListener("mouseup",endDrag);
+  }
+
+  function onDrag(e){
+    if(!isDragging) return;
+    e.preventDefault();
+    const client=getClient(e);
+    const dx=Math.abs(client.x - startX);
+    const dy=Math.abs(client.y - startY);
+    if(dx > 4 || dy > 4) moved = true;
+
+    let x=client.x-offsetX;
+    let y=client.y-offsetY;
+
+    const maxX=window.innerWidth - fab.offsetWidth;
+    const maxY=window.innerHeight - fab.offsetHeight;
+
+    x=clamp(x, 0, maxX);
+    y=clamp(y, 0, maxY);
+
+    fab.style.left=x+"px";
+    fab.style.top=y+"px";
+    fab.style.transform="none";
+  }
+
+  function endDrag(){
+    if(!isDragging) return;
+    isDragging=false;
+    document.removeEventListener("touchmove",onDrag);
+    document.removeEventListener("mousemove",onDrag);
+    document.removeEventListener("touchend",endDrag);
+    document.removeEventListener("mouseup",endDrag);
+
+    const rect = fab.getBoundingClientRect();
+    if(moved){
+      snapToEdge(rect.left, rect.top);
+      setTimeout(()=>{ moved = false; }, 50);
+    }
+    scheduleIdleFade();
+  }
+
+  window.addEventListener("resize", function(){
+    const rect = fab.getBoundingClientRect();
+    if(fab.style.transform === "none"){
+      const maxX=window.innerWidth - fab.offsetWidth;
+      const maxY=window.innerHeight - fab.offsetHeight;
+      const x=clamp(rect.left, 0, maxX);
+      const y=clamp(rect.top, 0, maxY);
+      fab.style.left=x+"px";
+      fab.style.top=y+"px";
+      saveFabPosition(x,y);
+    }
+  });
+
+  setTimeout(function(){
+    applyFabVisibility();
+    applyFabPosition();
+    scheduleIdleFade();
+  }, 50);
+})();
+</script>
+
+
+
+
+<div id="saldoAtualButtonMenuOverlay" class="quick-balance-overlay" onclick="fecharSaldoAtualButtonMenu()"></div>
+
+<div id="saldoAtualButtonMenuPanel" class="quick-balance-panel" role="dialog" aria-modal="true" aria-labelledby="saldoAtualButtonMenuTitle">
+  <div id="saldoAtualButtonMenuTitle" class="quick-balance-title">Botão de saldo atual</div>
+  <div class="quick-balance-sub">Ative ou desative o botão flutuante. Mesmo desligado, a atualização do saldo atual continua normal pela seção <b>Ganho por hora</b>.</div>
+  <div style="display:grid;gap:10px;">
+    <label class="fuel-radio" style="display:flex;align-items:center;gap:10px;">
+      <input type="checkbox" id="toggleSaldoAtualButtonCheckbox" onchange="salvarPreferenciaSaldoAtualButton()">
+      <span>Ativar botão flutuante</span>
+    </label>
+  </div>
+  <div class="quick-balance-actions" style="margin-top:12px;">
+    <button type="button" onclick="salvarPreferenciaSaldoAtualButton()">Salvar</button>
+    <button type="button" class="secondary" onclick="fecharSaldoAtualButtonMenu()">Fechar</button>
+  </div>
+</div>
 
 </body>
 </html>
