@@ -15,7 +15,7 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver v7.0.6</title>
+<title>MetaDriver v9.0.0</title>
 
 <style>
 :root{
@@ -1730,6 +1730,109 @@ input[type="date"],input[type="time"]{-webkit-appearance:none;appearance:none;ba
 #metaDiariaManual,#ganhoDiarioAtual,#ganhoHoraManual,#metaTotal,#dataLimite{width:100%;margin-right:0;margin-left:0;}
 /* END_PATCH_V86_TEMPO_META */
 
+/* THEMES_V90 */
+:root{
+  --btnText:#0b1220;
+  --btnSecondaryText:#0b1220;
+  --panelBg:rgba(15,23,42,.985);
+  --panelBorder:rgba(255,255,255,.12);
+  --panelShadow:0 24px 60px rgba(0,0,0,.5);
+}
+body{
+  transition:background-color .22s ease,color .22s ease;
+}
+button{color:var(--btnText);}
+button.secondary{color:var(--btnSecondaryText);}
+.menu-item button.primary{color:var(--btnText);}
+.menu-item button.secondary{color:var(--btnSecondaryText);}
+.quick-balance-panel{background:var(--panelBg);border-color:var(--panelBorder);box-shadow:var(--panelShadow);}
+.theme-grid{display:grid;grid-template-columns:1fr;gap:10px;}
+.theme-option{
+  border:1px solid var(--line);
+  background:rgba(255,255,255,.04);
+  border-radius:14px;
+  padding:12px;
+}
+.theme-option.active{
+  border-color:var(--accent);
+  box-shadow:0 0 0 1px rgba(255,255,255,.08), 0 10px 24px rgba(0,0,0,.18);
+}
+.theme-option-head{
+  display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px;
+}
+.theme-option-title{font-size:15px;font-weight:800;}
+.theme-option-sub{font-size:12px;opacity:.82;line-height:1.35;}
+.theme-chip-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+.theme-chip{
+  width:auto;
+  border-radius:999px;
+  padding:8px 12px;
+  margin-top:0;
+  font-size:13px;
+  border:1px solid var(--line);
+  background:rgba(255,255,255,.08);
+  color:var(--text);
+}
+.theme-chip.active{background:var(--accent);color:var(--btnText);border-color:transparent;}
+.theme-preview{display:flex;gap:8px;margin-top:10px;}
+.theme-preview span{flex:1;height:16px;border-radius:999px;display:block;border:1px solid rgba(255,255,255,.08);}
+.historico-dia-toggle{
+  background:transparent !important;
+  border:none !important;
+  box-shadow:none !important;
+  text-align:left;
+  padding:0 !important;
+  margin:0 !important;
+  color:var(--text) !important;
+  font-weight:800;
+  text-decoration:none;
+}
+.historico-dia-toggle .caret{
+  display:inline-block;
+  margin-left:6px;
+  font-weight:900;
+}
+.historico-dia-sessoes{display:none;margin-top:8px;}
+.historico-dia-sessoes.show{display:block;}
+body[data-theme="metadriver-dark"]{
+  --bg:#0f172a; --card:#1e293b; --input:#334155; --accent:#22c55e; --accent2:#60a5fa;
+  --text:#ffffff; --muted:rgba(255,255,255,0.88); --line:rgba(255,255,255,0.10);
+  --warn:#facc15; --danger:#fb7185; --btnText:#0b1220; --btnSecondaryText:#0b1220;
+  --panelBg:rgba(15,23,42,.985); --panelBorder:rgba(255,255,255,.12);
+}
+body[data-theme="metadriver-light"]{
+  --bg:#f4f7fb; --card:#ffffff; --input:#eef2f7; --accent:#16a34a; --accent2:#3b82f6;
+  --text:#0f172a; --muted:rgba(15,23,42,.78); --line:rgba(15,23,42,.08);
+  --warn:#ca8a04; --danger:#e11d48; --btnText:#ffffff; --btnSecondaryText:#ffffff;
+  --panelBg:#ffffff; --panelBorder:rgba(15,23,42,.10); --panelShadow:0 24px 60px rgba(15,23,42,.14);
+}
+body[data-theme="preto-dark"]{
+  --bg:#050505; --card:#111111; --input:#1b1b1b; --accent:#ffffff; --accent2:#d4d4d4;
+  --text:#f5f5f5; --muted:rgba(245,245,245,.78); --line:rgba(255,255,255,.08);
+  --warn:#d4d4d4; --danger:#ef4444; --btnText:#0a0a0a; --btnSecondaryText:#0a0a0a;
+  --panelBg:#0a0a0a; --panelBorder:rgba(255,255,255,.10); --panelShadow:0 24px 70px rgba(0,0,0,.72);
+}
+body[data-theme="preto-light"]{
+  --bg:#f7f7f7; --card:#ffffff; --input:#eeeeee; --accent:#111111; --accent2:#3a3a3a;
+  --text:#111111; --muted:rgba(17,17,17,.72); --line:rgba(17,17,17,.08);
+  --warn:#333333; --danger:#dc2626; --btnText:#ffffff; --btnSecondaryText:#ffffff;
+  --panelBg:#ffffff; --panelBorder:rgba(17,17,17,.10); --panelShadow:0 24px 60px rgba(17,17,17,.16);
+}
+body[data-theme="amarelo-dark"]{
+  --bg:#12100a; --card:#1b170d; --input:#2a2415; --accent:#ffd400; --accent2:#f4c430;
+  --text:#fff8d8; --muted:rgba(255,248,216,.80); --line:rgba(255,212,0,.12);
+  --warn:#ffd400; --danger:#ff6b6b; --btnText:#17120a; --btnSecondaryText:#17120a;
+  --panelBg:#17120a; --panelBorder:rgba(255,212,0,.14); --panelShadow:0 24px 70px rgba(0,0,0,.6);
+}
+body[data-theme="amarelo-light"]{
+  --bg:#fff9e6; --card:#ffffff; --input:#fff0b8; --accent:#ffcc00; --accent2:#f5b301;
+  --text:#241b00; --muted:rgba(36,27,0,.76); --line:rgba(36,27,0,.08);
+  --warn:#d97706; --danger:#dc2626; --btnText:#241b00; --btnSecondaryText:#241b00;
+  --panelBg:#fffaf0; --panelBorder:rgba(36,27,0,.10); --panelShadow:0 24px 60px rgba(120,90,0,.16);
+}
+/* END_THEMES_V90 */
+
+
 
 </style>
 
@@ -1800,6 +1903,7 @@ document.addEventListener("DOMContentLoaded", function(){
   <div class="menu-item"><button class="danger" onclick="openZerar(); closeMenu();">Zerar dados (cuidado)</button></div>
   <div class="menu-item"><button class="secondary" onclick="location.href='painel.html'; closeMenu();">Gerenciar APP</button></div>
   <div class="menu-item"><button class="secondary" onclick="abrirSaldoAtualButtonMenu(); closeMenu();">Botão de saldo atual</button></div>
+  <div class="menu-item"><button class="secondary" onclick="abrirTemasMenu(); closeMenu();">Temas</button></div>
   <div class="menu-item"><button class="danger" onclick="forceLogout(); return false;">Sair</button></div>
   <div class="menu-note">
     • Backup exporta um .json com tudo.<br>
@@ -1808,6 +1912,61 @@ document.addEventListener("DOMContentLoaded", function(){
   </div>
 </div>
 <input type="file" id="importFile" accept="application/json" style="display:none" onchange="importarBackup(event)">
+
+
+<div id="temasOverlay" class="editvalor-overlay" role="dialog" aria-modal="true" aria-label="Temas do aplicativo">
+  <div class="editvalor-modal" style="max-width:560px">
+    <div class="editvalor-title">Temas</div>
+    <div style="opacity:.86;font-size:13px;line-height:1.35;margin-bottom:12px">
+      Escolha o visual do app. Cada família possui modo claro e escuro.
+    </div>
+    <div class="theme-grid">
+      <div class="theme-option" id="themeOption_metadriver">
+        <div class="theme-option-head">
+          <div>
+            <div class="theme-option-title">MetaDriver</div>
+            <div class="theme-option-sub">Visual original do app, com contraste limpo e leitura forte.</div>
+          </div>
+        </div>
+        <div class="theme-preview"><span style="background:#0f172a"></span><span style="background:#1e293b"></span><span style="background:#22c55e"></span></div>
+        <div class="theme-chip-row">
+          <button type="button" class="theme-chip" id="themeChip_metadriver-dark" onclick="selecionarTema('metadriver-dark')">Escuro</button>
+          <button type="button" class="theme-chip" id="themeChip_metadriver-light" onclick="selecionarTema('metadriver-light')">Claro</button>
+        </div>
+      </div>
+      <div class="theme-option" id="themeOption_preto">
+        <div class="theme-option-head">
+          <div>
+            <div class="theme-option-title">Preto Profissional</div>
+            <div class="theme-option-sub">Estilo escuro premium, minimalista e focado em contraste.</div>
+          </div>
+        </div>
+        <div class="theme-preview"><span style="background:#050505"></span><span style="background:#111111"></span><span style="background:#ffffff"></span></div>
+        <div class="theme-chip-row">
+          <button type="button" class="theme-chip" id="themeChip_preto-dark" onclick="selecionarTema('preto-dark')">Escuro</button>
+          <button type="button" class="theme-chip" id="themeChip_preto-light" onclick="selecionarTema('preto-light')">Claro</button>
+        </div>
+      </div>
+      <div class="theme-option" id="themeOption_amarelo">
+        <div class="theme-option-head">
+          <div>
+            <div class="theme-option-title">Amarelo Dinâmico</div>
+            <div class="theme-option-sub">Visual vibrante, rápido de ler e com destaque forte para ações.</div>
+          </div>
+        </div>
+        <div class="theme-preview"><span style="background:#fff9e6"></span><span style="background:#ffcc00"></span><span style="background:#241b00"></span></div>
+        <div class="theme-chip-row">
+          <button type="button" class="theme-chip" id="themeChip_amarelo-dark" onclick="selecionarTema('amarelo-dark')">Escuro</button>
+          <button type="button" class="theme-chip" id="themeChip_amarelo-light" onclick="selecionarTema('amarelo-light')">Claro</button>
+        </div>
+      </div>
+    </div>
+    <div class="editvalor-actions" style="margin-top:14px">
+      <button type="button" class="cancel" onclick="fecharTemasMenu()">Fechar</button>
+    </div>
+  </div>
+</div>
+
 
 
 <div id="zerarOverlay" class="editvalor-overlay" role="dialog" aria-modal="true" aria-label="Zerar dados">
@@ -2250,6 +2409,8 @@ let dados = loadDados() || {
   ganhoHoraSessoes: [],
   ganhoHoraHistorico: [],
   ganhoHoraHistoricoAberto: false,
+  ganhoHoraHistoricoExpandidos: {},
+  appTheme: "metadriver-dark",
   ganhoHoraDiaRef: dataUberISO(),
   ganhoHoraSessaoDiaRef: "",
   combustivelModo: "fixo",
@@ -2268,6 +2429,8 @@ if(!dados.saldoAtualButtonPos || typeof dados.saldoAtualButtonPos !== "object"){
 if(!Array.isArray(dados.ganhoHoraSessoes)) dados.ganhoHoraSessoes = [];
 if(!Array.isArray(dados.ganhoHoraHistorico)) dados.ganhoHoraHistorico = [];
 if(typeof dados.ganhoHoraHistoricoAberto !== "boolean") dados.ganhoHoraHistoricoAberto = false;
+if(!dados.ganhoHoraHistoricoExpandidos || typeof dados.ganhoHoraHistoricoExpandidos !== "object") dados.ganhoHoraHistoricoExpandidos = {};
+if(typeof dados.appTheme !== "string" || !dados.appTheme) dados.appTheme = "metadriver-dark";
 if(!dados.ganhoHoraDiaRef) dados.ganhoHoraDiaRef = dataUberISO();
 if(typeof dados.ganhoHoraSessaoDiaRef !== "string") dados.ganhoHoraSessaoDiaRef = "";
 try{
@@ -2580,6 +2743,58 @@ function closeMenu(){
   document.getElementById("menuPanel").classList.remove("show");
   document.getElementById("overlay").classList.remove("show");
 }
+
+
+function getTemaAtualValido(){
+  const tema = String((dados && dados.appTheme) || '').trim();
+  const lista = ['metadriver-dark','metadriver-light','preto-dark','preto-light','amarelo-dark','amarelo-light'];
+  return lista.includes(tema) ? tema : 'metadriver-dark';
+}
+function aplicarTemaAtual(){
+  try{
+    const tema = getTemaAtualValido();
+    document.body.setAttribute('data-theme', tema);
+    const metaTheme = document.querySelector('meta[name="theme-color"]');
+    const cores = {
+      'metadriver-dark':'#0f172a','metadriver-light':'#f4f7fb',
+      'preto-dark':'#050505','preto-light':'#f7f7f7',
+      'amarelo-dark':'#12100a','amarelo-light':'#fff9e6'
+    };
+    if(metaTheme) metaTheme.setAttribute('content', cores[tema] || '#0f172a');
+    atualizarUISelecaoTema();
+  }catch(e){}
+}
+function atualizarUISelecaoTema(){
+  try{
+    document.querySelectorAll('.theme-chip').forEach(function(el){ el.classList.remove('active'); });
+    document.querySelectorAll('.theme-option').forEach(function(el){ el.classList.remove('active'); });
+    const tema = getTemaAtualValido();
+    const chip = document.getElementById('themeChip_' + tema);
+    if(chip) chip.classList.add('active');
+    const familia = tema.split('-')[0];
+    const op = document.getElementById('themeOption_' + familia);
+    if(op) op.classList.add('active');
+  }catch(e){}
+}
+function abrirTemasMenu(){
+  const ov = document.getElementById('temasOverlay');
+  if(ov) ov.classList.add('show');
+  atualizarUISelecaoTema();
+}
+function fecharTemasMenu(){
+  const ov = document.getElementById('temasOverlay');
+  if(ov) ov.classList.remove('show');
+}
+function selecionarTema(tema){
+  if(!window.dados) return;
+  dados.appTheme = String(tema || 'metadriver-dark');
+  aplicarTemaAtual();
+  salvar();
+}
+function homeQuickBalance(){
+  toggleQuickBalancePanel(false);
+}
+
 
 
 /* ===== Regra de data Uber (dia vira às 04:00) ===== */
@@ -2934,6 +3149,22 @@ function confirmEditValor(){
         salvar();
         atualizar();
       }
+    }else if(ctx.tipo === 'ganhoHoraSessaoHistorico'){
+      const historico = Array.isArray(dados.ganhoHoraHistorico) ? dados.ganhoHoraHistorico : [];
+      const diaItem = historico.find(function(item){
+        return String((item && item.diaUber) || '').trim() === String(ctx.diaUber || '').trim();
+      });
+      if(diaItem && Array.isArray(diaItem.sessoes) && diaItem.sessoes[ctx.index]){
+        diaItem.sessoes[ctx.index].valorTotal = v;
+        diaItem.sessoes[ctx.index].ganhoSessao = v;
+        const horasHistorico = Number(diaItem.sessoes[ctx.index].tempoDecorrido || 0);
+        diaItem.sessoes[ctx.index].ganhoHora = horasHistorico > 0 ? (v / horasHistorico) : 0;
+        diaItem.totalSaldoBase = diaItem.sessoes.reduce(function(acc, s){ return acc + Number((s && s.valorTotal) || 0); }, 0);
+        diaItem.totalHoras = diaItem.sessoes.reduce(function(acc, s){ return acc + Number((s && s.tempoDecorrido) || 0); }, 0);
+        diaItem.totalGanhoHora = Number(diaItem.totalHoras || 0) > 0 ? (Number(diaItem.totalSaldoBase || 0) / Number(diaItem.totalHoras || 0)) : 0;
+        salvar();
+        atualizar();
+      }
     }else{
       const item = dados[ctx.tipo] && dados[ctx.tipo][ctx.index];
       if(item){
@@ -3204,6 +3435,24 @@ function salvarResumoDiaGanhoHora(diaRef){
   if(!resumo) return false;
   if(!diaUberEhAteDataLimite(resumo.diaUber)) return false;
   if(!Array.isArray(dados.ganhoHoraHistorico)) dados.ganhoHoraHistorico = [];
+  const sessoesDia = (Array.isArray(dados.ganhoHoraSessoes) ? dados.ganhoHoraSessoes : []).filter(function(s, idx){
+    const dia = String((s && s.diaRef) || '').trim();
+    return dia === resumo.diaUber || (!dia && resumo.diaUber === String(dados.ganhoHoraDiaRef || ''));
+  }).map(function(s, idx){
+    return {
+      inicio: String((s && s.inicio) || ''),
+      fim: String((s && s.fim) || ''),
+      valorTotal: Number((s && s.valorTotal) || 0),
+      saldoAnterior: Number((s && s.saldoAnterior) || 0),
+      saldoAnteriorBase: Number((s && s.saldoAnteriorBase) || 0),
+      ganhoSessao: Number((s && s.ganhoSessao) || Number((s && s.valorTotal) || 0)),
+      ganhoHora: Number((s && s.ganhoHora) || 0),
+      tempoDecorrido: Number((s && s.tempoDecorrido) || 0),
+      diaRef: String((s && s.diaRef) || resumo.diaUber),
+      historicoId: String((s && s.historicoId) || (resumo.diaUber + "_" + idx + "_" + Date.now()))
+    };
+  });
+  resumo.sessoes = sessoesDia;
   const idx = dados.ganhoHoraHistorico.findIndex(function(item){
     return String((item && item.diaUber) || '').trim() === resumo.diaUber;
   });
@@ -3221,6 +3470,34 @@ function toggleHistoricoGanhoHora(){
   dados.ganhoHoraHistoricoAberto = !dados.ganhoHoraHistoricoAberto;
   salvar();
   atualizar();
+}
+
+function toggleHistoricoDiaGanhoHora(diaUber){
+  if(!dados.ganhoHoraHistoricoExpandidos || typeof dados.ganhoHoraHistoricoExpandidos !== "object"){
+    dados.ganhoHoraHistoricoExpandidos = {};
+  }
+  const chave = String(diaUber || '').trim();
+  if(!chave) return;
+  dados.ganhoHoraHistoricoExpandidos[chave] = !dados.ganhoHoraHistoricoExpandidos[chave];
+  salvar();
+  atualizar();
+}
+
+function editarValorSessaoHistorico(diaUber, indice){
+  const historico = Array.isArray(dados.ganhoHoraHistorico) ? dados.ganhoHoraHistorico : [];
+  const itemHistorico = historico.find(function(item){
+    return String((item && item.diaUber) || '').trim() === String(diaUber || '').trim();
+  });
+  if(!itemHistorico || !Array.isArray(itemHistorico.sessoes) || !itemHistorico.sessoes[indice]) return;
+  window.__editValorCtx = { tipo: 'ganhoHoraSessaoHistorico', diaUber: String(diaUber || '').trim(), index: indice };
+  const atual = Number(itemHistorico.sessoes[indice].valorTotal || 0);
+  const ov = document.getElementById("editValorOverlay");
+  const inp = document.getElementById("editValorInput");
+  if(!ov || !inp) return;
+  inp.value = atual;
+  ov.classList.add("show");
+  try{ closeAllMenus(); }catch(e){}
+  setTimeout(function(){ try{ inp.focus(); inp.select(); }catch(e){} }, 50);
 }
 
 function getViradaOperacional(refDate){
@@ -3929,7 +4206,16 @@ function atualizar(){
           const ganhoHoraItem = Number(item.totalGanhoHora || 0);
           const totalClass = total < 0 ? "dangerText" : "warning";
           const ghClass = ganhoHoraItem < 0 ? "dangerText" : "warning";
-          return `<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--line)"><b>${item.diaUber || "-"}</b><br>Total: <span class="${totalClass}">R$ ${total.toFixed(2)}</span> | <span class="warning">${horasItem.toFixed(2)}h</span> | <span class="${ghClass}">R$ ${ganhoHoraItem.toFixed(2)}/h</span></div>`;
+          const dia = String(item.diaUber || "-");
+          const expandido = !!(dados.ganhoHoraHistoricoExpandidos && dados.ganhoHoraHistoricoExpandidos[dia]);
+          const sessoesHistorico = Array.isArray(item.sessoes) ? item.sessoes : [];
+          const htmlSessoes = !sessoesHistorico.length ? "<div style='padding-top:6px'>Sem sessões salvas.</div>" : sessoesHistorico.map(function(s, idx){
+            const valorClass = Number(s.valorTotal || 0) < 0 ? "dangerText" : "warning";
+            const horaClass = Number(s.ganhoHora || 0) < 0 ? "dangerText" : "warning";
+            const tempoDecorrido = Number(s.tempoDecorrido || 0);
+            return `<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--line);position:relative;padding-right:40px"><div class="action-menu" style="position:absolute;top:8px;right:0"><button class="kebab-btn" type="button" onclick="event.stopPropagation(); toggleItemMenu('menu_hist_sessao_${dia}_${idx}', this)">≡</button><div class="menu-pop" id="menu_hist_sessao_${dia}_${idx}"><button type="button" onclick="editarValorSessaoHistorico('${dia}', ${idx})">Editar valor</button></div></div><b>${getNomeSessao(idx + 1)} sessão</b><br>Hora de início: ${s.inicio || "-"}<br>Hora de término: ${s.fim || "-"}<br>Valor total: <span class="${valorClass}">R$ ${Number(s.valorTotal || 0).toFixed(2)}</span><br>Ganho por hora: <span class="${horaClass}">R$ ${Number(s.ganhoHora || 0).toFixed(2)}</span><br>Tempo decorrido: <span class="warning">${tempoDecorrido.toFixed(2)}h</span></div>`;
+          }).join("");
+          return `<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--line)"><button type="button" class="historico-dia-toggle" onclick="toggleHistoricoDiaGanhoHora('${dia}')">${dia}<span class="caret">${expandido ? '▲' : '▼'}</span></button><br>Total: <span class="${totalClass}">R$ ${total.toFixed(2)}</span> | <span class="warning">${horasItem.toFixed(2)}h</span> | <span class="${ghClass}">R$ ${ganhoHoraItem.toFixed(2)}/h</span><div class="historico-dia-sessoes ${expandido ? 'show' : ''}">${htmlSessoes}</div></div>`;
         }).join("");
       }
     }
@@ -3958,6 +4244,7 @@ document.getElementById("metaDiariaManual").value = (dados.metaDiariaManual || d
   }
 
   updateFuelModeUI();
+  try{ aplicarTemaAtual(); }catch(e){}
   try{ applyQuickBalanceFabStateHard(); }catch(e){}
   try{ refreshQuickBalanceFabMiniDisplay(); }catch(e){}
   if(!window.__fuelConfigInitialized){
@@ -5633,7 +5920,7 @@ function logoutApp(){
 
 
 <div id="quickBalancePanel" class="quick-balance-panel" role="dialog" aria-modal="true" aria-labelledby="quickBalanceTitle">
-  <div id="quickBalanceTitle" class="quick-balance-title">Atualizar saldo atual</div>
+  <div id="quickBalanceTitle" class="quick-balance-title" style="display:none"></div>
   <div class="quick-balance-sub">Atalho rápido para alterar o <b>Saldo atual</b> enquanto dirige.</div>
   <div class="quick-balance-display">
     <div class="quick-balance-display-inner">
@@ -5658,8 +5945,9 @@ function logoutApp(){
     <button type="button" class="quick-balance-key" onclick="appendQuickBalanceKey('0')">0</button>
     <button type="button" class="quick-balance-key" onclick="backspaceQuickBalance()">⌫</button>
   </div>
-  <div class="quick-balance-actions">
+  <div class="quick-balance-actions" style="grid-template-columns:1fr 1fr 1fr;">
     <button type="button" onclick="salvarSaldoAtualRapido()">Salvar</button>
+    <button type="button" class="secondary" onclick="homeQuickBalance()">Home</button>
     <button type="button" class="secondary" onclick="clearQuickBalance()">Limpar</button>
   </div>
 </div>
