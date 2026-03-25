@@ -118,9 +118,9 @@ h1{text-align:center;margin:8px 0 14px;letter-spacing:0.2px;}
   background:rgba(255,255,255,0.10);
   color:var(--text);
 }
-.menu-item button.primary{background:var(--accent);color:#0b1220;}
-.menu-item button.secondary{background:var(--accent2);color:#0b1220;}
-.menu-item button.danger{background:var(--danger);color:#0b1220;}
+.menu-item button.primary{background:var(--accent);color:var(--btn-text,#0b1220);}
+.menu-item button.secondary{background:var(--accent2);color:var(--btn-text,#0b1220);}
+.menu-item button.danger{background:var(--danger);color:var(--btn-text,#0b1220);}
 .menu-note{padding:10px 14px; font-size:12px; opacity:0.85; line-height:1.35;}
 
 .card{
@@ -153,7 +153,7 @@ input,select,button{
   font-size:15px;
 }
 input,select{background:var(--input);color:var(--text);outline:none;}
-button{background:var(--accent);color:#0b1220;font-weight:bold;}
+button{background:var(--accent);color:var(--btn-text,#0b1220);font-weight:bold;}
 button.secondary{background:var(--accent2);}
 button:active{transform:scale(0.99);}
 .btn-historico-link{
@@ -1732,6 +1732,58 @@ input.negative-value, input.negative-value::placeholder{
   top:28px !important;
 }
 
+
+/* ===== TEMAS PREMIUM ===== */
+:root{
+  --btn-text:#0b1220;
+  --panel-overlay:rgba(0,0,0,0.58);
+}
+body[data-tema="meta-escuro"]{
+  --bg:#0f172a; --card:#1e293b; --input:#334155; --accent:#22c55e; --accent2:#60a5fa;
+  --text:#ffffff; --muted:rgba(255,255,255,0.88); --line:rgba(255,255,255,0.10);
+  --warn:#facc15; --danger:#fb7185; --btn-text:#0b1220; --panel-overlay:rgba(0,0,0,0.58);
+}
+body[data-tema="meta-claro"]{
+  --bg:#eef2f7; --card:#ffffff; --input:#e7edf5; --accent:#16a34a; --accent2:#3b82f6;
+  --text:#0f172a; --muted:rgba(15,23,42,0.72); --line:rgba(15,23,42,0.10);
+  --warn:#b45309; --danger:#dc2626; --btn-text:#ffffff; --panel-overlay:rgba(0,0,0,0.42);
+}
+body[data-tema="preto-escuro"]{
+  --bg:#0a0a0a; --card:#141414; --input:#1f1f1f; --accent:#ffffff; --accent2:#8b8b8b;
+  --text:#f5f5f5; --muted:rgba(255,255,255,0.76); --line:rgba(255,255,255,0.09);
+  --warn:#f4b740; --danger:#ff6b6b; --btn-text:#111111; --panel-overlay:rgba(0,0,0,0.66);
+}
+body[data-tema="preto-claro"]{
+  --bg:#f6f6f6; --card:#ffffff; --input:#ececec; --accent:#111111; --accent2:#4b5563;
+  --text:#111111; --muted:rgba(17,17,17,0.72); --line:rgba(17,17,17,0.10);
+  --warn:#a16207; --danger:#dc2626; --btn-text:#ffffff; --panel-overlay:rgba(0,0,0,0.46);
+}
+body[data-tema="amarelo-escuro"]{
+  --bg:#1b1600; --card:#2a2200; --input:#3a3000; --accent:#ffd400; --accent2:#ffec99;
+  --text:#fff8db; --muted:rgba(255,248,219,0.80); --line:rgba(255,212,0,0.16);
+  --warn:#ffd400; --danger:#ff7b7b; --btn-text:#171717; --panel-overlay:rgba(0,0,0,0.62);
+}
+body[data-tema="amarelo-claro"]{
+  --bg:#fff8dc; --card:#fff2b8; --input:#ffe98a; --accent:#ffcc00; --accent2:#f59e0b;
+  --text:#1f2937; --muted:rgba(31,41,55,0.72); --line:rgba(31,41,55,0.10);
+  --warn:#92400e; --danger:#dc2626; --btn-text:#111111; --panel-overlay:rgba(0,0,0,0.42);
+}
+.themes-modal{position:fixed;inset:0;z-index:1400;background:var(--panel-overlay);display:none;align-items:flex-end;justify-content:center;padding:14px}
+.themes-modal.show{display:flex}
+.themes-sheet{width:min(520px,100%);max-height:85vh;overflow:auto;background:var(--card);border:1px solid var(--line);border-radius:22px;box-shadow:0 24px 60px rgba(0,0,0,.45);padding:16px}
+.themes-title{font-size:18px;font-weight:800;margin:0 0 4px}
+.themes-sub{font-size:12px;color:var(--muted);margin:0 0 14px;line-height:1.35}
+.themes-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.theme-option{border:1px solid var(--line);border-radius:16px;padding:12px;background:rgba(255,255,255,.04);cursor:pointer}
+.theme-option.active{outline:2px solid var(--accent)}
+.theme-option h4{margin:0 0 8px;font-size:14px}
+.theme-preview{height:82px;border-radius:12px;border:1px solid rgba(255,255,255,.08);padding:8px;display:flex;flex-direction:column;gap:6px}
+.theme-preview .pv-top{height:14px;border-radius:8px;opacity:.9}
+.theme-preview .pv-card{flex:1;border-radius:10px;opacity:.95}
+.themes-actions{display:flex;gap:10px;margin-top:14px}
+.themes-actions button{margin-top:0}
+@media (max-width:420px){.themes-grid{grid-template-columns:1fr}}
+
 </style>
 
 <style id="app30-auth-guard-style">
@@ -1802,7 +1854,8 @@ document.addEventListener("DOMContentLoaded", function(){
   <div class="menu-item"><button class="secondary" onclick="location.href='painel.html'; closeMenu();">Gerenciar APP</button></div>
   <div class="menu-item"><button class="secondary" onclick="abrirSaldoAtualButtonMenu(); closeMenu();">Botão de saldo atual</button></div>
   <div class="menu-item"><button class="danger" onclick="forceLogout(); return false;">Sair</button></div>
-  <div class="menu-note">
+  <div class="menu-item"><button type="button" onclick="abrirTemas()">Temas</button></div>
+<div class="menu-note">
     • Backup exporta um .json com tudo.<br>
     • Importar substitui os dados atuais (com confirmação).<br>
     • PDF abre a tela de impressão pra salvar em PDF.
@@ -2251,6 +2304,8 @@ let dados = loadDados() || {
   ganhoHoraSessoes: [],
   ganhoHoraHistorico: [],
   ganhoHoraHistoricoAberto: false,
+    ganhoHoraHistoricoDetalhes: {},
+  ganhoHoraHistoricoDetalhes: {},
   ganhoHoraDiaRef: dataUberISO(),
   ganhoHoraSessaoDiaRef: "",
   combustivelModo: "fixo",
@@ -2269,6 +2324,7 @@ if(!dados.saldoAtualButtonPos || typeof dados.saldoAtualButtonPos !== "object"){
 if(!Array.isArray(dados.ganhoHoraSessoes)) dados.ganhoHoraSessoes = [];
 if(!Array.isArray(dados.ganhoHoraHistorico)) dados.ganhoHoraHistorico = [];
 if(typeof dados.ganhoHoraHistoricoAberto !== "boolean") dados.ganhoHoraHistoricoAberto = false;
+if(!dados.ganhoHoraHistoricoDetalhes || typeof dados.ganhoHoraHistoricoDetalhes !== "object") dados.ganhoHoraHistoricoDetalhes = {};
 if(!dados.ganhoHoraDiaRef) dados.ganhoHoraDiaRef = dataUberISO();
 if(typeof dados.ganhoHoraSessaoDiaRef !== "string") dados.ganhoHoraSessaoDiaRef = "";
 try{
@@ -3024,6 +3080,7 @@ function importarBackup(ev){
         ganhoHoraSessoes: Array.isArray(novoDados.ganhoHoraSessoes) ? novoDados.ganhoHoraSessoes : [],
         ganhoHoraHistorico: Array.isArray(novoDados.ganhoHoraHistorico) ? novoDados.ganhoHoraHistorico : [],
         ganhoHoraHistoricoAberto: typeof novoDados.ganhoHoraHistoricoAberto === "boolean" ? novoDados.ganhoHoraHistoricoAberto : false,
+        ganhoHoraHistoricoDetalhes: novoDados.ganhoHoraHistoricoDetalhes && typeof novoDados.ganhoHoraHistoricoDetalhes === 'object' ? novoDados.ganhoHoraHistoricoDetalhes : {},
         ganhoHoraDiaRef: (novoDados.ganhoHoraDiaRef && String(novoDados.ganhoHoraDiaRef)) || dataUberISO(),
         ganhoHoraSessaoDiaRef: (novoDados.ganhoHoraSessaoDiaRef && String(novoDados.ganhoHoraSessaoDiaRef)) || "",
         combustivelModo: (String(novoDados.combustivelModo || "fixo") === "real" ? "real" : "fixo"),
@@ -3183,7 +3240,8 @@ function getResumoDiaGanhoHora(diaRef){
     diaUber: dia,
     totalSaldoBase: totalSaldoBase,
     totalHoras: totalHoras,
-    totalGanhoHora: totalGanhoHora
+    totalGanhoHora: totalGanhoHora,
+    sessoes: sessoesDia.map(function(s){ return { inicio: s.inicio || '', fim: s.fim || '', valorTotal: Number(s.valorTotal || 0), ganhoHora: Number(s.ganhoHora || 0), tempoDecorrido: Number(s.tempoDecorrido || 0) }; })
   };
 }
 
@@ -3205,10 +3263,87 @@ function salvarResumoDiaGanhoHora(diaRef){
   return true;
 }
 
+
+function formatHorasMinutos(horasDecimal){
+  const totalMin=Math.max(0,Math.round(Number(horasDecimal||0)*60));
+  const h=Math.floor(totalMin/60);
+  const m=totalMin%60;
+  return `${h}h ${String(m).padStart(2,'0')}min`;
+}
+
+
+function atualizarTemaAtivoUI(){try{const atual=localStorage.getItem('metadriver_tema')||'meta-escuro';document.querySelectorAll('.theme-option').forEach(function(el){el.classList.toggle('active',el.getAttribute('data-theme')===atual);});}catch(e){}}
+function aplicarTema(tema){try{document.body.setAttribute('data-tema',tema);localStorage.setItem('metadriver_tema',tema);atualizarTemaAtivoUI();}catch(e){}}
+function abrirTemas(){try{const el=document.getElementById('themesModal');if(el)el.classList.add('show');atualizarTemaAtivoUI();}catch(e){}}
+function fecharTemas(){try{const el=document.getElementById('themesModal');if(el)el.classList.remove('show');}catch(e){}}
+(function(){try{const salvo=localStorage.getItem('metadriver_tema')||'meta-escuro';document.body.setAttribute('data-tema',salvo);}catch(e){}})();
+
 function toggleHistoricoGanhoHora(){
   dados.ganhoHoraHistoricoAberto = !dados.ganhoHoraHistoricoAberto;
   salvar();
   atualizar();
+}
+
+
+function toggleHistoricoDiaGanhoHora(dia){
+  try{
+    if(!dados.ganhoHoraHistoricoDetalhes||typeof dados.ganhoHoraHistoricoDetalhes!=='object') dados.ganhoHoraHistoricoDetalhes={};
+    dados.ganhoHoraHistoricoDetalhes[dia]=!dados.ganhoHoraHistoricoDetalhes[dia];
+    salvar(); atualizar();
+  }catch(e){}
+}
+function editarValorSessaoHistorico(dia, indice){
+  try{
+    if(!Array.isArray(dados.ganhoHoraHistorico)) return;
+    const item=dados.ganhoHoraHistorico.find(function(x){return String((x&&x.diaUber)||'').trim()===String(dia).trim();});
+    if(!item||!Array.isArray(item.sessoes)||!item.sessoes[indice]) return;
+    const atual=Number(item.sessoes[indice].valorTotal||0);
+    const novo=prompt('Editar valor da sessão:', atual.toFixed(2));
+    if(novo==null) return;
+    const valor=Number(String(novo).replace(',','.'));
+    if(!isFinite(valor)){toast('Valor inválido.');return;}
+    item.sessoes[indice].valorTotal=valor;
+    item.sessoes[indice].ganhoSessao=valor;
+    const horas=Number(item.sessoes[indice].tempoDecorrido||0);
+    item.sessoes[indice].ganhoHora=horas>0?(valor/horas):0;
+    item.totalSaldoBase=item.sessoes.reduce(function(acc,s){return acc+Number((s&&s.valorTotal)||0);},0);
+    item.totalHoras=item.sessoes.reduce(function(acc,s){return acc+Number((s&&s.tempoDecorrido)||0);},0);
+    item.totalGanhoHora=item.totalHoras>0?(item.totalSaldoBase/item.totalHoras):0;
+    salvar(); atualizar(); toast('✅ Sessão atualizada.');
+  }catch(e){}
+}
+function renderHistoricoGanhoHora(){
+  try{
+    const btnHistorico=document.getElementById("btnHistoricoGanhoHora");
+    const historicoWrap=document.getElementById("historicoGanhoHoraWrap");
+    if(btnHistorico) btnHistorico.textContent="Histórico";
+    if(!historicoWrap) return;
+    if(!dados.ganhoHoraHistoricoDetalhes||typeof dados.ganhoHoraHistoricoDetalhes!=='object') dados.ganhoHoraHistoricoDetalhes={};
+    const historico=(Array.isArray(dados.ganhoHoraHistorico)?dados.ganhoHoraHistorico:[]).filter(function(item){
+      const dia=String((item&&item.diaUber)||'').trim();
+      return dia && dia!==String(dados.ganhoHoraDiaRef||dataUberISO()) && diaUberEhAteDataLimite(dia);
+    }).sort(function(a,b){const da=String((a&&a.diaUber)||'');const db=String((b&&b.diaUber)||'');return da<db?1:da>db?-1:0;});
+    historicoWrap.style.display=dados.ganhoHoraHistoricoAberto?"block":"none";
+    if(!historico.length){historicoWrap.innerHTML=dados.ganhoHoraHistoricoAberto?"<div style='padding-top:6px'>Sem histórico.</div>":"";return;}
+    historicoWrap.innerHTML=historico.map(function(item){
+      const dia=String(item.diaUber||"-");
+      const total=Number(item.totalSaldoBase||0);
+      const horasItem=Number(item.totalHoras||0);
+      const ganhoHoraItem=Number(item.totalGanhoHora||0);
+      const totalClass=total<0?"dangerText":"warning";
+      const ghClass=ganhoHoraItem<0?"dangerText":"warning";
+      const aberto=!!dados.ganhoHoraHistoricoDetalhes[dia];
+      const sessoes=Array.isArray(item.sessoes)?item.sessoes:[];
+      const detalhes=aberto?sessoes.map(function(s,idx){
+        s=s||{};
+        const valorClass=Number(s.valorTotal||0)<0?"dangerText":"warning";
+        const horaClass=Number(s.ganhoHora||0)<0?"dangerText":"warning";
+        const menuId="menu_hist_"+dia.replace(/[^0-9]/g,'')+"_"+idx;
+        return `<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--line);position:relative;padding-right:40px"><div class="action-menu" style="position:absolute;top:8px;right:0"><button class="kebab-btn" type="button" onclick="event.stopPropagation(); toggleItemMenu('${menuId}', this)">≡</button><div class="menu-pop" id="${menuId}"><button type="button" onclick="editarValorSessaoHistorico('${dia}', ${idx})">Editar valor</button></div></div><b>${getNomeSessao(idx+1)} sessão</b><br>Hora de início: ${s.inicio||"-"}<br>Hora de término: ${s.fim||"-"}<br>Valor total: <span class="${valorClass}">R$ ${Number(s.valorTotal||0).toFixed(2)}</span><br>Ganho por hora: <span class="${horaClass}">R$ ${Number(s.ganhoHora||0).toFixed(2)}</span><br>Tempo decorrido: <span class="warning">${formatHorasMinutos(Number(s.tempoDecorrido||0))}</span></div>`;
+      }).join(''):'';
+      return `<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--line)"><button type="button" class="btn-historico-link" onclick="toggleHistoricoDiaGanhoHora('${dia}')">${dia}</button><br>Total: <span class="${totalClass}">R$ ${total.toFixed(2)}</span> | <span class="warning">${formatHorasMinutos(horasItem)}</span> | <span class="${ghClass}">R$ ${ganhoHoraItem.toFixed(2)}/h</span><div style="display:${aberto?'block':'none'}">${detalhes}</div></div>`;
+    }).join("");
+  }catch(e){}
 }
 
 function getViradaOperacional(refDate){
@@ -3763,13 +3898,6 @@ function exportarRelatorioPDF(){
   w.document.close();
 }
 
-function formatHorasMinutos(horasDecimal){
-  const totalMinutos = Math.max(0, Math.round(Number(horasDecimal || 0) * 60));
-  const horas = Math.floor(totalMinutos / 60);
-  const minutos = totalMinutos % 60;
-  return `${horas}h ${String(minutos).padStart(2, "0")}min`;
-}
-
 function atualizar(){
   try{
     const metaDiaInput = document.getElementById("metaDiariaManual");
@@ -3850,32 +3978,7 @@ function atualizar(){
       }
     }
 
-    const btnHistorico = document.getElementById("btnHistoricoGanhoHora");
-    const historicoWrap = document.getElementById("historicoGanhoHoraWrap");
-    if(btnHistorico) btnHistorico.textContent = "Histórico";
-    if(historicoWrap){
-      const historico = (Array.isArray(dados.ganhoHoraHistorico) ? dados.ganhoHoraHistorico : []).filter(function(item){
-        const dia = String((item && item.diaUber) || '').trim();
-        return dia && dia !== String(dados.ganhoHoraDiaRef || dataUberISO()) && diaUberEhAteDataLimite(dia);
-      }).sort(function(a,b){
-        const da = String((a && a.diaUber) || '');
-        const db = String((b && b.diaUber) || '');
-        return da < db ? 1 : da > db ? -1 : 0;
-      });
-      historicoWrap.style.display = dados.ganhoHoraHistoricoAberto ? "block" : "none";
-      if(!historico.length){
-        historicoWrap.innerHTML = dados.ganhoHoraHistoricoAberto ? "<div style='padding-top:6px'>Sem histórico.</div>" : "";
-      }else{
-        historicoWrap.innerHTML = historico.map(function(item){
-          const total = Number(item.totalSaldoBase || 0);
-          const horasItem = Number(item.totalHoras || 0);
-          const ganhoHoraItem = Number(item.totalGanhoHora || 0);
-          const totalClass = total < 0 ? "dangerText" : "warning";
-          const ghClass = ganhoHoraItem < 0 ? "dangerText" : "warning";
-          return `<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--line)"><b>${item.diaUber || "-"}</b><br>Total: <span class="${totalClass}">R$ ${total.toFixed(2)}</span> | <span class="warning">${formatHorasMinutos(horasItem)}</span> | <span class="${ghClass}">R$ ${ganhoHoraItem.toFixed(2)}/h</span></div>`;
-        }).join("");
-      }
-    }
+    renderHistoricoGanhoHora();
   }catch(e){}
 
 
@@ -3985,6 +4088,8 @@ const fuelCfg = getCombustivelConfig(bruto);
   const horasNecessarias = (ganhoHoraRef > 0) ? (metaDia / ganhoHoraRef) : 0;
   const horasRestantes = (ganhoHoraRef > 0) ? (Math.max(0, metaDia - ganhoDia) / ganhoHoraRef) : 0;
 
+  const horasNecessariasCeil = Math.ceil(horasNecessarias);
+  const horasRestantesCeil = horasRestantes.toFixed(1);
   
   document.getElementById("statusMeta").innerHTML =
     "Dias restantes: <span class='" + (diasRestantes < 0 ? "dangerText" : "warning") + "'>" + diasRestantes + "</span><br>" +
@@ -3993,9 +4098,9 @@ const fuelCfg = getCombustivelConfig(bruto);
     "Meta diária (automática): <span class='" + (metaDiariaAuto < 0 ? "dangerText" : "warning") + "'>R$ " + metaDiariaAuto.toFixed(2) + "</span>";
   const valorRestanteHoras = (metaDia - ganhoDia);
   document.getElementById("horasResumo").innerHTML =
-    "Tempo para atingir a meta diária: <span class='" + (horasNecessarias < 0 ? "dangerText" : "warning") + "'>" + formatHorasMinutos(horasNecessarias) + "</span><br>" +
+    "Horas necessárias: <span class='" + (horasNecessarias < 0 ? "dangerText" : "warning") + "'>" + horasNecessariasCeil + "h</span><br>" +
     "Valor restante: <span class='" + (valorRestanteHoras < 0 ? "dangerText" : "warning") + "'>R$ " + valorRestanteHoras.toFixed(2) + "</span><br>" +
-    "Tempo restante: <span class='" + (horasRestantes < 0 ? "dangerText" : "warning") + "'>" + formatHorasMinutos(horasRestantes) + "</span>";
+    "Horas restantes: <span class='" + (horasRestantes < 0 ? "dangerText" : "warning") + "'>" + horasRestantesCeil + "h</span>";
 
   document.getElementById("fuelResumo").innerHTML =
     "Modo combustível: <span class='warning'>" + (fuelCfg.modo === "real" ? "Real" : (Math.round(fuelCfg.percentualSelecionado * 100) + "% do bruto")) + "</span><br>" +
