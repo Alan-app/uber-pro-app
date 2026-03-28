@@ -63,65 +63,74 @@ h1{text-align:center;margin:8px 0 14px;letter-spacing:0.2px;}
   letter-spacing:0.3px;
 }
 .menu-btn{
-  width:40px;
-  height:40px;
-  border-radius:12px;
-  border:1px solid rgba(255,255,255,0.12);
-  background:rgba(255,255,255,0.08);
+  width:32px;
+  height:32px;
+  border-radius:8px;
+  border:1px solid rgba(255,255,255,0.10);
+  background:rgba(255,255,255,0.06);
   color:var(--text);
   display:flex;
   align-items:center;
   justify-content:center;
-  font-size:22px;
+  font-size:17px;
   flex:0 0 auto;
+  opacity:0.75;
 }
-.menu-btn:active{transform:scale(0.98);}
+.menu-btn:active{transform:scale(0.97);}
 
 
+/* v8 - menu mais discreto e compacto */
 /* Menu overlay */
 .overlay{
   position:fixed; inset:0; z-index:90;
-  background:rgba(0,0,0,0.55);
+  background:rgba(0,0,0,0.35);
   display:none;
 }
 .overlay.show{display:block;}
 .menu-panel{
-  position:fixed; top:64px; right:12px; z-index:100;
-  width:min(320px, calc(100% - 24px));
-  background:rgba(30,41,59,0.98);
-  border:1px solid rgba(255,255,255,0.10);
-  border-radius:16px;
-  box-shadow:0 18px 40px rgba(0,0,0,0.45);
+  position:fixed; top:56px; right:10px; z-index:100;
+  width:min(220px, calc(100% - 20px));
+  background:rgba(20,30,46,0.97);
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:12px;
+  box-shadow:0 8px 24px rgba(0,0,0,0.40);
   overflow:hidden;
   display:none;
 }
 .menu-panel.show{display:block;}
 .menu-header{
-  padding:12px 14px;
-  background:linear-gradient(135deg, rgba(96,165,250,0.22), rgba(34,197,94,0.16));
-  border-bottom:1px solid rgba(255,255,255,0.10);
-  font-weight:bold;
+  padding:7px 12px;
+  background:rgba(255,255,255,0.04);
+  border-bottom:1px solid rgba(255,255,255,0.07);
+  font-weight:600;
+  font-size:11px;
+  letter-spacing:0.5px;
+  text-transform:uppercase;
+  opacity:0.6;
 }
 .menu-item{
-  padding:12px 14px;
-  border-bottom:1px solid rgba(255,255,255,0.08);
+  padding:1px 8px;
+  border-bottom:1px solid rgba(255,255,255,0.05);
 }
 .menu-item:last-child{border-bottom:none;}
 .menu-item button{
   width:100%;
-  padding:10px;
+  padding:6px 8px;
   margin:0;
-  border-radius:12px;
+  border-radius:7px;
   border:none;
-  font-size:15px;
-  font-weight:bold;
-  background:rgba(255,255,255,0.10);
+  font-size:13px;
+  font-weight:500;
+  background:transparent;
   color:var(--text);
+  text-align:left;
+  opacity:0.85;
 }
-.menu-item button.primary{background:var(--accent);color:#0b1220;}
-.menu-item button.secondary{background:var(--accent2);color:#0b1220;}
-.menu-item button.danger{background:var(--danger);color:#0b1220;}
-.menu-note{padding:10px 14px; font-size:12px; opacity:0.85; line-height:1.35;}
+.menu-item button:hover{background:rgba(255,255,255,0.07); opacity:1;}
+.menu-item button.primary{color:var(--accent); font-weight:600;}
+.menu-item button.secondary{color:var(--accent2);}
+.menu-item button.danger{color:var(--danger);}
+.menu-note{padding:5px 12px 7px; font-size:10px; opacity:0.5; line-height:1.3;}
 
 .card{
   background:var(--card);
@@ -2219,7 +2228,11 @@ body[data-tema="amarelo-claro"] .menu-btn{
 <div id="ganhosForaResumo" class="muted" style="margin-top:10px;"></div>
 <div id="ganhosForaSessoes" class="muted" style="margin-top:10px;"></div>
 <div style="margin-top:10px;">
-  <button type="button" id="btnHistoricoGanhoHora" class="btn-historico-link" onclick="toggleHistoricoGanhoHora()">Histórico</button>
+  <span style="display:inline-flex;align-items:center;gap:8px;">
+    <button type="button" id="btnHistoricoGanhoHora" class="btn-historico-link" onclick="toggleHistoricoGanhoHora()">Histórico</button>
+    <!-- v8 - botão limpar histórico -->
+    <button type="button" onclick="limparHistoricoGanhoHora()" title="Limpar histórico" style="background:none;border:none;cursor:pointer;font-size:11px;color:var(--danger);opacity:0.55;padding:0;line-height:1;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.55">🗑</button>
+  </span>
   <div id="historicoGanhoHoraWrap" class="muted" style="display:none;margin-top:8px;"></div>
 </div>
 </div>
@@ -3681,6 +3694,69 @@ function toggleHistoricoDiaGanhoHora(diaUber){
   atualizar();
 }
 
+
+// v8 - editar horário de sessões no histórico
+function editarHorarioSessaoHistorico(diaUber, indice, campo){
+  const item = (dados.ganhoHoraHistorico || []).find(function(h){ return String((h && h.diaUber) || '').trim() === String(diaUber || '').trim(); });
+  if(!item || !Array.isArray(item.sessoes) || !item.sessoes[indice]) return;
+  const sessao = item.sessoes[indice];
+  const rotulo = campo === 'inicio' ? 'hora de início' : 'hora de término';
+  const atual = String(sessao[campo] || '').trim() || '00:00';
+  const novo = prompt('Digite a nova ' + rotulo + ' no formato HH:MM', atual);
+  if(novo == null) return;
+  const valor = String(novo).trim();
+  if(!/^([01]?\d|2[0-3]):[0-5]\d$/.test(valor)){
+    toast('Hora inválida. Use HH:MM.');
+    return;
+  }
+  sessao[campo] = valor;
+  // Recalcular tempo decorrido da sessão
+  try{
+    const ini = sessao.inicio ? sessao.inicio.split(':').map(Number) : [0,0];
+    const fim = sessao.fim ? sessao.fim.split(':').map(Number) : [0,0];
+    let diffMin = (fim[0]*60+fim[1]) - (ini[0]*60+ini[1]);
+    if(diffMin < 0) diffMin += 24*60;
+    sessao.tempoDecorrido = diffMin / 60;
+    if(sessao.tempoDecorrido > 0){
+      const ganhoSessao = Number(sessao.valorTotal||0) - Number(sessao.saldoAnterior||0);
+      sessao.ganhoSessao = ganhoSessao;
+      sessao.ganhoHora = ganhoSessao / sessao.tempoDecorrido;
+    }
+  }catch(e){}
+  salvar();
+  atualizar();
+  toast('✅ Sessão do histórico atualizada.');
+}
+
+// v8 - excluir sessão do histórico
+function excluirSessaoHistorico(diaUber, indice){
+  if(!confirm('Excluir esta sessão do histórico?')) return;
+  const idx = (dados.ganhoHoraHistorico || []).findIndex(function(h){ return String((h && h.diaUber) || '').trim() === String(diaUber || '').trim(); });
+  if(idx === -1) return;
+  dados.ganhoHoraHistorico[idx].sessoes.splice(indice, 1);
+  // Remove dia se ficou sem sessões
+  if(!dados.ganhoHoraHistorico[idx].sessoes.length){
+    dados.ganhoHoraHistorico.splice(idx, 1);
+  }
+  salvar();
+  atualizar();
+  toast('✅ Sessão do histórico excluída.');
+}
+
+// v8 - limpar todo o histórico
+function limparHistoricoGanhoHora(){
+  if(!dados.ganhoHoraHistorico || !dados.ganhoHoraHistorico.length){
+    toast('Histórico já está vazio.');
+    return;
+  }
+  if(!confirm('Apagar todo o histórico de sessões? Esta ação não pode ser desfeita.')) return;
+  dados.ganhoHoraHistorico = [];
+  dados.ganhoHoraHistoricoAberto = false;
+  salvar();
+  atualizar();
+  toast('✅ Histórico apagado.');
+}
+
 function editarValorSessaoHistorico(diaUber, indice){
   window.__editValorCtx = { tipo: 'ganhoHoraSessaoHistorico', diaUber: String(diaUber || '').trim(), index: Number(indice || 0) };
   const item = (dados.ganhoHoraHistorico || []).find(function(h){ return String((h && h.diaUber) || '').trim() === String(diaUber || '').trim(); });
@@ -4033,14 +4109,15 @@ function ensureGanhoHoraDiaAtual(){
   dados.saldoAtualFora = saldoAtualAntesVirada;
   dados.ganhoDiarioAtual = saldoAtualAntesVirada;
   dados.saldoAnteriorFora = saldoAtualAntesVirada;
-  dados.horarioInicioFora = horaAtual;
-  dados.ganhoHoraSessaoDiaRef = diaAtualUber;
+  // v8 - fix: ao virar 4h não inicia nova sessão automaticamente, usuário deve usar o botão Iniciar
+  dados.horarioInicioFora = "";
+  dados.ganhoHoraSessaoDiaRef = "";
   dados.horasDecorridasFora = 0;
   dados.ganhoHoraAtualFora = 0;
   salvar();
   atualizar();
   try{
-    toast("✅ Virou 4h: resumo do dia anterior salvo e nova sessão iniciada.");
+    toast("✅ Virou 4h: dia anterior salvo. Use Iniciar sessão para começar.");
   }catch(e){}
   return true;
 }
@@ -4505,7 +4582,7 @@ function atualizar(){
             const valorSessClass = Number(s.valorTotal || 0) < 0 ? "dangerText" : "warning";
             const ghSessClass = Number(s.ganhoHora || 0) < 0 ? "dangerText" : "warning";
             const tempoSess = Number(s.tempoDecorrido || 0);
-            return `<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--line);position:relative;padding-right:40px"><div class="action-menu" style="position:absolute;top:8px;right:0"><button class="kebab-btn" type="button" onclick="event.stopPropagation(); toggleItemMenu('menu_hist_sessao_${dia}_${idxSess}', this)">≡</button><div class="menu-pop" id="menu_hist_sessao_${dia}_${idxSess}"><button type="button" onclick="editarValorSessaoHistorico('${dia}', ${idxSess})">Editar valor</button></div></div><b>${getNomeSessao(idxSess + 1)} sessão</b><br>Hora de início: ${s.inicio || '-'}<br>Hora de término: ${s.fim || '-'}<br>Valor total: <span class="${valorSessClass}">R$ ${Number(s.valorTotal || 0).toFixed(2)}</span><br>Ganho por hora: <span class="${ghSessClass}">R$ ${Number(s.ganhoHora || 0).toFixed(2)}</span><br>Tempo decorrido: <span class="warning">${formatHorasMinutos(tempoSess)}</span></div>`;
+            return `<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--line);position:relative;padding-right:40px"><div class="action-menu" style="position:absolute;top:8px;right:0"><button class="kebab-btn" type="button" onclick="event.stopPropagation(); toggleItemMenu('menu_hist_sessao_${dia}_${idxSess}', this)">≡</button><div class="menu-pop" id="menu_hist_sessao_${dia}_${idxSess}"><!-- v8 - menu completo sessão histórico --><button type="button" onclick="editarHorarioSessaoHistorico('${dia}', ${idxSess}, 'inicio')">Editar hora de início</button><button type="button" onclick="editarHorarioSessaoHistorico('${dia}', ${idxSess}, 'fim')">Editar hora de término</button><button type="button" onclick="editarValorSessaoHistorico('${dia}', ${idxSess})">Editar valor</button><button type="button" class="danger" onclick="excluirSessaoHistorico('${dia}', ${idxSess})">Excluir sessão</button></div></div><b>${getNomeSessao(idxSess + 1)} sessão</b><br>Hora de início: ${s.inicio || '-'}<br>Hora de término: ${s.fim || '-'}<br>Valor total: <span class="${valorSessClass}">R$ ${Number(s.valorTotal || 0).toFixed(2)}</span><br>Ganho por hora: <span class="${ghSessClass}">R$ ${Number(s.ganhoHora || 0).toFixed(2)}</span><br>Tempo decorrido: <span class="warning">${formatHorasMinutos(tempoSess)}</span></div>`;
           }).join('') : "<div style='padding-top:6px'>Sem sessões salvas nesse dia.</div>") : '';
           return `<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--line)"><button type="button" class="btn-historico-link" onclick="toggleHistoricoDiaGanhoHora('${dia}')">${dia}</button><br>Total: <span class="${totalClass}">R$ ${total.toFixed(2)}</span> | <span class="warning">${formatHorasMinutos(horasItem)}</span> | <span class="${ghClass}">R$ ${ganhoHoraItem.toFixed(2)}/h</span>${aberto ? `<div style="margin-top:8px">${detalhes}</div>` : ''}</div>`;
         }).join("");
