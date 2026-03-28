@@ -1908,12 +1908,15 @@ body[data-tema="amarelo-claro"]{
   --warn:#c68a00;
   --danger:#dc2626;
 }
+/* v9 - color-scheme por modo */
 body[data-tema="meta-claro"],
 body[data-tema="preto-claro"],
 body[data-tema="amarelo-claro"]{ color-scheme:light; }
 body[data-tema="meta-escuro"],
 body[data-tema="preto-escuro"],
 body[data-tema="amarelo-escuro"]{ color-scheme:dark; }
+
+/* ── TOPBAR por tema ── */
 body[data-tema$="claro"] .topbar{
   background:linear-gradient(to bottom, rgba(255,255,255,0.95), rgba(255,255,255,0.84));
   border-bottom:1px solid var(--line);
@@ -1921,50 +1924,266 @@ body[data-tema$="claro"] .topbar{
 body[data-tema$="claro"] .menu-panel{
   background:rgba(255,255,255,0.98);
 }
-body[data-tema="preto-escuro"] .card-header{
-  background:linear-gradient(135deg, rgba(255,255,255,0.13), rgba(255,255,255,0.04));
-}
-body[data-tema="preto-claro"] .card-header{
-  background:linear-gradient(135deg, rgba(17,17,17,0.12), rgba(17,17,17,0.03));
-}
-body[data-tema="amarelo-escuro"] .card-header{
-  background:linear-gradient(135deg, rgba(255,212,0,0.18), rgba(255,245,180,0.06));
-}
-body[data-tema="amarelo-claro"] .card-header{
-  background:linear-gradient(135deg, rgba(255,212,0,0.28), rgba(255,204,0,0.10));
-}
-body[data-tema="preto-escuro"] .quick-balance-panel,
-body[data-tema="preto-escuro"] .quick-balance-display{
-  background-color:#0d0d0d;
-}
-body[data-tema="preto-claro"] .quick-balance-panel{
-  background:#ffffff;
-}
-body[data-tema="amarelo-escuro"] .quick-balance-panel{
-  background:#171300;
-}
-body[data-tema="amarelo-claro"] .quick-balance-panel{
-  background:#fff7d1;
-}
-body[data-tema="preto-escuro"] button,
-body[data-tema="amarelo-escuro"] button,
-body[data-tema="amarelo-claro"] button,
-body[data-tema="preto-claro"] button,
-body[data-tema="meta-claro"] button{
-  color:#0b1220;
-}
-body[data-tema="preto-escuro"] .menu-item button.secondary,
-body[data-tema="preto-claro"] .menu-item button.secondary{
-  background:var(--accent2);
-  color:#fff;
-}
-body[data-tema="meta-claro"] .menu-btn,
-body[data-tema="preto-claro"] .menu-btn,
-body[data-tema="amarelo-claro"] .menu-btn{
-  background:rgba(15,23,42,0.06);
+body[data-tema$="claro"] .menu-item button{ color:var(--text) !important; }
+body[data-tema$="claro"] .menu-item button.primary{ color:var(--accent) !important; }
+body[data-tema$="claro"] .menu-item button.secondary{ color:var(--accent2) !important; }
+body[data-tema$="claro"] .menu-item button.danger{ color:var(--danger) !important; }
+
+/* ── menu-btn por tema claro ── */
+body[data-tema$="claro"] .menu-btn{
+  background:rgba(0,0,0,0.06);
   color:var(--text);
   border-color:var(--line);
 }
+
+/* ════════════════════════════════════════════
+   TEMA: META ESCURO (padrão, nenhum override
+   necessário — o CSS base já é otimizado)
+   ════════════════════════════════════════════ */
+
+/* ════════════════════════════════════════════
+   TEMA: META CLARO
+   ════════════════════════════════════════════ */
+body[data-tema="meta-claro"] .card-header{
+  background:linear-gradient(135deg, rgba(59,130,246,0.18), rgba(29,185,84,0.12));
+}
+/* botões globais no claro: texto escuro sobre accent claro */
+body[data-tema="meta-claro"] button{ color:#0f172a; }
+body[data-tema="meta-claro"] button.secondary{ background:var(--accent2); color:#ffffff; }
+/* abas */
+body[data-tema="meta-claro"] .tab-btn{
+  background:rgba(15,23,42,0.06);
+  border-color:rgba(15,23,42,0.14);
+  color:var(--text);
+}
+body[data-tema="meta-claro"] .tab-btn.active{
+  background:rgba(59,130,246,0.18);
+  border-color:rgba(59,130,246,0.40);
+  color:var(--text);
+}
+body[data-tema="meta-claro"] .subtab-btn{
+  background:rgba(15,23,42,0.06);
+  border-color:rgba(15,23,42,0.12);
+  color:var(--text);
+}
+body[data-tema="meta-claro"] .list-item{
+  background:rgba(15,23,42,0.04);
+  border-color:rgba(15,23,42,0.10);
+}
+body[data-tema="meta-claro"] .quick-balance-panel{ background:#ffffff; }
+
+/* ════════════════════════════════════════════
+   TEMA: PRETO ESCURO (identidade Uber)
+   ════════════════════════════════════════════ */
+body[data-tema="preto-escuro"] .card-header{
+  background:rgba(255,255,255,0.05);
+  border-bottom:1px solid rgba(255,255,255,0.07);
+}
+/* botões primários: branco com texto preto */
+body[data-tema="preto-escuro"] button{
+  background:#ffffff;
+  color:#000000;
+}
+body[data-tema="preto-escuro"] button.secondary{
+  background:rgba(255,255,255,0.12);
+  color:#ffffff;
+}
+/* abas principais */
+body[data-tema="preto-escuro"] .tab-btn{
+  background:rgba(255,255,255,0.05);
+  border-color:rgba(255,255,255,0.10);
+  color:#ffffff;
+}
+body[data-tema="preto-escuro"] .tab-btn.active{
+  background:rgba(255,255,255,0.14);
+  border-color:rgba(255,255,255,0.30);
+  color:#ffffff;
+}
+/* sub-abas ganhos/gastos */
+body[data-tema="preto-escuro"] .subtab-btn{
+  background:rgba(255,255,255,0.06);
+  border-color:rgba(255,255,255,0.10);
+  color:#ffffff;
+}
+body[data-tema="preto-escuro"] #btnSubGanhos.active{
+  background:rgba(255,255,255,0.18);
+  color:#ffffff;
+  border-color:rgba(255,255,255,0.30);
+}
+body[data-tema="preto-escuro"] #btnSubGastos.active{
+  background:rgba(255,80,80,0.25);
+  color:#ff8888;
+  border-color:rgba(255,80,80,0.30);
+}
+/* list items */
+body[data-tema="preto-escuro"] .list-item{
+  background:rgba(255,255,255,0.04);
+  border-color:rgba(255,255,255,0.07);
+}
+/* quick balance */
+body[data-tema="preto-escuro"] .quick-balance-panel,
+body[data-tema="preto-escuro"] .quick-balance-display{
+  background-color:#0a0a0a;
+}
+/* inputs */
+body[data-tema="preto-escuro"] input,
+body[data-tema="preto-escuro"] select{
+  background:#1a1a1a;
+  color:#ffffff;
+  border:1px solid rgba(255,255,255,0.10);
+}
+
+/* ════════════════════════════════════════════
+   TEMA: PRETO CLARO (identidade Uber Claro)
+   ════════════════════════════════════════════ */
+body[data-tema="preto-claro"] .card-header{
+  background:rgba(0,0,0,0.06);
+  border-bottom:1px solid rgba(0,0,0,0.08);
+}
+body[data-tema="preto-claro"] button{
+  background:#000000;
+  color:#ffffff;
+}
+body[data-tema="preto-claro"] button.secondary{
+  background:rgba(0,0,0,0.10);
+  color:#000000;
+}
+body[data-tema="preto-claro"] .tab-btn{
+  background:rgba(0,0,0,0.05);
+  border-color:rgba(0,0,0,0.12);
+  color:#000000;
+}
+body[data-tema="preto-claro"] .tab-btn.active{
+  background:rgba(0,0,0,0.14);
+  border-color:rgba(0,0,0,0.30);
+  color:#000000;
+}
+body[data-tema="preto-claro"] .subtab-btn{
+  background:rgba(0,0,0,0.05);
+  border-color:rgba(0,0,0,0.10);
+  color:#000000;
+}
+body[data-tema="preto-claro"] #btnSubGanhos.active{
+  background:rgba(0,0,0,0.16);
+  color:#000000;
+  border-color:rgba(0,0,0,0.28);
+}
+body[data-tema="preto-claro"] #btnSubGastos.active{
+  background:rgba(200,40,40,0.15);
+  color:#c00000;
+  border-color:rgba(200,40,40,0.25);
+}
+body[data-tema="preto-claro"] .list-item{
+  background:rgba(0,0,0,0.03);
+  border-color:rgba(0,0,0,0.08);
+}
+body[data-tema="preto-claro"] .quick-balance-panel{ background:#ffffff; }
+
+/* ════════════════════════════════════════════
+   TEMA: AMARELO ESCURO (identidade 99)
+   ════════════════════════════════════════════ */
+body[data-tema="amarelo-escuro"] .card-header{
+  background:rgba(255,204,0,0.10);
+  border-bottom:1px solid rgba(255,204,0,0.12);
+}
+/* botões primários: amarelo com texto preto */
+body[data-tema="amarelo-escuro"] button{
+  background:#ffcc00;
+  color:#000000;
+}
+body[data-tema="amarelo-escuro"] button.secondary{
+  background:rgba(255,204,0,0.15);
+  color:#ffcc00;
+}
+/* abas */
+body[data-tema="amarelo-escuro"] .tab-btn{
+  background:rgba(255,255,255,0.05);
+  border-color:rgba(255,204,0,0.15);
+  color:#ffffff;
+}
+body[data-tema="amarelo-escuro"] .tab-btn.active{
+  background:rgba(255,204,0,0.18);
+  border-color:rgba(255,204,0,0.40);
+  color:#ffcc00;
+}
+/* sub-abas */
+body[data-tema="amarelo-escuro"] .subtab-btn{
+  background:rgba(255,255,255,0.05);
+  border-color:rgba(255,204,0,0.12);
+  color:#ffffff;
+}
+body[data-tema="amarelo-escuro"] #btnSubGanhos.active{
+  background:rgba(255,204,0,0.22);
+  color:#ffcc00;
+  border-color:rgba(255,204,0,0.35);
+}
+body[data-tema="amarelo-escuro"] #btnSubGastos.active{
+  background:rgba(255,80,80,0.22);
+  color:#ff8888;
+  border-color:rgba(255,80,80,0.30);
+}
+/* list items */
+body[data-tema="amarelo-escuro"] .list-item{
+  background:rgba(255,204,0,0.05);
+  border-color:rgba(255,204,0,0.10);
+}
+/* quick balance */
+body[data-tema="amarelo-escuro"] .quick-balance-panel{
+  background:#0d0d00;
+}
+/* inputs */
+body[data-tema="amarelo-escuro"] input,
+body[data-tema="amarelo-escuro"] select{
+  background:#222200;
+  color:#ffffff;
+  border:1px solid rgba(255,204,0,0.15);
+}
+
+/* ════════════════════════════════════════════
+   TEMA: AMARELO CLARO (identidade 99 Claro)
+   ════════════════════════════════════════════ */
+body[data-tema="amarelo-claro"] .card-header{
+  background:rgba(255,204,0,0.20);
+  border-bottom:1px solid rgba(255,204,0,0.20);
+}
+body[data-tema="amarelo-claro"] button{
+  background:#ffcc00;
+  color:#000000;
+}
+body[data-tema="amarelo-claro"] button.secondary{
+  background:rgba(0,0,0,0.08);
+  color:#1a1400;
+}
+body[data-tema="amarelo-claro"] .tab-btn{
+  background:rgba(0,0,0,0.05);
+  border-color:rgba(0,0,0,0.12);
+  color:#1a1400;
+}
+body[data-tema="amarelo-claro"] .tab-btn.active{
+  background:rgba(255,204,0,0.35);
+  border-color:rgba(200,150,0,0.45);
+  color:#000000;
+}
+body[data-tema="amarelo-claro"] .subtab-btn{
+  background:rgba(0,0,0,0.05);
+  border-color:rgba(0,0,0,0.10);
+  color:#1a1400;
+}
+body[data-tema="amarelo-claro"] #btnSubGanhos.active{
+  background:rgba(255,204,0,0.40);
+  color:#000000;
+  border-color:rgba(180,130,0,0.35);
+}
+body[data-tema="amarelo-claro"] #btnSubGastos.active{
+  background:rgba(200,40,40,0.15);
+  color:#aa0000;
+  border-color:rgba(200,40,40,0.20);
+}
+body[data-tema="amarelo-claro"] .list-item{
+  background:rgba(0,0,0,0.03);
+  border-color:rgba(0,0,0,0.08);
+}
+body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff9d0; }
 
 .temas-overlay{
   position:fixed; inset:0; z-index:1500;
