@@ -2846,6 +2846,7 @@ const CLOUD_PENDING_KEY = STORAGE_KEY + "__cloud_pending_v1";
 const CLOUD_LAST_OK_KEY = STORAGE_KEY + "__cloud_last_ok_v1";
 let __cloudSaveTimer = null;
 let __cloudBootStarted = false;
+let __cloudDirty = false; // v9 - flag: só envia pra nuvem se houve mudança real
 
 // ===== Forçar aba inicial: sempre MetaDriver =====
 try{
@@ -3019,6 +3020,8 @@ salvar = function(){
       cloudWritePendingSnapshot(JSON.parse(JSON.stringify(dados)));
     }
   }catch(e){}
+  // v9 - marca que há mudança pendente para o intervalo de 60s
+  __cloudDirty = true;
   try{ cloudScheduleSave(); }catch(e){}
   return r;
 }
@@ -3235,6 +3238,8 @@ async function cloudPushNow(snapshotOverride){
       cloudMarkLastOk(updatedAt);
       return true;
     }
+    // Push falhou — remarca como sujo para o próximo ciclo de 60s tentar de novo
+    __cloudDirty = true;
     return false;
   }catch(e){ return false; }
 }
@@ -3316,18 +3321,18 @@ document.addEventListener("visibilitychange", function(){
     }
   }catch(e){}
 });
+// v9 - save inteligente a cada 60s: só envia pra nuvem se houve mudança real
 setInterval(function(){
   try{
-    if(document.visibilityState === "visible"){
-      // v9 - salva local antes do push periódico
-      try{ salvar(); }catch(e){}
-      const pending = cloudReadPendingSnapshot();
-      if((pending && pending.payload && cloudHasUsefulData(pending.payload)) || cloudHasUsefulData(dados)){
-        cloudPushNow();
-      }
+    if(document.visibilityState !== "visible") return;
+    if(!__cloudDirty) return; // nenhuma mudança desde o último envio — não faz nada
+    __cloudDirty = false;     // limpa a flag antes de enviar (se falhar, próximo ciclo reenvia via pending)
+    const pending = cloudReadPendingSnapshot();
+    if((pending && pending.payload && cloudHasUsefulData(pending.payload)) || cloudHasUsefulData(dados)){
+      cloudPushNow();
     }
   }catch(e){}
-}, 15000);
+}, 60000);
 
 
 function toast(msg){
