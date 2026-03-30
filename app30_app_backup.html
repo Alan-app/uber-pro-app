@@ -2909,7 +2909,12 @@ async function cloudBoot(){
 window.addEventListener("pagehide", function(){ try{ cloudPushNow(); }catch(e){} });
 window.addEventListener("beforeunload", function(){ try{ cloudPushNow(); }catch(e){} });
 window.addEventListener("online", function(){ try{ cloudPushNow(); }catch(e){} });
-// disabled visibilitychange re-sync (fix meta reset)
+document.addEventListener("visibilitychange", function(){
+  try{
+    if(document.visibilityState === "hidden") cloudPushNow();
+    if(document.visibilityState === "visible") cloudBoot();
+  }catch(e){}
+});
 setInterval(function(){
   try{
     if(document.visibilityState === "visible"){
@@ -3229,11 +3234,6 @@ function toggleForm(id){
 }
 
 function salvarMeta(){
-  dados.metaTotal = parseFloat(document.getElementById("metaTotal").value) || 0;
-  dados.dataLimite = document.getElementById("dataLimite").value || "";
-  salvar();
-  setTimeout(()=>atualizar(),0);
-  return;
   dados.metaTotal = parseFloat(document.getElementById("metaTotal").value) || 0;
   dados.dataLimite = document.getElementById("dataLimite").value || "";
   salvar();
@@ -4407,10 +4407,6 @@ function exportarRelatorioPDF(){
 }
 
 function atualizar(){
-  if(!dados || !dados.metaTotal || !dados.dataLimite){
-    // evita zerar meta com estado incompleto
-    return;
-  }
   try{
     const metaDiaInput = document.getElementById("metaDiariaManual");
     const ganhoDiaInput = document.getElementById("ganhoDiarioAtual");
