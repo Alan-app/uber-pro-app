@@ -2,6 +2,11 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
+
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>MetaDriver</title>
 <style>
@@ -431,5 +436,54 @@ button.action {
   }
 })();
 </script>
+
+<script>
+/* mdAutoUpdate v4 */
+(function(){
+  var APP_VERSION = "v4-metadriver-auto-update";
+  var VERSION_KEY = "md_app_version";
+  var RELOAD_KEY = "md_app_version_reload_once";
+
+  function forceReload(){
+    try{
+      var url = new URL(window.location.href);
+      url.searchParams.set("appv", APP_VERSION);
+      window.location.replace(url.toString());
+    }catch(e){
+      window.location.reload();
+    }
+  }
+
+  try{
+    var prev = localStorage.getItem(VERSION_KEY);
+    var reloaded = sessionStorage.getItem(RELOAD_KEY);
+
+    if(prev !== APP_VERSION){
+      localStorage.setItem(VERSION_KEY, APP_VERSION);
+
+      if(reloaded !== APP_VERSION){
+        sessionStorage.setItem(RELOAD_KEY, APP_VERSION);
+
+        if("serviceWorker" in navigator){
+          navigator.serviceWorker.getRegistrations()
+            .then(function(regs){
+              return Promise.all(regs.map(function(reg){
+                try { return reg.update(); } catch(e){ return Promise.resolve(); }
+              }));
+            })
+            .finally(function(){
+              setTimeout(forceReload, 80);
+            });
+        }else{
+          setTimeout(forceReload, 80);
+        }
+      }
+    }else if(reloaded && reloaded !== APP_VERSION){
+      sessionStorage.removeItem(RELOAD_KEY);
+    }
+  }catch(e){}
+})();
+</script>
+
 </body>
 </html>

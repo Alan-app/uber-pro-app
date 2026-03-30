@@ -33,3 +33,28 @@ O QUE FOI FEITO:
 STATUS:
 - Aguardando teste
 
+VERSÃO v4 - auto-update
+O QUE FOI PEDIDO:
+- Implementar forçar atualização automática do app para facilitar testes de novas versões
+- Evitar precisar desinstalar o app, limpar Chrome ou fazer processo manual sempre que subir atualização
+
+O QUE FOI FEITO:
+- Adicionado controle de versão do app via localStorage
+- Adicionada verificação automática de versão ao abrir o app
+- Quando a versão muda, o app força uma recarga única da nova versão
+- Adicionadas meta tags de no-cache nas páginas principais
+- Mantido o service worker existente, apenas identificado para esta versão
+
+ARQUIVOS ALTERADOS:
+- app30_app.html
+- app30_app_backup.html
+- admin.html
+- index.html
+- login.html
+- painel.html
+- reset.html
+- sw.js
+
+STATUS:
+- Aguardando teste
+
