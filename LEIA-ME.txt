@@ -88,3 +88,27 @@ O QUE FOI FEITO:
 
 STATUS:
 - Aguardando teste
+
+VERSÃO v8 - fix-install-dev-mode
+
+O QUE FOI PEDIDO:
+- Corrigir o botão de instalação, que não estava funcionando para teste
+- Melhorar o fluxo de desenvolvimento sem depender totalmente do prompt automático de instalação
+
+O QUE FOI FEITO:
+- Reforçado o comportamento do botão de instalação na tela de instalação
+- Quando o prompt automático não existir, agora aparece fallback de desenvolvimento
+- Adicionado botão “Abrir app” para entrar direto no app sem depender do install prompt
+- Adicionado botão “Como instalar” com instruções manuais
+- Atualizada a indicação visual da versão na tela de instalação para v8
+
+ARQUIVOS ALTERADOS:
+- index.html
+
+OBSERVAÇÕES:
+- Em modo de desenvolvimento, o prompt automático de instalação pode não aparecer no Chrome dependendo do estado do PWA
+- Esta versão não força instalação; ela melhora o fallback quando o prompt não vier
+
+STATUS:
+- Aguardando teste
+

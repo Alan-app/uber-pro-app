@@ -87,6 +87,29 @@ button{
   opacity:.95;
 }
 
+
+.install-helper{
+  margin-top:12px;
+  padding:12px 14px;
+  border-radius:14px;
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.12);
+  font-size:12px;
+  line-height:1.45;
+  display:none;
+}
+.install-helper.show{display:block;}
+.install-actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  margin-top:10px;
+}
+.install-actions button{
+  margin-top:0;
+  padding:12px 14px;
+}
+
 </style>
 </head>
 <body>
@@ -97,6 +120,15 @@ button{
   <button id="installBtn" type="button">Instalar aplicativo</button>
   <button id="fallbackBtn" type="button">Entrar</button>
   <div class="note" id="noteText">Use o Chrome para instalar o aplicativo.</div>
+
+  <div class="install-helper" id="installHelper">
+    <div id="installHelperText">Instalação automática indisponível neste momento.</div>
+    <div class="install-actions">
+      <button id="openAppBtnDev" type="button">Abrir app</button>
+      <button id="showStepsBtn" type="button">Como instalar</button>
+    </div>
+  </div>
+
 </div>
 
 <script>
@@ -151,6 +183,84 @@ if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.
 );
 }
 </script>
-<div class="version-debug-badge" id="versionDebugBadge">MetaDriver v7 · instalação</div>
+<div class="version-debug-badge" id="versionDebugBadge">MetaDriver v8 · instalação</div>
+
+<script>
+let deferredPrompt = null;
+const INSTALL_SCREEN_VERSION = "v8";
+
+function isIOS() {
+  return /iphone|ipad|ipod/i.test(navigator.userAgent);
+}
+function isSafari() {
+  return /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+}
+function isStandalone() {
+  return window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+}
+function showHelper(message){
+  const box = document.getElementById("installHelper");
+  const text = document.getElementById("installHelperText");
+  if(text && message) text.textContent = message;
+  if(box) box.classList.add("show");
+}
+function openAppDirect(){
+  try{
+    window.location.href = "login.html";
+  }catch(e){}
+}
+function showManualSteps(){
+  const steps = isIOS() && isSafari()
+    ? "No iPhone: Compartilhar → Adicionar à Tela de Início. Depois abra o ícone instalado."
+    : "No Chrome Android: menu ⋮ → Instalar aplicativo ou Adicionar à tela inicial.";
+  alert(steps);
+}
+
+window.addEventListener('beforeinstallprompt', function(e){
+  e.preventDefault();
+  deferredPrompt = e;
+  try{
+    document.getElementById('subText').textContent = 'Versão v8 pronta para instalar ou abrir.';
+    document.getElementById('noteText').textContent = 'Se o botão não abrir o prompt, use “Abrir app” ou instale pelo menu do navegador.';
+  }catch(e){}
+});
+
+window.addEventListener('appinstalled', function(){
+  deferredPrompt = null;
+  document.getElementById('subText').textContent = 'Aplicativo instalado com sucesso. Abra o app instalado para entrar.';
+  document.getElementById('noteText').textContent = 'Depois de instalar, use o ícone do MetaDriver na tela inicial.';
+  try { document.getElementById('installBtn').style.display = 'none'; } catch(e){}
+});
+
+document.getElementById('installBtn').addEventListener('click', async function(){
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    try { await deferredPrompt.userChoice; } catch(e){}
+    return;
+  }
+
+  if (isStandalone()) {
+    openAppDirect();
+    return;
+  }
+
+  if (isIOS() && isSafari()) {
+    document.getElementById('subText').textContent = 'No iPhone, instale pelo menu Compartilhar do Safari e depois “Adicionar à Tela de Início”.';
+    document.getElementById('noteText').textContent = 'Quando o prompt automático não existir, use as instruções ou toque em Abrir app.';
+    showHelper('Instalação automática indisponível no Safari. Você pode abrir o app agora ou instalar manualmente.');
+    return;
+  }
+
+  showHelper('O prompt automático de instalação não apareceu. Você pode abrir o app agora ou instalar manualmente pelo menu do navegador.');
+});
+
+document.getElementById('openAppBtnDev').addEventListener('click', openAppDirect);
+document.getElementById('showStepsBtn').addEventListener('click', showManualSteps);
+
+try{
+  var badge = document.getElementById('versionDebugBadge');
+  if(badge) badge.textContent = 'MetaDriver v8 · instalação';
+}catch(e){}
+</script>
 </body>
 </html>
