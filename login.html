@@ -2,11 +2,6 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
-
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>MetaDriver</title>
 <style>
@@ -129,6 +124,24 @@ button.action {
   padding:6px 10px;
   font-size:12px;
 }
+
+.version-debug-badge{
+  position:fixed;
+  right:10px;
+  bottom:10px;
+  z-index:2147483647;
+  padding:6px 10px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.14);
+  background:rgba(15,23,42,.88);
+  color:#fff;
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:.2px;
+  opacity:.95;
+  backdrop-filter: blur(6px);
+}
+
 </style>
 </head>
 <body>
@@ -436,52 +449,31 @@ button.action {
   }
 })();
 </script>
+<div class="version-debug-badge" id="versionDebugBadge">MetaDriver v2 · login</div>
 
 <script>
-/* mdAutoUpdate v4 */
 (function(){
-  var APP_VERSION = "v4-metadriver-auto-update";
-  var VERSION_KEY = "md_app_version";
-  var RELOAD_KEY = "md_app_version_reload_once";
+  var APP_VERSION = "v2";
+  var KEY = "md_app_version";
+  var RELOAD_ONCE_KEY = "md_app_version_reload_once";
 
-  function forceReload(){
-    try{
-      var url = new URL(window.location.href);
-      url.searchParams.set("appv", APP_VERSION);
-      window.location.replace(url.toString());
-    }catch(e){
-      window.location.reload();
-    }
-  }
+  try {
+    var prev = localStorage.getItem(KEY);
+    var reloaded = sessionStorage.getItem(RELOAD_ONCE_KEY);
 
-  try{
-    var prev = localStorage.getItem(VERSION_KEY);
-    var reloaded = sessionStorage.getItem(RELOAD_KEY);
-
-    if(prev !== APP_VERSION){
-      localStorage.setItem(VERSION_KEY, APP_VERSION);
-
-      if(reloaded !== APP_VERSION){
-        sessionStorage.setItem(RELOAD_KEY, APP_VERSION);
-
-        if("serviceWorker" in navigator){
-          navigator.serviceWorker.getRegistrations()
-            .then(function(regs){
-              return Promise.all(regs.map(function(reg){
-                try { return reg.update(); } catch(e){ return Promise.resolve(); }
-              }));
-            })
-            .finally(function(){
-              setTimeout(forceReload, 80);
-            });
-        }else{
-          setTimeout(forceReload, 80);
-        }
+    if (prev !== APP_VERSION) {
+      localStorage.setItem(KEY, APP_VERSION);
+      if (reloaded !== APP_VERSION) {
+        sessionStorage.setItem(RELOAD_ONCE_KEY, APP_VERSION);
+        setTimeout(function(){ location.reload(); }, 50);
       }
-    }else if(reloaded && reloaded !== APP_VERSION){
-      sessionStorage.removeItem(RELOAD_KEY);
     }
-  }catch(e){}
+
+    var badge = document.getElementById("versionDebugBadge");
+    if (badge) {
+      badge.textContent = "MetaDriver " + APP_VERSION + " · login";
+    }
+  } catch(e) {}
 })();
 </script>
 

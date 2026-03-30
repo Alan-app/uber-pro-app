@@ -1,76 +1,49 @@
 VERSÃO v1 - base-estavel
+
 O QUE FOI PEDIDO:
-- Recuperar versão funcional
+- Definir uma base estável oficial para voltar a versionar corretamente
+- Parar de usar versões quebradas como referência
 
 O QUE FOI FEITO:
-- Base restaurada e validada
+- Esta versão foi definida como base estável oficial
+- Nenhuma alteração nova foi aplicada nela
+- As versões problemáticas posteriores devem ser desconsideradas
 
 STATUS:
-- OK
+- Base oficial estável
 
-VERSÃO v2 - restaurar-rolagem-card
+
+VERSÃO v2 - versao-visivel-auto-update-leve
+
 O QUE FOI PEDIDO:
-- Manter posição do scroll ao minimizar/restaurar app
+- Mostrar sempre a versão atual do app para facilitar validar se a atualização carregou
+- Não depender de desinstalar o app para ver a versão
+- Implementar auto update leve, sem quebrar o funcionamento
+- Exibir a versão em tudo para debug
 
 O QUE FOI FEITO:
-- Persistência do scroll via localStorage
-- Restauração automática ao abrir
-
-STATUS:
-- Aguardando teste
-
-VERSÃO v3 - corrige-rolagem-e-fixa-botoes
-O QUE FOI PEDIDO:
-- Corrigir de novo o problema de rolagem, que continuava voltando para o topo ao minimizar e voltar para o aplicativo
-- Travar os botões MetaDriver e Manutenção do carro para que fiquem fixos, sem rolar junto com a página
-
-O QUE FOI FEITO:
-- Substituída a restauração simples de scroll por uma restauração reforçada para PWA/minimizar/restaurar
-- A posição da rolagem agora é salva em scroll, visibilitychange, pagehide e beforeunload
-- A posição da rolagem agora é restaurada em load, pageshow e quando o app volta a ficar visível
-- Aplicada trava visual sticky na barra dos botões MetaDriver / Manutenção do carro
-
-STATUS:
-- Aguardando teste
-
-VERSÃO v4 - auto-update
-O QUE FOI PEDIDO:
-- Implementar forçar atualização automática do app para facilitar testes de novas versões
-- Evitar precisar desinstalar o app, limpar Chrome ou fazer processo manual sempre que subir atualização
-
-O QUE FOI FEITO:
-- Adicionado controle de versão do app via localStorage
-- Adicionada verificação automática de versão ao abrir o app
-- Quando a versão muda, o app força uma recarga única da nova versão
-- Adicionadas meta tags de no-cache nas páginas principais
-- Mantido o service worker existente, apenas identificado para esta versão
+- Adicionada indicação visual da versão em:
+  - tela de instalação
+  - tela de login
+  - app principal
+  - app backup
+  - painel
+  - admin
+  - reset
+- Implementado controle leve de versão:
+  - compara a versão salva com a versão atual
+  - se mudou, faz uma recarga simples única
+  - sem limpar storage
+  - sem mexer agressivamente no service worker
 
 ARQUIVOS ALTERADOS:
-- app30_app.html
-- app30_app_backup.html
-- admin.html
 - index.html
 - login.html
+- app30_app.html
+- app30_app_backup.html
 - painel.html
+- admin.html
 - reset.html
-- sw.js
 
 STATUS:
 - Aguardando teste
-
-VERSÃO v5 - versao-na-tela-instalacao
-O QUE FOI PEDIDO:
-- Mostrar sempre a versão atual na tela de instalação
-- Usar isso para confirmar visualmente se a atualização carregou
-
-O QUE FOI FEITO:
-- Adicionada indicação visível da versão na tela de instalação
-- A tela de instalação agora mostra "Versão v5"
-- A versão foi colocada em badge próprio para facilitar leitura e validação de update
-
-ARQUIVOS ALTERADOS:
-- index.html
-
-STATUS:
-- Aguardando teste
-

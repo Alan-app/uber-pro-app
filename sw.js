@@ -1,4 +1,3 @@
-/* mdAutoUpdateSW v4 */
 self.addEventListener("install", (event) => {
   self.skipWaiting();
 });
