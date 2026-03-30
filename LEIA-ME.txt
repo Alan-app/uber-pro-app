@@ -112,3 +112,17 @@ OBSERVAÇÕES:
 STATUS:
 - Aguardando teste
 
+
+
+VERSÃO v9 - fix-rolagem-e-botoes
+
+O QUE FOI PEDIDO:
+- Corrigir rolagem que volta pro topo ao minimizar
+- Fixar botões MetaDriver e Manutenção do carro
+
+O QUE FOI FEITO:
+- Nova lógica de persistência de scroll com restore múltiplo
+- Aplicado sticky real nos botões (topo fixo)
+
+STATUS:
+- Aguardando teste
