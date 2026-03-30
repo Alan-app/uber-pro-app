@@ -2552,6 +2552,43 @@ body[data-tema="amarelo-claro"] .menu-btn{
 })();
 
 const STORAGE_KEY = "controleUberProDados";
+
+const META_DRAFT_KEY = STORAGE_KEY + "__metaDraft";
+function getMetaDraft(){
+  try{
+    const raw = localStorage.getItem(META_DRAFT_KEY);
+    return raw ? JSON.parse(raw) : { metaTotal: "", dataLimite: "" };
+  }catch(e){
+    return { metaTotal: "", dataLimite: "" };
+  }
+}
+function saveMetaDraftFromInputs(){
+  try{
+    const metaEl = document.getElementById("metaTotal");
+    const dataEl = document.getElementById("dataLimite");
+    localStorage.setItem(META_DRAFT_KEY, JSON.stringify({
+      metaTotal: metaEl ? String(metaEl.value || "") : "",
+      dataLimite: dataEl ? String(dataEl.value || "") : ""
+    }));
+  }catch(e){}
+}
+function syncMetaDraftListeners(){
+  try{
+    const metaEl = document.getElementById("metaTotal");
+    const dataEl = document.getElementById("dataLimite");
+    if(metaEl && !metaEl.__metaDraftBound){
+      metaEl.addEventListener("input", saveMetaDraftFromInputs);
+      metaEl.addEventListener("change", saveMetaDraftFromInputs);
+      metaEl.__metaDraftBound = true;
+    }
+    if(dataEl && !dataEl.__metaDraftBound){
+      dataEl.addEventListener("input", saveMetaDraftFromInputs);
+      dataEl.addEventListener("change", saveMetaDraftFromInputs);
+      dataEl.__metaDraftBound = true;
+    }
+  }catch(e){}
+}
+
 const CLOUD_TABLE = "app_cloud_data";
 const CLOUD_SUPABASE_URL = "https://xoqlgwjpmdkiazwpwhmn.supabase.co";
 const CLOUD_SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhvcWxnd2pwbWRraWF6d3B3aG1uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5NjY1OTksImV4cCI6MjA4NzU0MjU5OX0.txohC3MvvEDaCCVRouVPDrmVaAO1PJxY0LawUttj9PA";
@@ -3247,10 +3284,10 @@ function toggleForm(id){
 function salvarMeta(){
   dados.metaTotal = parseFloat(document.getElementById("metaTotal").value) || 0;
   dados.dataLimite = document.getElementById("dataLimite").value || "";
+  try{ saveMetaDraftFromInputs(); }catch(e){}
   salvar();
   atualizar();
-      try{ atualizarCarro(); }catch(e){}
-
+  try{ atualizarCarro(); }catch(e){}
 }
 
 function salvarHoras(){
@@ -3356,9 +3393,8 @@ function addNaoTrabalhado(){
   const motivo = (document.getElementById("motivoNaoTrabalhado").value || "").trim();
   if(!data) return;
 
-  // preserva campos já digitados em Meta antes de salvar dias não trabalhados
-  dados.metaTotal = parseFloat(document.getElementById("metaTotal")?.value) || 0;
-  dados.dataLimite = document.getElementById("dataLimite")?.value || "";
+  // preserva apenas o que foi digitado no formulário de Meta, sem alterar o cálculo antes de Salvar Meta
+  try{ saveMetaDraftFromInputs(); }catch(e){}
 
   dados.naoTrabalhados.push({data, motivo: motivo || "Dia não trabalhado"});
 
@@ -3366,7 +3402,6 @@ function addNaoTrabalhado(){
   atualizar();
 
   document.getElementById("motivoNaoTrabalhado").value = "";
-  document.getElementById("formNaoTrabalhado").classList.remove("open");
   document.getElementById("wrapListaNaoTrab").style.display = "block";
 }
 function editarValorSessaoFinalizada(index){
@@ -3615,6 +3650,7 @@ function zerarTudo(){
   try{
     localStorage.removeItem(CLOUD_PENDING_KEY);
     localStorage.removeItem(CLOUD_LAST_OK_KEY);
+    localStorage.removeItem(META_DRAFT_KEY);
   }catch(e){}
   dados = {
     ganhos: [],
@@ -4538,8 +4574,12 @@ function atualizar(){
 
   if(!Array.isArray(dados.naoTrabalhados)) dados.naoTrabalhados = [];
 
-  document.getElementById("metaTotal").value = dados.metaTotal || "";
-  document.getElementById("dataLimite").value = dados.dataLimite || "";
+  const __metaDraft = getMetaDraft();
+  const __metaDraftValor = (__metaDraft && typeof __metaDraft.metaTotal !== "undefined") ? String(__metaDraft.metaTotal || "") : "";
+  const __dataDraftValor = (__metaDraft && typeof __metaDraft.dataLimite !== "undefined") ? String(__metaDraft.dataLimite || "") : "";
+  document.getElementById("metaTotal").value = (__metaDraftValor !== "") ? __metaDraftValor : (dados.metaTotal || "");
+  document.getElementById("dataLimite").value = (__dataDraftValor !== "") ? __dataDraftValor : (dados.dataLimite || "");
+  try{ syncMetaDraftListeners(); }catch(e){}
 document.getElementById("metaDiariaManual").value = (dados.metaDiariaManual || dados.metaDiariaManual === 0) ? dados.metaDiariaManual : "";
   document.getElementById("ganhoDiarioAtual").value = (dados.ganhoDiarioAtual ?? "");
 
