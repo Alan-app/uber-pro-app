@@ -126,3 +126,29 @@ O QUE FOI FEITO:
 
 STATUS:
 - Aguardando teste
+
+VERSÃO v10 - alinha-versao-telas
+
+O QUE FOI PEDIDO:
+- Gerar a próxima versão já corrigindo a indicação visual de versão
+- Sempre atualizar a versão na tela de instalação e também dentro do app
+- Garantir que a versão visível seja a primeira coisa para validar se a atualização carregou
+
+O QUE FOI FEITO:
+- Alinhada a versão visual para v10 nas telas principais
+- Atualizada a indicação de versão na tela de instalação
+- Atualizada a indicação de versão dentro do app
+- Atualizadas também as demais telas com badge/indicação de versão
+
+ARQUIVOS ALTERADOS:
+- index.html
+- login.html
+- app30_app.html
+- app30_app_backup.html
+- admin.html
+- painel.html
+- reset.html
+
+STATUS:
+- Aguardando teste
+
