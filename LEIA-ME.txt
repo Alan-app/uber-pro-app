@@ -1,0 +1,35 @@
+VERSÃO v1 - base-estavel
+O QUE FOI PEDIDO:
+- Recuperar versão funcional
+
+O QUE FOI FEITO:
+- Base restaurada e validada
+
+STATUS:
+- OK
+
+VERSÃO v2 - restaurar-rolagem-card
+O QUE FOI PEDIDO:
+- Manter posição do scroll ao minimizar/restaurar app
+
+O QUE FOI FEITO:
+- Persistência do scroll via localStorage
+- Restauração automática ao abrir
+
+STATUS:
+- Aguardando teste
+
+VERSÃO v3 - corrige-rolagem-e-fixa-botoes
+O QUE FOI PEDIDO:
+- Corrigir de novo o problema de rolagem, que continuava voltando para o topo ao minimizar e voltar para o aplicativo
+- Travar os botões MetaDriver e Manutenção do carro para que fiquem fixos, sem rolar junto com a página
+
+O QUE FOI FEITO:
+- Substituída a restauração simples de scroll por uma restauração reforçada para PWA/minimizar/restaurar
+- A posição da rolagem agora é salva em scroll, visibilitychange, pagehide e beforeunload
+- A posição da rolagem agora é restaurada em load, pageshow e quando o app volta a ficar visível
+- Aplicada trava visual sticky na barra dos botões MetaDriver / Manutenção do carro
+
+STATUS:
+- Aguardando teste
+
