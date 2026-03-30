@@ -3879,15 +3879,17 @@ function addNaoTrabalhado(){
   const motivo = (document.getElementById("motivoNaoTrabalhado").value || "").trim();
   if(!data) return;
 
-  // IMPORTANTÍSSIMO:
-  // adicionar dia não trabalhado NÃO pode mexer em dados.metaTotal nem dados.dataLimite
-  // porque isso zera/trava os cálculos da Meta quando os campos estão em estado parcial.
+  // preserva campos já digitados em Meta antes de salvar dias não trabalhados
+  dados.metaTotal = parseFloat(document.getElementById("metaTotal")?.value) || 0;
+  dados.dataLimite = document.getElementById("dataLimite")?.value || "";
+
   dados.naoTrabalhados.push({data, motivo: motivo || "Dia não trabalhado"});
 
   salvar();
   atualizar();
 
   document.getElementById("motivoNaoTrabalhado").value = "";
+  document.getElementById("formNaoTrabalhado").classList.remove("open");
   document.getElementById("wrapListaNaoTrab").style.display = "block";
 }
 function editarValorSessaoFinalizada(index){
@@ -5301,9 +5303,18 @@ function atualizar(){
 
   if(!Array.isArray(dados.naoTrabalhados)) dados.naoTrabalhados = [];
 
-  document.getElementById("metaTotal").value = dados.metaTotal || "";
-  document.getElementById("dataLimite").value = dados.dataLimite || "";
-document.getElementById("metaDiariaManual").value = (dados.metaDiariaManual || dados.metaDiariaManual === 0) ? dados.metaDiariaManual : "";
+  // v9 fix: sincronizar inputs de meta com dados sem apagar o que o usuário digitou
+  // Se o campo está ativo (usuário digitando), não sobrescreve
+  const metaTotalEl = document.getElementById("metaTotal");
+  const dataLimiteEl = document.getElementById("dataLimite");
+  if(metaTotalEl && document.activeElement !== metaTotalEl){
+    metaTotalEl.value = dados.metaTotal || "";
+  }
+  if(dataLimiteEl && document.activeElement !== dataLimiteEl){
+    dataLimiteEl.value = dados.dataLimite || "";
+  }
+  // metaDiariaManual é calculado em tempo real — nunca preencher com dados.metaDiariaManual (sempre 0)
+  // o cálculo real acontece mais abaixo no atualizar()
   document.getElementById("ganhoDiarioAtual").value = (dados.ganhoDiarioAtual ?? "");
 
   const modoCombustivel = (dados.combustivelModo === "real") ? "real" : "fixo";
@@ -5954,7 +5965,25 @@ atualizar();
 
 
 (function(){
-  function bindExprField(id, storeKey){
+  // v9 fix: atualizar dados.metaTotal e dados.dataLimite em tempo real ao digitar
+// assim o cálculo de metaDiariaManual e metaBruta usa sempre o valor atual do campo
+(function(){
+  function bindMetaInput(id, key, parseFunc){
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.addEventListener('input', function(){
+      const val = parseFunc(el.value);
+      if(!isNaN(val) || key === 'dataLimite'){
+        dados[key] = key === 'dataLimite' ? (el.value || "") : (val || 0);
+        try{ atualizar(); }catch(e){}
+      }
+    });
+  }
+  bindMetaInput('metaTotal', 'metaTotal', parseFloat);
+  bindMetaInput('dataLimite', 'dataLimite', function(v){ return v; });
+})();
+
+function bindExprField(id, storeKey){
     const el = document.getElementById(id);
     if(!el) return;
 
