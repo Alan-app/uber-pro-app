@@ -36,7 +36,6 @@ button.secondary { background:rgba(255,255,255,.06); color:#fff; border:1px soli
   font-weight:700;
   letter-spacing:.2px;
   opacity:.95;
-  backdrop-filter: blur(6px);
 }
 
 </style>
@@ -169,33 +168,6 @@ button.secondary { background:rgba(255,255,255,.06); color:#fff; border:1px soli
   loadPanel();
 })();
 </script>
-<div class="version-debug-badge" id="versionDebugBadge">MetaDriver v2 · painel</div>
-
-<script>
-(function(){
-  var APP_VERSION = "v2";
-  var KEY = "md_app_version";
-  var RELOAD_ONCE_KEY = "md_app_version_reload_once";
-
-  try {
-    var prev = localStorage.getItem(KEY);
-    var reloaded = sessionStorage.getItem(RELOAD_ONCE_KEY);
-
-    if (prev !== APP_VERSION) {
-      localStorage.setItem(KEY, APP_VERSION);
-      if (reloaded !== APP_VERSION) {
-        sessionStorage.setItem(RELOAD_ONCE_KEY, APP_VERSION);
-        setTimeout(function(){ location.reload(); }, 50);
-      }
-    }
-
-    var badge = document.getElementById("versionDebugBadge");
-    if (badge) {
-      badge.textContent = "MetaDriver " + APP_VERSION + " · painel";
-    }
-  } catch(e) {}
-})();
-</script>
-
+<div class="version-debug-badge" id="versionDebugBadge">MetaDriver v3 · painel</div>
 </body>
 </html>

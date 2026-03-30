@@ -85,7 +85,6 @@ button{
   font-weight:700;
   letter-spacing:.2px;
   opacity:.95;
-  backdrop-filter: blur(6px);
 }
 
 </style>
@@ -148,39 +147,10 @@ if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.
   location.href = 'app30_app.html';
 }
 
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', function(){
-    navigator.serviceWorker.register('./sw.js').catch(console.error);
-  });
+// Service Worker removido na v3 para evitar cache e mistura de versões.
+);
 }
 </script>
-<div class="version-debug-badge" id="versionDebugBadge">MetaDriver v2 · instalação</div>
-
-<script>
-(function(){
-  var APP_VERSION = "v2";
-  var KEY = "md_app_version";
-  var RELOAD_ONCE_KEY = "md_app_version_reload_once";
-
-  try {
-    var prev = localStorage.getItem(KEY);
-    var reloaded = sessionStorage.getItem(RELOAD_ONCE_KEY);
-
-    if (prev !== APP_VERSION) {
-      localStorage.setItem(KEY, APP_VERSION);
-      if (reloaded !== APP_VERSION) {
-        sessionStorage.setItem(RELOAD_ONCE_KEY, APP_VERSION);
-        setTimeout(function(){ location.reload(); }, 50);
-      }
-    }
-
-    var badge = document.getElementById("versionDebugBadge");
-    if (badge) {
-      badge.textContent = "MetaDriver " + APP_VERSION + " · instalação";
-    }
-  } catch(e) {}
-})();
-</script>
-
+<div class="version-debug-badge" id="versionDebugBadge">MetaDriver v3 · instalação</div>
 </body>
 </html>

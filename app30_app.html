@@ -2368,7 +2368,6 @@ body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff9d0; }
   font-weight:700;
   letter-spacing:.2px;
   opacity:.95;
-  backdrop-filter: blur(6px);
 }
 
 </style>
@@ -5163,34 +5162,7 @@ function exportarRelatorioPDF(){
       <script>
         setTimeout(()=>window.print(), 250);
       <\/script>
-    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v2 · app</div>
-
-<script>
-(function(){
-  var APP_VERSION = "v2";
-  var KEY = "md_app_version";
-  var RELOAD_ONCE_KEY = "md_app_version_reload_once";
-
-  try {
-    var prev = localStorage.getItem(KEY);
-    var reloaded = sessionStorage.getItem(RELOAD_ONCE_KEY);
-
-    if (prev !== APP_VERSION) {
-      localStorage.setItem(KEY, APP_VERSION);
-      if (reloaded !== APP_VERSION) {
-        sessionStorage.setItem(RELOAD_ONCE_KEY, APP_VERSION);
-        setTimeout(function(){ location.reload(); }, 50);
-      }
-    }
-
-    var badge = document.getElementById("versionDebugBadge");
-    if (badge) {
-      badge.textContent = "MetaDriver " + APP_VERSION + " · app";
-    }
-  } catch(e) {}
-})();
-</script>
-
+    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v3 · app</div>
 </body>
     </html>  `);
   w.document.close();

@@ -22,28 +22,56 @@ O QUE FOI PEDIDO:
 - Exibir a versão em tudo para debug
 
 O QUE FOI FEITO:
-- Adicionada indicação visual da versão em:
-  - tela de instalação
-  - tela de login
-  - app principal
-  - app backup
-  - painel
-  - admin
-  - reset
-- Implementado controle leve de versão:
-  - compara a versão salva com a versão atual
-  - se mudou, faz uma recarga simples única
-  - sem limpar storage
-  - sem mexer agressivamente no service worker
+- Tentativa de indicação visual da versão e recarga leve
+
+STATUS:
+- Com problema
+- App desconfigurado / inválido
+- Deve ser desconsiderada como base
+
+
+VERSÃO v3 - remove-sw
+
+O QUE FOI PEDIDO:
+- Remover o Service Worker durante o desenvolvimento
+- Parar de precisar desinstalar o app e limpar Chrome para testar versões
+- Manter indicação visível da versão para confirmar atualização carregada
+
+O QUE FOI FEITO:
+- Removido o registro do Service Worker das páginas
+- sw.js mantido apenas de forma inerte, sem estratégia de cache
+- Adicionada indicação visual da versão v3 nas telas principais para debug
+- Não foi aplicado auto update agressivo
+- Base usada: versão estável funcional enviada pelo usuário
 
 ARQUIVOS ALTERADOS:
-- index.html
-- login.html
 - app30_app.html
 - app30_app_backup.html
-- painel.html
+- login.html
 - admin.html
+- painel.html
 - reset.html
+- index.html
+- sw.js
+
+OBSERVAÇÕES:
+- Durante o desenvolvimento, a atualização passa a depender do navegador buscar os arquivos normais do GitHub, sem cache agressivo do PWA
+- Quando o app for para clientes, o Service Worker pode ser reintroduzido corretamente
+
+STATUS:
+- Aguardando teste
+
+
+VERSÃO v6 - remove-sw (numeração corrigida)
+
+O QUE FOI PEDIDO:
+- Corrigir numeração de versões para não regredir
+- Manter sequência após v5
+
+O QUE FOI FEITO:
+- Esta versão é a mesma build estável com remoção de Service Worker
+- Apenas renumerada corretamente para v6
+- Histórico mantido sem perda
 
 STATUS:
 - Aguardando teste
