@@ -2344,12 +2344,10 @@ body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff9d0; }
 }
 
 
-/* Dias não trabalhados — dica visível no campo data */
+/* Dias não trabalhados — refinamento visual sem mexer na lógica da Meta */
 #dataNaoTrabalhado[type="text"]{
   color: rgba(255,255,255,0.68);
 }
-
-/* Dias não trabalhados — lançamentos mais compactos, no padrão visual da Meta */
 #listaNaoTrabalhados .list-item,
 #listaNaoTrabalhados .nao-trabalhado-item{
   width: calc(100% - 24px);
@@ -2376,11 +2374,6 @@ body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff9d0; }
 #listaNaoTrabalhados .kebab-btn{
   padding: 2px 5px;
   font-size: 16px;
-}
-#listaNaoTrabalhados .small-btn{
-  padding: 4px 7px;
-  font-size: 11px;
-  border-radius: 8px;
 }
 
 </style>
@@ -3056,6 +3049,28 @@ function loadDados(){
   return null;
 }
 
+
+function mergeDadosSeguro(local, cloud){
+  try{
+    if(!cloud) return local;
+    if(!local) return cloud;
+
+    const localTime = Number(local.updatedAt || 0);
+    const cloudTime = Number(cloud.updatedAt || 0);
+
+    // ignora cloud inválido
+    if(!cloud.metaTotal && !cloud.ganhos?.length) return local;
+
+    if(cloudTime > localTime){
+      return cloud;
+    }else{
+      return local;
+    }
+  }catch(e){
+    return local;
+  }
+}
+
 let dados = loadDados() || {
   ganhos: [],
   gastos: [],
@@ -3109,6 +3124,10 @@ try{ reprocessarSessoesGanhoHora(); }catch(e){}
 // Migração desativada (substituída por loadDados com legacyKeys)
 // v9 - salvar com verificação de integridade: confirma que o dado foi realmente gravado
 function salvar(){
+  try{
+    if(!dados.updatedAt) dados.updatedAt = Date.now();
+    dados.updatedAt = Date.now();
+  }catch(e){}
   try{
     const payload = JSON.stringify(dados);
     // Verifica que o payload não é menor que o anterior (proteção contra corrupção)
@@ -3768,15 +3787,11 @@ function toggleForm(id){
 }
 
 function salvarMeta(){
-  const _metaVal = parseFloat(document.getElementById("metaTotal").value);
-  const _dataVal = document.getElementById("dataLimite").value || "";
-  // Só zera se o campo estiver explicitamente vazio
-  dados.metaTotal = (!isNaN(_metaVal) && _metaVal >= 0) ? _metaVal : dados.metaTotal;
-  dados.dataLimite = _dataVal || dados.dataLimite;
+  dados.metaTotal = parseFloat(document.getElementById("metaTotal").value) || 0;
+  dados.dataLimite = document.getElementById("dataLimite").value || "";
   salvar();
   atualizar();
   try{ atualizarCarro(); }catch(e){}
-  toast("✅ Meta salva.");
 }
 
 function salvarHoras(){
@@ -3882,19 +3897,12 @@ function addNaoTrabalhado(){
   const motivo = (document.getElementById("motivoNaoTrabalhado").value || "").trim();
   if(!data) return;
 
-  // v9 fix: preservar metaTotal e dataLimite sem zerar se input estiver vazio (card collapsed)
-  const _ntMetaVal = parseFloat(document.getElementById("metaTotal")?.value);
-  if(!isNaN(_ntMetaVal) && _ntMetaVal > 0) dados.metaTotal = _ntMetaVal;
-  const _ntDataVal = document.getElementById("dataLimite")?.value || "";
-  if(_ntDataVal) dados.dataLimite = _ntDataVal;
-
   dados.naoTrabalhados.push({data, motivo: motivo || "Dia não trabalhado"});
 
   salvar();
   atualizar();
 
   document.getElementById("motivoNaoTrabalhado").value = "";
-  document.getElementById("formNaoTrabalhado").classList.remove("open");
   document.getElementById("wrapListaNaoTrab").style.display = "block";
 }
 function editarValorSessaoFinalizada(index){
@@ -5308,31 +5316,9 @@ function atualizar(){
 
   if(!Array.isArray(dados.naoTrabalhados)) dados.naoTrabalhados = [];
 
-  // v9 fix definitivo: sincronizar inputs de meta — sempre repõe campo vazio com dados
-  const metaTotalEl = document.getElementById("metaTotal");
-  const dataLimiteEl = document.getElementById("dataLimite");
-  if(metaTotalEl){
-    const campoVazio = !metaTotalEl.value || metaTotalEl.value === "0";
-    const campoAtivo = document.activeElement === metaTotalEl;
-    if(dados.metaTotal > 0 && campoVazio && !campoAtivo){
-      // Repõe o campo (pode ter sumido por card collapsed no Android)
-      metaTotalEl.value = dados.metaTotal;
-    } else if(!campoVazio && !campoAtivo){
-      // Campo tem valor — sincroniza com dados
-      const v = parseFloat(metaTotalEl.value);
-      if(!isNaN(v) && v > 0) dados.metaTotal = v;
-    }
-  }
-  if(dataLimiteEl){
-    const campoVazio = !dataLimiteEl.value;
-    const campoAtivo = document.activeElement === dataLimiteEl;
-    if(dados.dataLimite && campoVazio && !campoAtivo){
-      dataLimiteEl.value = dados.dataLimite;
-    } else if(!campoVazio && !campoAtivo){
-      dados.dataLimite = dataLimiteEl.value;
-    }
-  }
-  // metaDiariaManual é readonly e calculado — nunca preencher com dados.metaDiariaManual
+  document.getElementById("metaTotal").value = dados.metaTotal || "";
+  document.getElementById("dataLimite").value = dados.dataLimite || "";
+document.getElementById("metaDiariaManual").value = (dados.metaDiariaManual || dados.metaDiariaManual === 0) ? dados.metaDiariaManual : "";
   document.getElementById("ganhoDiarioAtual").value = (dados.ganhoDiarioAtual ?? "");
 
   const modoCombustivel = (dados.combustivelModo === "real") ? "real" : "fixo";
@@ -5363,42 +5349,6 @@ function atualizar(){
   if(fuelKmRodados && document.activeElement !== fuelKmRodados) fuelKmRodados.value = Number(dados?.combustivelReal?.kmRodados || 0) || "";
   if(fuelConsumoMedio && document.activeElement !== fuelConsumoMedio) fuelConsumoMedio.value = Number(dados?.combustivelReal?.consumoMedio || 0) || "";
   if(fuelPrecoLitro && document.activeElement !== fuelPrecoLitro) fuelPrecoLitro.value = Number(dados?.combustivelReal?.precoLitro || 0) || "";
-
-  // v9 fix definitivo: sincronizar inputs de meta com dados ANTES do cálculo
-  // garante que o que está digitado no campo seja usado, mesmo sem clicar Salvar Meta
-  try{
-    const _metaEl = document.getElementById("metaTotal");
-    const _dataEl = document.getElementById("dataLimite");
-    // Só atualiza dados se o input tiver valor válido — nunca zera com input vazio
-    if(_metaEl && _metaEl.value !== ""){
-      const _v = parseFloat(_metaEl.value);
-      if(!isNaN(_v) && _v > 0) dados.metaTotal = _v;
-    }
-    // Se dados.metaTotal está perdido mas o input está vazio (card collapsed),
-    // tenta recuperar do localStorage diretamente
-    if((!dados.metaTotal || dados.metaTotal === 0)){
-      try{
-        const _raw = localStorage.getItem("controleUberProDados");
-        if(_raw){
-          const _parsed = JSON.parse(_raw);
-          if(_parsed && Number(_parsed.metaTotal) > 0) dados.metaTotal = Number(_parsed.metaTotal);
-          if(_parsed && _parsed.dataLimite) dados.dataLimite = dados.dataLimite || _parsed.dataLimite;
-        }
-      }catch(e){}
-    }
-    if(_dataEl && _dataEl.value !== ""){
-      dados.dataLimite = _dataEl.value;
-    } else if(!dados.dataLimite){
-      // Tenta recuperar dataLimite do localStorage se perdido
-      try{
-        const _raw = localStorage.getItem("controleUberProDados");
-        if(_raw){
-          const _parsed = JSON.parse(_raw);
-          if(_parsed && _parsed.dataLimite) dados.dataLimite = _parsed.dataLimite;
-        }
-      }catch(e){}
-    }
-  }catch(e){}
 
   const bruto = dados.ganhos.reduce((s,g)=>s+g.valor,0);
   const gastosExtras = dados.gastos.reduce((s,g)=>s+g.valor,0);
@@ -6019,25 +5969,7 @@ atualizar();
 
 
 (function(){
-  // v9 fix: atualizar dados.metaTotal e dados.dataLimite em tempo real ao digitar
-// assim o cálculo de metaDiariaManual e metaBruta usa sempre o valor atual do campo
-(function(){
-  function bindMetaInput(id, key, parseFunc){
-    const el = document.getElementById(id);
-    if(!el) return;
-    el.addEventListener('input', function(){
-      const val = parseFunc(el.value);
-      if(!isNaN(val) || key === 'dataLimite'){
-        dados[key] = key === 'dataLimite' ? (el.value || "") : (val || 0);
-        try{ atualizar(); }catch(e){}
-      }
-    });
-  }
-  bindMetaInput('metaTotal', 'metaTotal', parseFloat);
-  bindMetaInput('dataLimite', 'dataLimite', function(v){ return v; });
-})();
-
-function bindExprField(id, storeKey){
+  function bindExprField(id, storeKey){
     const el = document.getElementById(id);
     if(!el) return;
 
