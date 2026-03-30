@@ -15,7 +15,7 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver v13.0.6</title>
+<title>MetaDriver v14</title>
 
 <style>
 :root{
@@ -3417,18 +3417,27 @@ async function cloudBoot(){
   }catch(e){}
 }
 
-window.addEventListener("pagehide", function(){ try{ cloudPushNow(); }catch(e){} });
+window.addEventListener("pagehide", function(){
+  try{ sessionStorage.setItem("md_scroll_y", String(window.scrollY || 0)); }catch(e){}
+  try{ cloudPushNow(); }catch(e){}
+});
 window.addEventListener("beforeunload", function(){ try{ cloudPushNow(); }catch(e){} });
 window.addEventListener("online", function(){ try{ cloudPushNow(); }catch(e){} });
 // v9 - fix: ao esconder app (minimizar, trocar aba, fechar) salva local E nuvem
 document.addEventListener("visibilitychange", function(){
   try{
     if(document.visibilityState === "hidden"){
-      try{ salvar(); }catch(e){}   // garante localStorage/IDB atualizado
-      cloudPushNow();               // envia pra nuvem
+      // v14 - salva posição de scroll antes de minimizar
+      try{ sessionStorage.setItem("md_scroll_y", String(window.scrollY || 0)); }catch(e){}
+      try{ salvar(); }catch(e){}
+      cloudPushNow();
     }
     if(document.visibilityState === "visible"){
-      // Reinicia boot apenas se o cloudBoot ainda não foi concluído recentemente
+      // v14 - restaura posição de scroll ao voltar
+      try{
+        const sy = parseInt(sessionStorage.getItem("md_scroll_y") || "0", 10);
+        if(sy > 0) setTimeout(function(){ window.scrollTo(0, sy); }, 80);
+      }catch(e){}
       __cloudBootStarted = false;
       cloudBoot();
     }
@@ -5162,7 +5171,7 @@ function exportarRelatorioPDF(){
       <script>
         setTimeout(()=>window.print(), 250);
       <\/script>
-    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v13 · app</div>
+    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v14 · app</div>
 </body>
     </html>  `);
   w.document.close();
@@ -5943,7 +5952,15 @@ if(document.readyState === "loading"){
   bootApp();
 }
 // Em alguns celulares, ao voltar para o app (bfcache), reaplica o estado
-window.addEventListener("pageshow", ()=>{ try{ initSectionCollapse(); }catch(e){} try{ applyQuickBalanceFabStateHard(); }catch(e){} });
+window.addEventListener("pageshow", ()=>{
+  try{ initSectionCollapse(); }catch(e){}
+  try{ applyQuickBalanceFabStateHard(); }catch(e){}
+  // v14 - restaura scroll no pageshow (bfcache)
+  try{
+    const sy = parseInt(sessionStorage.getItem("md_scroll_y") || "0", 10);
+    if(sy > 0) setTimeout(function(){ window.scrollTo(0, sy); }, 80);
+  }catch(e){}
+});
 
 try{ ensureGanhoHoraDiaAtual(); }catch(e){}
 atualizar();
