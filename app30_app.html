@@ -18,7 +18,7 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver v16</title>
+<title>MetaDriver v17</title>
 
 <style>
 :root{
@@ -51,7 +51,7 @@ h1{text-align:center;margin:8px 0 14px;letter-spacing:0.2px;}
   background:linear-gradient(to bottom, rgba(15,23,42,0.92), rgba(15,23,42,0.78));
   backdrop-filter: blur(8px);
   padding:14px 12px;
-  margin:-15px -15px 12px;
+  margin:-15px -15px 0;
   border-bottom:1px solid rgba(255,255,255,0.08);
 }
 .topbar-inner{
@@ -512,14 +512,12 @@ input.negative-value, input.negative-value::placeholder{
 /* ===== Abas ===== */
 /* v15 - abas fixas abaixo da topbar */
 .tabs-wrap{
-  padding:0 12px 10px;
+  padding:8px 15px 10px;
   position:sticky;
   top:64px;
-  z-index:49;
+  z-index:48;
   background:var(--bg);
   margin:0 -15px;
-  padding-left:15px;
-  padding-right:15px;
 }
 .tabs-bar{ display:flex; gap:10px; margin-top:6px; }
 .tab-btn{
@@ -5185,7 +5183,7 @@ function exportarRelatorioPDF(){
       <script>
         setTimeout(()=>window.print(), 250);
       <\/script>
-    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v16 · app</div>
+    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v17 · app</div>
 </body>
     </html>  `);
   w.document.close();
@@ -5947,6 +5945,15 @@ window.addEventListener("pageshow", function(){ try{ applyQuickBalanceFabStateHa
 setInterval(function(){ try{ applyQuickBalanceFabStateHard(); }catch(e){} try{ refreshQuickBalanceFabMiniDisplay(); }catch(e){} }, 800);
 
 function bootApp(){
+  // v16 - calcular altura real da topbar e aplicar nas tabs para sticky preciso
+  try{
+    const topbar = document.querySelector('.topbar');
+    const tabsWrap = document.querySelector('.tabs-wrap');
+    if(topbar && tabsWrap){
+      const h = topbar.getBoundingClientRect().height;
+      tabsWrap.style.top = h + 'px';
+    }
+  }catch(e){}
   try{ ensureFirstInstallCollapsed(); }catch(e){}
   try{ initSectionCollapse(); }catch(e){}
   try{ ensureGanhoHoraDiaAtual(); }catch(e){}
