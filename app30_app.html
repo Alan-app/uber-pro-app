@@ -18,18 +18,35 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver v18</title>
+<title>MetaDriver v19</title>
 <script>
-// v17 - esconde body ANTES de renderizar se há posição de scroll salva
-// evita o piscão de ir pro topo e depois voltar
+// v19 - scroll restore sem piscão
+// Esconde o body imediatamente se há scroll salvo
+// Restaura no DOMContentLoaded antes de qualquer renderização visível
 (function(){
+  try{ if('scrollRestoration' in history) history.scrollRestoration = 'manual'; }catch(e){}
   try{
-    if('scrollRestoration' in history) history.scrollRestoration = 'manual';
-    const sy = parseInt(sessionStorage.getItem('md_scroll_y') || '0', 10);
+    var sy = parseInt(localStorage.getItem('md_scroll_y') || '0', 10);
     if(sy > 0){
-      document.documentElement.style.visibility = 'hidden';
+      document.documentElement.style.opacity = '0';
+      document.documentElement.style.pointerEvents = 'none';
     }
   }catch(e){}
+  document.addEventListener('DOMContentLoaded', function(){
+    try{
+      var sy = parseInt(localStorage.getItem('md_scroll_y') || '0', 10);
+      if(sy > 0){
+        window.scrollTo(0, sy);
+        document.documentElement.scrollTop = sy;
+        document.body && (document.body.scrollTop = sy);
+      }
+    }catch(e){}
+    // Mostra a página após restaurar scroll (pequeno delay para garantir que o scroll aplicou)
+    setTimeout(function(){
+      document.documentElement.style.opacity = '';
+      document.documentElement.style.pointerEvents = '';
+    }, 60);
+  });
 })();
 </script>
 
@@ -3446,31 +3463,31 @@ window.addEventListener("pagehide", function(){
 });
 window.addEventListener("beforeunload", function(){ try{ cloudPushNow(); }catch(e){} });
 window.addEventListener("online", function(){ try{ cloudPushNow(); }catch(e){} });
-// v9 - fix: ao esconder app (minimizar, trocar aba, fechar) salva local E nuvem
+// v19 - salva scroll continuamente (localStorage sobrevive ao processo morto pelo Android)
+window.addEventListener('scroll', function(){
+  try{
+    var _sy = window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0;
+    localStorage.setItem('md_scroll_y', String(_sy));
+  }catch(e){}
+}, { passive: true });
+
 document.addEventListener("visibilitychange", function(){
   try{
     if(document.visibilityState === "hidden"){
-      // v15 - scroll: apenas salva, não precisa mais forçar restauração
+      // Salva scroll e dados ao minimizar/trocar app
       try{
-        const _sy = window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0;
-        sessionStorage.setItem("md_scroll_y", String(_sy));
+        var _sy = window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0;
+        localStorage.setItem('md_scroll_y', String(_sy));
       }catch(e){}
       try{ salvar(); }catch(e){}
       cloudPushNow();
     }
     if(document.visibilityState === "visible"){
-      // v17 - restaura scroll sem piscão: body estava hidden, restaura posição, mostra
+      // v19 - scroll já restaurado no DOMContentLoaded, só precisa garantir visibilidade
       try{
-        const sy = parseInt(sessionStorage.getItem('md_scroll_y') || '0', 10);
-        if(sy > 0){
-          window.scrollTo(0, sy);
-          document.documentElement.scrollTop = sy;
-          document.body.scrollTop = sy;
-        }
-        document.documentElement.style.visibility = '';
-      }catch(e){
-        document.documentElement.style.visibility = '';
-      }
+        document.documentElement.style.opacity = '';
+        document.documentElement.style.pointerEvents = '';
+      }catch(e){}
       __cloudBootStarted = false;
       cloudBoot();
     }
@@ -5204,7 +5221,7 @@ function exportarRelatorioPDF(){
       <script>
         setTimeout(()=>window.print(), 250);
       <\/script>
-    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v18 · app</div>
+    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v19 · app</div>
 </body>
     </html>  `);
   w.document.close();
@@ -5966,8 +5983,11 @@ window.addEventListener("pageshow", function(){ try{ applyQuickBalanceFabStateHa
 setInterval(function(){ try{ applyQuickBalanceFabStateHard(); }catch(e){} try{ refreshQuickBalanceFabMiniDisplay(); }catch(e){} }, 800);
 
 function bootApp(){
-  // v17 - garante visibilidade mesmo se scroll não precisou ser restaurado
-  try{ document.documentElement.style.visibility = ''; }catch(e){}
+  // v19 - garante visibilidade
+  try{
+    document.documentElement.style.opacity = '';
+    document.documentElement.style.pointerEvents = '';
+  }catch(e){}
   // v16 - calcular altura real da topbar e aplicar nas tabs para sticky preciso
   try{
     const topbar = document.querySelector('.topbar');
@@ -5999,18 +6019,11 @@ if(document.readyState === "loading"){
 window.addEventListener("pageshow", ()=>{
   try{ initSectionCollapse(); }catch(e){}
   try{ applyQuickBalanceFabStateHard(); }catch(e){}
-  // v17 - restaura scroll no pageshow sem piscão
+  // v19 - scroll já restaurado no DOMContentLoaded
   try{
-    const sy = parseInt(sessionStorage.getItem('md_scroll_y') || '0', 10);
-    if(sy > 0){
-      window.scrollTo(0, sy);
-      document.documentElement.scrollTop = sy;
-      document.body.scrollTop = sy;
-    }
-    document.documentElement.style.visibility = '';
-  }catch(e){
-    document.documentElement.style.visibility = '';
-  }
+    document.documentElement.style.opacity = '';
+    document.documentElement.style.pointerEvents = '';
+  }catch(e){}
 });
 
 try{ ensureGanhoHoraDiaAtual(); }catch(e){}
