@@ -18,163 +18,18 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver v20.3</title>
+<title>MetaDriver v18</title>
 <script>
-// v20.3 - restauração de rolagem definitiva ao minimizar/restaurar
+// v17 - esconde body ANTES de renderizar se há posição de scroll salva
+// evita o piscão de ir pro topo e depois voltar
 (function(){
-  var KEY_Y = 'md_scroll_y';
-  var KEY_X = 'md_scroll_x';
-  var KEY_TS = 'md_scroll_ts';
-  var MAX_TRIES = 240;
-  var restoring = false;
-  var unlockTimer = null;
-  var rafSave = 0;
-
-  function storageGet(key){
-    try{
-      var v = sessionStorage.getItem(key);
-      if(v !== null && v !== undefined && v !== '') return v;
-    }catch(e){}
-    try{ return localStorage.getItem(key); }catch(e){}
-    return null;
-  }
-
-  function storageSet(key, value){
-    try{ sessionStorage.setItem(key, value); }catch(e){}
-    try{ localStorage.setItem(key, value); }catch(e){}
-  }
-
-  function readInt(key){
-    var n = parseInt(storageGet(key) || '0', 10);
-    return Number.isFinite(n) ? n : 0;
-  }
-
-  function getScrollX(){
-    return Math.round(window.scrollX || window.pageXOffset || document.documentElement.scrollLeft || (document.body && document.body.scrollLeft) || 0);
-  }
-
-  function getScrollY(){
-    return Math.round(window.scrollY || window.pageYOffset || document.documentElement.scrollTop || (document.body && document.body.scrollTop) || 0);
-  }
-
-  function saveScroll(force){
-    try{
-      var x = getScrollX();
-      var y = getScrollY();
-      var prevY = readInt(KEY_Y);
-      var prevX = readInt(KEY_X);
-      var shouldWrite = !!force || y !== prevY || x !== prevX || !storageGet(KEY_TS);
-      if(!shouldWrite) return;
-      storageSet(KEY_X, String(x));
-      storageSet(KEY_Y, String(y));
-      storageSet(KEY_TS, String(Date.now()));
-    }catch(e){}
-  }
-
-  function scheduleSave(){
-    try{
-      if(rafSave) return;
-      rafSave = requestAnimationFrame(function(){
-        rafSave = 0;
-        saveScroll(false);
-      });
-    }catch(e){ saveScroll(false); }
-  }
-
-  function lockView(){
-    try{
-      if(readInt(KEY_Y) > 0){
-        document.documentElement.style.opacity = '0';
-        document.documentElement.style.pointerEvents = 'none';
-      }
-    }catch(e){}
-  }
-
-  function unlockView(){
-    try{
-      clearTimeout(unlockTimer);
-      unlockTimer = setTimeout(function(){
-        document.documentElement.style.opacity = '';
-        document.documentElement.style.pointerEvents = '';
-      }, 120);
-    }catch(e){}
-  }
-
-  function applyScroll(x, y){
-    try{ window.scrollTo(x, y); }catch(e){}
-    try{ document.documentElement.scrollLeft = x; }catch(e){}
-    try{ document.documentElement.scrollTop = y; }catch(e){}
-    try{ if(document.body){ document.body.scrollLeft = x; document.body.scrollTop = y; } }catch(e){}
-  }
-
-  function restoreScroll(force){
-    if(restoring && !force) return;
-    restoring = true;
-    try{ if('scrollRestoration' in history) history.scrollRestoration = 'manual'; }catch(e){}
-
-    var targetX = readInt(KEY_X);
-    var targetY = readInt(KEY_Y);
-    if(targetX <= 0 && targetY <= 0){
-      restoring = false;
-      unlockView();
-      return;
+  try{
+    if('scrollRestoration' in history) history.scrollRestoration = 'manual';
+    const sy = parseInt(sessionStorage.getItem('md_scroll_y') || '0', 10);
+    if(sy > 0){
+      document.documentElement.style.visibility = 'hidden';
     }
-
-    var tries = 0;
-    function tick(){
-      tries += 1;
-      var doc = document.documentElement || document.body;
-      var maxY = Math.max(0, ((doc && doc.scrollHeight) || 0) - window.innerHeight);
-      var maxX = Math.max(0, ((doc && doc.scrollWidth) || 0) - window.innerWidth);
-      var nextY = Math.min(targetY, maxY);
-      var nextX = Math.min(targetX, maxX);
-      applyScroll(nextX, nextY);
-
-      var curY = getScrollY();
-      var curX = getScrollX();
-      var doneY = Math.abs(curY - nextY) <= 2;
-      var doneX = Math.abs(curX - nextX) <= 2;
-      var roomReady = maxY >= Math.max(0, nextY - 2);
-
-      if((doneX && doneY && roomReady) || tries >= MAX_TRIES){
-        restoring = false;
-        unlockView();
-        return;
-      }
-      requestAnimationFrame(tick);
-    }
-    requestAnimationFrame(tick);
-  }
-
-  function restoreBurst(){
-    restoreScroll(true);
-    setTimeout(function(){ restoreScroll(true); }, 60);
-    setTimeout(function(){ restoreScroll(true); }, 180);
-    setTimeout(function(){ restoreScroll(true); }, 400);
-    setTimeout(function(){ restoreScroll(true); }, 800);
-    setTimeout(function(){ restoreScroll(true); }, 1500);
-  }
-
-  window.__mdSaveScroll = saveScroll;
-  window.__mdRestoreScroll = restoreScroll;
-  window.__mdRestoreScrollBurst = restoreBurst;
-
-  lockView();
-  try{ if('scrollRestoration' in history) history.scrollRestoration = 'manual'; }catch(e){}
-
-  document.addEventListener('DOMContentLoaded', function(){ restoreBurst(); }, { passive: true });
-  window.addEventListener('load', function(){ restoreBurst(); }, { passive: true });
-  window.addEventListener('pageshow', function(){ restoreBurst(); }, { passive: true });
-  window.addEventListener('focus', function(){ restoreBurst(); }, { passive: true });
-  window.addEventListener('orientationchange', function(){ restoreBurst(); }, { passive: true });
-  window.addEventListener('scroll', scheduleSave, { passive: true });
-  window.addEventListener('pagehide', function(){ saveScroll(true); }, { passive: true });
-  window.addEventListener('beforeunload', function(){ saveScroll(true); });
-  window.addEventListener('blur', function(){ saveScroll(true); }, { passive: true });
-  document.addEventListener('visibilitychange', function(){
-    if(document.visibilityState === 'hidden') saveScroll(true);
-    if(document.visibilityState === 'visible') restoreBurst();
-  }, { passive: true });
+  }catch(e){}
 })();
 </script>
 
@@ -3591,24 +3446,31 @@ window.addEventListener("pagehide", function(){
 });
 window.addEventListener("beforeunload", function(){ try{ cloudPushNow(); }catch(e){} });
 window.addEventListener("online", function(){ try{ cloudPushNow(); }catch(e){} });
-// v20 - salva scroll continuamente
-window.addEventListener('scroll', function(){
-  try{ if(window.__mdSaveScroll) window.__mdSaveScroll(); }catch(e){}
-}, { passive: true });
-
+// v9 - fix: ao esconder app (minimizar, trocar aba, fechar) salva local E nuvem
 document.addEventListener("visibilitychange", function(){
   try{
     if(document.visibilityState === "hidden"){
-      // Salva scroll e dados ao minimizar/trocar app
+      // v15 - scroll: apenas salva, não precisa mais forçar restauração
       try{
-        if(window.__mdSaveScroll) window.__mdSaveScroll();
+        const _sy = window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0;
+        sessionStorage.setItem("md_scroll_y", String(_sy));
       }catch(e){}
       try{ salvar(); }catch(e){}
       cloudPushNow();
     }
     if(document.visibilityState === "visible"){
-      // v20 - reaplica posição ao voltar para o app
-      try{ if(window.__mdRestoreScrollBurst) window.__mdRestoreScrollBurst(); else if(window.__mdRestoreScroll) window.__mdRestoreScroll(true); }catch(e){}
+      // v17 - restaura scroll sem piscão: body estava hidden, restaura posição, mostra
+      try{
+        const sy = parseInt(sessionStorage.getItem('md_scroll_y') || '0', 10);
+        if(sy > 0){
+          window.scrollTo(0, sy);
+          document.documentElement.scrollTop = sy;
+          document.body.scrollTop = sy;
+        }
+        document.documentElement.style.visibility = '';
+      }catch(e){
+        document.documentElement.style.visibility = '';
+      }
       __cloudBootStarted = false;
       cloudBoot();
     }
@@ -5342,7 +5204,7 @@ function exportarRelatorioPDF(){
       <script>
         setTimeout(()=>window.print(), 250);
       <\/script>
-    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v20.3 · app</div>
+    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v18 · app</div>
 </body>
     </html>  `);
   w.document.close();
@@ -6104,11 +5966,8 @@ window.addEventListener("pageshow", function(){ try{ applyQuickBalanceFabStateHa
 setInterval(function(){ try{ applyQuickBalanceFabStateHard(); }catch(e){} try{ refreshQuickBalanceFabMiniDisplay(); }catch(e){} }, 800);
 
 function bootApp(){
-  // v20 - garante visibilidade
-  try{
-    document.documentElement.style.opacity = '';
-    document.documentElement.style.pointerEvents = '';
-  }catch(e){}
+  // v17 - garante visibilidade mesmo se scroll não precisou ser restaurado
+  try{ document.documentElement.style.visibility = ''; }catch(e){}
   // v16 - calcular altura real da topbar e aplicar nas tabs para sticky preciso
   try{
     const topbar = document.querySelector('.topbar');
@@ -6140,8 +5999,18 @@ if(document.readyState === "loading"){
 window.addEventListener("pageshow", ()=>{
   try{ initSectionCollapse(); }catch(e){}
   try{ applyQuickBalanceFabStateHard(); }catch(e){}
-  // v20 - reforça restauração ao reabrir do cache do navegador
-  try{ if(window.__mdRestoreScrollBurst) window.__mdRestoreScrollBurst(); else if(window.__mdRestoreScroll) window.__mdRestoreScroll(true); }catch(e){}
+  // v17 - restaura scroll no pageshow sem piscão
+  try{
+    const sy = parseInt(sessionStorage.getItem('md_scroll_y') || '0', 10);
+    if(sy > 0){
+      window.scrollTo(0, sy);
+      document.documentElement.scrollTop = sy;
+      document.body.scrollTop = sy;
+    }
+    document.documentElement.style.visibility = '';
+  }catch(e){
+    document.documentElement.style.visibility = '';
+  }
 });
 
 try{ ensureGanhoHoraDiaAtual(); }catch(e){}
@@ -6706,9 +6575,7 @@ function snoozeCarPopup(){
   const KEY = "controleUberPro_activeTab_v7_2_6";
 
   // substitui switchTab por uma versão simples e confiável
-  window.switchTab = function(which, opts){
-    opts = opts || {};
-    const preserveScroll = !!opts.preserveScroll;
+  window.switchTab = function(which){
     const tabUber = document.getElementById("tabUber");
     const tabCarro = document.getElementById("tabCarro");
     const bU = document.getElementById("tabBtnUber");
@@ -6738,9 +6605,7 @@ function snoozeCarPopup(){
       try{ localStorage.setItem(KEY, "uber"); }catch(e){}
       try{ atualizar && atualizar(); }catch(e){}
     }
-    if(!preserveScroll){
-      window.scrollTo(0,0);
-    }
+    window.scrollTo(0,0);
   };
 
   function init(){
@@ -6757,7 +6622,7 @@ function snoozeCarPopup(){
       tabCarro.classList.add("hidden");
       tabUber.classList.remove("hidden");
     }
-    window.switchTab(t === "carro" ? "carro" : "uber", { preserveScroll:true });
+    window.switchTab(t === "carro" ? "carro" : "uber");
   }
 
   document.addEventListener("DOMContentLoaded", ()=>{ try{ bindCarCollapsibles(); }catch(e){} });
@@ -6767,7 +6632,7 @@ document.addEventListener("DOMContentLoaded", init);
 document.addEventListener("DOMContentLoaded", ()=>{
   try{ localStorage.setItem("controleUberPro_activeTab_v7_2_6", "uber"); }catch(e){}
   try{ localStorage.setItem("controleUberPro_activeTab_v7_2_0", "uber"); }catch(e){}
-  try{ window.switchTab && window.switchTab("uber", { preserveScroll:true }); }catch(e){}
+  try{ window.switchTab && window.switchTab("uber"); }catch(e){}
 }, true);
 
 })();

@@ -318,27 +318,3 @@ ARQUIVOS ALTERADOS:
 
 STATUS:
 - Aguardando teste
-
-
-VERSÃO v19 - fix-scroll-localStorage-DOMContentLoaded
-
-FEEDBACK DA v18:
-- Não resolveu — ao minimizar e voltar, ou ao trocar de app, continuava indo pro topo
-- Confirmado via vídeo: o Android mata o processo do PWA, reconstrói do zero e vai direto pro topo
-
-O QUE FOI PEDIDO:
-- Resolver definitivamente o scroll voltando ao topo ao minimizar/trocar de app
-
-O QUE FOI FEITO:
-- Nova estratégia completa:
-  1. Salva posição no localStorage (não sessionStorage) a cada evento de scroll em tempo real — localStorage sobrevive ao processo ser morto pelo Android
-  2. Script inline no <head> esconde a página (opacity:0) antes de qualquer renderização se há scroll salvo
-  3. Restaura o scroll no DOMContentLoaded — o evento mais cedo possível, antes do usuário ver qualquer coisa
-  4. Após 60ms mostra a página (opacity:1) — neste ponto o scroll já foi aplicado, sem piscão
-  5. visibilitychange e pageshow apenas garantem visibilidade, não tentam mais forçar scroll
-
-ARQUIVOS ALTERADOS:
-- app30_app.html
-
-STATUS:
-- Aguardando teste
