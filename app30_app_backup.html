@@ -5531,7 +5531,11 @@ if(elMeta && document.activeElement !== elMeta){
 if(elData && document.activeElement !== elData){
   elData.value = dados.dataLimite || "";
 }
-const metaSalvaAgora = !!dados.metaSalva;
+const metaSalvaAgora = !!(
+  Number(dados.metaTotal || 0) > 0 ||
+  String(dados.dataLimite || '').trim() ||
+  Number(dados.metaDiariaManual || 0) > 0
+);
 document.getElementById("metaDiariaManual").value = metaSalvaAgora && (dados.metaDiariaManual || dados.metaDiariaManual === 0) ? dados.metaDiariaManual : "";
   document.getElementById("ganhoDiarioAtual").value = (dados.ganhoDiarioAtual ?? "");
 
@@ -6218,8 +6222,8 @@ atualizar();
       dados.metaTotal = parseFloat(document.getElementById("metaTotal")?.value) || 0;
       dados.dataLimite = document.getElementById("dataLimite")?.value || "";
       dados.metaSalva = !!(Number(dados.metaTotal || 0) > 0 || String(dados.dataLimite || '').trim());
-      try{ salvar(); }catch(e){}
       try{ atualizar(); }catch(e){}
+      try{ salvar(); }catch(e){}
     }
 
     el.addEventListener("input", syncMetaAuto);
