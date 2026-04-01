@@ -966,6 +966,81 @@ input.negative-value, input.negative-value::placeholder{
   opacity:0;
   pointer-events:none;
 }
+
+
+.meta-total-overlay{
+  background:transparent;
+}
+.meta-total-panel{
+  left:12px;
+  right:12px;
+  bottom:auto;
+  top:auto;
+  max-width:none;
+  width:auto;
+  padding:12px;
+  border-radius:18px;
+}
+.meta-total-panel .quick-balance-title{
+  font-size:16px;
+  margin-bottom:4px;
+}
+.meta-total-panel .quick-balance-sub{
+  font-size:11px;
+  margin-bottom:8px;
+}
+.meta-total-panel .quick-balance-display{
+  height:auto;
+  min-height:72px;
+  margin-bottom:8px;
+  border-radius:16px;
+}
+.meta-total-panel .quick-balance-display-inner{
+  border-radius:14px;
+}
+.meta-total-panel .quick-balance-display-top{
+  padding:8px 10px;
+  font-size:11px;
+}
+.meta-total-panel .quick-balance-display-bottom{
+  padding:8px 10px;
+}
+.meta-total-panel .quick-balance-value{
+  font-size:34px;
+}
+.meta-total-panel .quick-balance-keypad{
+  gap:8px;
+  height:auto;
+}
+.meta-total-panel .quick-balance-key{
+  min-height:52px;
+  font-size:24px;
+  border-radius:14px;
+}
+.meta-total-panel .quick-balance-actions{
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  margin-top:8px;
+}
+.meta-total-panel .quick-balance-actions button{
+  min-height:48px;
+  font-size:16px;
+  border-radius:14px;
+}
+@media (max-width:420px){
+  .meta-total-panel{
+    left:10px;
+    right:10px;
+    padding:10px;
+  }
+  .meta-total-panel .quick-balance-value{
+    font-size:30px;
+  }
+  .meta-total-panel .quick-balance-key{
+    min-height:48px;
+    font-size:22px;
+  }
+}
 @media (min-width:700px){
   .quick-balance-panel{
     max-width:520px;
@@ -5843,6 +5918,28 @@ function clearMetaTotal(){
   applyMetaTotalValue();
 }
 
+function positionMetaTotalKeypad(){
+  const panel = document.getElementById("metaTotalPanel");
+  const visible = document.getElementById("metaTotal");
+  if(!panel || !visible || !panel.classList.contains("show")) return;
+  const rect = visible.getBoundingClientRect();
+  const cardBody = visible.closest('.card-body');
+  const cardRect = cardBody ? cardBody.getBoundingClientRect() : rect;
+  const viewportWidth = window.innerWidth || document.documentElement.clientWidth || 0;
+  const viewportHeight = window.innerHeight || document.documentElement.clientHeight || 0;
+  const margin = viewportWidth <= 420 ? 10 : 12;
+  const left = Math.max(margin, Math.min(cardRect.left, viewportWidth - margin - 220));
+  const right = Math.max(margin, viewportWidth - Math.max(cardRect.right, left + 220));
+  const top = Math.max(rect.bottom + 8, margin);
+  const maxHeight = Math.max(220, viewportHeight - top - 8);
+  panel.style.left = left + 'px';
+  panel.style.right = right + 'px';
+  panel.style.top = top + 'px';
+  panel.style.bottom = 'auto';
+  panel.style.maxHeight = maxHeight + 'px';
+  panel.style.overflowY = 'auto';
+}
+
 function toggleMetaTotalKeypad(forceOpen){
   const panel = document.getElementById("metaTotalPanel");
   const overlay = document.getElementById("metaTotalOverlay");
@@ -5856,10 +5953,27 @@ function toggleMetaTotalKeypad(forceOpen){
     hidden.value = String(visible.value || "");
     metaTotalReplaceOnNextInput = true;
     refreshMetaTotalDisplay();
+    positionMetaTotalKeypad();
   }else{
     metaTotalReplaceOnNextInput = false;
+    panel.style.top = '';
+    panel.style.bottom = '';
+    panel.style.left = '';
+    panel.style.right = '';
+    panel.style.maxHeight = '';
+    panel.style.overflowY = '';
   }
 }
+
+window.addEventListener('resize', function(){
+  positionMetaTotalKeypad();
+}, { passive:true });
+window.addEventListener('orientationchange', function(){
+  setTimeout(positionMetaTotalKeypad, 50);
+}, { passive:true });
+window.addEventListener('scroll', function(){
+  positionMetaTotalKeypad();
+}, { passive:true });
 
 function openMetaTotalKeypad(){
   toggleMetaTotalKeypad(true);
@@ -7495,8 +7609,8 @@ window.addEventListener("load", function(){
 
 
 
-<div id="metaTotalOverlay" class="quick-balance-overlay" onclick="toggleMetaTotalKeypad(false)"></div>
-<div id="metaTotalPanel" class="quick-balance-panel" role="dialog" aria-modal="true" aria-labelledby="metaTotalTitle">
+<div id="metaTotalOverlay" class="quick-balance-overlay meta-total-overlay" onclick="toggleMetaTotalKeypad(false)"></div>
+<div id="metaTotalPanel" class="quick-balance-panel meta-total-panel" role="dialog" aria-modal="true" aria-labelledby="metaTotalTitle">
   <div id="metaTotalTitle" class="quick-balance-title">Meta líquida desejada</div>
   <div class="quick-balance-sub">Digite apenas números. Ao tocar em um número, o valor atual é substituído.</div>
   <div class="quick-balance-display">
