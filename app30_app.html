@@ -18,35 +18,168 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver v19</title>
+<title>MetaDriver v21</title>
 <script>
-// v19 - scroll restore sem piscão
-// Esconde o body imediatamente se há scroll salvo
-// Restaura no DOMContentLoaded antes de qualquer renderização visível
+// v21 - correção de duplicação ao minimizar/restaurar + proteção de rolagem
 (function(){
-  try{ if('scrollRestoration' in history) history.scrollRestoration = 'manual'; }catch(e){}
-  try{
-    var sy = parseInt(localStorage.getItem('md_scroll_y') || '0', 10);
-    if(sy > 0){
-      document.documentElement.style.opacity = '0';
-      document.documentElement.style.pointerEvents = 'none';
-    }
-  }catch(e){}
-  document.addEventListener('DOMContentLoaded', function(){
+  var KEY_Y = 'md_scroll_y';
+  var KEY_X = 'md_scroll_x';
+  var KEY_TS = 'md_scroll_ts';
+  var MAX_TRIES = 240;
+  var restoring = false;
+  var unlockTimer = null;
+  var rafSave = 0;
+
+  function storageGet(key){
+    // fix v21: localStorage tem prioridade — sobrevive ao Android matar o processo
+    // sessionStorage é destruído quando o processo morre
     try{
-      var sy = parseInt(localStorage.getItem('md_scroll_y') || '0', 10);
-      if(sy > 0){
-        window.scrollTo(0, sy);
-        document.documentElement.scrollTop = sy;
-        document.body && (document.body.scrollTop = sy);
+      var v = localStorage.getItem(key);
+      if(v !== null && v !== undefined && v !== '') return v;
+    }catch(e){}
+    try{
+      var v2 = sessionStorage.getItem(key);
+      if(v2 !== null && v2 !== undefined && v2 !== '') return v2;
+    }catch(e){}
+    return null;
+  }
+
+  function storageSet(key, value){
+    try{ sessionStorage.setItem(key, value); }catch(e){}
+    try{ localStorage.setItem(key, value); }catch(e){}
+  }
+
+  function readInt(key){
+    var n = parseInt(storageGet(key) || '0', 10);
+    return Number.isFinite(n) ? n : 0;
+  }
+
+  function getScrollX(){
+    return Math.round(window.scrollX || window.pageXOffset || document.documentElement.scrollLeft || (document.body && document.body.scrollLeft) || 0);
+  }
+
+  function getScrollY(){
+    return Math.round(window.scrollY || window.pageYOffset || document.documentElement.scrollTop || (document.body && document.body.scrollTop) || 0);
+  }
+
+  function saveScroll(force){
+    try{
+      var x = getScrollX();
+      var y = getScrollY();
+      var prevY = readInt(KEY_Y);
+      var prevX = readInt(KEY_X);
+      var shouldWrite = !!force || y !== prevY || x !== prevX || !storageGet(KEY_TS);
+      if(!shouldWrite) return;
+      storageSet(KEY_X, String(x));
+      storageSet(KEY_Y, String(y));
+      storageSet(KEY_TS, String(Date.now()));
+    }catch(e){}
+  }
+
+  function scheduleSave(){
+    try{
+      if(rafSave) return;
+      rafSave = requestAnimationFrame(function(){
+        rafSave = 0;
+        saveScroll(false);
+      });
+    }catch(e){ saveScroll(false); }
+  }
+
+  function lockView(){
+    try{
+      if(readInt(KEY_Y) > 0){
+        document.documentElement.style.opacity = '0';
+        document.documentElement.style.pointerEvents = 'none';
       }
     }catch(e){}
-    // Mostra a página após restaurar scroll (pequeno delay para garantir que o scroll aplicou)
-    setTimeout(function(){
-      document.documentElement.style.opacity = '';
-      document.documentElement.style.pointerEvents = '';
-    }, 60);
-  });
+  }
+
+  function unlockView(){
+    try{
+      clearTimeout(unlockTimer);
+      unlockTimer = setTimeout(function(){
+        document.documentElement.style.opacity = '';
+        document.documentElement.style.pointerEvents = '';
+      }, 120);
+    }catch(e){}
+  }
+
+  function applyScroll(x, y){
+    try{ window.scrollTo(x, y); }catch(e){}
+    try{ document.documentElement.scrollLeft = x; }catch(e){}
+    try{ document.documentElement.scrollTop = y; }catch(e){}
+    try{ if(document.body){ document.body.scrollLeft = x; document.body.scrollTop = y; } }catch(e){}
+  }
+
+  function restoreScroll(force){
+    if(restoring && !force) return;
+    restoring = true;
+    try{ if('scrollRestoration' in history) history.scrollRestoration = 'manual'; }catch(e){}
+
+    var targetX = readInt(KEY_X);
+    var targetY = readInt(KEY_Y);
+    if(targetX <= 0 && targetY <= 0){
+      restoring = false;
+      unlockView();
+      return;
+    }
+
+    var tries = 0;
+    function tick(){
+      tries += 1;
+      var doc = document.documentElement || document.body;
+      var maxY = Math.max(0, ((doc && doc.scrollHeight) || 0) - window.innerHeight);
+      var maxX = Math.max(0, ((doc && doc.scrollWidth) || 0) - window.innerWidth);
+      var nextY = Math.min(targetY, maxY);
+      var nextX = Math.min(targetX, maxX);
+      applyScroll(nextX, nextY);
+
+      var curY = getScrollY();
+      var curX = getScrollX();
+      var doneY = Math.abs(curY - nextY) <= 2;
+      var doneX = Math.abs(curX - nextX) <= 2;
+      var roomReady = maxY >= Math.max(0, nextY - 2);
+
+      if((doneX && doneY && roomReady) || tries >= MAX_TRIES){
+        restoring = false;
+        unlockView();
+        return;
+      }
+      requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+
+  function restoreBurst(){
+    restoreScroll(true);
+    setTimeout(function(){ restoreScroll(true); }, 60);
+    setTimeout(function(){ restoreScroll(true); }, 180);
+    setTimeout(function(){ restoreScroll(true); }, 400);
+    setTimeout(function(){ restoreScroll(true); }, 800);
+    setTimeout(function(){ restoreScroll(true); }, 1500);
+  }
+
+  window.__mdSaveScroll = saveScroll;
+  window.__mdRestoreScroll = restoreScroll;
+  window.__mdRestoreScrollBurst = restoreBurst;
+
+  lockView();
+  try{ if('scrollRestoration' in history) history.scrollRestoration = 'manual'; }catch(e){}
+
+  document.addEventListener('DOMContentLoaded', function(){ restoreBurst(); }, { passive: true });
+  window.addEventListener('load', function(){ restoreBurst(); }, { passive: true });
+  window.addEventListener('pageshow', function(){ restoreBurst(); }, { passive: true });
+  window.addEventListener('focus', function(){ restoreBurst(); }, { passive: true });
+  window.addEventListener('orientationchange', function(){ restoreBurst(); }, { passive: true });
+  window.addEventListener('scroll', scheduleSave, { passive: true });
+  window.addEventListener('pagehide', function(){ saveScroll(true); }, { passive: true });
+  window.addEventListener('beforeunload', function(){ saveScroll(true); });
+  window.addEventListener('blur', function(){ saveScroll(true); }, { passive: true });
+  document.addEventListener('visibilitychange', function(){
+    if(document.visibilityState === 'hidden') saveScroll(true);
+    if(document.visibilityState === 'visible') restoreBurst();
+  }, { passive: true });
 })();
 </script>
 
@@ -837,6 +970,59 @@ input.negative-value, input.negative-value::placeholder{
   height:1px;
   opacity:0;
   pointer-events:none;
+}
+
+
+.meta-total-overlay{
+  background:transparent;
+}
+.meta-total-panel{
+  left:12px;
+  right:12px;
+  bottom:auto;
+  top:auto;
+  max-width:none;
+  width:auto;
+  padding:12px;
+  border-radius:18px;
+}
+.meta-total-panel{
+  padding:8px;
+}
+.meta-total-panel .quick-balance-keypad{
+  gap:6px;
+  height:auto;
+}
+.meta-total-panel .quick-balance-key{
+  min-height:44px;
+  font-size:22px;
+  border-radius:12px;
+}
+.meta-total-panel .quick-balance-actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:6px;
+  margin-top:6px;
+}
+.meta-total-panel .quick-balance-actions button{
+  min-height:42px;
+  font-size:15px;
+  border-radius:12px;
+}
+@media (max-width:420px){
+  .meta-total-panel{
+    left:10px;
+    right:10px;
+    padding:8px;
+  }
+  .meta-total-panel .quick-balance-key{
+    min-height:42px;
+    font-size:20px;
+  }
+  .meta-total-panel .quick-balance-actions button{
+    min-height:40px;
+    font-size:14px;
+  }
 }
 @media (min-width:700px){
   .quick-balance-panel{
@@ -2483,16 +2669,16 @@ body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff9d0; }
     try{
       const sess = readStoredSession();
       if(!sess.access_token && !sess.refresh_token){
-        location.replace("login.html");
+        window.__mdAuthOptionalMode = true;
         return;
       }
       const token = await refreshAccessTokenIfNeeded(false);
       if(!token){
-        location.replace("login.html");
+        window.__mdAuthOptionalMode = true;
         return;
       }
     }catch(e){
-      location.replace("login.html");
+      window.__mdAuthOptionalMode = true;
     }
   })();
 
@@ -2644,7 +2830,7 @@ body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff9d0; }
       </div>
   <div class="card-body">
     <label>Meta líquida desejada (R$)</label>
-    <input type="number" id="metaTotal" inputmode="decimal">
+    <input type="text" id="metaTotal" inputmode="none" autocomplete="off" readonly onclick="openMetaTotalKeypad()" onfocus="this.blur(); openMetaTotalKeypad();">
     <label>Data limite para atingir a Meta</label>
     <input type="date" id="dataLimite">
 
@@ -2671,8 +2857,6 @@ body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff9d0; }
   <div id="diasRestantesBox" class="warning" style="font-weight:bold;margin-top:6px;">0</div>
 </div>
 <div class="divider"></div>
-
-    <button onclick="salvarMeta()">Salvar Meta</button>
 
     <div id="statusMeta" class="muted" style="margin-top:10px;"></div>
   </div>
@@ -3816,6 +4000,7 @@ function toggleForm(id){
 function salvarMeta(){
   dados.metaTotal = parseFloat(document.getElementById("metaTotal").value) || 0;
   dados.dataLimite = document.getElementById("dataLimite").value || "";
+  dados.metaSalva = !!(Number(dados.metaTotal || 0) > 0 || String(dados.dataLimite || '').trim());
   salvar();
   atualizar();
       try{ atualizarCarro(); }catch(e){}
@@ -4652,7 +4837,7 @@ function reprocessarSessoesGanhoHora(){
   }
   syncSaldoAnteriorSessaoAtual();
 
-  const temSessaoEmAndamento = String(dados.horarioInicioFora || '').trim();
+  const temSessaoEmAndamento = !!dados.ganhoHoraSessaoAtiva && !!String(dados.horarioInicioFora || '').trim();
   if(temSessaoEmAndamento){
     const saldoAtual = Number(dados.saldoAtualFora || 0);
     const saldoAnterior = Number(dados.saldoAnteriorFora || 0);
@@ -4777,6 +4962,7 @@ function finalizarSessaoGanhoHoraInterno(opcoes){
     dados.ganhoHoraAtualFora = 0;
   }else{
     dados.horarioInicioFora = "";
+    dados.ganhoHoraSessaoAtiva = false;
     dados.ganhoHoraSessaoDiaRef = "";
     syncSaldoAnteriorSessaoAtual();
     dados.horasDecorridasFora = 0;
@@ -4797,6 +4983,7 @@ function finalizarSessaoGanhoHoraInterno(opcoes){
   }else{
     pararTimerGanhoHoraTempoReal();
     dados.horarioInicioFora = "";
+    dados.ganhoHoraSessaoAtiva = false;
     dados.ganhoHoraSessaoDiaRef = "";
     dados.horasDecorridasFora = 0;
     dados.ganhoHoraAtualFora = 0;
@@ -4836,7 +5023,7 @@ function ensureGanhoHoraDiaAtual(){
 
   const saldoAtualAntesVirada = Number(dados.saldoAtualFora || 0);
   const horaAtual = String(agora.getHours()).padStart(2,'0') + ':' + String(agora.getMinutes()).padStart(2,'0');
-  const temSessaoEmAndamento = String(dados.horarioInicioFora || '').trim();
+  const temSessaoEmAndamento = !!dados.ganhoHoraSessaoAtiva && !!String(dados.horarioInicioFora || '').trim();
   if(temSessaoEmAndamento){
     try{
       finalizarSessaoGanhoHoraInterno({
@@ -4885,6 +5072,7 @@ function salvarGanhosForaTempoReal(){
   dados.ganhoDiarioAtual = saldoAtual;
   dados.horarioInicioFora = horario;
   dados.ganhoHoraSessaoDiaRef = horario ? String(dados.ganhoHoraDiaRef || dataUberISO()) : "";
+  dados.ganhoHoraSessaoAtiva = !!horario;
 
   const saldoBase = saldoAtual - saldoAnterior;
 
@@ -5221,7 +5409,7 @@ function exportarRelatorioPDF(){
       <script>
         setTimeout(()=>window.print(), 250);
       <\/script>
-    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v19 · app</div>
+    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v21 · app</div>
 </body>
     </html>  `);
   w.document.close();
@@ -5248,16 +5436,17 @@ function atualizar(){
     const horaInput = document.getElementById("horarioInicioFora");
     const resumoEl = document.getElementById("ganhosForaResumo");
 
+    const sessaoAtiva = !!dados.ganhoHoraSessaoAtiva && !!String(dados.horarioInicioFora || '').trim();
     const saldoAnterior = syncSaldoAnteriorSessaoAtual();
     const saldoAtual = Number(dados.saldoAtualFora || 0);
-    const horario = dados.horarioInicioFora || "";
-    const horas = Number(dados.horasDecorridasFora || 0);
-    const ganhoHora = Number(dados.ganhoHoraAtualFora || 0);
-    const valorSessaoAtual = saldoAtual - saldoAnterior;
+    const horario = sessaoAtiva ? (dados.horarioInicioFora || "") : "";
+    const horas = sessaoAtiva ? Number(dados.horasDecorridasFora || 0) : 0;
+    const ganhoHora = sessaoAtiva ? Number(dados.ganhoHoraAtualFora || 0) : 0;
+    const valorSessaoAtual = sessaoAtiva ? (saldoAtual - saldoAnterior) : 0;
 
     const saldoAnteriorInput = document.getElementById("saldoAnteriorFora");
     if(saldoAnteriorInput && document.activeElement !== saldoAnteriorInput){
-      saldoAnteriorInput.value = saldoAnterior ? String(dados.saldoAnteriorFora) : "";
+      saldoAnteriorInput.value = sessaoAtiva && saldoAnterior ? String(dados.saldoAnteriorFora) : "";
     }
     if(saldoInput && document.activeElement !== saldoInput){
       saldoInput.value = saldoAtual ? String(dados.saldoAtualFora) : "";
@@ -5268,7 +5457,7 @@ function atualizar(){
 
     if(resumoEl){
       const sessoes = Array.isArray(dados.ganhoHoraSessoes) ? dados.ganhoHoraSessoes : [];
-      if(String(horario || '').trim()){
+      if(sessaoAtiva && String(horario || '').trim()){
         const indiceAtual = sessoes.length + 1;
         const tituloSessao = getNomeSessao(indiceAtual) + " sessão";
         const valorClass = valorSessaoAtual < 0 ? "dangerText" : "warning";
@@ -5358,7 +5547,12 @@ if(elMeta && document.activeElement !== elMeta){
 if(elData && document.activeElement !== elData){
   elData.value = dados.dataLimite || "";
 }
-document.getElementById("metaDiariaManual").value = (dados.metaDiariaManual || dados.metaDiariaManual === 0) ? dados.metaDiariaManual : "";
+const metaSalvaAgora = !!(
+  Number(dados.metaTotal || 0) > 0 ||
+  String(dados.dataLimite || '').trim() ||
+  Number(dados.metaDiariaManual || 0) > 0
+);
+document.getElementById("metaDiariaManual").value = metaSalvaAgora && (dados.metaDiariaManual || dados.metaDiariaManual === 0) ? dados.metaDiariaManual : "";
   document.getElementById("ganhoDiarioAtual").value = (dados.ganhoDiarioAtual ?? "");
 
   const modoCombustivel = (dados.combustivelModo === "real") ? "real" : "fixo";
@@ -5449,28 +5643,36 @@ const fuelCfg = getCombustivelConfig(bruto);
   try{
     const metaDiaInput = document.getElementById("metaDiariaManual");
     if(metaDiaInput){
-      metaDiaInput.value = metaDiariaAuto.toFixed(2);
+      metaDiaInput.value = metaSalvaAgora ? metaDiariaAuto.toFixed(2) : "";
       metaDiaInput.readOnly = true;
     }
   }catch(e){}
 
-  const metaDia = Math.max(0, metaDiariaAuto || 0);
+  const metaDia = metaSalvaAgora ? Math.max(0, metaDiariaAuto || 0) : 0;
   const ganhoDia = Math.max(0, dados.ganhoDiarioAtual || 0);
   const ganhoHoraRef = Math.max(0, Number(dados.ganhoHoraManual || 40));
   const horasNecessarias = (ganhoHoraRef > 0) ? (metaDia / ganhoHoraRef) : 0;
   const horasRestantes = (ganhoHoraRef > 0) ? (Math.max(0, metaDia - ganhoDia) / ganhoHoraRef) : 0;
 
       
-  document.getElementById("statusMeta").innerHTML =
-    "Dias restantes: <span class='" + (diasRestantes < 0 ? "dangerText" : "warning") + "'>" + diasRestantes + "</span><br>" +
-    "Meta bruta necessária total (" + (fuelCfg.modo === "real" ? "combustível real" : "30% combustível") + "): <span class='" + (metaBrutaComGastos < 0 ? "dangerText" : "warning") + "'>R$ " + metaBrutaComGastos.toFixed(2) + "</span><br>" +
-    "Meta bruta restante: <span class='" + (metaRestante < 0 ? "dangerText" : "warning") + "'>R$ " + metaRestante.toFixed(2) + "</span><br>" +
-    "Meta diária (automática): <span class='" + (metaDiariaAuto < 0 ? "dangerText" : "warning") + "'>R$ " + metaDiariaAuto.toFixed(2) + "</span>";
+  if(metaSalvaAgora){
+    document.getElementById("statusMeta").innerHTML =
+      "Dias restantes: <span class='" + (diasRestantes < 0 ? "dangerText" : "warning") + "'>" + diasRestantes + "</span><br>" +
+      "Meta bruta necessária total (" + (fuelCfg.modo === "real" ? "combustível real" : "30% combustível") + "): <span class='" + (metaBrutaComGastos < 0 ? "dangerText" : "warning") + "'>R$ " + metaBrutaComGastos.toFixed(2) + "</span><br>" +
+      "Meta bruta restante: <span class='" + (metaRestante < 0 ? "dangerText" : "warning") + "'>R$ " + metaRestante.toFixed(2) + "</span><br>" +
+      "Meta diária (automática): <span class='" + (metaDiariaAuto < 0 ? "dangerText" : "warning") + "'>R$ " + metaDiariaAuto.toFixed(2) + "</span>";
+  }else{
+    document.getElementById("statusMeta").innerHTML = "";
+  }
   const valorRestanteHoras = (metaDia - ganhoDia);
-  document.getElementById("horasResumo").innerHTML =
-    "Tempo para atingir a meta diária: <span class='" + (horasNecessarias < 0 ? "dangerText" : "warning") + "'>" + formatHorasMinutos(horasNecessarias) + "</span><br>" +
-    "Valor restante: <span class='" + (valorRestanteHoras < 0 ? "dangerText" : "warning") + "'>R$ " + valorRestanteHoras.toFixed(2) + "</span><br>" +
-    "Tempo restante: <span class='" + (horasRestantes < 0 ? "dangerText" : "warning") + "'>" + formatHorasMinutos(horasRestantes) + "</span>";
+  if(metaSalvaAgora){
+    document.getElementById("horasResumo").innerHTML =
+      "Tempo para atingir a meta diária: <span class='" + (horasNecessarias < 0 ? "dangerText" : "warning") + "'>" + formatHorasMinutos(horasNecessarias) + "</span><br>" +
+      "Valor restante: <span class='" + (valorRestanteHoras < 0 ? "dangerText" : "warning") + "'>R$ " + valorRestanteHoras.toFixed(2) + "</span><br>" +
+      "Tempo restante: <span class='" + (horasRestantes < 0 ? "dangerText" : "warning") + "'>" + formatHorasMinutos(horasRestantes) + "</span>";
+  }else{
+    document.getElementById("horasResumo").innerHTML = "";
+  }
 
   document.getElementById("fuelResumo").innerHTML =
     "Modo combustível: <span class='warning'>" + (fuelCfg.modo === "real" ? "Real" : (Math.round(fuelCfg.percentualSelecionado * 100) + "% do bruto")) + "</span><br>" +
@@ -5582,6 +5784,150 @@ document.getElementById("listaGastos").innerHTML =
 }
 
 
+
+
+function syncMetaAutoFromInputs(){
+  try{
+    const metaInput = document.getElementById("metaTotal");
+    const dataInput = document.getElementById("dataLimite");
+    dados.metaTotal = parseFloat(String(metaInput?.value || "").replace(",", ".")) || 0;
+    dados.dataLimite = dataInput?.value || "";
+    dados.metaSalva = !!(Number(dados.metaTotal || 0) > 0 || String(dados.dataLimite || '').trim());
+    try{ atualizar(); }catch(e){}
+    try{ salvar(); }catch(e){}
+  }catch(e){}
+}
+
+let metaTotalReplaceOnNextInput = false;
+
+function formatMetaTotalDisplay(valueStr){
+  const n = parseFloat(String(valueStr || "").replace(",", ".")) || 0;
+  return "R$ " + n.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function refreshMetaTotalDisplay(){
+  const input = document.getElementById("metaTotalHiddenInput");
+  const view = document.getElementById("metaTotalValue");
+  if(input && view){
+    view.textContent = formatMetaTotalDisplay(input.value);
+  }
+}
+
+function applyMetaTotalValue(){
+  const hidden = document.getElementById("metaTotalHiddenInput");
+  const visible = document.getElementById("metaTotal");
+  if(!hidden || !visible) return;
+  visible.value = String(hidden.value || "");
+  syncMetaAutoFromInputs();
+}
+
+function appendMetaTotalKey(key){
+  const input = document.getElementById("metaTotalHiddenInput");
+  if(!input) return;
+  let current = String(input.value || "");
+  if(metaTotalReplaceOnNextInput){
+    current = "";
+    metaTotalReplaceOnNextInput = false;
+  }
+  if(!/^[0-9]$/.test(String(key))) return;
+  current += String(key);
+  current = current.replace(/^0+(?=\d)/, "");
+  input.value = current;
+  refreshMetaTotalDisplay();
+  applyMetaTotalValue();
+}
+
+function backspaceMetaTotal(){
+  const input = document.getElementById("metaTotalHiddenInput");
+  if(!input) return;
+  if(metaTotalReplaceOnNextInput){
+    input.value = "";
+    metaTotalReplaceOnNextInput = false;
+  }else{
+    input.value = String(input.value || "").slice(0, -1);
+  }
+  refreshMetaTotalDisplay();
+  applyMetaTotalValue();
+}
+
+function clearMetaTotal(){
+  const input = document.getElementById("metaTotalHiddenInput");
+  if(!input) return;
+  input.value = "";
+  metaTotalReplaceOnNextInput = false;
+  refreshMetaTotalDisplay();
+  applyMetaTotalValue();
+}
+
+function positionMetaTotalKeypad(){
+  const panel = document.getElementById("metaTotalPanel");
+  const visible = document.getElementById("metaTotal");
+  if(!panel || !visible || !panel.classList.contains("show")) return;
+  const rect = visible.getBoundingClientRect();
+  const cardBody = visible.closest('.card-body');
+  const cardRect = cardBody ? cardBody.getBoundingClientRect() : rect;
+  const viewportWidth = window.innerWidth || document.documentElement.clientWidth || 0;
+  const viewportHeight = window.innerHeight || document.documentElement.clientHeight || 0;
+  const margin = viewportWidth <= 420 ? 10 : 12;
+  const minPanelWidth = 220;
+  const left = Math.max(margin, Math.min(cardRect.left, viewportWidth - margin - minPanelWidth));
+  const right = Math.max(margin, viewportWidth - Math.max(cardRect.right, left + minPanelWidth));
+  const top = Math.max(rect.bottom + 6, margin);
+  const maxHeight = Math.max(170, viewportHeight - top - 8);
+  panel.style.left = left + 'px';
+  panel.style.right = right + 'px';
+  panel.style.top = top + 'px';
+  panel.style.bottom = 'auto';
+  panel.style.maxHeight = maxHeight + 'px';
+  panel.style.overflowY = 'auto';
+}
+
+function toggleMetaTotalKeypad(forceOpen){
+  const panel = document.getElementById("metaTotalPanel");
+  const overlay = document.getElementById("metaTotalOverlay");
+  const hidden = document.getElementById("metaTotalHiddenInput");
+  const visible = document.getElementById("metaTotal");
+  if(!panel || !overlay || !hidden || !visible) return;
+  const abrir = (typeof forceOpen === "boolean") ? forceOpen : !panel.classList.contains("show");
+  panel.classList.toggle("show", abrir);
+  overlay.classList.toggle("show", abrir);
+  if(abrir){
+    hidden.value = String(visible.value || "");
+    metaTotalReplaceOnNextInput = true;
+    refreshMetaTotalDisplay();
+    positionMetaTotalKeypad();
+  }else{
+    metaTotalReplaceOnNextInput = false;
+    panel.style.top = '';
+    panel.style.bottom = '';
+    panel.style.left = '';
+    panel.style.right = '';
+    panel.style.maxHeight = '';
+    panel.style.overflowY = '';
+  }
+}
+
+window.addEventListener('resize', function(){
+  positionMetaTotalKeypad();
+}, { passive:true });
+window.addEventListener('orientationchange', function(){
+  setTimeout(positionMetaTotalKeypad, 50);
+}, { passive:true });
+window.addEventListener('scroll', function(){
+  positionMetaTotalKeypad();
+}, { passive:true });
+
+function openMetaTotalKeypad(){
+  toggleMetaTotalKeypad(true);
+}
+
+function confirmMetaTotalKeypad(){
+  const el = document.getElementById("metaTotal");
+  applyMetaTotalValue();
+  toggleMetaTotalKeypad(false);
+  try{ if(el) el.blur(); }catch(e){}
+  try{ document.activeElement && document.activeElement.blur && document.activeElement.blur(); }catch(e){}
+}
 
 
 function formatQuickBalanceDisplay(valueStr){
@@ -5983,7 +6329,7 @@ window.addEventListener("pageshow", function(){ try{ applyQuickBalanceFabStateHa
 setInterval(function(){ try{ applyQuickBalanceFabStateHard(); }catch(e){} try{ refreshQuickBalanceFabMiniDisplay(); }catch(e){} }, 800);
 
 function bootApp(){
-  // v19 - garante visibilidade
+  // v21 - garante visibilidade
   try{
     document.documentElement.style.opacity = '';
     document.documentElement.style.pointerEvents = '';
@@ -6019,16 +6365,37 @@ if(document.readyState === "loading"){
 window.addEventListener("pageshow", ()=>{
   try{ initSectionCollapse(); }catch(e){}
   try{ applyQuickBalanceFabStateHard(); }catch(e){}
-  // v19 - scroll já restaurado no DOMContentLoaded
-  try{
-    document.documentElement.style.opacity = '';
-    document.documentElement.style.pointerEvents = '';
-  }catch(e){}
+  // v21 - reforça restauração ao reabrir do cache do navegador
+  try{ if(window.__mdRestoreScrollBurst) window.__mdRestoreScrollBurst(); else if(window.__mdRestoreScroll) window.__mdRestoreScroll(true); }catch(e){}
 });
 
 try{ ensureGanhoHoraDiaAtual(); }catch(e){}
 atualizar();
 
+(function(){
+  const metaIds = ["metaTotal", "dataLimite"];
+  metaIds.forEach(function(id){
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.addEventListener("input", syncMetaAutoFromInputs);
+    el.addEventListener("change", syncMetaAutoFromInputs);
+  });
+
+  const ganhoIds = ["saldoAtualFora", "horarioInicioFora"];
+  ganhoIds.forEach(function(id){
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.addEventListener("input", function(){
+      if(dados.ganhoHoraSessaoAtiva) return;
+      try{
+        const resumoEl = document.getElementById("ganhosForaResumo");
+        const saldoAnteriorInput = document.getElementById("saldoAnteriorFora");
+        if(resumoEl) resumoEl.innerHTML = "";
+        if(saldoAnteriorInput) saldoAnteriorInput.value = "";
+      }catch(e){}
+    });
+  });
+})();
 
 (function(){
   function bindExprField(id, storeKey){
@@ -6588,7 +6955,9 @@ function snoozeCarPopup(){
   const KEY = "controleUberPro_activeTab_v7_2_6";
 
   // substitui switchTab por uma versão simples e confiável
-  window.switchTab = function(which){
+  window.switchTab = function(which, opts){
+    opts = opts || {};
+    const preserveScroll = !!opts.preserveScroll;
     const tabUber = document.getElementById("tabUber");
     const tabCarro = document.getElementById("tabCarro");
     const bU = document.getElementById("tabBtnUber");
@@ -6618,7 +6987,9 @@ function snoozeCarPopup(){
       try{ localStorage.setItem(KEY, "uber"); }catch(e){}
       try{ atualizar && atualizar(); }catch(e){}
     }
-    window.scrollTo(0,0);
+    if(!preserveScroll){
+      window.scrollTo(0,0);
+    }
   };
 
   function init(){
@@ -6635,7 +7006,7 @@ function snoozeCarPopup(){
       tabCarro.classList.add("hidden");
       tabUber.classList.remove("hidden");
     }
-    window.switchTab(t === "carro" ? "carro" : "uber");
+    window.switchTab(t === "carro" ? "carro" : "uber", { preserveScroll:true });
   }
 
   document.addEventListener("DOMContentLoaded", ()=>{ try{ bindCarCollapsibles(); }catch(e){} });
@@ -6645,7 +7016,7 @@ document.addEventListener("DOMContentLoaded", init);
 document.addEventListener("DOMContentLoaded", ()=>{
   try{ localStorage.setItem("controleUberPro_activeTab_v7_2_6", "uber"); }catch(e){}
   try{ localStorage.setItem("controleUberPro_activeTab_v7_2_0", "uber"); }catch(e){}
-  try{ window.switchTab && window.switchTab("uber"); }catch(e){}
+  try{ window.switchTab && window.switchTab("uber", { preserveScroll:true }); }catch(e){}
 }, true);
 
 })();
@@ -7177,6 +7548,31 @@ window.addEventListener("load", function(){
   </div>
 </div>
 
+
+
+
+<div id="metaTotalOverlay" class="quick-balance-overlay meta-total-overlay" onclick="toggleMetaTotalKeypad(false)"></div>
+<div id="metaTotalPanel" class="quick-balance-panel meta-total-panel" role="dialog" aria-modal="true" aria-label="Teclado numérico da meta líquida">
+  <input type="text" id="metaTotalHiddenInput" class="quick-balance-hidden-input" inputmode="none" readonly tabindex="-1" aria-hidden="true" placeholder="0">
+  <div class="quick-balance-keypad">
+    <button type="button" class="quick-balance-key" onclick="appendMetaTotalKey('1')">1</button>
+    <button type="button" class="quick-balance-key" onclick="appendMetaTotalKey('2')">2</button>
+    <button type="button" class="quick-balance-key" onclick="appendMetaTotalKey('3')">3</button>
+    <button type="button" class="quick-balance-key" onclick="appendMetaTotalKey('4')">4</button>
+    <button type="button" class="quick-balance-key" onclick="appendMetaTotalKey('5')">5</button>
+    <button type="button" class="quick-balance-key" onclick="appendMetaTotalKey('6')">6</button>
+    <button type="button" class="quick-balance-key" onclick="appendMetaTotalKey('7')">7</button>
+    <button type="button" class="quick-balance-key" onclick="appendMetaTotalKey('8')">8</button>
+    <button type="button" class="quick-balance-key" onclick="appendMetaTotalKey('9')">9</button>
+    <button type="button" class="quick-balance-key" onclick="clearMetaTotal()">Limpar</button>
+    <button type="button" class="quick-balance-key" onclick="appendMetaTotalKey('0')">0</button>
+    <button type="button" class="quick-balance-key" onclick="backspaceMetaTotal()">⌫</button>
+  </div>
+  <div class="quick-balance-actions">
+    <button type="button" class="secondary" onclick="backspaceMetaTotal()">Apagar</button>
+    <button type="button" onclick="confirmMetaTotalKeypad()">OK</button>
+  </div>
+</div>
 
 <div id="saldoAtualButtonMenuOverlay" class="quick-balance-overlay" onclick="fecharSaldoAtualButtonMenu()"></div>
 <div id="saldoAtualButtonMenuPanel" class="quick-balance-panel" role="dialog" aria-modal="true" aria-labelledby="saldoAtualButtonMenuTitle">
