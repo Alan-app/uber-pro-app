@@ -18,7 +18,7 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver v22</title>
+<title>MetaDriver v21</title>
 <script>
 // v20 - correção de duplicação ao minimizar/restaurar + proteção de rolagem
 (function(){
@@ -2668,38 +2668,17 @@ body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff9d0; }
   (async function(){
     try{
       const sess = readStoredSession();
-      // v21 fix: sem credenciais nenhuma — aí sim redireciona pro login
       if(!sess.access_token && !sess.refresh_token){
         location.replace("login.html");
         return;
       }
-      // v21 fix: se já tem access_token válido, usa ele diretamente
-      // NÃO faz logout por falha de rede ao tentar renovar
-      if(hasUsableToken(sess)){
-        return; // token válido, continua
-      }
-      // token expirado — tenta renovar, mas sem forçar logout em caso de falha de rede
-      if(sess.refresh_token){
-        try{
-          const token = await refreshAccessTokenIfNeeded(false);
-          if(token) return; // renovado com sucesso
-        }catch(e){
-          // falha de rede — não faz logout, usa token expirado localmente
-          console.warn("MetaDriver v22: falha ao renovar token, mantendo sessão local");
-          return;
-        }
-      }
-      // sem access_token e sem refresh_token válido — logout real
-      if(!sess.access_token){
+      const token = await refreshAccessTokenIfNeeded(false);
+      if(!token){
         location.replace("login.html");
+        return;
       }
-      // se tem access_token mesmo que expirado, mantém — melhor que perder dados
     }catch(e){
-      // erro inesperado — só redireciona se não tem nenhum token
-      try{
-        const sess = readStoredSession();
-        if(!sess.access_token && !sess.refresh_token) location.replace("login.html");
-      }catch(_){ location.replace("login.html"); }
+      location.replace("login.html");
     }
   })();
 
@@ -3742,7 +3721,7 @@ function cloudApplyRemoteData(remoteData){
     const diaLocal = String(dados.ganhoHoraDiaRef || "").trim();
     const diaRemoto = String(remoteData.ganhoHoraDiaRef || "").trim();
     if(diaLocal && diaRemoto && diaRemoto < diaLocal){
-      console.warn("MetaDriver v22: remoto recusado — dia remoto ("+diaRemoto+") < dia local ("+diaLocal+")");
+      console.warn("MetaDriver v21: remoto recusado — dia remoto ("+diaRemoto+") < dia local ("+diaLocal+")");
       // Mesmo recusando o merge, garantir que os arrays remotos não percam dados extras
       // — apenas mescla arrays sem mudar o estado do dia atual
       const arrayFields = ["ganhos","gastos","abastecimentos","naoTrabalhados",
@@ -4003,24 +3982,14 @@ document.addEventListener("visibilitychange", function(){
 setInterval(function(){
   try{
     if(document.visibilityState !== "visible") return;
-    if(!__cloudDirty) return;
-    __cloudDirty = false;
+    if(!__cloudDirty) return; // nenhuma mudança desde o último envio — não faz nada
+    __cloudDirty = false;     // limpa a flag antes de enviar (se falhar, próximo ciclo reenvia via pending)
     const pending = cloudReadPendingSnapshot();
     if((pending && pending.payload && cloudHasUsefulData(pending.payload)) || cloudHasUsefulData(dados)){
       cloudPushNow();
     }
   }catch(e){}
 }, 60000);
-
-// v21 - renovação proativa de token a cada 25min
-// evita logout involuntário por token expirado durante uso prolongado na madrugada
-setInterval(function(){
-  try{
-    if(typeof window.mdEnsureActiveSession === "function"){
-      window.mdEnsureActiveSession(false).catch(function(){});
-    }
-  }catch(e){}
-}, 25 * 60 * 1000);
 
 
 function toast(msg){
@@ -5747,7 +5716,7 @@ function exportarRelatorioPDF(){
       <script>
         setTimeout(()=>window.print(), 250);
       <\/script>
-    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v22 · app</div>
+    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v21 · app</div>
 
 <script>
 (function(){
