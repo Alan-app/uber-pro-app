@@ -18,7 +18,7 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver v20.9</title>
+<title>MetaDriver v20</title>
 <script>
 // v20 - correção de duplicação ao minimizar/restaurar + proteção de rolagem
 (function(){
@@ -2669,16 +2669,16 @@ body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff9d0; }
     try{
       const sess = readStoredSession();
       if(!sess.access_token && !sess.refresh_token){
-        location.replace("login.html");
+        window.__mdAuthOptionalMode = true;
         return;
       }
       const token = await refreshAccessTokenIfNeeded(false);
       if(!token){
-        location.replace("login.html");
+        window.__mdAuthOptionalMode = true;
         return;
       }
     }catch(e){
-      location.replace("login.html");
+      window.__mdAuthOptionalMode = true;
     }
   })();
 
@@ -3184,6 +3184,9 @@ const CLOUD_PENDING_KEY = STORAGE_KEY + "__cloud_pending_v1";
 const CLOUD_LAST_OK_KEY = STORAGE_KEY + "__cloud_last_ok_v1";
 const CLOUD_BACKUP_KEY = STORAGE_KEY + "__cloud_backup_ring_v2";
 const LOCAL_BACKUP_KEY = STORAGE_KEY + "__local_backup_ring_v2";
+const DURABLE_STATE_KEY = STORAGE_KEY + "__durable_snapshot_v1";
+const JOURNAL_KEY = STORAGE_KEY + "__journal_v1";
+const JOURNAL_IDB_KEY = STORAGE_KEY + "__journal_idb_v1";
 const META_SCHEMA_VERSION = 2;
 let __cloudSaveTimer = null;
 let __cloudBootStarted = false;
@@ -3244,26 +3247,123 @@ async function idbGet(key){
   }catch(e){ return null; }
 }
 
+function mdSafeJsonParse(raw){
+  try{ return raw ? JSON.parse(raw) : null; }catch(e){ return null; }
+}
+
+function mdSnapshotFingerprint(obj){
+  try{ return typeof mdCanonicalStringify === "function" ? mdCanonicalStringify(obj) : JSON.stringify(obj); }
+  catch(e){ try{ return JSON.stringify(obj); }catch(_){ return String(obj); } }
+}
+
+function mdSnapshotOrderValue(obj){
+  try{
+    if(!obj || typeof obj !== "object") return -1;
+    const seq = Number(obj.__local_commit_seq || 0);
+    if(seq > 0) return seq * 1000000000000;
+    const rev = Number(obj.__rev || 0);
+    const ts = new Date(obj.__updated_at || obj.__last_local_write_at || obj.__cloud_updated_at || 0).getTime() || 0;
+    return (rev * 1000000000000) + ts;
+  }catch(e){ return -1; }
+}
+
+function mdReadJournal(){
+  try{
+    const arr = mdSafeJsonParse(localStorage.getItem(JOURNAL_KEY));
+    return Array.isArray(arr) ? arr : [];
+  }catch(e){ return []; }
+}
+
+function mdWriteJournal(entries){
+  try{
+    const arr = Array.isArray(entries) ? entries.slice(-300) : [];
+    localStorage.setItem(JOURNAL_KEY, JSON.stringify(arr));
+    idbSet(JOURNAL_IDB_KEY, JSON.stringify(arr));
+  }catch(e){}
+}
+
+function mdAppendJournal(snapshot, reason){
+  try{
+    if(!snapshot || typeof snapshot !== "object") return;
+    const journal = mdReadJournal();
+    journal.push({
+      seq: Number(snapshot.__local_commit_seq || 0),
+      rev: Number(snapshot.__rev || 0),
+      ts: snapshot.__last_local_write_at || snapshot.__updated_at || mdNowIso(),
+      reason: reason || "save",
+      fp: mdSnapshotFingerprint(snapshot),
+      snapshot: JSON.parse(JSON.stringify(snapshot))
+    });
+    mdWriteJournal(journal);
+  }catch(e){}
+}
+
+function mdReadDurableLocalCandidates(){
+  const out = [];
+  try{
+    const direct = mdSafeJsonParse(localStorage.getItem(STORAGE_KEY));
+    if(direct) out.push({ snapshot: direct, source: "storage" });
+  }catch(e){}
+  try{
+    const durable = mdSafeJsonParse(localStorage.getItem(DURABLE_STATE_KEY));
+    if(durable) out.push({ snapshot: durable, source: "durable" });
+  }catch(e){}
+  try{
+    const ring = mdReadBackupRing(LOCAL_BACKUP_KEY);
+    ring.forEach(function(item){ if(item && item.snapshot) out.push({ snapshot: item.snapshot, source: "backup" }); });
+  }catch(e){}
+  try{
+    const journal = mdReadJournal();
+    journal.forEach(function(item){ if(item && item.snapshot) out.push({ snapshot: item.snapshot, source: "journal" }); });
+  }catch(e){}
+  return out;
+}
+
+function mdChooseBestLocalSnapshotSync(){
+  try{
+    const candidates = mdReadDurableLocalCandidates();
+    if(!candidates.length) return null;
+    candidates.sort(function(a,b){
+      const ao = mdSnapshotOrderValue(a.snapshot), bo = mdSnapshotOrderValue(b.snapshot);
+      if(bo !== ao) return bo - ao;
+      return mdUsefulScore(b.snapshot) - mdUsefulScore(a.snapshot);
+    });
+    return candidates[0].snapshot || null;
+  }catch(e){ return null; }
+}
+
+async function mdRecoverDurableStateFromIDB(){
+  try{
+    const direct = await idbGet(IDB_KEY);
+    const durable = await idbGet(DURABLE_STATE_KEY);
+    const journal = await idbGet(JOURNAL_IDB_KEY);
+    const candidates = [];
+    const d1 = mdSafeJsonParse(direct); if(d1) candidates.push({snapshot:d1, source:"idb-main"});
+    const d2 = mdSafeJsonParse(durable); if(d2) candidates.push({snapshot:d2, source:"idb-durable"});
+    const ja = mdSafeJsonParse(journal); if(Array.isArray(ja)) ja.forEach(function(item){ if(item && item.snapshot) candidates.push({snapshot:item.snapshot, source:"idb-journal"}); });
+    candidates.sort(function(a,b){
+      const ao = mdSnapshotOrderValue(a.snapshot), bo = mdSnapshotOrderValue(b.snapshot);
+      if(bo !== ao) return bo - ao;
+      return mdUsefulScore(b.snapshot) - mdUsefulScore(a.snapshot);
+    });
+    const best = candidates.length ? candidates[0].snapshot : null;
+    if(best){
+      try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(best)); }catch(e){}
+      try{ localStorage.setItem(DURABLE_STATE_KEY, JSON.stringify(best)); }catch(e){}
+    }
+    return best;
+  }catch(e){ return null; }
+}
 
 
 function loadDados(){
   try{
-    const direct = localStorage.getItem(STORAGE_KEY);
-    if(direct) return JSON.parse(direct);
-
-    try{
-      const backupRaw = localStorage.getItem(LOCAL_BACKUP_KEY);
-      const backupRing = backupRaw ? JSON.parse(backupRaw) : [];
-      if(Array.isArray(backupRing) && backupRing.length){
-        const firstValid = backupRing.find(function(item){ return item && item.snapshot && typeof item.snapshot === "object"; });
-        if(firstValid && firstValid.snapshot){
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(firstValid.snapshot));
-          return firstValid.snapshot;
-        }
-      }
-    }catch(e){}
-
-    // tenta chaves antigas (para não perder dados ao atualizar o arquivo)
+    const bestLocal = mdChooseBestLocalSnapshotSync();
+    if(bestLocal){
+      try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(bestLocal)); }catch(e){}
+      try{ localStorage.setItem(DURABLE_STATE_KEY, JSON.stringify(bestLocal)); }catch(e){}
+      return bestLocal;
+    }
     const legacyKeys = [
       "dadosControleProV641","dadosControleProV63","dadosControleProV631","dadosControleProV632",
       "dadosControleProV633","dadosControleProV64","dadosControleProV640","dadosControleProV641",
@@ -3274,8 +3374,8 @@ function loadDados(){
       if(v){
         try{
           const parsed = JSON.parse(v);
-          // migra para a chave nova (uma vez)
           localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
+          localStorage.setItem(DURABLE_STATE_KEY, JSON.stringify(parsed));
           return parsed;
         }catch(e){}
       }
@@ -3382,6 +3482,10 @@ function mdEnsureDataMeta(obj){
   if(!obj.__device_id) obj.__device_id = mdEnsureDeviceId();
   if(!obj.__updated_at) obj.__updated_at = mdNowIso();
   if(!obj.__cloud_updated_at) obj.__cloud_updated_at = obj.__updated_at;
+  if(typeof obj.__local_commit_seq !== "number" || !isFinite(obj.__local_commit_seq)) obj.__local_commit_seq = 0;
+  if(typeof obj.__last_synced_commit_seq !== "number" || !isFinite(obj.__last_synced_commit_seq)) obj.__last_synced_commit_seq = 0;
+  if(typeof obj.__dirty_local !== "boolean") obj.__dirty_local = false;
+  if(!obj.__last_local_write_at) obj.__last_local_write_at = obj.__updated_at;
   return obj;
 }
 
@@ -3464,35 +3568,40 @@ function mdPickBestSnapshot(candidates){
 
 mdEnsureDataMeta(dados);
 // Migração desativada (substituída por loadDados com legacyKeys)
-// v9 - salvar com verificação de integridade: confirma que o dado foi realmente gravado
+// v20.11 - salvar local-first durável com journal append-only
 function salvar(){
   try{
     mdEnsureDataMeta(dados);
     dados.__rev = Number(dados.__rev || 0) + 1;
-    dados.__updated_at = mdNowIso();
+    dados.__local_commit_seq = Number(dados.__local_commit_seq || 0) + 1;
+    dados.__dirty_local = true;
+    dados.__last_local_write_at = mdNowIso();
+    dados.__updated_at = dados.__last_local_write_at;
     const payload = JSON.stringify(dados);
-    // Verifica que o payload não é menor que o anterior (proteção contra corrupção)
     const anterior = localStorage.getItem(STORAGE_KEY);
-    // fix v20: só bloqueia se payload for mais de 40% menor (remoção legítima de registros é normal)
     if(anterior && anterior.length > 0 && payload.length < anterior.length * 0.6){
       console.warn("MetaDriver: payload muito menor que anterior, salvando backup e verificando");
       mdPushBackup(LOCAL_BACKUP_KEY, dados, "small-payload-warning");
-      // não bloqueia — apenas loga. Remoção de registros é operação legítima.
     }
     localStorage.setItem(STORAGE_KEY, payload);
+    localStorage.setItem(DURABLE_STATE_KEY, payload);
     const verificacao = localStorage.getItem(STORAGE_KEY);
     if(verificacao !== payload){
       throw new Error("Verificação de escrita falhou");
     }
     idbSet(IDB_KEY, payload);
+    idbSet(DURABLE_STATE_KEY, payload);
     mdPushBackup(LOCAL_BACKUP_KEY, dados, "save");
+    mdAppendJournal(dados, "save");
   }catch(e){
     try{
       const payload = JSON.stringify(dados);
       idbSet(IDB_KEY, payload);
+      idbSet(DURABLE_STATE_KEY, payload);
       mdPushBackup(LOCAL_BACKUP_KEY, dados, "fallback-idb");
+      mdAppendJournal(dados, "fallback-idb");
       toast("⚠️ Falha ao salvar localmente. Abra no Chrome normal (não anônimo).");
-    }catch(_){}
+    }catch(_){ }
   }
 }
 window.__salvarLocalOriginal = salvar;
@@ -3701,11 +3810,35 @@ function cloudMergeArrays(local, remote){
   return mdDedupArrayExact(base);
 }
 
+function mdHasUnsyncedLocalChanges(){
+  try{
+    return !!(dados && (dados.__dirty_local || Number(dados.__local_commit_seq || 0) > Number(dados.__last_synced_commit_seq || 0)));
+  }catch(e){ return false; }
+}
+
+function mdRemoteWouldRollback(remoteData){
+  try{
+    if(!remoteData || typeof remoteData !== "object") return false;
+    const localSeq = Number(dados && dados.__local_commit_seq || 0);
+    const remoteSeq = Number(remoteData.__local_commit_seq || 0);
+    const localTs = new Date((dados && (dados.__last_local_write_at || dados.__updated_at || dados.__cloud_updated_at)) || 0).getTime() || 0;
+    const remoteTs = new Date(remoteData.__last_local_write_at || remoteData.__updated_at || remoteData.__cloud_updated_at || 0).getTime() || 0;
+    if(mdHasUnsyncedLocalChanges() && localSeq >= remoteSeq) return true;
+    if(localSeq > remoteSeq) return true;
+    if(localSeq === remoteSeq && localTs > remoteTs) return true;
+    return false;
+  }catch(e){ return false; }
+}
+
 function cloudApplyRemoteData(remoteData){
   try{
     if(!remoteData || typeof remoteData !== "object") return;
     mdEnsureDataMeta(dados);
     mdEnsureDataMeta(remoteData);
+    if(mdRemoteWouldRollback(remoteData)){
+      console.warn("MetaDriver: remoto ignorado para evitar rollback local");
+      return;
+    }
     const arrayFields = ["ganhos","gastos","abastecimentos","naoTrabalhados",
                          "ganhoHoraSessoes","ganhoHoraHistorico"];
     const base = mdPickBestSnapshot([
@@ -3818,6 +3951,10 @@ async function cloudPushNow(snapshotOverride){
 
     if(localPayload === dados){
       dados = best;
+      mdEnsureDataMeta(dados);
+      dados.__last_synced_commit_seq = Number(dados.__local_commit_seq || 0);
+      dados.__dirty_local = false;
+      dados.__cloud_updated_at = updatedAt;
       if(window.__salvarLocalOriginal) window.__salvarLocalOriginal();
     }
     mdWriteBackupRing(CLOUD_BACKUP_KEY, backups);
@@ -3852,10 +3989,23 @@ async function cloudBoot(force){
   if(__cloudBootDoneOnce && force !== true) return;
   __cloudBootStarted = true;
   try{
+    const recovered = await mdRecoverDurableStateFromIDB().catch(function(){ return null; });
+    if(recovered && mdSnapshotOrderValue(recovered) > mdSnapshotOrderValue(dados)){
+      dados = JSON.parse(JSON.stringify(recovered));
+      mdEnsureDataMeta(dados);
+      try{ atualizar(); }catch(e){}
+    }
+
     const token = await cloudGetToken();
-    if(!token) return;
+    if(!token){
+      __cloudBootDoneOnce = true;
+      return;
+    }
     const user = await cloudGetUser(token);
-    if(!user || !user.id) return;
+    if(!user || !user.id){
+      __cloudBootDoneOnce = true;
+      return;
+    }
 
     const pending = cloudReadPendingSnapshot();
     const remoteRow = await cloudFetchRow(token, user.id).catch(function(){ return null; });
@@ -3863,37 +4013,33 @@ async function cloudBoot(force){
     mdSyncBackupsFromCloud(remoteWrapped.backups || []);
 
     const remoteSnapshot = remoteWrapped.snapshot;
-    const best = mdPickBestSnapshot([
+    const localBest = mdPickBestSnapshot([
       { snapshot: pending && pending.payload ? pending.payload : null },
       { snapshot: dados },
-      { snapshot: remoteSnapshot }
-    ]);
+      { snapshot: recovered }
+    ]) || dados;
 
-    // fix v20: usa mdPickBestSnapshot para decidir entre local e remoto
-    // não aplica remoto cegamente — compara revisão, timestamp e score
-    if(best && cloudHasUsefulData(best)){
-      const localRev = Number(dados.__rev || 0);
-      const bestRev = Number(best.__rev || 0);
-      const bestIsRemote = best === remoteSnapshot;
-      if(bestIsRemote && remoteSnapshot && cloudHasUsefulData(remoteSnapshot)){
-        // remoto ganhou na comparação — aplica merge
-        cloudApplyRemoteData(remoteSnapshot);
-      } else if(remoteSnapshot && cloudHasUsefulData(remoteSnapshot) && bestRev <= Number(remoteSnapshot.__rev || 0)){
-        // remoto tem revisão >= local — merge seguro
+    if(remoteSnapshot && cloudHasUsefulData(remoteSnapshot) && !mdRemoteWouldRollback(remoteSnapshot)){
+      const localOrder = mdSnapshotOrderValue(localBest || {});
+      const remoteOrder = mdSnapshotOrderValue(remoteSnapshot || {});
+      if(remoteOrder > localOrder){
         cloudApplyRemoteData(remoteSnapshot);
       } else {
-        // local é mais recente ou remoto está vazio — mantém local, sobe pra nuvem
-        dados = JSON.parse(JSON.stringify(best));
+        dados = JSON.parse(JSON.stringify(localBest));
         mdEnsureDataMeta(dados);
-        mdPushBackup(LOCAL_BACKUP_KEY, dados, "boot-best-local");
+        mdPushBackup(LOCAL_BACKUP_KEY, dados, "boot-keep-local");
         if(window.__salvarLocalOriginal) window.__salvarLocalOriginal();
-        try{ atualizar(); }catch(e){}
       }
+    } else if(localBest && cloudHasUsefulData(localBest)){
+      dados = JSON.parse(JSON.stringify(localBest));
+      mdEnsureDataMeta(dados);
+      mdPushBackup(LOCAL_BACKUP_KEY, dados, "boot-local-only");
+      if(window.__salvarLocalOriginal) window.__salvarLocalOriginal();
     }
 
     if(cloudHasUsefulData(dados)){
       cloudWritePendingSnapshot(JSON.parse(JSON.stringify(dados)));
-      cloudScheduleSave();
+      if(token) cloudScheduleSave();
     }
     __cloudBootDoneOnce = true;
   }catch(e){
@@ -5670,108 +5816,6 @@ function exportarRelatorioPDF(){
         setTimeout(()=>window.print(), 250);
       <\/script>
     <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v20 · app</div>
-
-<script>
-(function(){
-  var APP_VERSION = 'v20.9';
-  var banner = null;
-  var registrationRef = null;
-  var reloadTriggered = false;
-
-  function ready(fn){
-    if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fn, {once:true});
-    else fn();
-  }
-
-  function ensureBanner(){
-    if(banner) return banner;
-    banner = document.createElement('div');
-    banner.id = 'mdUpdateBanner';
-    banner.style.cssText = 'position:fixed;left:12px;right:12px;bottom:64px;z-index:2147483646;background:#0b1220;color:#fff;border:1px solid rgba(255,255,255,.14);border-radius:16px;padding:12px 14px;box-shadow:0 12px 28px rgba(0,0,0,.28);display:none;gap:10px;align-items:center;justify-content:space-between;font-family:Arial,Helvetica,sans-serif;';
-    var text = document.createElement('div');
-    text.id = 'mdUpdateBannerText';
-    text.textContent = 'Nova versão disponível.';
-    text.style.cssText = 'font-size:13px;line-height:1.35;flex:1;';
-    var btn = document.createElement('button');
-    btn.type = 'button';
-    btn.textContent = 'Atualizar agora';
-    btn.style.cssText = 'border:none;border-radius:12px;padding:10px 12px;background:#22c55e;color:#08111f;font:inherit;font-weight:800;white-space:nowrap;';
-    btn.addEventListener('click', applyUpdate, true);
-    banner.appendChild(text);
-    banner.appendChild(btn);
-    ready(function(){ document.body.appendChild(banner); });
-    return banner;
-  }
-
-  function showBanner(message){
-    var el = ensureBanner();
-    var txt = document.getElementById('mdUpdateBannerText');
-    if(txt && message) txt.textContent = message;
-    el.style.display = 'flex';
-  }
-
-  function hideBanner(){
-    if(banner) banner.style.display = 'none';
-  }
-
-  async function persistStateBeforeUpdate(){
-    try{ if(document.activeElement && typeof document.activeElement.blur === 'function') document.activeElement.blur(); }catch(e){}
-    try{ if(typeof salvar === 'function') salvar(); }catch(e){}
-    try{ if(typeof salvarHoras === 'function') salvarHoras(); }catch(e){}
-    try{ if(typeof salvarResumoDiaGanhoHora === 'function'){ var dia = (typeof obterDiaAtualResumoGanhoHora === 'function') ? obterDiaAtualResumoGanhoHora() : null; if(dia) salvarResumoDiaGanhoHora(dia); } }catch(e){}
-    try{ if(typeof cloudPushNow === 'function') await cloudPushNow(); }catch(e){}
-  }
-
-  async function applyUpdate(){
-    if(!registrationRef) return;
-    hideBanner();
-    await persistStateBeforeUpdate();
-    var worker = registrationRef.waiting;
-    if(worker){
-      worker.postMessage({ type:'SKIP_WAITING' });
-      setTimeout(function(){ if(!reloadTriggered) window.location.reload(); }, 2500);
-      return;
-    }
-    try{
-      await registrationRef.update();
-    }catch(e){}
-    setTimeout(function(){ if(!reloadTriggered) window.location.reload(); }, 1200);
-  }
-
-  if(!('serviceWorker' in navigator)) return;
-
-  navigator.serviceWorker.addEventListener('controllerchange', function(){
-    if(reloadTriggered) return;
-    reloadTriggered = true;
-    window.location.reload();
-  });
-
-  window.addEventListener('load', async function(){
-    try{
-      var reg = await navigator.serviceWorker.register('./sw.js?v=' + encodeURIComponent(APP_VERSION), { scope:'./' });
-      registrationRef = reg;
-      try{ await reg.update(); }catch(e){}
-      if(reg.waiting && navigator.serviceWorker.controller){
-        showBanner('Nova versão disponível. Toque para atualizar sem reinstalar.');
-      }
-      reg.addEventListener('updatefound', function(){
-        var installing = reg.installing;
-        if(!installing) return;
-        installing.addEventListener('statechange', function(){
-          if(installing.state === 'installed' && navigator.serviceWorker.controller){
-            showBanner('Atualização pronta. Toque para aplicar a nova versão.');
-          }
-        });
-      });
-    }catch(e){
-      console.warn('SW register falhou', e);
-    }
-  });
-
-  window.MetaDriverUpdate = { applyUpdate: applyUpdate, version: APP_VERSION };
-})();
-</script>
-
 </body>
     </html>  `);
   w.document.close();
@@ -7949,108 +7993,6 @@ window.addEventListener("load", function(){
     <button type="button" class="secondary" onclick="fecharSaldoAtualButtonMenu()">Fechar</button>
   </div>
 </div>
-
-
-<script>
-(function(){
-  var APP_VERSION = 'v20.9';
-  var banner = null;
-  var registrationRef = null;
-  var reloadTriggered = false;
-
-  function ready(fn){
-    if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fn, {once:true});
-    else fn();
-  }
-
-  function ensureBanner(){
-    if(banner) return banner;
-    banner = document.createElement('div');
-    banner.id = 'mdUpdateBanner';
-    banner.style.cssText = 'position:fixed;left:12px;right:12px;bottom:64px;z-index:2147483646;background:#0b1220;color:#fff;border:1px solid rgba(255,255,255,.14);border-radius:16px;padding:12px 14px;box-shadow:0 12px 28px rgba(0,0,0,.28);display:none;gap:10px;align-items:center;justify-content:space-between;font-family:Arial,Helvetica,sans-serif;';
-    var text = document.createElement('div');
-    text.id = 'mdUpdateBannerText';
-    text.textContent = 'Nova versão disponível.';
-    text.style.cssText = 'font-size:13px;line-height:1.35;flex:1;';
-    var btn = document.createElement('button');
-    btn.type = 'button';
-    btn.textContent = 'Atualizar agora';
-    btn.style.cssText = 'border:none;border-radius:12px;padding:10px 12px;background:#22c55e;color:#08111f;font:inherit;font-weight:800;white-space:nowrap;';
-    btn.addEventListener('click', applyUpdate, true);
-    banner.appendChild(text);
-    banner.appendChild(btn);
-    ready(function(){ document.body.appendChild(banner); });
-    return banner;
-  }
-
-  function showBanner(message){
-    var el = ensureBanner();
-    var txt = document.getElementById('mdUpdateBannerText');
-    if(txt && message) txt.textContent = message;
-    el.style.display = 'flex';
-  }
-
-  function hideBanner(){
-    if(banner) banner.style.display = 'none';
-  }
-
-  async function persistStateBeforeUpdate(){
-    try{ if(document.activeElement && typeof document.activeElement.blur === 'function') document.activeElement.blur(); }catch(e){}
-    try{ if(typeof salvar === 'function') salvar(); }catch(e){}
-    try{ if(typeof salvarHoras === 'function') salvarHoras(); }catch(e){}
-    try{ if(typeof salvarResumoDiaGanhoHora === 'function'){ var dia = (typeof obterDiaAtualResumoGanhoHora === 'function') ? obterDiaAtualResumoGanhoHora() : null; if(dia) salvarResumoDiaGanhoHora(dia); } }catch(e){}
-    try{ if(typeof cloudPushNow === 'function') await cloudPushNow(); }catch(e){}
-  }
-
-  async function applyUpdate(){
-    if(!registrationRef) return;
-    hideBanner();
-    await persistStateBeforeUpdate();
-    var worker = registrationRef.waiting;
-    if(worker){
-      worker.postMessage({ type:'SKIP_WAITING' });
-      setTimeout(function(){ if(!reloadTriggered) window.location.reload(); }, 2500);
-      return;
-    }
-    try{
-      await registrationRef.update();
-    }catch(e){}
-    setTimeout(function(){ if(!reloadTriggered) window.location.reload(); }, 1200);
-  }
-
-  if(!('serviceWorker' in navigator)) return;
-
-  navigator.serviceWorker.addEventListener('controllerchange', function(){
-    if(reloadTriggered) return;
-    reloadTriggered = true;
-    window.location.reload();
-  });
-
-  window.addEventListener('load', async function(){
-    try{
-      var reg = await navigator.serviceWorker.register('./sw.js?v=' + encodeURIComponent(APP_VERSION), { scope:'./' });
-      registrationRef = reg;
-      try{ await reg.update(); }catch(e){}
-      if(reg.waiting && navigator.serviceWorker.controller){
-        showBanner('Nova versão disponível. Toque para atualizar sem reinstalar.');
-      }
-      reg.addEventListener('updatefound', function(){
-        var installing = reg.installing;
-        if(!installing) return;
-        installing.addEventListener('statechange', function(){
-          if(installing.state === 'installed' && navigator.serviceWorker.controller){
-            showBanner('Atualização pronta. Toque para aplicar a nova versão.');
-          }
-        });
-      });
-    }catch(e){
-      console.warn('SW register falhou', e);
-    }
-  });
-
-  window.MetaDriverUpdate = { applyUpdate: applyUpdate, version: APP_VERSION };
-})();
-</script>
 
 </body>
 </html>
