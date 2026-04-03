@@ -18,7 +18,7 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver v21</title>
+<title>MetaDriver v24</title>
 <script>
 // v21 - correção de duplicação ao minimizar/restaurar + proteção de rolagem
 (function(){
@@ -3182,8 +3182,15 @@ const FIRST_INSTALL_COLLAPSED_KEY = "metadriver_first_install_collapsed_v1";
 const FAB_PREF_KEY = "metadriver_quick_balance_fab_enabled";
 const CLOUD_PENDING_KEY = STORAGE_KEY + "__cloud_pending_v1";
 const CLOUD_LAST_OK_KEY = STORAGE_KEY + "__cloud_last_ok_v1";
+const CLOUD_BACKUP_KEY = STORAGE_KEY + "__cloud_backup_ring_v2";
+const LOCAL_BACKUP_KEY = STORAGE_KEY + "__local_backup_ring_v2";
+const DURABLE_STATE_KEY = STORAGE_KEY + "__durable_snapshot_v1";
+const JOURNAL_KEY = STORAGE_KEY + "__journal_v1";
+const JOURNAL_IDB_KEY = STORAGE_KEY + "__journal_idb_v1";
+const META_SCHEMA_VERSION = 2;
 let __cloudSaveTimer = null;
 let __cloudBootStarted = false;
+let __cloudBootDoneOnce = false;
 let __cloudDirty = false; // v9 - flag: só envia pra nuvem se houve mudança real
 
 // ===== Forçar aba inicial: sempre MetaDriver =====
@@ -3240,14 +3247,123 @@ async function idbGet(key){
   }catch(e){ return null; }
 }
 
+function mdSafeJsonParse(raw){
+  try{ return raw ? JSON.parse(raw) : null; }catch(e){ return null; }
+}
+
+function mdSnapshotFingerprint(obj){
+  try{ return typeof mdCanonicalStringify === "function" ? mdCanonicalStringify(obj) : JSON.stringify(obj); }
+  catch(e){ try{ return JSON.stringify(obj); }catch(_){ return String(obj); } }
+}
+
+function mdSnapshotOrderValue(obj){
+  try{
+    if(!obj || typeof obj !== "object") return -1;
+    const seq = Number(obj.__local_commit_seq || 0);
+    if(seq > 0) return seq * 1000000000000;
+    const rev = Number(obj.__rev || 0);
+    const ts = new Date(obj.__updated_at || obj.__last_local_write_at || obj.__cloud_updated_at || 0).getTime() || 0;
+    return (rev * 1000000000000) + ts;
+  }catch(e){ return -1; }
+}
+
+function mdReadJournal(){
+  try{
+    const arr = mdSafeJsonParse(localStorage.getItem(JOURNAL_KEY));
+    return Array.isArray(arr) ? arr : [];
+  }catch(e){ return []; }
+}
+
+function mdWriteJournal(entries){
+  try{
+    const arr = Array.isArray(entries) ? entries.slice(-300) : [];
+    localStorage.setItem(JOURNAL_KEY, JSON.stringify(arr));
+    idbSet(JOURNAL_IDB_KEY, JSON.stringify(arr));
+  }catch(e){}
+}
+
+function mdAppendJournal(snapshot, reason){
+  try{
+    if(!snapshot || typeof snapshot !== "object") return;
+    const journal = mdReadJournal();
+    journal.push({
+      seq: Number(snapshot.__local_commit_seq || 0),
+      rev: Number(snapshot.__rev || 0),
+      ts: snapshot.__last_local_write_at || snapshot.__updated_at || mdNowIso(),
+      reason: reason || "save",
+      fp: mdSnapshotFingerprint(snapshot),
+      snapshot: JSON.parse(JSON.stringify(snapshot))
+    });
+    mdWriteJournal(journal);
+  }catch(e){}
+}
+
+function mdReadDurableLocalCandidates(){
+  const out = [];
+  try{
+    const direct = mdSafeJsonParse(localStorage.getItem(STORAGE_KEY));
+    if(direct) out.push({ snapshot: direct, source: "storage" });
+  }catch(e){}
+  try{
+    const durable = mdSafeJsonParse(localStorage.getItem(DURABLE_STATE_KEY));
+    if(durable) out.push({ snapshot: durable, source: "durable" });
+  }catch(e){}
+  try{
+    const ring = mdReadBackupRing(LOCAL_BACKUP_KEY);
+    ring.forEach(function(item){ if(item && item.snapshot) out.push({ snapshot: item.snapshot, source: "backup" }); });
+  }catch(e){}
+  try{
+    const journal = mdReadJournal();
+    journal.forEach(function(item){ if(item && item.snapshot) out.push({ snapshot: item.snapshot, source: "journal" }); });
+  }catch(e){}
+  return out;
+}
+
+function mdChooseBestLocalSnapshotSync(){
+  try{
+    const candidates = mdReadDurableLocalCandidates();
+    if(!candidates.length) return null;
+    candidates.sort(function(a,b){
+      const ao = mdSnapshotOrderValue(a.snapshot), bo = mdSnapshotOrderValue(b.snapshot);
+      if(bo !== ao) return bo - ao;
+      return mdUsefulScore(b.snapshot) - mdUsefulScore(a.snapshot);
+    });
+    return candidates[0].snapshot || null;
+  }catch(e){ return null; }
+}
+
+async function mdRecoverDurableStateFromIDB(){
+  try{
+    const direct = await idbGet(IDB_KEY);
+    const durable = await idbGet(DURABLE_STATE_KEY);
+    const journal = await idbGet(JOURNAL_IDB_KEY);
+    const candidates = [];
+    const d1 = mdSafeJsonParse(direct); if(d1) candidates.push({snapshot:d1, source:"idb-main"});
+    const d2 = mdSafeJsonParse(durable); if(d2) candidates.push({snapshot:d2, source:"idb-durable"});
+    const ja = mdSafeJsonParse(journal); if(Array.isArray(ja)) ja.forEach(function(item){ if(item && item.snapshot) candidates.push({snapshot:item.snapshot, source:"idb-journal"}); });
+    candidates.sort(function(a,b){
+      const ao = mdSnapshotOrderValue(a.snapshot), bo = mdSnapshotOrderValue(b.snapshot);
+      if(bo !== ao) return bo - ao;
+      return mdUsefulScore(b.snapshot) - mdUsefulScore(a.snapshot);
+    });
+    const best = candidates.length ? candidates[0].snapshot : null;
+    if(best){
+      try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(best)); }catch(e){}
+      try{ localStorage.setItem(DURABLE_STATE_KEY, JSON.stringify(best)); }catch(e){}
+    }
+    return best;
+  }catch(e){ return null; }
+}
 
 
 function loadDados(){
   try{
-    const direct = localStorage.getItem(STORAGE_KEY);
-    if(direct) return JSON.parse(direct);
-
-    // tenta chaves antigas (para não perder dados ao atualizar o arquivo)
+    const bestLocal = mdChooseBestLocalSnapshotSync();
+    if(bestLocal){
+      try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(bestLocal)); }catch(e){}
+      try{ localStorage.setItem(DURABLE_STATE_KEY, JSON.stringify(bestLocal)); }catch(e){}
+      return bestLocal;
+    }
     const legacyKeys = [
       "dadosControleProV641","dadosControleProV63","dadosControleProV631","dadosControleProV632",
       "dadosControleProV633","dadosControleProV64","dadosControleProV640","dadosControleProV641",
@@ -3258,8 +3374,8 @@ function loadDados(){
       if(v){
         try{
           const parsed = JSON.parse(v);
-          // migra para a chave nova (uma vez)
           localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
+          localStorage.setItem(DURABLE_STATE_KEY, JSON.stringify(parsed));
           return parsed;
         }catch(e){}
       }
@@ -3295,7 +3411,9 @@ let dados = loadDados() || {
     kmRodados: 0,
     consumoMedio: 0,
     precoLitro: 0
-  }
+  },
+  metaSalva: false,
+  ganhoHoraSessaoAtiva: false
 };
 
 if(typeof dados.saldoAtualButtonAtivo !== "boolean"){ dados.saldoAtualButtonAtivo = getQuickBalanceFabPref ? getQuickBalanceFabPref() : true; }
@@ -3308,6 +3426,8 @@ if(typeof dados.ganhoHoraHistoricoAberto !== "boolean") dados.ganhoHoraHistorico
 if(!dados.ganhoHoraHistoricoExpandidos || typeof dados.ganhoHoraHistoricoExpandidos !== "object") dados.ganhoHoraHistoricoExpandidos = {};
 if(!dados.ganhoHoraDiaRef) dados.ganhoHoraDiaRef = dataUberISO();
 if(typeof dados.ganhoHoraSessaoDiaRef !== "string") dados.ganhoHoraSessaoDiaRef = "";
+dados.metaSalva = !!(Number(dados.metaTotal || 0) > 0 || String(dados.dataLimite || '').trim());
+if(typeof dados.ganhoHoraSessaoAtiva !== "boolean") dados.ganhoHoraSessaoAtiva = false;
 try{
   const sessoesDiaAtualBoot = Array.isArray(dados.ganhoHoraSessoes) ? dados.ganhoHoraSessoes.filter(function(s){
     const diaRef = String((s && s.diaRef) || '').trim();
@@ -3317,39 +3437,179 @@ try{
     dados.saldoAnteriorFora = 0;
   }
 }catch(e){}
+try{ mdSanitizeDuplicatedData(); }catch(e){}
 try{ reprocessarSessoesGanhoHora(); }catch(e){}
+
+function mdNowIso(){
+  return new Date().toISOString();
+}
+
+function mdEnsureDeviceId(){
+  try{
+    let id = localStorage.getItem("md_device_id_v1") || "";
+    if(!id){
+      id = "md-" + Math.random().toString(36).slice(2) + Date.now().toString(36);
+      localStorage.setItem("md_device_id_v1", id);
+    }
+    return id;
+  }catch(e){
+    return "md-device";
+  }
+}
+
+function mdUsefulScore(obj){
+  try{
+    if(!obj || typeof obj !== "object") return 0;
+    let score = 0;
+    ["ganhos","gastos","abastecimentos","naoTrabalhados","ganhoHoraSessoes","ganhoHoraHistorico"].forEach(function(k){
+      if(Array.isArray(obj[k])) score += obj[k].length * 10;
+    });
+    ["metaTotal","metaDiariaManual","ganhoDiarioAtual","saldoAtualFora","saldoAnteriorFora","horasDecorridasFora","ganhoHoraAtualFora"].forEach(function(k){
+      if(Number(obj[k] || 0) !== 0) score += 3;
+    });
+    ["dataLimite","horarioInicioFora","ganhoHoraDiaRef","ganhoHoraSessaoDiaRef","tema"].forEach(function(k){
+      if(String(obj[k] || "").trim()) score += 2;
+    });
+    if(obj.combustivelReal && typeof obj.combustivelReal === "object") score += 2;
+    return score + Number(obj.__rev || 0);
+  }catch(e){ return 0; }
+}
+
+function mdEnsureDataMeta(obj){
+  if(!obj || typeof obj !== "object") return obj;
+  if(typeof obj.__schema_version !== "number") obj.__schema_version = META_SCHEMA_VERSION;
+  if(typeof obj.__rev !== "number" || !isFinite(obj.__rev)) obj.__rev = 0;
+  if(!obj.__device_id) obj.__device_id = mdEnsureDeviceId();
+  if(!obj.__updated_at) obj.__updated_at = mdNowIso();
+  if(!obj.__cloud_updated_at) obj.__cloud_updated_at = obj.__updated_at;
+  if(typeof obj.__local_commit_seq !== "number" || !isFinite(obj.__local_commit_seq)) obj.__local_commit_seq = 0;
+  if(typeof obj.__last_synced_commit_seq !== "number" || !isFinite(obj.__last_synced_commit_seq)) obj.__last_synced_commit_seq = 0;
+  if(typeof obj.__dirty_local !== "boolean") obj.__dirty_local = false;
+  if(!obj.__last_local_write_at) obj.__last_local_write_at = obj.__updated_at;
+  return obj;
+}
+
+function mdCreateBackupEntry(snapshot, reason){
+  try{
+    return {
+      ts: (snapshot && snapshot.__updated_at) || mdNowIso(),
+      rev: Number(snapshot && snapshot.__rev || 0),
+      reason: reason || "save",
+      score: mdUsefulScore(snapshot),
+      snapshot: JSON.parse(JSON.stringify(snapshot || {}))
+    };
+  }catch(e){ return null; }
+}
+
+function mdReadBackupRing(key){
+  try{
+    const raw = localStorage.getItem(key);
+    const arr = raw ? JSON.parse(raw) : [];
+    return Array.isArray(arr) ? arr : [];
+  }catch(e){ return []; }
+}
+
+function mdWriteBackupRing(key, ring){
+  try{
+    localStorage.setItem(key, JSON.stringify(Array.isArray(ring) ? ring.slice(0, 12) : []));
+  }catch(e){}
+}
+
+function mdPushBackup(key, snapshot, reason){
+  try{
+    if(!snapshot || typeof snapshot !== "object") return;
+    const entry = mdCreateBackupEntry(snapshot, reason);
+    if(!entry) return;
+    let ring = mdReadBackupRing(key);
+    ring = ring.filter(function(item){ return !(item && item.rev === entry.rev && item.ts === entry.ts); });
+    ring.unshift(entry);
+    mdWriteBackupRing(key, ring);
+  }catch(e){}
+}
+
+function mdUnwrapCloudPayload(payload){
+  try{
+    if(!payload || typeof payload !== "object") return { snapshot:null, backups:[] };
+    if(payload.schema_version === META_SCHEMA_VERSION && payload.snapshot && typeof payload.snapshot === "object"){
+      return {
+        snapshot: payload.snapshot,
+        backups: Array.isArray(payload.backups) ? payload.backups : []
+      };
+    }
+    return { snapshot: payload, backups: [] };
+  }catch(e){
+    return { snapshot:null, backups:[] };
+  }
+}
+
+function mdBuildCloudEnvelope(snapshot, backups){
+  return {
+    schema_version: META_SCHEMA_VERSION,
+    device_id: mdEnsureDeviceId(),
+    snapshot: JSON.parse(JSON.stringify(snapshot || {})),
+    backups: (Array.isArray(backups) ? backups : []).slice(0, 8),
+    exported_at: mdNowIso()
+  };
+}
+
+function mdPickBestSnapshot(candidates){
+  const valid = (Array.isArray(candidates) ? candidates : []).filter(function(item){ return item && item.snapshot && typeof item.snapshot === "object"; });
+  if(!valid.length) return null;
+  valid.sort(function(a,b){
+    const ar = Number(a.snapshot.__rev || 0), br = Number(b.snapshot.__rev || 0);
+    if(br !== ar) return br - ar;
+    const at = new Date(a.snapshot.__updated_at || a.snapshot.__cloud_updated_at || 0).getTime() || 0;
+    const bt = new Date(b.snapshot.__updated_at || b.snapshot.__cloud_updated_at || 0).getTime() || 0;
+    if(bt !== at) return bt - at;
+    return mdUsefulScore(b.snapshot) - mdUsefulScore(a.snapshot);
+  });
+  return valid[0].snapshot;
+}
+
+mdEnsureDataMeta(dados);
 // Migração desativada (substituída por loadDados com legacyKeys)
-// v9 - salvar com verificação de integridade: confirma que o dado foi realmente gravado
+// v21.11 - salvar local-first durável com journal append-only
 function salvar(){
   try{
+    mdEnsureDataMeta(dados);
+    dados.__rev = Number(dados.__rev || 0) + 1;
+    dados.__local_commit_seq = Number(dados.__local_commit_seq || 0) + 1;
+    dados.__dirty_local = true;
+    dados.__last_local_write_at = mdNowIso();
+    dados.__updated_at = dados.__last_local_write_at;
     const payload = JSON.stringify(dados);
-    // Verifica que o payload não é menor que o anterior (proteção contra corrupção)
     const anterior = localStorage.getItem(STORAGE_KEY);
-    if(anterior && anterior.length > payload.length + 500){
-      // Payload atual é significativamente menor — possível corrupção, aborta
-      console.warn("MetaDriver: payload menor que anterior, salvamento abortado por segurança");
-      return;
+    if(anterior && anterior.length > 0 && payload.length < anterior.length * 0.6){
+      console.warn("MetaDriver: payload muito menor que anterior, salvando backup e verificando");
+      mdPushBackup(LOCAL_BACKUP_KEY, dados, "small-payload-warning");
     }
     localStorage.setItem(STORAGE_KEY, payload);
-    // Verifica se realmente foi gravado
+    localStorage.setItem(DURABLE_STATE_KEY, payload);
     const verificacao = localStorage.getItem(STORAGE_KEY);
     if(verificacao !== payload){
       throw new Error("Verificação de escrita falhou");
     }
     idbSet(IDB_KEY, payload);
+    idbSet(DURABLE_STATE_KEY, payload);
+    mdPushBackup(LOCAL_BACKUP_KEY, dados, "save");
+    mdAppendJournal(dados, "save");
   }catch(e){
     try{
       const payload = JSON.stringify(dados);
       idbSet(IDB_KEY, payload);
+      idbSet(DURABLE_STATE_KEY, payload);
+      mdPushBackup(LOCAL_BACKUP_KEY, dados, "fallback-idb");
+      mdAppendJournal(dados, "fallback-idb");
       toast("⚠️ Falha ao salvar localmente. Abra no Chrome normal (não anônimo).");
-    }catch(_){}
+    }catch(_){ }
   }
 }
 window.__salvarLocalOriginal = salvar;
 salvar = function(){
   try{
     if(typeof dados === "object" && dados){
-      dados.__cloud_updated_at = new Date().toISOString();
+      mdEnsureDataMeta(dados);
+      dados.__cloud_updated_at = mdNowIso();
     }
   }catch(e){}
   const r = window.__salvarLocalOriginal.apply(this, arguments);
@@ -3358,22 +3618,40 @@ salvar = function(){
       cloudWritePendingSnapshot(JSON.parse(JSON.stringify(dados)));
     }
   }catch(e){}
-  // v9 - marca que há mudança pendente para o intervalo de 60s
   __cloudDirty = true;
   try{ cloudScheduleSave(); }catch(e){}
   return r;
 }
 
 
+function cloudReadCachedUserId(){
+  try{ return localStorage.getItem("sb_user_id") || ""; }catch(e){ return ""; }
+}
+function cloudWriteCachedUserId(userId){
+  try{ if(userId) localStorage.setItem("sb_user_id", String(userId)); }catch(e){}
+}
+function cloudGetStoredTokenSync(){
+  try{ return localStorage.getItem("sb_token") || ""; }catch(e){ return ""; }
+}
 async function cloudGetToken(){
+  let fast = "";
+  try{ fast = localStorage.getItem("sb_token") || ""; }catch(e){ fast = ""; }
   try{
+    if(fast){
+      if(typeof window.mdEnsureActiveSession === "function"){
+        Promise.resolve().then(function(){ return window.mdEnsureActiveSession(false); }).then(function(renewed){
+          try{ if(renewed) localStorage.setItem("sb_token", renewed || ""); }catch(_){ }
+        }).catch(function(){});
+      }
+      return fast;
+    }
     if(typeof window.mdEnsureActiveSession === "function"){
       const renewed = await window.mdEnsureActiveSession(false);
       if(renewed) return renewed;
     }
-    return localStorage.getItem("sb_token") || "";
+    return cloudGetStoredTokenSync();
   }catch(e){
-    try{ return localStorage.getItem("sb_token") || ""; }catch(_){ return ""; }
+    return cloudGetStoredTokenSync();
   }
 }
 
@@ -3419,7 +3697,15 @@ async function cloudGetUser(token){
     }
   });
   if(!res.ok) throw new Error("Falha ao obter usuário");
-  return await res.json();
+  const user = await res.json();
+  try{ if(user && user.id) cloudWriteCachedUserId(user.id); }catch(e){}
+  return user;
+}
+async function cloudResolveUserId(token){
+  const cached = cloudReadCachedUserId();
+  if(cached) return cached;
+  const user = await cloudGetUser(token);
+  return (user && user.id) ? user.id : "";
 }
 
 function cloudHasUsefulData(obj){
@@ -3472,49 +3758,136 @@ async function cloudFetchRow(token, userId){
   return (Array.isArray(rows) && rows.length) ? rows[0] : null;
 }
 
+function mdSyncBackupsFromCloud(backups){
+  try{
+    if(!Array.isArray(backups) || !backups.length) return;
+    let ring = mdReadBackupRing(CLOUD_BACKUP_KEY).concat(mdReadBackupRing(LOCAL_BACKUP_KEY));
+    ring = ring.concat(backups.filter(function(item){ return item && item.snapshot; }));
+    const seen = new Set();
+    ring = ring.filter(function(item){
+      const sig = String((item && item.rev) || "") + "|" + String((item && item.ts) || "");
+      if(seen.has(sig)) return false;
+      seen.add(sig);
+      return true;
+    }).sort(function(a,b){
+      const ar = Number(a && a.rev || 0), br = Number(b && b.rev || 0);
+      if(br !== ar) return br - ar;
+      return (new Date((b && b.ts) || 0).getTime()||0) - (new Date((a && a.ts) || 0).getTime()||0);
+    }).slice(0, 12);
+    mdWriteBackupRing(CLOUD_BACKUP_KEY, ring);
+    mdWriteBackupRing(LOCAL_BACKUP_KEY, ring);
+  }catch(e){}
+}
+
+// v21 - stringify canônico para impedir duplicações por ordem de chaves diferente
+function mdCanonicalStringify(value){
+  try{
+    const seen = new WeakSet();
+    const norm = function(v){
+      if(v === null || typeof v !== "object") return v;
+      if(seen.has(v)) return null;
+      seen.add(v);
+      if(Array.isArray(v)) return v.map(norm);
+      const out = {};
+      Object.keys(v).sort().forEach(function(k){ out[k] = norm(v[k]); });
+      return out;
+    };
+    return JSON.stringify(norm(value));
+  }catch(e){
+    try{ return JSON.stringify(value); }catch(_){ return String(value); }
+  }
+}
+
+function mdDedupArrayExact(arr){
+  if(!Array.isArray(arr) || !arr.length) return Array.isArray(arr) ? arr : [];
+  const out = [];
+  const seen = new Set();
+  arr.forEach(function(item){
+    const sig = mdCanonicalStringify(item);
+    if(seen.has(sig)) return;
+    seen.add(sig);
+    out.push(item);
+  });
+  return out;
+}
+
+function mdSanitizeDuplicatedData(){
+  try{
+    if(!dados || typeof dados !== "object") return;
+    ["ganhos","gastos","abastecimentos","naoTrabalhados","ganhoHoraSessoes","ganhoHoraHistorico"].forEach(function(field){
+      if(Array.isArray(dados[field])) dados[field] = mdDedupArrayExact(dados[field]);
+    });
+  }catch(e){}
+}
+
 // v9 - fix crítico: merge inteligente — nunca sobrescreve array local com array menor
 function cloudMergeArrays(local, remote){
-  // Garante que nenhum dado lançado localmente é perdido ao restaurar da nuvem
-  if(!Array.isArray(remote)) return Array.isArray(local) ? local : [];
-  if(!Array.isArray(local) || local.length === 0) return remote;
-  if(remote.length === 0) return local;
-  // Usa o array com mais registros como base, sem descartar o outro
-  const base = remote.length >= local.length ? remote : local;
+  if(!Array.isArray(remote)) return mdDedupArrayExact(Array.isArray(local) ? local : []);
+  if(!Array.isArray(local) || local.length === 0) return mdDedupArrayExact(remote.slice());
+  if(remote.length === 0) return mdDedupArrayExact(local.slice());
+  const base = remote.length >= local.length ? remote.slice() : local.slice();
   const extra = remote.length >= local.length ? local : remote;
-  // Adiciona itens do menor array que não existam no base (por data+valor ou por chave única)
-  const baseStr = base.map(function(i){ return JSON.stringify(i); });
+  const seen = new Set(base.map(function(i){ return mdCanonicalStringify(i); }));
   extra.forEach(function(item){
-    if(!baseStr.includes(JSON.stringify(item))){
-      base.push(item);
-    }
+    const sig = mdCanonicalStringify(item);
+    if(seen.has(sig)) return;
+    seen.add(sig);
+    base.push(item);
   });
-  return base;
+  return mdDedupArrayExact(base);
+}
+
+function mdHasUnsyncedLocalChanges(){
+  try{
+    return !!(dados && (dados.__dirty_local || Number(dados.__local_commit_seq || 0) > Number(dados.__last_synced_commit_seq || 0)));
+  }catch(e){ return false; }
+}
+
+function mdRemoteWouldRollback(remoteData){
+  try{
+    if(!remoteData || typeof remoteData !== "object") return false;
+    const localSeq = Number(dados && dados.__local_commit_seq || 0);
+    const remoteSeq = Number(remoteData.__local_commit_seq || 0);
+    const localTs = new Date((dados && (dados.__last_local_write_at || dados.__updated_at || dados.__cloud_updated_at)) || 0).getTime() || 0;
+    const remoteTs = new Date(remoteData.__last_local_write_at || remoteData.__updated_at || remoteData.__cloud_updated_at || 0).getTime() || 0;
+    if(mdHasUnsyncedLocalChanges() && localSeq >= remoteSeq) return true;
+    if(localSeq > remoteSeq) return true;
+    if(localSeq === remoteSeq && localTs > remoteTs) return true;
+    return false;
+  }catch(e){ return false; }
 }
 
 function cloudApplyRemoteData(remoteData){
   try{
     if(!remoteData || typeof remoteData !== "object") return;
-    // Campos de array: sempre mescla, nunca substitui cegamente
+    mdEnsureDataMeta(dados);
+    mdEnsureDataMeta(remoteData);
+    if(mdRemoteWouldRollback(remoteData)){
+      console.warn("MetaDriver: remoto ignorado para evitar rollback local");
+      return;
+    }
     const arrayFields = ["ganhos","gastos","abastecimentos","naoTrabalhados",
                          "ganhoHoraSessoes","ganhoHoraHistorico"];
-    const merged = Object.assign({}, remoteData || {});
+    const base = mdPickBestSnapshot([
+      { snapshot: dados },
+      { snapshot: remoteData }
+    ]) || remoteData;
+    const merged = Object.assign({}, base || {});
     arrayFields.forEach(function(field){
       merged[field] = cloudMergeArrays(
         Array.isArray(dados[field]) ? dados[field] : [],
         Array.isArray(remoteData[field]) ? remoteData[field] : []
       );
     });
-    // Campos escalares: usa remoto só se local estiver vazio/zero
-    const scalarPreferLocal = ["metaTotal","dataLimite","metaDiariaManual",
-                               "saldoAtualFora","horarioInicioFora","ganhoHoraDiaRef",
-                               "combustivelPercentual","combustivelModo","tema"];
-    scalarPreferLocal.forEach(function(field){
+    const scalarPreferNewest = ["metaTotal","dataLimite","metaDiariaManual","saldoAtualFora","horarioInicioFora","ganhoHoraDiaRef","combustivelPercentual","combustivelModo","tema","ganhoDiarioAtual","ganhoHoraManual","saldoAnteriorFora","horasDecorridasFora","ganhoHoraAtualFora"];
+    scalarPreferNewest.forEach(function(field){
       const localVal = dados[field];
-      const hasLocal = localVal !== null && localVal !== undefined && localVal !== "" && localVal !== 0;
-      if(hasLocal) merged[field] = localVal;
+      const remoteVal = remoteData[field];
+      const localHas = localVal !== null && localVal !== undefined && localVal !== "";
+      const remoteHas = remoteVal !== null && remoteVal !== undefined && remoteVal !== "";
+      if(localHas && !remoteHas) merged[field] = localVal;
+      else if(remoteHas && !localHas) merged[field] = remoteVal;
     });
-    // v9 - fix logout: sessão em andamento NUNCA é apagada por sync da nuvem
-    // Se havia sessão local ativa, preserva ela integralmente
     const sessaoLocalAtiva = String(dados.horarioInicioFora || "").trim();
     if(sessaoLocalAtiva){
       merged.horarioInicioFora    = dados.horarioInicioFora;
@@ -3525,9 +3898,13 @@ function cloudApplyRemoteData(remoteData){
       merged.horasDecorridasFora  = dados.horasDecorridasFora;
       merged.ganhoHoraAtualFora   = dados.ganhoHoraAtualFora;
     }
+    mdEnsureDataMeta(merged);
+    merged.__rev = Math.max(Number(dados.__rev || 0), Number(remoteData.__rev || 0));
+    merged.__updated_at = mdPickBestSnapshot([{snapshot:dados},{snapshot:remoteData}]).__updated_at || mdNowIso();
+    merged.__cloud_updated_at = mdNowIso();
     dados = merged;
+    mdPushBackup(LOCAL_BACKUP_KEY, dados, "merge-remote");
     if(window.__salvarLocalOriginal) window.__salvarLocalOriginal();
-    // v9 - religa timer da sessão se ainda estiver em andamento após merge
     try{
       if(String(dados.horarioInicioFora || "").trim()){
         iniciarTimerGanhoHoraTempoReal();
@@ -3542,104 +3919,189 @@ async function cloudPushNow(snapshotOverride){
   try{
     const token = await cloudGetToken();
     if(!token) return false;
-    const user = await cloudGetUser(token);
-    if(!user || !user.id) return false;
+    const userId = await cloudResolveUserId(token).catch(function(){ return ""; });
+    if(!userId) return false;
 
     const pending = snapshotOverride || cloudReadPendingSnapshot();
-    const payload = pending && pending.payload ? pending.payload : dados;
-    const updatedAt = (pending && pending.updated_at) || (payload && payload.__cloud_updated_at) || new Date().toISOString();
+    const pendingPayload = pending && pending.payload ? pending.payload : null;
+    const localPayload = (typeof dados === "object" && dados) ? dados : null;
+    const remoteRow = await cloudFetchRow(token, userId).catch(function(){ return null; });
+    const remoteWrapped = mdUnwrapCloudPayload(remoteRow && remoteRow.payload ? remoteRow.payload : null);
+    const remoteSnapshot = remoteWrapped.snapshot;
+    const best = mdPickBestSnapshot([
+      { snapshot: pendingPayload },
+      { snapshot: localPayload },
+      { snapshot: remoteSnapshot }
+    ]);
+    if(!best || !cloudHasUsefulData(best)) return false;
 
-    if(!cloudHasUsefulData(payload)) return false;
+    mdEnsureDataMeta(best);
+    best.__cloud_updated_at = mdNowIso();
 
+    const backupCandidates = []
+      .concat(mdReadBackupRing(LOCAL_BACKUP_KEY))
+      .concat(mdReadBackupRing(CLOUD_BACKUP_KEY))
+      .concat(Array.isArray(remoteWrapped.backups) ? remoteWrapped.backups : []);
+    backupCandidates.unshift(mdCreateBackupEntry(best, "cloud-push"));
+    const seen = new Set();
+    const backups = backupCandidates.filter(function(item){
+      if(!item || !item.snapshot) return false;
+      const sig = String(item.rev || "") + "|" + String(item.ts || "");
+      if(seen.has(sig)) return false;
+      seen.add(sig);
+      return true;
+    }).sort(function(a,b){
+      const ar = Number(a.rev || 0), br = Number(b.rev || 0);
+      if(br !== ar) return br - ar;
+      return (new Date(b.ts || 0).getTime()||0) - (new Date(a.ts || 0).getTime()||0);
+    }).slice(0, 8);
+
+    const updatedAt = best.__cloud_updated_at;
+    const envelope = mdBuildCloudEnvelope(best, backups);
     const body = [{
-      user_id: user.id,
-      payload: payload,
+      user_id: userId,
+      payload: envelope,
       updated_at: updatedAt
     }];
 
-    const res = await fetch(
-      CLOUD_SUPABASE_URL + "/rest/v1/" + CLOUD_TABLE + "?on_conflict=user_id",
-      {
-        method: "POST",
-        headers: {
-          "apikey": CLOUD_SUPABASE_KEY,
-          "Authorization": "Bearer " + token,
-          "Content-Type": "application/json",
-          "Prefer": "resolution=merge-duplicates,return=minimal"
-        },
-        body: JSON.stringify(body)
-      }
-    );
+    const res = await fetch(CLOUD_SUPABASE_URL + "/rest/v1/" + CLOUD_TABLE, {
+      method: "POST",
+      headers: {
+        "apikey": CLOUD_SUPABASE_KEY,
+        "Authorization": "Bearer " + token,
+        "Content-Type": "application/json",
+        "Prefer": "resolution=merge-duplicates,return=minimal"
+      },
+      body: JSON.stringify(body)
+    });
+    if(!res.ok) throw new Error("Falha ao salvar na nuvem");
 
-    if(res.ok){
-      cloudClearPendingSnapshot(updatedAt);
-      cloudMarkLastOk(updatedAt);
-      return true;
+    if(localPayload === dados){
+      dados = best;
+      mdEnsureDataMeta(dados);
+      dados.__last_synced_commit_seq = Number(dados.__local_commit_seq || 0);
+      dados.__dirty_local = false;
+      dados.__cloud_updated_at = updatedAt;
+      if(window.__salvarLocalOriginal) window.__salvarLocalOriginal();
     }
-    // Push falhou — remarca como sujo para o próximo ciclo de 60s tentar de novo
+    mdWriteBackupRing(CLOUD_BACKUP_KEY, backups);
+    mdPushBackup(LOCAL_BACKUP_KEY, best, "cloud-ok");
+    cloudClearPendingSnapshot(updatedAt);
+    cloudMarkLastOk(updatedAt);
+    __cloudDirty = false;
+    return true;
+  }catch(e){
     __cloudDirty = true;
     return false;
-  }catch(e){ return false; }
+  }
 }
 
-// v9 - fix: delay maior (1s) e retry em caso de falha
 let __cloudSaveRetries = 0;
-function cloudScheduleSave(){
+function cloudScheduleSave(delayMs){
   clearTimeout(__cloudSaveTimer);
+  const wait = typeof delayMs === "number" ? delayMs : 180;
   __cloudSaveTimer = setTimeout(async function(){
     const ok = await cloudPushNow();
-    if(!ok && __cloudSaveRetries < 4){
+    if(!ok && __cloudSaveRetries < 6){
       __cloudSaveRetries++;
-      const delay = Math.min(2000 * __cloudSaveRetries, 10000);
+      const delay = Math.min(1200 * __cloudSaveRetries, 8000);
       setTimeout(function(){ cloudPushNow(); }, delay);
-    } else {
+    } else if(ok){
       __cloudSaveRetries = 0;
     }
-  }, 1000);
+  }, wait);
 }
 
-async function cloudBoot(){
+async function cloudBoot(force){
   if(__cloudBootStarted) return;
+  if(__cloudBootDoneOnce && force !== true) return;
   __cloudBootStarted = true;
   try{
-    const token = await cloudGetToken();
-    if(!token) return;
-    const user = await cloudGetUser(token);
-    if(!user || !user.id) return;
-
-    const pending = cloudReadPendingSnapshot();
-    const pendingTs = pending && pending.updated_at ? new Date(pending.updated_at).getTime() : 0;
-    const localTs = dados && dados.__cloud_updated_at ? new Date(dados.__cloud_updated_at).getTime() : 0;
-
-    // Primeiro tenta empurrar o que ainda está pendente localmente
-    if(pending && pending.payload && cloudHasUsefulData(pending.payload)){
-      await cloudPushNow(pending);
+    const recovered = await mdRecoverDurableStateFromIDB().catch(function(){ return null; });
+    if(recovered && mdSnapshotOrderValue(recovered) > mdSnapshotOrderValue(dados)){
+      dados = JSON.parse(JSON.stringify(recovered));
+      mdEnsureDataMeta(dados);
+      try{ atualizar(); }catch(e){}
+      try{ atualizarCarro(); }catch(e){}
     }
 
-    const remoteRow = await cloudFetchRow(token, user.id);
-    const remoteData = remoteRow && remoteRow.payload ? remoteRow.payload : null;
-    const remoteTs = remoteRow && remoteRow.updated_at ? new Date(remoteRow.updated_at).getTime() : 0;
-
-    // v9 - fix: sempre mescla nuvem+local; nunca descarta nenhum dos dois
-    if(remoteData && cloudHasUsefulData(remoteData)){
-      cloudApplyRemoteData(remoteData);
-      // Após merge, salva o resultado consolidado de volta pra nuvem
-      try{
-        cloudWritePendingSnapshot(JSON.parse(JSON.stringify(dados)));
-        cloudScheduleSave();
-      }catch(e){}
-      if(remoteTs > Math.max(localTs, pendingTs)){
-        try{ toast("☁️ Dados sincronizados com a nuvem."); }catch(e){}
-      }
+    const token = await cloudGetToken();
+    if(!token){
+      __cloudBootDoneOnce = true;
+      return;
+    }
+    const userId = await cloudResolveUserId(token).catch(function(){ return ""; });
+    if(!userId){
+      __cloudBootDoneOnce = true;
       return;
     }
 
-    // Nuvem vazia ou sem dados úteis — envia o local
+    const pending = cloudReadPendingSnapshot();
+    const remoteRow = await cloudFetchRow(token, userId).catch(function(){ return null; });
+    const remoteWrapped = mdUnwrapCloudPayload(remoteRow && remoteRow.payload ? remoteRow.payload : null);
+    mdSyncBackupsFromCloud(remoteWrapped.backups || []);
+
+    const remoteSnapshot = remoteWrapped.snapshot;
+    const localBest = mdPickBestSnapshot([
+      { snapshot: pending && pending.payload ? pending.payload : null },
+      { snapshot: dados },
+      { snapshot: recovered }
+    ]) || dados;
+
+    const remoteUseful = remoteSnapshot && cloudHasUsefulData(remoteSnapshot);
+    const localUseful = localBest && cloudHasUsefulData(localBest);
+
+    if(remoteUseful && (!localUseful || !mdRemoteWouldRollback(remoteSnapshot))){
+      const localOrder = mdSnapshotOrderValue(localBest || {});
+      const remoteOrder = mdSnapshotOrderValue(remoteSnapshot || {});
+      if(!localUseful || remoteOrder >= localOrder){
+        cloudApplyRemoteData(remoteSnapshot);
+      } else {
+        dados = JSON.parse(JSON.stringify(localBest));
+        mdEnsureDataMeta(dados);
+        if(window.__salvarLocalOriginal) window.__salvarLocalOriginal();
+      }
+    } else if(localUseful){
+      dados = JSON.parse(JSON.stringify(localBest));
+      mdEnsureDataMeta(dados);
+      if(window.__salvarLocalOriginal) window.__salvarLocalOriginal();
+      cloudWritePendingSnapshot(JSON.parse(JSON.stringify(dados)));
+      cloudScheduleSave(120);
+    }
+
     if(cloudHasUsefulData(dados)){
       cloudWritePendingSnapshot(JSON.parse(JSON.stringify(dados)));
-      cloudScheduleSave();
+      cloudScheduleSave(120);
+    }
+    __cloudBootDoneOnce = true;
+  }catch(e){
+    console.warn("cloudBoot", e);
+  }finally{
+    __cloudBootStarted = false;
+  }
+}
+
+async function mdInitialHydrateAndRender(){
+  try{
+    const localUseful = cloudHasUsefulData(dados);
+    if(!localUseful){
+      const token = cloudGetStoredTokenSync();
+      const cachedUserId = cloudReadCachedUserId();
+      if(token && cachedUserId){
+        const remoteRow = await cloudFetchRow(token, cachedUserId).catch(function(){ return null; });
+        const remoteWrapped = mdUnwrapCloudPayload(remoteRow && remoteRow.payload ? remoteRow.payload : null);
+        const remoteSnapshot = remoteWrapped.snapshot;
+        if(remoteSnapshot && cloudHasUsefulData(remoteSnapshot)){
+          dados = JSON.parse(JSON.stringify(remoteSnapshot));
+          mdEnsureDataMeta(dados);
+          if(window.__salvarLocalOriginal) window.__salvarLocalOriginal();
+        }
+      }
     }
   }catch(e){}
+  try{ atualizar(); }catch(e){}
+  try{ atualizarCarro(); }catch(e){}
+  setTimeout(function(){ try{ cloudBoot(true); }catch(e){} }, 40);
 }
 
 window.addEventListener("pagehide", function(){
@@ -3647,33 +4109,32 @@ window.addEventListener("pagehide", function(){
 });
 window.addEventListener("beforeunload", function(){ try{ cloudPushNow(); }catch(e){} });
 window.addEventListener("online", function(){ try{ cloudPushNow(); }catch(e){} });
-// v19 - salva scroll continuamente (localStorage sobrevive ao processo morto pelo Android)
+// v21 - salva scroll continuamente
 window.addEventListener('scroll', function(){
-  try{
-    var _sy = window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0;
-    localStorage.setItem('md_scroll_y', String(_sy));
-  }catch(e){}
+  try{ if(window.__mdSaveScroll) window.__mdSaveScroll(); }catch(e){}
 }, { passive: true });
 
 document.addEventListener("visibilitychange", function(){
   try{
     if(document.visibilityState === "hidden"){
-      // Salva scroll e dados ao minimizar/trocar app
       try{
         var _sy = window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0;
         localStorage.setItem('md_scroll_y', String(_sy));
       }catch(e){}
-      try{ salvar(); }catch(e){}
-      cloudPushNow();
+      // v21 - salva localmente sem gerar nova sincronização/merge ao apenas minimizar o app
+      try{ if(typeof window.__salvarLocalOriginal === "function") window.__salvarLocalOriginal(); }catch(e){}
     }
     if(document.visibilityState === "visible"){
-      // v19 - scroll já restaurado no DOMContentLoaded, só precisa garantir visibilidade
       try{
         document.documentElement.style.opacity = '';
         document.documentElement.style.pointerEvents = '';
       }catch(e){}
-      __cloudBootStarted = false;
-      cloudBoot();
+      try{ refreshQuickBalanceFabMiniDisplay(); }catch(e){}
+      // fix v21: sincroniza com nuvem ao voltar ao app
+      try{
+        __cloudBootStarted = false;
+        cloudBoot();
+      }catch(e){}
     }
   }catch(e){}
 });
@@ -5409,7 +5870,7 @@ function exportarRelatorioPDF(){
       <script>
         setTimeout(()=>window.print(), 250);
       <\/script>
-    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v21 · app</div>
+    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v24 · app</div>
 </body>
     </html>  `);
   w.document.close();
@@ -6354,7 +6815,7 @@ function bootApp(){
       iniciarTimerGanhoHoraTempoReal();
     }
   }catch(e){}
-  setTimeout(function(){ try{ cloudBoot(); }catch(e){} }, 500);
+  setTimeout(function(){ try{ cloudBoot(true); }catch(e){} }, cloudHasUsefulData(dados) ? 120 : 30);
 }
 if(document.readyState === "loading"){
   document.addEventListener("DOMContentLoaded", ()=>{ bootApp(); try{ initTabs(); }catch(e){} });
@@ -6370,7 +6831,7 @@ window.addEventListener("pageshow", ()=>{
 });
 
 try{ ensureGanhoHoraDiaAtual(); }catch(e){}
-atualizar();
+mdInitialHydrateAndRender();
 
 (function(){
   const metaIds = ["metaTotal", "dataLimite"];

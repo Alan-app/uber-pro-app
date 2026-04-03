@@ -207,6 +207,7 @@ button.action {
       localStorage.setItem("sb_token", data.access_token || "");
       localStorage.setItem("sb_refresh_token", data.refresh_token || "");
       localStorage.setItem("sb_expires_at", String(data.expires_at || 0));
+      if (data && data.user && data.user.id) localStorage.setItem("sb_user_id", data.user.id);
     } catch(e) {}
   }
   function clearSession() {
@@ -214,6 +215,7 @@ button.action {
       localStorage.removeItem("sb_token");
       localStorage.removeItem("sb_refresh_token");
       localStorage.removeItem("sb_expires_at");
+      localStorage.removeItem("sb_user_id");
     } catch(e) {}
   }
   function hasToken() {
@@ -299,6 +301,7 @@ button.action {
   }
   async function validateAndGo(session) {
     var user = await getUser(session.access_token);
+    try { if (user && user.id) localStorage.setItem("sb_user_id", user.id); } catch(e) {}
     var access = await getAccess(user.id, session.access_token);
     if (!access) {
       access = await createAccess(user.id, session.access_token, user.user_metadata && user.user_metadata.nome, user.email);
@@ -462,6 +465,6 @@ button.action {
   }
 })();
 </script>
-<div class="version-debug-badge" id="versionDebugBadge">MetaDriver v21 · login</div>
+<div class="version-debug-badge" id="versionDebugBadge">MetaDriver v24 · login</div>
 </body>
 </html>
