@@ -2738,6 +2738,8 @@ body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff9d0; }
   <div class="menu-item"><button class="primary" onclick="abrirExportBackup(); closeMenu();">Exportar / Backup</button></div>
   <div class="menu-item"><button class="secondary" onclick="document.getElementById('importFile').click()">Importar backup</button></div>
   <div class="menu-item"><button class="secondary" onclick="exportarRelatorioPDF(); closeMenu();">Exportar relatório (PDF)</button></div>
+  <div class="menu-item"><button class="secondary" onclick="mdRunRollbackSelfTest(); closeMenu();">Autoteste anti-rollback</button></div>
+  <div class="menu-item"><button class="secondary" onclick="mdExportDiagnostics(); closeMenu();">Exportar diagnóstico</button></div>
   <div class="menu-item"><button class="danger" onclick="openZerar(); closeMenu();">Zerar dados (cuidado)</button></div>
   <div class="menu-item"><button class="secondary" onclick="location.href='painel.html'; closeMenu();">Gerenciar APP</button></div>
   <div class="menu-item"><button class="secondary" onclick="abrirSaldoAtualButtonMenu(); closeMenu();">Botão de saldo atual</button></div>
@@ -3662,6 +3664,131 @@ function cloudReadPendingSnapshot(){
   }catch(e){ return null; }
 }
 
+function mdBuildDiagnosticsObject(){
+  try{
+    const pending = cloudReadPendingSnapshot();
+    const localRaw = localStorage.getItem(STORAGE_KEY);
+    const durableRaw = localStorage.getItem(DURABLE_STATE_KEY);
+    const localObj = mdSafeJsonParse(localRaw);
+    const durableObj = mdSafeJsonParse(durableRaw);
+    const diag = {
+      generated_at: mdNowIso(),
+      app_version: 'MetaDriver v26 sync-fix',
+      cloud_table: CLOUD_TABLE,
+      device_id: mdEnsureDeviceId(),
+      visibility_state: document.visibilityState,
+      cloud_boot_started: !!__cloudBootStarted,
+      cloud_boot_done_once: !!__cloudBootDoneOnce,
+      cloud_dirty: !!__cloudDirty,
+      current: {
+        rev: Number(dados && dados.__rev || 0),
+        local_commit_seq: Number(dados && dados.__local_commit_seq || 0),
+        last_synced_commit_seq: Number(dados && dados.__last_synced_commit_seq || 0),
+        dirty_local: !!(dados && dados.__dirty_local),
+        updated_at: dados && dados.__updated_at || '',
+        last_local_write_at: dados && dados.__last_local_write_at || '',
+        cloud_updated_at: dados && dados.__cloud_updated_at || '',
+        useful_score: mdUsefulScore(dados || {}),
+        counts: {
+          ganhos: Array.isArray(dados && dados.ganhos) ? dados.ganhos.length : 0,
+          gastos: Array.isArray(dados && dados.gastos) ? dados.gastos.length : 0,
+          abastecimentos: Array.isArray(dados && dados.abastecimentos) ? dados.abastecimentos.length : 0,
+          naoTrabalhados: Array.isArray(dados && dados.naoTrabalhados) ? dados.naoTrabalhados.length : 0,
+          sessoes: Array.isArray(dados && dados.ganhoHoraSessoes) ? dados.ganhoHoraSessoes.length : 0,
+          historico: Array.isArray(dados && dados.ganhoHoraHistorico) ? dados.ganhoHoraHistorico.length : 0
+        }
+      },
+      storage: {
+        local_bytes: localRaw ? localRaw.length : 0,
+        durable_bytes: durableRaw ? durableRaw.length : 0,
+        local_order: mdSnapshotOrderValue(localObj || {}),
+        durable_order: mdSnapshotOrderValue(durableObj || {}),
+        pending_exists: !!(pending && pending.payload),
+        pending_order: pending && pending.payload ? mdSnapshotOrderValue(pending.payload || {}) : 0,
+        pending_updated_at: pending && pending.updated_at || ''
+      },
+      backups: {
+        local_ring: mdReadBackupRing(LOCAL_BACKUP_KEY).slice(0,8).map(function(item){
+          return { ts:item.ts, rev:item.rev, reason:item.reason, order: mdSnapshotOrderValue(item.snapshot||{}) };
+        }),
+        cloud_ring: mdReadBackupRing(CLOUD_BACKUP_KEY).slice(0,8).map(function(item){
+          return { ts:item.ts, rev:item.rev, reason:item.reason, order: mdSnapshotOrderValue(item.snapshot||{}) };
+        })
+      },
+      journal_tail: mdReadJournal().slice(0,12).map(function(item){
+        return {
+          ts: item.ts,
+          reason: item.reason,
+          rev: item.rev,
+          seq: item.seq,
+          order: mdSnapshotOrderValue(item.snapshot || {})
+        };
+      })
+    };
+    return diag;
+  }catch(e){
+    return { generated_at: new Date().toISOString(), error: String(e && e.message || e) };
+  }
+}
+
+function mdDownloadTextFile(filename, content, mime){
+  const blob = new Blob([content], {type: mime || 'text/plain;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(function(){
+    try{ URL.revokeObjectURL(url); }catch(e){}
+    try{ a.remove(); }catch(e){}
+  }, 300);
+}
+
+async function mdExportDiagnostics(){
+  try{
+    try{ if(typeof window.__salvarLocalOriginal === 'function') window.__salvarLocalOriginal(); }catch(e){}
+    const diag = mdBuildDiagnosticsObject();
+    const nome = 'metadriver-diagnostico-' + new Date().toISOString().replace(/[:.]/g,'-') + '.json';
+    mdDownloadTextFile(nome, JSON.stringify(diag, null, 2), 'application/json;charset=utf-8');
+    toast('✅ Diagnóstico exportado.');
+  }catch(e){
+    toast('❌ Não consegui exportar o diagnóstico.');
+  }
+}
+
+async function mdRunRollbackSelfTest(){
+  try{
+    const before = mdBuildDiagnosticsObject();
+    const beforeOrder = Number(before && before.storage && before.storage.local_order || 0);
+    const beforeSeq = Number(before && before.current && before.current.local_commit_seq || 0);
+    try{ if(typeof window.__salvarLocalOriginal === 'function') window.__salvarLocalOriginal(); }catch(e){}
+    const pendingBefore = cloudReadPendingSnapshot();
+    if(!(pendingBefore && pendingBefore.payload && cloudHasUsefulData(pendingBefore.payload))){
+      cloudWritePendingSnapshot(JSON.parse(JSON.stringify(dados)));
+    }
+    const fakeRemote = JSON.parse(JSON.stringify(dados || {}));
+    mdEnsureDataMeta(fakeRemote);
+    fakeRemote.__local_commit_seq = Math.max(0, Number(fakeRemote.__local_commit_seq || 0) - 1);
+    fakeRemote.__rev = Math.max(0, Number(fakeRemote.__rev || 0) - 1);
+    fakeRemote.__updated_at = '2000-01-01T00:00:00.000Z';
+    fakeRemote.__last_local_write_at = '2000-01-01T00:00:00.000Z';
+    fakeRemote.__cloud_updated_at = '2000-01-01T00:00:00.000Z';
+    const blocked = mdRemoteWouldRollback(fakeRemote) === true;
+    if(!blocked) throw new Error('bloqueio de rollback não disparou');
+    cloudApplyRemoteData(fakeRemote);
+    const after = mdBuildDiagnosticsObject();
+    const afterOrder = Number(after && after.storage && after.storage.local_order || 0);
+    const afterSeq = Number(after && after.current && after.current.local_commit_seq || 0);
+    if(afterOrder < beforeOrder) throw new Error('ordem local caiu após teste');
+    if(afterSeq < beforeSeq) throw new Error('commit seq caiu após teste');
+    toast('✅ Autoteste anti-rollback passou.');
+  }catch(e){
+    console.warn('mdRunRollbackSelfTest', e);
+    toast('❌ Autoteste falhou: ' + String(e && e.message || e));
+  }
+}
+
 function cloudWritePendingSnapshot(snapshot){
   try{
     if(!snapshot || typeof snapshot !== "object") return false;
@@ -4118,7 +4245,7 @@ window.addEventListener("pagehide", function(){
   try{ cloudPushNow(); }catch(e){}
 });
 window.addEventListener("beforeunload", function(){ try{ cloudPushNow(); }catch(e){} });
-window.addEventListener("online", function(){ try{ cloudPushNow(); }catch(e){} });
+window.addEventListener("online", function(){ try{ if(__cloudDirty || (cloudReadPendingSnapshot() && cloudReadPendingSnapshot().payload)) cloudPushNow(); }catch(e){} });
 // v21 - salva scroll continuamente
 window.addEventListener('scroll', function(){
   try{ if(window.__mdSaveScroll) window.__mdSaveScroll(); }catch(e){}
@@ -4141,11 +4268,14 @@ document.addEventListener("visibilitychange", function(){
         document.documentElement.style.pointerEvents = '';
       }catch(e){}
       try{ refreshQuickBalanceFabMiniDisplay(); }catch(e){}
-      // v25: força cloudBoot sempre ao voltar — __cloudBootDoneOnce não bloqueia
+      // v26: ao voltar, NÃO puxa remoto para evitar rollback visual/local.
+      // Apenas garante persistência local e, se houver pendência, agenda push.
+      try{ if(typeof window.__salvarLocalOriginal === "function") window.__salvarLocalOriginal(); }catch(e){}
       try{
-        __cloudBootStarted = false;
-        __cloudBootDoneOnce = false;
-        cloudBoot(true);
+        const pending = cloudReadPendingSnapshot();
+        if(__cloudDirty || (pending && pending.payload && cloudHasUsefulData(pending.payload))){
+          cloudScheduleSave(120);
+        }
       }catch(e){}
     }
   }catch(e){}
@@ -4953,10 +5083,10 @@ safe.naoTrabalhados = (safe.naoTrabalhados || []).map(n => ({
       salvar();
       atualizar();
       try{ atualizarCarro(); }catch(e){}
-      // v25: subir imediatamente pra nuvem e resetar flag para cloudBoot rodar
+      // v26: após importar, apenas sobe o novo estado; não rearma restore remoto automático
       try{
         __cloudDirty = true;
-        __cloudBootDoneOnce = false;
+        cloudWritePendingSnapshot(JSON.parse(JSON.stringify(dados)));
         cloudPushNow();
       }catch(e){}
       toast("✅ Backup importado com sucesso.");
