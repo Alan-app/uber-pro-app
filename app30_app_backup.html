@@ -18,7 +18,7 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver v27</title>
+<title>MetaDriver v28</title>
 <script>
 // v21 - correção de duplicação ao minimizar/restaurar + proteção de rolagem
 (function(){
@@ -2643,6 +2643,10 @@ body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff9d0; }
     if(!force && hasUsableToken(sess)) return sess.access_token || "";
     if(!sess.refresh_token) return sess.access_token || "";
 
+    if(typeof navigator !== "undefined" && navigator.onLine === false){
+      return sess.access_token || "";
+    }
+
     try{
       const res = await fetch("https://xoqlgwjpmdkiazwpwhmn.supabase.co/auth/v1/token?grant_type=refresh_token", {
         method: "POST",
@@ -2673,12 +2677,20 @@ body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff9d0; }
         return;
       }
       const token = await refreshAccessTokenIfNeeded(false);
-      if(!token){
+      const offline = (typeof navigator !== "undefined" && navigator.onLine === false);
+      if(!token && !offline){
+        window.location.replace("login.html?next=app30_app.html&t=" + Date.now());
+        return;
+      }
+      if(!token && offline && !(sess.access_token || sess.refresh_token)){
         window.location.replace("login.html?next=app30_app.html&t=" + Date.now());
         return;
       }
     }catch(e){
-      window.location.replace("login.html?next=app30_app.html&t=" + Date.now());
+      const offline = (typeof navigator !== "undefined" && navigator.onLine === false);
+      if(!offline){
+        window.location.replace("login.html?next=app30_app.html&t=" + Date.now());
+      }
     }
   })();
 
@@ -3745,7 +3757,7 @@ function mdBuildDiagnosticsObject(){
     const durableObj = mdSafeJsonParse(durableRaw);
     const diag = {
       generated_at: mdNowIso(),
-      app_version: 'MetaDriver v27 rollback-shield',
+      app_version: 'MetaDriver v28 rollback-shield',
       cloud_table: CLOUD_TABLE,
       device_id: mdEnsureDeviceId(),
       visibility_state: document.visibilityState,
@@ -4282,30 +4294,11 @@ async function cloudBoot(force){
 
 async function mdInitialHydrateAndRender(){
   try{
-    const localUseful = cloudHasUsefulData(dados);
-    if(!localUseful){
-      // v25: busca da nuvem sem depender de cachedUserId — tenta token direto
-      let token = cloudGetStoredTokenSync();
-      if(!token){
-        try{ token = await cloudGetToken(); }catch(e){}
-      }
-      let userId = cloudReadCachedUserId();
-      if(!userId && token){
-        try{
-          const u = await cloudGetUser(token).catch(function(){ return null; });
-          userId = u && u.id ? u.id : "";
-        }catch(e){}
-      }
-      if(token && userId){
-        const remoteRow = await cloudFetchRow(token, userId).catch(function(){ return null; });
-        const remoteWrapped = mdUnwrapCloudPayload(remoteRow && remoteRow.payload ? remoteRow.payload : null);
-        const remoteSnapshot = remoteWrapped.snapshot;
-        if(remoteSnapshot && cloudHasUsefulData(remoteSnapshot)){
-          dados = JSON.parse(JSON.stringify(remoteSnapshot));
-          mdEnsureDataMeta(dados);
-          if(window.__salvarLocalOriginal) window.__salvarLocalOriginal();
-        }
-      }
+    const recovered = await mdRecoverDurableStateFromIDB().catch(function(){ return null; });
+    if(recovered && mdSnapshotOrderValue(recovered) > mdSnapshotOrderValue(dados)){
+      dados = JSON.parse(JSON.stringify(recovered));
+      mdEnsureDataMeta(dados);
+      if(window.__salvarLocalOriginal) window.__salvarLocalOriginal();
     }
   }catch(e){}
   try{ atualizar(); }catch(e){}
@@ -6096,7 +6089,7 @@ function exportarRelatorioPDF(){
       <script>
         setTimeout(()=>window.print(), 250);
       <\/script>
-    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v27 · app</div>
+    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v28 · app</div>
 </body>
     </html>  `);
   w.document.close();
