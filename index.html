@@ -24,7 +24,7 @@ button{width:100%;padding:14px 16px;border:none;border-radius:14px;font:inherit;
 .note{margin-top:12px;font-size:12px;opacity:.8;line-height:1.4}
 .install-helper{margin-top:12px;padding:12px 14px;border-radius:14px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);font-size:12px;line-height:1.45;display:none}
 .install-helper.show{display:block}
-.install-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.install-actions{display:grid;grid-template-columns:1fr;gap:10px;margin-top:10px}
 .install-actions button{margin-top:0;padding:12px 14px}
 .hidden{display:none !important}
 .splash .logo-img{animation:pulse 1.1s ease-in-out infinite alternate}
@@ -45,18 +45,16 @@ button{width:100%;padding:14px 16px;border:none;border-radius:14px;font:inherit;
   <div class="title">MetaDriver</div>
   <div class="sub" id="installSubText">Instale o aplicativo para usar da forma correta.</div>
   <button id="installBtn" type="button">Instalar aplicativo</button>
-  <button id="openLoginBtn" type="button">Entrar sem instalar</button>
-  <div class="note" id="noteText">Use o Chrome para instalar o aplicativo.</div>
+    <div class="note" id="noteText">Use o Chrome para instalar o aplicativo.</div>
   <div class="install-helper" id="installHelper">
     <div id="installHelperText">Instalação automática indisponível neste momento.</div>
     <div class="install-actions">
-      <button id="openAppBtnDev" type="button">Abrir login</button>
       <button id="showStepsBtn" type="button">Como instalar</button>
     </div>
   </div>
 </div>
 
-<div class="version-debug-badge">MetaDriver v30 · boot</div>
+<div class="version-debug-badge">MetaDriver v31 · boot</div>
 
 <script>
 (function(){
@@ -119,11 +117,9 @@ button{width:100%;padding:14px 16px;border:none;border-radius:14px;font:inherit;
       showHelper('No iPhone/Safari a instalação é manual pelo menu Compartilhar.');
       return;
     }
-    showHelper('Instalação automática indisponível neste momento. Você também pode entrar sem instalar.');
+    showHelper('Instalação automática indisponível neste momento.');
   }, true);
 
-  document.getElementById('openLoginBtn').addEventListener('click', function(){ go('login.html'); }, true);
-  document.getElementById('openAppBtnDev').addEventListener('click', function(){ go('login.html'); }, true);
   document.getElementById('showStepsBtn').addEventListener('click', showManualSteps, true);
 
   // Fluxo correto:
