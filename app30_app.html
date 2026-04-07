@@ -18,8 +18,9 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver v63</title>
+<title>MetaDriver v64</title>
 <script>
+document.documentElement.setAttribute("data-md-bootlock","1");
 // v57 - correção de duplicação ao minimizar/restaurar + proteção de rolagem
 (function(){
   var KEY_Y = 'md_scroll_y';
@@ -2759,6 +2760,12 @@ body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff9d0; }
   cursor:not-allowed !important;
 }
 
+
+/* v64 - evita piscão das seções no boot */
+html[data-md-bootlock="1"] .card .card-body{
+  display:none !important;
+}
+
 </style>
 
 <style id="app30-auth-guard-style">
@@ -3819,7 +3826,7 @@ function mdBuildDiagnosticsObject(){
     const durableObj = mdSafeJsonParse(durableRaw);
     const diag = {
       generated_at: mdNowIso(),
-      app_version: 'MetaDriver v57 sync-fix',
+      app_version: 'MetaDriver v64 restore-fix',
       cloud_table: CLOUD_TABLE,
       device_id: mdEnsureDeviceId(),
       visibility_state: document.visibilityState,
@@ -4300,12 +4307,12 @@ async function cloudBoot(force){
 
     const token = await cloudGetToken();
     if(!token){
-      __cloudBootDoneOnce = true;
+      __cloudBootDoneOnce = false;
       return;
     }
     const userId = await cloudResolveUserId(token).catch(function(){ return ""; });
     if(!userId){
-      __cloudBootDoneOnce = true;
+      __cloudBootDoneOnce = false;
       return;
     }
 
@@ -4386,6 +4393,92 @@ async function mdInitialHydrateAndRender(){
   try{ atualizarCarro(); }catch(e){}
   setTimeout(function(){ try{ cloudBoot(true); }catch(e){} }, 40);
 }
+
+let __mdLastRestoreAuthKey = "";
+let __mdRestoreRetryTimer = null;
+
+async function mdForceRestoreFromCloudIfPossible(reason){
+  try{
+    let token = cloudGetStoredTokenSync();
+    if(!token){
+      try{ token = await cloudGetToken(); }catch(e){}
+    }
+    if(!token) return false;
+
+    let userId = cloudReadCachedUserId();
+    if(!userId){
+      try{
+        const u = await cloudGetUser(token).catch(function(){ return null; });
+        userId = u && u.id ? u.id : "";
+      }catch(e){}
+    }
+    if(!userId) return false;
+
+    const authKey = String(userId) + "|" + String(token).slice(0,24);
+    const localUseful = cloudHasUsefulData(dados);
+    if(localUseful && __mdLastRestoreAuthKey === authKey && reason !== "force") return true;
+
+    const remoteRow = await cloudFetchRow(token, userId).catch(function(){ return null; });
+    const remoteWrapped = mdUnwrapCloudPayload(remoteRow && remoteRow.payload ? remoteRow.payload : null);
+    const remoteSnapshot = remoteWrapped && remoteWrapped.snapshot ? remoteWrapped.snapshot : null;
+
+    if(remoteSnapshot && cloudHasUsefulData(remoteSnapshot)){
+      const localOrder = mdSnapshotOrderValue(dados || {});
+      const remoteOrder = mdSnapshotOrderValue(remoteSnapshot || {});
+      if(!cloudHasUsefulData(dados) || remoteOrder >= localOrder){
+        dados = JSON.parse(JSON.stringify(remoteSnapshot));
+        mdEnsureDataMeta(dados);
+        if(window.__salvarLocalOriginal) window.__salvarLocalOriginal();
+        try{ atualizar(); }catch(e){}
+        try{ atualizarCarro(); }catch(e){}
+      }
+      __mdLastRestoreAuthKey = authKey;
+      setTimeout(function(){ try{ cloudBoot(true); }catch(e){} }, 20);
+      return true;
+    }
+  }catch(e){}
+  return false;
+}
+
+function mdScheduleRestoreProbe(){
+  try{
+    if(__mdRestoreRetryTimer) clearTimeout(__mdRestoreRetryTimer);
+  }catch(e){}
+  __mdRestoreRetryTimer = setTimeout(function(){
+    try{ mdForceRestoreFromCloudIfPossible("probe"); }catch(e){}
+    try{ cloudBoot(true); }catch(e){}
+  }, 120);
+}
+
+
+window.addEventListener("storage", function(ev){
+  try{
+    const k = String((ev && ev.key) || "");
+    if(k === "sb_token" || k === "sb_refresh_token" || k === "sb_user_id"){
+      mdScheduleRestoreProbe();
+    }
+  }catch(e){}
+});
+
+window.addEventListener("focus", function(){
+  try{ mdScheduleRestoreProbe(); }catch(e){}
+});
+
+window.addEventListener("pageshow", function(){
+  try{ mdScheduleRestoreProbe(); }catch(e){}
+});
+
+window.addEventListener("online", function(){
+  try{ mdScheduleRestoreProbe(); }catch(e){}
+});
+
+document.addEventListener("visibilitychange", function(){
+  try{
+    if(document.visibilityState === "visible"){
+      mdScheduleRestoreProbe();
+    }
+  }catch(e){}
+});
 
 window.addEventListener("pagehide", function(){
   try{ cloudPushNow(); }catch(e){}
@@ -7346,7 +7439,7 @@ setInterval(function(){ try{ applyQuickBalanceFabStateHard(); }catch(e){} try{ r
 }, 800);
 
 function bootApp(){
-  // v57 - garante visibilidade
+  // v64 - segura a UI até o estado de collapse estar aplicado
   try{
     document.documentElement.style.opacity = '';
     document.documentElement.style.pointerEvents = '';
@@ -7362,6 +7455,7 @@ function bootApp(){
   }catch(e){}
   try{ ensureFirstInstallCollapsed(); }catch(e){}
   try{ initSectionCollapse(); }catch(e){}
+  try{ document.documentElement.setAttribute("data-md-bootlock","0"); }catch(e){}
   try{ ensureGanhoHoraDiaAtual(); }catch(e){}
   try{ setInterval(function(){ try{ ensureGanhoHoraDiaAtual(); }catch(e){} }, 15000); }catch(e){}
   try{ updateUberClock(); setInterval(updateUberClock, 1000); }catch(e){}
@@ -7372,6 +7466,11 @@ function bootApp(){
     }
   }catch(e){}
   setTimeout(function(){ try{ cloudBoot(true); }catch(e){} }, cloudHasUsefulData(dados) ? 120 : 30);
+  if(!cloudHasUsefulData(dados)){
+    setTimeout(function(){ try{ mdForceRestoreFromCloudIfPossible("boot-1"); }catch(e){} }, 300);
+    setTimeout(function(){ try{ mdForceRestoreFromCloudIfPossible("boot-2"); }catch(e){} }, 1200);
+    setTimeout(function(){ try{ mdForceRestoreFromCloudIfPossible("boot-3"); }catch(e){} }, 2500);
+  }
 }
 if(document.readyState === "loading"){
   document.addEventListener("DOMContentLoaded", ()=>{ bootApp(); try{ initTabs(); }catch(e){}; try{ bindSectionHeaders(); }catch(e){} });
@@ -7381,8 +7480,10 @@ if(document.readyState === "loading"){
 }
 // Em alguns celulares, ao voltar para o app (bfcache), reaplica o estado
 window.addEventListener("pageshow", ()=>{
+  try{ document.documentElement.setAttribute("data-md-bootlock","1"); }catch(e){}
   try{ initSectionCollapse(); }catch(e){}
   try{ applyQuickBalanceFabStateHard(); }catch(e){}
+  try{ document.documentElement.setAttribute("data-md-bootlock","0"); }catch(e){}
   // v57 - reforça restauração ao reabrir do cache do navegador
   try{ if(window.__mdRestoreScrollBurst) window.__mdRestoreScrollBurst(); else if(window.__mdRestoreScroll) window.__mdRestoreScroll(true); }catch(e){}
 });
