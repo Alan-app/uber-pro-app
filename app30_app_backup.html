@@ -18,9 +18,9 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver v28</title>
+<title>MetaDriver v63</title>
 <script>
-// v21 - correção de duplicação ao minimizar/restaurar + proteção de rolagem
+// v57 - correção de duplicação ao minimizar/restaurar + proteção de rolagem
 (function(){
   var KEY_Y = 'md_scroll_y';
   var KEY_X = 'md_scroll_x';
@@ -31,15 +31,15 @@
   var rafSave = 0;
 
   function storageGet(key){
-    // fix v21: localStorage tem prioridade — sobrevive ao Android matar o processo
+    // fix v57: localStorage tem prioridade — sobrevive ao Android matar o processo
     // sessionStorage é destruído quando o processo morre
     try{
       var v = localStorage.getItem(key);
       if(v !== null && v !== undefined && v !== '') return v;
     }catch(e){}
     try{
-      var v2 = sessionStorage.getItem(key);
-      if(v2 !== null && v2 !== undefined && v2 !== '') return v2;
+      var v57 = sessionStorage.getItem(key);
+      if(v57 !== null && v57 !== undefined && v57 !== '') return v57;
     }catch(e){}
     return null;
   }
@@ -181,6 +181,46 @@
     if(document.visibilityState === 'visible') restoreBurst();
   }, { passive: true });
 })();
+
+setInterval(function(){
+}, 800);
+
+
+function lockSaldoAtualByFab(){
+  const saldo = document.getElementById("saldoAtualFora");
+  if(!saldo) return;
+
+  let ativo = false;
+  try{
+    ativo = (typeof getQuickBalanceFabPref === "function") ? !!getQuickBalanceFabPref() : false;
+  }catch(e){
+    ativo = false;
+  }
+
+  if(ativo){
+    saldo.setAttribute("readonly","readonly");
+    saldo.setAttribute("inputmode","none");
+    saldo.classList.add("readonly");
+    saldo.blur && saldo.blur();
+  }else{
+    saldo.removeAttribute("readonly");
+    saldo.setAttribute("inputmode","decimal");
+    saldo.classList.remove("readonly");
+  }
+}
+
+
+/* v63 - estado unificado da trava do saldo atual */
+document.addEventListener("DOMContentLoaded", function(){
+  try{ lockSaldoAtualByFab(); }catch(e){}
+});
+window.addEventListener("pageshow", function(){
+  try{ lockSaldoAtualByFab(); }catch(e){}
+});
+setInterval(function(){
+  try{ lockSaldoAtualByFab(); }catch(e){}
+}, 700);
+
 </script>
 
 <style>
@@ -250,7 +290,7 @@ h1{text-align:center;margin:8px 0 14px;letter-spacing:0.2px;}
   font-weight:400;
   color:var(--text);
 }
-/* v9 - botão menu tamanho ajustado */
+/* v57 - botão menu tamanho ajustado */
 .menu-btn{
   width:36px;
   height:36px;
@@ -270,7 +310,7 @@ h1{text-align:center;margin:8px 0 14px;letter-spacing:0.2px;}
 .menu-btn:active{transform:scale(0.97);}
 
 
-/* v9 - menu tamanho ajustado */
+/* v57 - menu tamanho ajustado */
 /* Menu overlay */
 .overlay{
   position:fixed; inset:0; z-index:90;
@@ -304,7 +344,7 @@ h1{text-align:center;margin:8px 0 14px;letter-spacing:0.2px;}
   border-bottom:1px solid rgba(255,255,255,0.05);
 }
 .menu-item:last-child{border-bottom:none;}
-/* v9 - menu: tamanho ajustado e botões com diferenciação visual agradável */
+/* v57 - menu: tamanho ajustado e botões com diferenciação visual agradável */
 .menu-item button{
   width:100%;
   padding:8px 10px;
@@ -521,22 +561,15 @@ button:active{transform:scale(0.99);}
 
 
 .card-body button[onclick="salvarMeta()"]{
-  width: calc(100% - 32px);
   margin: 0 16px 12px 16px;
   display: block;
 }
 
 
 /* Ajuste solicitado: manter alinhado à esquerda e aumentar espaço à direita */
-#metaTotal,
-#dataLimite{
-  width: calc(100% - 24px);
-  margin: 0 24px 12px 0; /* só aumenta espaço final */
-  display:block;
-}
+
 
 .card-body button[onclick="salvarMeta()"]{
-  width: calc(100% - 24px);
   margin: 0 24px 12px 0;
   display:block;
 }
@@ -545,7 +578,6 @@ button:active{transform:scale(0.99);}
 /* Ajuste igual aplicado no card Horas necessárias */
 #metaDiariaManual,
 #ganhoDiarioAtual{
-  width: calc(100% - 24px);
   margin: 0 24px 12px 0;
   display:block;
 }
@@ -562,13 +594,11 @@ button:active{transform:scale(0.99);}
 
 /* Botões na Meta: manter padrão e evitar "colar" quando expandir */
 button[onclick="salvarMeta()"]{
-  width: calc(100% - 24px);
   margin: 0 24px 16px 0; /* mais espaço abaixo */
   display:block;
   height:44px;
 }
 button[onclick*="toggleForm('formNaoTrabalhado')"]{
-  width: calc(100% - 24px);
   margin: 0 24px 10px 0;
   display:block;
   height:44px;
@@ -673,7 +703,7 @@ input.negative-value, input.negative-value::placeholder{
 
 
 /* ===== Abas ===== */
-/* v15 - abas fixas abaixo da topbar */
+/* v57 - abas fixas abaixo da topbar */
 .tabs-wrap{
   padding:8px 15px 10px;
   position:sticky;
@@ -1093,12 +1123,11 @@ input.negative-value, input.negative-value::placeholder{
   .modal-content,
   .popup-content,
   #modalManutencao .modal-content {
-    max-width: calc(100% - 32px);
-  }
+    max-}
 }
 
 
-/* ===== Fix layout Manutenções (mobile) v7.2.9 ===== */
+/* ===== Fix layout Manutenções (mobile) v57.2.9 ===== */
 .checkline{
   display:flex !important;
   align-items:center !important;
@@ -1195,8 +1224,8 @@ input.negative-value, input.negative-value::placeholder{
 #tabCarro input[type="text"],
 #tabCarro input[type="number"]{
   box-sizing:border-box;
-  width:100% !important;
-  max-width:100% !important;
+  
+  max-
 }
 
 #tabCarro .row,
@@ -1556,7 +1585,7 @@ input.negative-value, input.negative-value::placeholder{
 /* ===== Modal editar valor (teclado numérico) ===== */
 
 
-/* v9 - modal editar data/motivo (substitui prompt nativo que falha no Android) */
+/* v57 - modal editar data/motivo (substitui prompt nativo que falha no Android) */
 .edit-data-overlay{
   position:fixed; inset:0; z-index:400;
   background:rgba(0,0,0,0.55);
@@ -1587,7 +1616,7 @@ input.negative-value, input.negative-value::placeholder{
 .edit-data-actions button{ flex:1; height:44px; border-radius:12px; font-size:14px; font-weight:700; border:none; cursor:pointer; font-family:inherit; }
 .edit-data-actions .btn-cancelar{ background:rgba(255,255,255,0.10); color:var(--text); }
 
-/* v8 - modal exportar backup */
+/* v57 - modal exportar backup */
 .export-backup-overlay{
   position:fixed; inset:0; z-index:300;
   background:rgba(0,0,0,0.55);
@@ -1698,14 +1727,15 @@ input.negative-value, input.negative-value::placeholder{
 }
 .subtab-btn{
   flex:1;
-  height:54px;              /* altura igual ao botão Adicionar (aprox) */
-  border-radius:18px;
+  height:44px;
+  border-radius:14px;
   border:1px solid rgba(255,255,255,0.10);
   background:rgba(255,255,255,0.06);
   color:var(--text);
   font-weight:900;
-  font-size:15px;
-  letter-spacing:0.2px;
+  font-size:14px;
+  letter-spacing:0.15px;
+  padding:10px 8px;
 }
 .subtab-btn.active{
   background:linear-gradient(180deg, rgba(47,240,142,0.92), rgba(36,206,120,0.92));
@@ -1741,6 +1771,13 @@ input.negative-value, input.negative-value::placeholder{
   color:#0b1220;
 }
 
+/* Combustível (marrom) */
+#btnSubCombustivel.active{
+  background:linear-gradient(180deg, rgba(181, 101, 29, 0.95), rgba(139, 69, 19, 0.95));
+  color:#fff;
+  border-color:rgba(90,45,10,0.55);
+}
+
 
 
 
@@ -1753,7 +1790,14 @@ input.negative-value, input.negative-value::placeholder{
   margin: 0 !important;
 }
 .card + .card{
-  margin-top: 16px !important;
+  margin-top: 20px !important;
+}
+.card.collapsed + .card,
+.card + .card.collapsed{
+  margin-top: 20px !important;
+}
+.card.collapsed .card-header{
+  margin-bottom:0 !important;
 }
 
 
@@ -2094,16 +2138,7 @@ input[type="date"]::-webkit-calendar-picker-indicator,
 input[type="time"]::-webkit-calendar-picker-indicator{opacity:0;display:none;-webkit-appearance:none;}
 input[type="date"],input[type="time"]{-webkit-appearance:none;appearance:none;background-image:none;}
 /* neutraliza ajustes antigos que deixavam campos despadronizados */
-#metaDiariaManual,#ganhoDiarioAtual,#ganhoHoraManual,#metaTotal,#dataLimite{width:100%;margin-right:0;margin-left:0;}
-/* END_PATCH_V86_TEMPO_META */
-
-
-
-
-/* ===== META THEMES (additive only) ===== */
-body{
-  transition: background .28s ease, color .28s ease;
-}
+#metaDiariaManual,#ganhoDiarioAtual,
 body[data-tema="meta-escuro"]{
   --bg:#0f172a;
   --card:#1e293b;
@@ -2128,7 +2163,7 @@ body[data-tema="meta-claro"]{
   --warn:#ca8a04;
   --danger:#e11d48;
 }
-/* v9 - preto: identidade Uber (preto total + branco puro) */
+/* v57 - preto: identidade Uber (preto total + branco puro) */
 body[data-tema="preto-escuro"]{
   --bg:#000000;
   --card:#111111;
@@ -2153,7 +2188,7 @@ body[data-tema="preto-claro"]{
   --warn:#000000;
   --danger:#ff3b30;
 }
-/* v9 - amarelo: identidade 99 (preto + amarelo vibrante) */
+/* v57 - amarelo: identidade 99 (preto + amarelo vibrante) */
 body[data-tema="amarelo-escuro"]{
   --bg:#0d0d0d;
   --card:#1a1a00;
@@ -2178,7 +2213,7 @@ body[data-tema="amarelo-claro"]{
   --warn:#c68a00;
   --danger:#dc2626;
 }
-/* v9 - color-scheme por modo */
+/* v57 - color-scheme por modo */
 body[data-tema="meta-claro"],
 body[data-tema="preto-claro"],
 body[data-tema="amarelo-claro"]{ color-scheme:light; }
@@ -2512,7 +2547,6 @@ body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff9d0; }
 
 /* Dias não trabalhados: formulário centralizado e ação discreta */
 #formNaoTrabalhado{
-  width: calc(100% - 24px);
   margin: 10px auto 10px !important;
 }
 #formNaoTrabalhado input{
@@ -2540,7 +2574,6 @@ body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff9d0; }
   transform:none !important;
 }
 #listaNaoTrabalhados .list-item{
-  width: calc(100% - 24px);
   margin: 8px auto 0 !important;
   padding: 6px 10px !important;
   min-height: 0 !important;
@@ -2597,6 +2630,135 @@ body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff9d0; }
   opacity:.95;
 }
 
+
+/* PADRONIZAÇÃO inputs Configurar Meta */
+
+
+
+
+
+/* PADRONIZAÇÃO FINA - Configurar Meta */
+.config-meta-label{
+  display:block;
+  margin-top:8px !important;
+  margin-bottom:0 !important;
+}
+.config-meta-input{
+  margin:0 24px 12px 0 !important;
+  display:block !important;
+}
+#fuelPercentFields.config-meta-field{
+  margin-top:0 !important;
+  margin-bottom:0 !important;
+  padding:0 !important;
+}
+
+
+/* PADRÃO VERTICAL — Configurar Meta (sem alterar largura) */
+#cardMeta .card-body label{
+  margin-top:8px !important;
+  margin-bottom:4px !important;
+}
+#cardMeta .card-body input,
+#cardMeta .card-body select{
+  margin-top:4px !important;
+  margin-bottom:12px !important;
+}
+
+/* Fallback caso o id do card seja diferente */
+.card-body .meta-section label{
+  margin-top:8px !important;
+  margin-bottom:4px !important;
+}
+.card-body .meta-section input,
+.card-body .meta-section select{
+  margin-top:4px !important;
+  margin-bottom:12px !important;
+}
+
+
+/* v57 - padroniza distância entre botões do topo e o primeiro card */
+.tabs-wrap{
+  margin-bottom: 16px !important;
+}
+
+
+/* v57 - aumenta altura dos botões do topo */
+.tabs-wrap button{
+  padding-top:14px !important;
+  padding-bottom:14px !important;
+}
+
+
+/* v57 safe patch - botão flutuante sem $ e com valor maior */
+.quick-balance-fab-inner{
+  justify-content:center !important;
+}
+.quick-balance-fab-value{
+  font-size:14px !important;
+  max-width:62px !important;
+  font-weight:900 !important;
+  line-height:1.05 !important;
+}
+
+
+/* v61n - botão flutuante Uber / 99 com transparência maior */
+.quick-balance-split{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
+.quick-balance-split-card{border:1px solid rgba(255,255,255,.10);border-radius:16px;padding:10px 12px;cursor:pointer;user-select:none;transition:opacity .15s ease, box-shadow .15s ease;}
+.quick-balance-split-card.active{box-shadow:0 0 0 2px rgba(255,255,255,.14) inset;opacity:1;}
+.quick-balance-split-label{font-size:12px;font-weight:900;opacity:.9;margin-bottom:6px;letter-spacing:.2px;}
+.quick-balance-split-card.uber{background:rgba(0,0,0,.55);border-color:rgba(255,255,255,.12);}
+.quick-balance-split-card.uber .quick-balance-split-label,.quick-balance-split-card.uber .quick-balance-split-value{color:#fff;}
+.quick-balance-split-card.n99{background:rgba(255,221,0,.55);border-color:rgba(0,0,0,.10);}
+.quick-balance-split-card.n99 .quick-balance-split-label,.quick-balance-split-card.n99 .quick-balance-split-value{color:#111827;}
+.quick-balance-split-card:not(.active){opacity:.72;}
+.quick-balance-split-value{font-size:24px;line-height:1;font-weight:900;min-height:24px;}
+
+
+/* v61n - UX seleção Uber/99 refinada */
+.quick-balance-split-card,
+.quick-balance-split-card *{
+  -webkit-tap-highlight-color: transparent !important;
+  tap-highlight-color: transparent !important;
+}
+.quick-balance-split-card{
+  outline:none !important;
+  box-shadow:none;
+}
+.quick-balance-split-card.active{
+  opacity:1 !important;
+  transform:scale(1.015);
+  box-shadow:
+    0 0 0 2px rgba(255,255,255,.26) inset,
+    0 8px 18px rgba(0,0,0,.18);
+  border-color:rgba(255,255,255,.22) !important;
+}
+.quick-balance-split-card:not(.active){
+  opacity:.62 !important;
+  transform:none;
+}
+.quick-balance-split-card.uber.active{
+  background:rgba(0,0,0,.72) !important;
+}
+.quick-balance-split-card.n99.active{
+  background:rgba(255,221,0,.72) !important;
+}
+
+
+.quick-balance-split-card.uber::after{
+  background:rgba(255,255,255,.9);
+}
+.quick-balance-split-card.n99::after{
+  background:rgba(17,24,39,.9);
+}
+
+
+/* v61n - trava visual do saldo atual quando FAB ativo */
+#saldoAtualFora[readonly]{
+  opacity:.78 !important;
+  cursor:not-allowed !important;
+}
+
 </style>
 
 <style id="app30-auth-guard-style">
@@ -2605,10 +2767,53 @@ body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff9d0; }
   padding:10px 12px; border-radius:999px; border:1px solid rgba(255,255,255,.18);
   background:rgba(0,0,0,.55); color:#fff; font:600 14px system-ui, Arial, sans-serif;
 }
+
+/* PADRONIZAÇÃO inputs Configurar Meta */
+
+
+
+
+
+/* PADRÃO VERTICAL — Configurar Meta (sem alterar largura) */
+#cardMeta .card-body label{
+  margin-top:8px !important;
+  margin-bottom:4px !important;
+}
+#cardMeta .card-body input,
+#cardMeta .card-body select{
+  margin-top:4px !important;
+  margin-bottom:12px !important;
+}
+
+/* Fallback caso o id do card seja diferente */
+.card-body .meta-section label{
+  margin-top:8px !important;
+  margin-bottom:4px !important;
+}
+.card-body .meta-section input,
+.card-body .meta-section select{
+  margin-top:4px !important;
+  margin-bottom:12px !important;
+}
+
+
+/* v57 - padroniza distância entre botões do topo e o primeiro card */
+.tabs-wrap{
+  margin-bottom: 16px !important;
+}
+
+
+/* v57 - aumenta altura dos botões do topo */
+.tabs-wrap button{
+  padding-top:14px !important;
+  padding-bottom:14px !important;
+}
+
 </style>
 
 
 <script id="auth-guard">
+const DEV_LOCAL_MODE = true;
 (function(){
   const AUTH_SKEW_MS = 60000;
 
@@ -2643,12 +2848,8 @@ body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff9d0; }
     if(!force && hasUsableToken(sess)) return sess.access_token || "";
     if(!sess.refresh_token) return sess.access_token || "";
 
-    if(typeof navigator !== "undefined" && navigator.onLine === false){
-      return sess.access_token || "";
-    }
-
     try{
-      const res = await fetch("https://xoqlgwjpmdkiazwpwhmn.supabase.co/auth/v1/token?grant_type=refresh_token", {
+      const res = await fetch("https://xoqlgwjpmdkiazwpwhmn.supabase.co/auth/v57/token?grant_type=refresh_token", {
         method: "POST",
         headers: {
           "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJIUzI1NiIsInJlZiI6InhvcWxnd2pwbWRraWF6d3B3aG1uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5NjY1OTksImV4cCI6MjA4NzU0MjU5OX0.txohC3MvvEDaCCVRouVPDrmVaAO1PJxY0LawUttj9PA",
@@ -2673,24 +2874,16 @@ body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff9d0; }
     try{
       const sess = readStoredSession();
       if(!sess.access_token && !sess.refresh_token){
-        window.location.replace("login.html?next=app30_app.html&t=" + Date.now());
+        window.__mdAuthOptionalMode = true;
         return;
       }
       const token = await refreshAccessTokenIfNeeded(false);
-      const offline = (typeof navigator !== "undefined" && navigator.onLine === false);
-      if(!token && !offline){
-        window.location.replace("login.html?next=app30_app.html&t=" + Date.now());
-        return;
-      }
-      if(!token && offline && !(sess.access_token || sess.refresh_token)){
-        window.location.replace("login.html?next=app30_app.html&t=" + Date.now());
+      if(!token){
+        window.__mdAuthOptionalMode = true;
         return;
       }
     }catch(e){
-      const offline = (typeof navigator !== "undefined" && navigator.onLine === false);
-      if(!offline){
-        window.location.replace("login.html?next=app30_app.html&t=" + Date.now());
-      }
+      window.__mdAuthOptionalMode = true;
     }
   })();
 
@@ -2757,11 +2950,7 @@ body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff9d0; }
   <div class="menu-item"><button class="secondary" onclick="abrirSaldoAtualButtonMenu(); closeMenu();">Botão de saldo atual</button></div>
   <div class="menu-item"><button class="secondary" onclick="abrirTemas(); closeMenu();">Temas</button></div>
   <div class="menu-item"><button class="danger" onclick="forceLogout(); return false;">Sair</button></div>
-  <div class="menu-note">
-    • Backup exporta um .json com tudo.<br>
-    • Importar substitui os dados atuais (com confirmação).<br>
-    • PDF abre a tela de impressão pra salvar em PDF.
-  </div>
+  <div class="menu-note" style="text-align:center;">v63</div>
 </div>
 
 <div id="temasOverlay" class="temas-overlay" onclick="fecharTemas()"></div>
@@ -2839,14 +3028,28 @@ body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff9d0; }
 
 <div class="card">
   <div class="card-header collapsible-header" onclick="toggleSection(this)">
-        <h3>Meta</h3>
+        <h3>Configurar Meta</h3>
         <span class="collapse-arrow">▼</span>
       </div>
   <div class="card-body">
-    <label>Meta líquida desejada (R$)</label>
-    <input type="text" id="metaTotal" inputmode="none" autocomplete="off" readonly onclick="openMetaTotalKeypad()" onfocus="this.blur(); openMetaTotalKeypad();">
-    <label>Data limite para atingir a Meta</label>
-    <input type="date" id="dataLimite">
+    <label class="config-meta-label">Meta líquida desejada (R$)</label>
+    <input class="config-meta-input" type="text" id="metaTotal" inputmode="none" autocomplete="off" readonly onclick="openMetaTotalKeypad()" onfocus="this.blur(); openMetaTotalKeypad();">
+    <label class="config-meta-label">Meta de ganho por hora</label>
+    <input class="config-meta-input" type="text" id="ganhoHoraManual" inputmode="none" autocomplete="off" readonly onclick="openMetaTotalKeypadFor('ganhoHoraManual')" onfocus="this.blur(); openMetaTotalKeypadFor('ganhoHoraManual');" placeholder="Ex: 40">
+
+    <div id="fuelPercentFields" class="config-meta-field">
+      <label class="config-meta-label">Percentual do combustível</label>
+      <select class="config-meta-input" id="percentualCombustivel" onchange="salvarConfigCombustivelAuto();">
+        <option value="0.30">30%</option>
+        <option value="0.35">35%</option>
+        <option value="0.40">40%</option>
+        <option value="0.45">45%</option>
+        <option value="0.50">50%</option>
+      </select>
+    </div>
+
+    <label class="config-meta-label">Data limite para atingir a Meta</label>
+    <input class="config-meta-input" type="date" id="dataLimite">
 
     
     <div class="label-row" style="display:flex;justify-content:center;align-items:center;margin-top:10px;"><label style="margin:0;">Dias não trabalhados</label></div>
@@ -2873,6 +3076,8 @@ body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff9d0; }
 <div class="divider"></div>
 
     <div id="statusMeta" class="muted" style="margin-top:10px;"></div>
+    <input type="hidden" id="metaDiariaManual">
+    <input type="hidden" id="ganhoDiarioAtual">
   </div>
 </div>
 
@@ -2886,6 +3091,8 @@ body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff9d0; }
 <label>Saldo anterior (R$)</label>
 <input type="number" id="saldoAnteriorFora" inputmode="decimal" placeholder="Automático" step="0.01" readonly>
 </div>
+
+<div id="horasResumo" class="muted" style="margin-top:0;margin-bottom:10px;"></div>
 
 <label>Saldo atual (R$)</label>
 <input type="number" id="saldoAtualFora" inputmode="decimal" placeholder="Ex: 120" step="0.01">
@@ -2902,7 +3109,7 @@ body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff9d0; }
 <div style="margin-top:10px;">
   <span style="display:inline-flex;align-items:center;gap:8px;">
     <button type="button" id="btnHistoricoGanhoHora" class="btn-historico-link" onclick="toggleHistoricoGanhoHora()">Histórico</button>
-    <!-- v8 - botão limpar histórico -->
+    <!-- v57 - botão limpar histórico -->
     <button type="button" onclick="limparHistoricoGanhoHora()" title="Limpar histórico" style="background:none;border:none;cursor:pointer;font-size:11px;color:var(--danger);opacity:0.55;padding:0;line-height:1;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.55">🗑</button>
   </span>
   <div id="historicoGanhoHoraWrap" class="muted" style="display:none;margin-top:8px;text-align:left;"></div>
@@ -2910,28 +3117,6 @@ body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff9d0; }
 </div>
 </div>
 
-<div class="card" id="cardTempoMeta">
-  <div class="card-header collapsible-header" onclick="toggleSection(this)">
-        <h3>Tempo para atingir a meta diária</h3>
-        <span class="collapse-arrow">▼</span>
-      </div>
-  <div class="card-body tempo-meta-stack">
-      <div>
-        <label>Meta diária (R$) — automática</label>
-        <input type="number" id="metaDiariaManual" inputmode="decimal" placeholder="Meta diária automática" readonly>
-      </div>
-      <div>
-        <label>Ganho diário atual (R$) — automático</label>
-        <input type="text" id="ganhoDiarioAtual" inputmode="text" placeholder="Automático pelo Saldo atual" autocomplete="off" autocapitalize="off" spellcheck="false" readonly>
-      </div>
-      <div>
-        <label>Ganho por hora (R$)</label>
-        <input type="number" id="ganhoHoraManual" inputmode="decimal" placeholder="Ex: 40">
-      </div>
-    <button onclick="salvarHoras()">Salvar</button>
-    <div id="horasResumo" class="muted" style="margin-top:10px;"></div>
-  </div>
-</div>
 
 <div class="card">
   <div class="card-header collapsible-header" onclick="toggleSection(this)">
@@ -2941,16 +3126,17 @@ body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff9d0; }
   <div class="card-body">
     
 <div class="subtabs">
-  <button type="button" id="btnSubGanhos" class="subtab-btn" onclick="openLancSection('ganhos')">Ganhos diários</button>
+  <button type="button" id="btnSubGanhos" class="subtab-btn" onclick="openLancSection('ganhos')">Ganhos</button>
   <button type="button" id="btnSubGastos" class="subtab-btn" onclick="openLancSection('gastos')">Gastos</button>
+  <button type="button" id="btnSubCombustivel" class="subtab-btn" onclick="openLancSection('combustivel')">Combustível</button>
 </div>
 
-<div id="secGanhos" class="subcard-hidden"><div class="section-title ganhos-title">Ganhos diários</div>
+<div id="secGanhos" class="subcard-hidden"><div class="section-title ganhos-title">Ganhos</div>
     <button onclick="toggleForm('formGanho')">Adicionar</button>
     <div id="formGanho" class="collapsible">
       <input type="date" id="dataGanho">
       <input type="text" id="descricaoGanho" placeholder="Descrição (ex: Uber, 99, Particular...)" />
-      <input type="number" id="valorGanho" placeholder="Valor ganho" inputmode="decimal" pattern="[0-9]*" step="0.01">
+      <input type="text" id="valorGanho" placeholder="Valor ganho" inputmode="none" autocomplete="off" readonly onclick="openMetaTotalKeypadFor('valorGanho')" onfocus="this.blur(); openMetaTotalKeypadFor('valorGanho');" data-keypad-mode="lancamentos">
       <button onclick="addGanho()">Salvar ganho</button>
     </div>
     <div id="wrapGanhos"><div id="listaGanhos"></div></div>
@@ -2963,75 +3149,23 @@ body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff9d0; }
     <div id="formGasto" class="collapsible">
       <input type="date" id="dataGasto">
       <input type="text" id="descGasto" placeholder="Descrição (ex: lavagem, manutenção)">
-      <input type="number" id="valorGasto" placeholder="Valor gasto" inputmode="decimal" pattern="[0-9]*" step="0.01">
+      <input type="text" id="valorGasto" placeholder="Valor gasto" inputmode="none" autocomplete="off" readonly onclick="openMetaTotalKeypadFor('valorGasto')" onfocus="this.blur(); openMetaTotalKeypadFor('valorGasto');" data-keypad-mode="lancamentos">
       <button onclick="addGasto()">Salvar gasto</button>
     </div>
     <div id="wrapGastos"><div id="listaGastos"></div></div>
   </div>
-</div>
-
-</div>
-<div class="card">
-  <div class="card-header collapsible-header" onclick="toggleSection(this)">
-        <h3>Controle de combustível</h3>
-        <span class="collapse-arrow">▼</span>
-      </div>
-  <div class="card-body">
-    <div id="fuelResumo" class="muted"></div>
-
-    <div id="fuelConfigCard" class="fuel-config-card collapsed">
-      <div class="fuel-config-head" onclick="toggleFuelConfigCard()">
-        <span>Modo combustível</span>
-        <span id="fuelConfigArrow">▼</span>
-      </div>
-      <div class="fuel-config-body">
-        <div class="fuel-mode-box">
-          <div class="fuel-mode-row">
-            <label class="fuel-radio">
-              <input type="radio" name="combustivelModo" id="combustivelModoFixo" value="fixo" onchange="updateFuelModeUI()">
-              <span>% do bruto</span>
-            </label>
-            <label class="fuel-radio">
-              <input type="radio" name="combustivelModo" id="combustivelModoReal" value="real" onchange="updateFuelModeUI()">
-              <span>Combustível real</span>
-            </label>
-          </div>
-
-          <div id="fuelPercentFields" class="fuel-percent-wrap">
-            <label>Percentual do combustível</label>
-            <select id="percentualCombustivel" onchange="updateFuelModeUI()">
-              <option value="0.30">30%</option>
-              <option value="0.35">35%</option>
-              <option value="0.40">40%</option>
-              <option value="0.45">45%</option>
-              <option value="0.50">50%</option>
-            </select>
-          </div>
-
-          <div id="fuelRealFields" class="fuel-grid">
-            <input type="number" id="fuelKmRodados" inputmode="decimal" step="0.01" placeholder="KM rodados">
-            <input type="number" id="fuelConsumoMedio" inputmode="decimal" step="0.01" placeholder="Consumo médio (km/l)">
-            <input type="number" id="fuelPrecoLitro" inputmode="decimal" step="0.01" placeholder="Preço por litro (R$)">
-          </div>
-
-          <div class="fuel-help">
-            Em <b>% do bruto</b>, você escolhe entre <b>30% e 50%</b>.<br>
-            Em <b>Combustível real</b>, o cálculo usa: <b>(KM rodados ÷ consumo médio) × preço por litro</b>.
-          </div>
-
-          <button type="button" class="secondary" onclick="salvarConfigCombustivel()">Salvar configuração</button>
-        </div>
-      </div>
-    </div>
-
+<div id="secCombustivel" class="subcard-hidden"><div class="section-title gastos-title">Combustível</div>
     <button class="secondary" onclick="toggleForm('formAbastecimento')">Adicionar abastecimento</button>
     <div id="formAbastecimento" class="collapsible">
       <input type="date" id="dataAbastecimento">
-      <input type="number" id="valorAbastecimento" placeholder="Valor abastecimento" inputmode="decimal">
+      <input type="text" id="valorAbastecimento" placeholder="Valor abastecimento" inputmode="none" autocomplete="off" readonly onclick="openMetaTotalKeypadFor('valorAbastecimento')" onfocus="this.blur(); openMetaTotalKeypadFor('valorAbastecimento');" data-keypad-mode="lancamentos">
       <button onclick="addAbastecimento()">Salvar abastecimento</button>
     </div>
     <div id="listaAbastecimentos"></div>
+    <div id="totalAbastecidoLanc" class="muted" style="margin-top:10px;"></div>
   </div>
+</div>
+</div>
 </div>
 
 <div class="card">
@@ -3062,7 +3196,7 @@ body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff9d0; }
 
 
 
-<!-- v9 - modal editar data/motivo de dias não trabalhados -->
+<!-- v57 - modal editar data/motivo de dias não trabalhados -->
 <div id="editDataOverlay" class="edit-data-overlay" onclick="if(event.target.id==='editDataOverlay')fecharEditData()">
   <div class="edit-data-modal" onclick="event.stopPropagation()">
     <div class="edit-data-title" id="editDataTitle">Editar data</div>
@@ -3075,7 +3209,7 @@ body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff9d0; }
   </div>
 </div>
 
-<!-- v8 - modal exportar backup -->
+<!-- v57 - modal exportar backup -->
 <div id="exportBackupOverlay" class="export-backup-overlay" onclick="if(event.target.id==='exportBackupOverlay')fecharExportBackup()">
   <div class="export-backup-modal" onclick="event.stopPropagation()">
     <div class="export-backup-title">Exportar Backup</div>
@@ -3192,7 +3326,7 @@ const STORAGE_KEY = "controleUberProDados";
 const CLOUD_TABLE = "app_cloud_data";
 const CLOUD_SUPABASE_URL = "https://xoqlgwjpmdkiazwpwhmn.supabase.co";
 const CLOUD_SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhvcWxnd2pwbWRraWF6d3B3aG1uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5NjY1OTksImV4cCI6MjA4NzU0MjU5OX0.txohC3MvvEDaCCVRouVPDrmVaAO1PJxY0LawUttj9PA";
-const FIRST_INSTALL_COLLAPSED_KEY = "metadriver_first_install_collapsed_v1";
+const FIRST_INSTALL_COLLAPSED_KEY = "metadriver_first_install_collapsed_v2";
 const FAB_PREF_KEY = "metadriver_quick_balance_fab_enabled";
 const CLOUD_PENDING_KEY = STORAGE_KEY + "__cloud_pending_v1";
 const CLOUD_LAST_OK_KEY = STORAGE_KEY + "__cloud_last_ok_v1";
@@ -3202,11 +3336,10 @@ const DURABLE_STATE_KEY = STORAGE_KEY + "__durable_snapshot_v1";
 const JOURNAL_KEY = STORAGE_KEY + "__journal_v1";
 const JOURNAL_IDB_KEY = STORAGE_KEY + "__journal_idb_v1";
 const META_SCHEMA_VERSION = 2;
-const GLOBAL_SEQ_KEY = STORAGE_KEY + "__global_seq_v1";
 let __cloudSaveTimer = null;
 let __cloudBootStarted = false;
 let __cloudBootDoneOnce = false;
-let __cloudDirty = false; // v9 - flag: só envia pra nuvem se houve mudança real
+let __cloudDirty = false; // v57 - flag: só envia pra nuvem se houve mudança real
 
 // ===== Forçar aba inicial: sempre MetaDriver =====
 try{
@@ -3351,20 +3484,17 @@ async function mdRecoverDurableStateFromIDB(){
   try{
     const direct = await idbGet(IDB_KEY);
     const durable = await idbGet(DURABLE_STATE_KEY);
-    const d1 = mdSafeJsonParse(direct);
-    const d2 = mdSafeJsonParse(durable);
-    let best = mdPickBestSnapshot([{snapshot:d1},{snapshot:d2}]);
-    if(!best){
-      const journal = await idbGet(JOURNAL_IDB_KEY);
-      const candidates = [];
-      const ja = mdSafeJsonParse(journal); if(Array.isArray(ja)) ja.forEach(function(item){ if(item && item.snapshot) candidates.push({snapshot:item.snapshot, source:"idb-journal"}); });
-      candidates.sort(function(a,b){
-        const ao = mdSnapshotOrderValue(a.snapshot), bo = mdSnapshotOrderValue(b.snapshot);
-        if(bo !== ao) return bo - ao;
-        return mdUsefulScore(b.snapshot) - mdUsefulScore(a.snapshot);
-      });
-      best = candidates.length ? candidates[0].snapshot : null;
-    }
+    const journal = await idbGet(JOURNAL_IDB_KEY);
+    const candidates = [];
+    const d1 = mdSafeJsonParse(direct); if(d1) candidates.push({snapshot:d1, source:"idb-main"});
+    const d2 = mdSafeJsonParse(durable); if(d2) candidates.push({snapshot:d2, source:"idb-durable"});
+    const ja = mdSafeJsonParse(journal); if(Array.isArray(ja)) ja.forEach(function(item){ if(item && item.snapshot) candidates.push({snapshot:item.snapshot, source:"idb-journal"}); });
+    candidates.sort(function(a,b){
+      const ao = mdSnapshotOrderValue(a.snapshot), bo = mdSnapshotOrderValue(b.snapshot);
+      if(bo !== ao) return bo - ao;
+      return mdUsefulScore(b.snapshot) - mdUsefulScore(a.snapshot);
+    });
+    const best = candidates.length ? candidates[0].snapshot : null;
     if(best){
       try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(best)); }catch(e){}
       try{ localStorage.setItem(DURABLE_STATE_KEY, JSON.stringify(best)); }catch(e){}
@@ -3376,17 +3506,6 @@ async function mdRecoverDurableStateFromIDB(){
 
 function loadDados(){
   try{
-    const direct = mdSafeJsonParse(localStorage.getItem(STORAGE_KEY));
-    const durable = mdSafeJsonParse(localStorage.getItem(DURABLE_STATE_KEY));
-    const primary = mdPickBestSnapshot([
-      { snapshot: direct },
-      { snapshot: durable }
-    ]);
-    if(primary){
-      try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(primary)); }catch(e){}
-      try{ localStorage.setItem(DURABLE_STATE_KEY, JSON.stringify(primary)); }catch(e){}
-      return primary;
-    }
     const bestLocal = mdChooseBestLocalSnapshotSync();
     if(bestLocal){
       try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(bestLocal)); }catch(e){}
@@ -3517,60 +3636,6 @@ function mdEnsureDataMeta(obj){
   if(!obj.__last_local_write_at) obj.__last_local_write_at = obj.__updated_at;
   return obj;
 }
-function mdReadGlobalSeq(){
-  try{ return Number(localStorage.getItem(GLOBAL_SEQ_KEY) || 0) || 0; }catch(e){ return 0; }
-}
-function mdWriteGlobalSeq(seq){
-  try{ localStorage.setItem(GLOBAL_SEQ_KEY, String(Number(seq || 0) || 0)); }catch(e){}
-  try{ idbSet(GLOBAL_SEQ_KEY, String(Number(seq || 0) || 0)); }catch(e){}
-}
-function mdScanMaxSeq(){
-  try{
-    let maxSeq = mdReadGlobalSeq();
-    const scan = function(snapshot){
-      const s = Number(snapshot && snapshot.__local_commit_seq || 0);
-      if(s > maxSeq) maxSeq = s;
-    };
-    scan(dados);
-    mdReadDurableLocalCandidates().forEach(function(item){ scan(item && item.snapshot); });
-    mdReadBackupRing(LOCAL_BACKUP_KEY).forEach(function(item){ scan(item && item.snapshot); });
-    mdReadBackupRing(CLOUD_BACKUP_KEY).forEach(function(item){ scan(item && item.snapshot); });
-    const pending = cloudReadPendingSnapshot();
-    scan(pending && pending.payload);
-    return maxSeq;
-  }catch(e){ return mdReadGlobalSeq(); }
-}
-function mdNextGlobalSeq(minBase){
-  const base = Math.max(Number(minBase || 0) || 0, mdScanMaxSeq(), mdReadGlobalSeq());
-  const next = base + 1;
-  mdWriteGlobalSeq(next);
-  return next;
-}
-function mdResetRollbackSources(keepCloudBackups){
-  try{ localStorage.removeItem(CLOUD_PENDING_KEY); }catch(e){}
-  try{ localStorage.removeItem(JOURNAL_KEY); }catch(e){}
-  try{ idbSet(JOURNAL_IDB_KEY, JSON.stringify([])); }catch(e){}
-  try{ localStorage.removeItem(LOCAL_BACKUP_KEY); }catch(e){}
-  if(!keepCloudBackups){
-    try{ localStorage.removeItem(CLOUD_BACKUP_KEY); }catch(e){}
-  }
-}
-function mdSealImportedSnapshot(obj){
-  try{
-    if(!obj || typeof obj !== "object") return obj;
-    mdEnsureDataMeta(obj);
-    const seq = mdNextGlobalSeq(mdScanMaxSeq() + 5000);
-    const now = mdNowIso();
-    obj.__local_commit_seq = seq;
-    obj.__rev = Math.max(Number(obj.__rev || 0), seq);
-    obj.__dirty_local = true;
-    obj.__last_local_write_at = now;
-    obj.__updated_at = now;
-    obj.__cloud_updated_at = now;
-    obj.__imported_at = now;
-    return obj;
-  }catch(e){ return obj; }
-}
 
 function mdCreateBackupEntry(snapshot, reason){
   try{
@@ -3639,12 +3704,10 @@ function mdPickBestSnapshot(candidates){
   const valid = (Array.isArray(candidates) ? candidates : []).filter(function(item){ return item && item.snapshot && typeof item.snapshot === "object"; });
   if(!valid.length) return null;
   valid.sort(function(a,b){
-    const ao = mdSnapshotOrderValue(a.snapshot), bo = mdSnapshotOrderValue(b.snapshot);
-    if(bo !== ao) return bo - ao;
     const ar = Number(a.snapshot.__rev || 0), br = Number(b.snapshot.__rev || 0);
     if(br !== ar) return br - ar;
-    const at = new Date(a.snapshot.__updated_at || a.snapshot.__last_local_write_at || a.snapshot.__cloud_updated_at || 0).getTime() || 0;
-    const bt = new Date(b.snapshot.__updated_at || b.snapshot.__last_local_write_at || b.snapshot.__cloud_updated_at || 0).getTime() || 0;
+    const at = new Date(a.snapshot.__updated_at || a.snapshot.__cloud_updated_at || 0).getTime() || 0;
+    const bt = new Date(b.snapshot.__updated_at || b.snapshot.__cloud_updated_at || 0).getTime() || 0;
     if(bt !== at) return bt - at;
     return mdUsefulScore(b.snapshot) - mdUsefulScore(a.snapshot);
   });
@@ -3653,13 +3716,12 @@ function mdPickBestSnapshot(candidates){
 
 mdEnsureDataMeta(dados);
 // Migração desativada (substituída por loadDados com legacyKeys)
-// v21.11 - salvar local-first durável com journal append-only
+// v57.11 - salvar local-first durável com journal append-only
 function salvar(){
   try{
     mdEnsureDataMeta(dados);
-    const nextSeq = mdNextGlobalSeq(Math.max(Number(dados.__local_commit_seq || 0), Number(dados.__rev || 0)));
-    dados.__local_commit_seq = nextSeq;
-    dados.__rev = Math.max(Number(dados.__rev || 0) + 1, nextSeq);
+    dados.__rev = Number(dados.__rev || 0) + 1;
+    dados.__local_commit_seq = Number(dados.__local_commit_seq || 0) + 1;
     dados.__dirty_local = true;
     dados.__last_local_write_at = mdNowIso();
     dados.__updated_at = dados.__last_local_write_at;
@@ -3757,7 +3819,7 @@ function mdBuildDiagnosticsObject(){
     const durableObj = mdSafeJsonParse(durableRaw);
     const diag = {
       generated_at: mdNowIso(),
-      app_version: 'MetaDriver v28 rollback-shield',
+      app_version: 'MetaDriver v57 sync-fix',
       cloud_table: CLOUD_TABLE,
       device_id: mdEnsureDeviceId(),
       visibility_state: document.visibilityState,
@@ -3901,7 +3963,7 @@ function cloudMarkLastOk(ts){
 }
 
 async function cloudGetUser(token){
-  const res = await fetch(CLOUD_SUPABASE_URL + "/auth/v1/user", {
+  const res = await fetch(CLOUD_SUPABASE_URL + "/auth/v57/user", {
     headers: {
       "apikey": CLOUD_SUPABASE_KEY,
       "Authorization": "Bearer " + token
@@ -3955,7 +4017,7 @@ function cloudHasUsefulData(obj){
 
 async function cloudFetchRow(token, userId){
   const res = await fetch(
-    CLOUD_SUPABASE_URL + "/rest/v1/" + CLOUD_TABLE + "?select=payload,updated_at&user_id=eq." + encodeURIComponent(userId),
+    CLOUD_SUPABASE_URL + "/rest/v57/" + CLOUD_TABLE + "?select=payload,updated_at&user_id=eq." + encodeURIComponent(userId),
     {
       headers: {
         "apikey": CLOUD_SUPABASE_KEY,
@@ -3990,7 +4052,7 @@ function mdSyncBackupsFromCloud(backups){
   }catch(e){}
 }
 
-// v21 - stringify canônico para impedir duplicações por ordem de chaves diferente
+// v57 - stringify canônico para impedir duplicações por ordem de chaves diferente
 function mdCanonicalStringify(value){
   try{
     const seen = new WeakSet();
@@ -4031,7 +4093,7 @@ function mdSanitizeDuplicatedData(){
   }catch(e){}
 }
 
-// v9 - fix crítico: merge inteligente — nunca sobrescreve array local com array menor
+// v57 - fix crítico: merge inteligente — nunca sobrescreve array local com array menor
 function cloudMergeArrays(local, remote){
   if(!Array.isArray(remote)) return mdDedupArrayExact(Array.isArray(local) ? local : []);
   if(!Array.isArray(local) || local.length === 0) return mdDedupArrayExact(remote.slice());
@@ -4175,7 +4237,7 @@ async function cloudPushNow(snapshotOverride){
       updated_at: updatedAt
     }];
 
-    const res = await fetch(CLOUD_SUPABASE_URL + "/rest/v1/" + CLOUD_TABLE, {
+    const res = await fetch(CLOUD_SUPABASE_URL + "/rest/v57/" + CLOUD_TABLE, {
       method: "POST",
       headers: {
         "apikey": CLOUD_SUPABASE_KEY,
@@ -4294,11 +4356,30 @@ async function cloudBoot(force){
 
 async function mdInitialHydrateAndRender(){
   try{
-    const recovered = await mdRecoverDurableStateFromIDB().catch(function(){ return null; });
-    if(recovered && mdSnapshotOrderValue(recovered) > mdSnapshotOrderValue(dados)){
-      dados = JSON.parse(JSON.stringify(recovered));
-      mdEnsureDataMeta(dados);
-      if(window.__salvarLocalOriginal) window.__salvarLocalOriginal();
+    const localUseful = cloudHasUsefulData(dados);
+    if(!localUseful){
+      // v57: busca da nuvem sem depender de cachedUserId — tenta token direto
+      let token = cloudGetStoredTokenSync();
+      if(!token){
+        try{ token = await cloudGetToken(); }catch(e){}
+      }
+      let userId = cloudReadCachedUserId();
+      if(!userId && token){
+        try{
+          const u = await cloudGetUser(token).catch(function(){ return null; });
+          userId = u && u.id ? u.id : "";
+        }catch(e){}
+      }
+      if(token && userId){
+        const remoteRow = await cloudFetchRow(token, userId).catch(function(){ return null; });
+        const remoteWrapped = mdUnwrapCloudPayload(remoteRow && remoteRow.payload ? remoteRow.payload : null);
+        const remoteSnapshot = remoteWrapped.snapshot;
+        if(remoteSnapshot && cloudHasUsefulData(remoteSnapshot)){
+          dados = JSON.parse(JSON.stringify(remoteSnapshot));
+          mdEnsureDataMeta(dados);
+          if(window.__salvarLocalOriginal) window.__salvarLocalOriginal();
+        }
+      }
     }
   }catch(e){}
   try{ atualizar(); }catch(e){}
@@ -4311,7 +4392,7 @@ window.addEventListener("pagehide", function(){
 });
 window.addEventListener("beforeunload", function(){ try{ cloudPushNow(); }catch(e){} });
 window.addEventListener("online", function(){ try{ if(__cloudDirty || (cloudReadPendingSnapshot() && cloudReadPendingSnapshot().payload)) cloudPushNow(); }catch(e){} });
-// v21 - salva scroll continuamente
+// v57 - salva scroll continuamente
 window.addEventListener('scroll', function(){
   try{ if(window.__mdSaveScroll) window.__mdSaveScroll(); }catch(e){}
 }, { passive: true });
@@ -4323,7 +4404,7 @@ document.addEventListener("visibilitychange", function(){
         var _sy = window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0;
         localStorage.setItem('md_scroll_y', String(_sy));
       }catch(e){}
-      // v25: salva local E sobe pra nuvem ao minimizar
+      // v57: salva local E sobe pra nuvem ao minimizar
       try{ if(typeof window.__salvarLocalOriginal === "function") window.__salvarLocalOriginal(); }catch(e){}
       try{ cloudPushNow(); }catch(e){}
     }
@@ -4333,7 +4414,7 @@ document.addEventListener("visibilitychange", function(){
         document.documentElement.style.pointerEvents = '';
       }catch(e){}
       try{ refreshQuickBalanceFabMiniDisplay(); }catch(e){}
-      // v26: ao voltar, NÃO puxa remoto para evitar rollback visual/local.
+      // v57: ao voltar, NÃO puxa remoto para evitar rollback visual/local.
       // Apenas garante persistência local e, se houver pendência, agenda push.
       try{ if(typeof window.__salvarLocalOriginal === "function") window.__salvarLocalOriginal(); }catch(e){}
       try{
@@ -4345,7 +4426,7 @@ document.addEventListener("visibilitychange", function(){
     }
   }catch(e){}
 });
-// v9 - save inteligente a cada 60s: só envia pra nuvem se houve mudança real
+// v57 - save inteligente a cada 60s: só envia pra nuvem se houve mudança real
 setInterval(function(){
   try{
     if(document.visibilityState !== "visible") return;
@@ -4566,7 +4647,7 @@ function updateUberClock(){
 }
 
 
-const SECTION_STATE_KEY = "controleUberPro_collapsedSections_v1";
+const SECTION_STATE_KEY = "controleUberPro_collapsedSections_v2";
 
 function sectionIdFor(card, index){
   const h3 = card.querySelector(".card-header h3");
@@ -4692,7 +4773,35 @@ function addGanho(){
   }
 
   if(!isNaN(valor) && data){
-    dados.ganhos.push({data, app, valor});
+    const detalhe = (window.dados && dados.ultimoGanhoDetalhado && Number(dados.ultimoGanhoDetalhado.total || 0) === Number(valor))
+      ? { uber: Number(dados.ultimoGanhoDetalhado.uber || 0), n99: Number(dados.ultimoGanhoDetalhado.n99 || 0) }
+      : { uber: 0, n99: 0 };
+
+    const appBase = String(app || "").trim();
+
+    if(detalhe.uber > 0 || detalhe.n99 > 0){
+      if(detalhe.uber > 0){
+        dados.ganhos.push({
+          data,
+          app: appBase ? appBase + " - Uber" : "Uber",
+          valor: detalhe.uber,
+          uber: detalhe.uber,
+          n99: 0
+        });
+      }
+      if(detalhe.n99 > 0){
+        dados.ganhos.push({
+          data,
+          app: appBase ? appBase + " - 99" : "99",
+          valor: detalhe.n99,
+          uber: 0,
+          n99: detalhe.n99
+        });
+      }
+    }else{
+      dados.ganhos.push({data, app, valor, uber: 0, n99: 0});
+    }
+
     salvar();
     atualizar();
     document.getElementById("valorGanho").value="";
@@ -4702,8 +4811,10 @@ function addGanho(){
 
 
 
-function syncGanhoDoSaldoRapido(valorSaldoAtual){
+function syncGanhoDoSaldoRapido(valorSaldoAtual, uberPart, n99Part){
   const valor = Number(valorSaldoAtual || 0);
+  const uber = Number(uberPart || 0);
+  const n99 = Number(n99Part || 0);
   const dataRef = dataUberISO();
   if(!Array.isArray(dados.ganhos)) dados.ganhos = [];
 
@@ -4724,16 +4835,35 @@ function syncGanhoDoSaldoRapido(valorSaldoAtual){
   }
 
   if(idx >= 0){
-    dados.ganhos[idx].data = dataRef;
-    dados.ganhos[idx].valor = valor;
-    if(!dados.ganhos[idx].app || String(dados.ganhos[idx].app).trim() === ""){
-      dados.ganhos[idx].app = "Saldo atual (botão)";
-    }
-  }else{
+    // remove o registro agregado antigo para recriar separado
+    dados.ganhos.splice(idx, 1);
+  }
+
+  if(uber > 0){
+    dados.ganhos.push({
+      data: dataRef,
+      app: "Uber",
+      valor: uber,
+      uber,
+      n99: 0
+    });
+  }
+  if(n99 > 0){
+    dados.ganhos.push({
+      data: dataRef,
+      app: "99",
+      valor: n99,
+      uber: 0,
+      n99
+    });
+  }
+  if(uber <= 0 && n99 <= 0 && valor > 0){
     dados.ganhos.push({
       data: dataRef,
       app: "Saldo atual (botão)",
-      valor
+      valor,
+      uber: 0,
+      n99: 0
     });
   }
 }
@@ -4874,7 +5004,7 @@ function confirmEditValor(){
 
 
 
-// v9 - editarData e editarMotivo: modal próprio substituindo prompt() nativo (falha no Android)
+// v57 - editarData e editarMotivo: modal próprio substituindo prompt() nativo (falha no Android)
 window.__editDataCtx = null;
 
 function editarData(tipo, index){
@@ -4946,7 +5076,7 @@ function excluirItem(tipo, index){
   atualizar();
 }
 
-// v9 - funções de tema (corrigido: funções estavam ausentes)
+// v57 - funções de tema (corrigido: funções estavam ausentes)
 function aplicarTema(tema){
   document.body.setAttribute('data-tema', tema || 'meta-escuro');
   document.querySelectorAll('[data-tema-option]').forEach(function(el){
@@ -4972,7 +5102,7 @@ function fecharTemas(){
   if(panel) panel.classList.remove('show');
 }
 
-// v8 - exportar backup agora abre modal com opção de nome e escolha de pasta
+// v57 - exportar backup agora abre modal com opção de nome e escolha de pasta
 function getExportBackupBlob(){
   const payload = {
     app: "MetaDriver",
@@ -5138,25 +5268,23 @@ safe.naoTrabalhados = (safe.naoTrabalhados || []).map(n => ({
       const ok = confirm("Importar vai SUBSTITUIR seus dados atuais por esse backup. Confirmar?");
       if(!ok) return;
 
-      try{ mdResetRollbackSources(false); }catch(e){}
       dados = safe;
       ensureCarro();
-      mdSealImportedSnapshot(dados);
-      try{ localStorage.removeItem(STORAGE_KEY); }catch(e){}
-      try{ localStorage.removeItem(DURABLE_STATE_KEY); }catch(e){}
-      if(window.__salvarLocalOriginal) window.__salvarLocalOriginal();
-      try{ idbSet(IDB_KEY, JSON.stringify(dados)); }catch(e){}
-      try{ idbSet(DURABLE_STATE_KEY, JSON.stringify(dados)); }catch(e){}
-      try{ mdPushBackup(LOCAL_BACKUP_KEY, dados, "import"); }catch(e){}
-      try{ mdAppendJournal(dados, "import"); }catch(e){}
+      // v57: garantir seq alto para que import ganhe em qualquer comparação
+      dados.__local_commit_seq = Number(dados.__local_commit_seq || 0) + 1000;
+      dados.__last_local_write_at = mdNowIso();
+      dados.__updated_at = dados.__last_local_write_at;
+      dados.__dirty_local = true;
+      salvar();
       atualizar();
       try{ atualizarCarro(); }catch(e){}
+      // v57: após importar, apenas sobe o novo estado; não rearma restore remoto automático
       try{
         __cloudDirty = true;
         cloudWritePendingSnapshot(JSON.parse(JSON.stringify(dados)));
-        setTimeout(function(){ cloudPushNow(); }, 80);
+        cloudPushNow();
       }catch(e){}
-      toast("✅ Backup importado com sucesso. Estado antigo foi isolado para não voltar por rollback.");
+      toast("✅ Backup importado com sucesso.");
       closeMenu();
     }catch(e){
       toast("❌ Arquivo inválido. Escolha um backup .json exportado pelo app.");
@@ -5308,7 +5436,7 @@ function toggleHistoricoDiaGanhoHora(diaUber){
 }
 
 
-// v8 - editar horário de sessões no histórico
+// v57 - editar horário de sessões no histórico
 function editarHorarioSessaoHistorico(diaUber, indice, campo){
   const item = (dados.ganhoHoraHistorico || []).find(function(h){ return String((h && h.diaUber) || '').trim() === String(diaUber || '').trim(); });
   if(!item || !Array.isArray(item.sessoes) || !item.sessoes[indice]) return;
@@ -5341,7 +5469,7 @@ function editarHorarioSessaoHistorico(diaUber, indice, campo){
   toast('✅ Sessão do histórico atualizada.');
 }
 
-// v8 - excluir sessão do histórico
+// v57 - excluir sessão do histórico
 function excluirSessaoHistorico(diaUber, indice){
   if(!confirm('Excluir esta sessão do histórico?')) return;
   const idx = (dados.ganhoHoraHistorico || []).findIndex(function(h){ return String((h && h.diaUber) || '').trim() === String(diaUber || '').trim(); });
@@ -5356,7 +5484,7 @@ function excluirSessaoHistorico(diaUber, indice){
   toast('✅ Sessão do histórico excluída.');
 }
 
-// v8 - limpar todo o histórico
+// v57 - limpar todo o histórico
 function limparHistoricoGanhoHora(){
   if(!dados.ganhoHoraHistorico || !dados.ganhoHoraHistorico.length){
     toast('Histórico já está vazio.');
@@ -5724,7 +5852,7 @@ function ensureGanhoHoraDiaAtual(){
   dados.saldoAtualFora = saldoAtualAntesVirada;
   dados.ganhoDiarioAtual = saldoAtualAntesVirada;
   dados.saldoAnteriorFora = saldoAtualAntesVirada;
-  // v8 - fix: ao virar 4h não inicia nova sessão automaticamente, usuário deve usar o botão Iniciar
+  // v57 - fix: ao virar 4h não inicia nova sessão automaticamente, usuário deve usar o botão Iniciar
   dados.horarioInicioFora = "";
   dados.ganhoHoraSessaoDiaRef = "";
   dados.horasDecorridasFora = 0;
@@ -5858,7 +5986,7 @@ function iniciarTimerGanhoHoraTempoReal(){
 
 
 function getCombustivelConfig(brutoBase){
-  const modo = (dados.combustivelModo === "real") ? "real" : "fixo";
+  const modo = "fixo";
   const percentualSelecionado = [0.30,0.35,0.40,0.45,0.50].includes(Number(dados.combustivelPercentual))
     ? Number(dados.combustivelPercentual)
     : 0.30;
@@ -5897,13 +6025,9 @@ function getCombustivelConfig(brutoBase){
 }
 
 function updateFuelModeUI(){
-  const modoEl = document.querySelector('input[name="combustivelModo"]:checked');
-  const modo = (modoEl && modoEl.value === "real") ? "real" : "fixo";
-  const fuelRealFields = document.getElementById("fuelRealFields");
+  const modo = "fixo";
   const fuelPercentFields = document.getElementById("fuelPercentFields");
-  if(fuelRealFields) fuelRealFields.style.display = modo === "real" ? "grid" : "none";
-  if(fuelPercentFields) fuelPercentFields.style.display = modo === "fixo" ? "block" : "none";
-  // impede voltar sozinho para % do bruto ao atualizar a tela
+  if(fuelPercentFields) fuelPercentFields.style.display = "block";
   if(dados && dados.combustivelModo !== modo){
     dados.combustivelModo = modo;
     try{ salvar(); }catch(e){}
@@ -5922,9 +6046,8 @@ function toggleFuelConfigCard(){
   card.classList.toggle("collapsed");
 }
 
-function salvarConfigCombustivel(){
-  const modoEl = document.querySelector('input[name="combustivelModo"]:checked');
-  dados.combustivelModo = (modoEl && modoEl.value === "real") ? "real" : "fixo";
+function salvarConfigCombustivel(showToast){
+  dados.combustivelModo = "fixo";
   const percentualEl = document.getElementById("percentualCombustivel");
   const percentualSelecionado = percentualEl ? Number(percentualEl.value || 0.30) : 0.30;
   dados.combustivelPercentual = [0.30,0.35,0.40,0.45,0.50].includes(percentualSelecionado) ? percentualSelecionado : 0.30;
@@ -5935,8 +6058,18 @@ function salvarConfigCombustivel(){
   };
   salvar();
   atualizar();
-  setFuelConfigCollapsed(true);
-  toast("⛽ Configuração de combustível salva.");
+  if(showToast) toast("⛽ Configuração de combustível salva.");
+}
+
+let __fuelAutoSaveTimer = null;
+function salvarConfigCombustivelAuto(){
+  try{ salvarConfigCombustivel(false); }catch(e){}
+}
+function salvarConfigCombustivelAutoDebounced(){
+  clearTimeout(__fuelAutoSaveTimer);
+  __fuelAutoSaveTimer = setTimeout(function(){
+    salvarConfigCombustivelAuto();
+  }, 250);
 }
 
 
@@ -6036,7 +6169,49 @@ function exportarRelatorioPDF(){
         @media print{
           body{margin:0.8cm}
         }
-      </style>
+      
+/* PADRONIZAÇÃO inputs Configurar Meta */
+
+
+
+
+
+/* PADRÃO VERTICAL — Configurar Meta (sem alterar largura) */
+#cardMeta .card-body label{
+  margin-top:8px !important;
+  margin-bottom:4px !important;
+}
+#cardMeta .card-body input,
+#cardMeta .card-body select{
+  margin-top:4px !important;
+  margin-bottom:12px !important;
+}
+
+/* Fallback caso o id do card seja diferente */
+.card-body .meta-section label{
+  margin-top:8px !important;
+  margin-bottom:4px !important;
+}
+.card-body .meta-section input,
+.card-body .meta-section select{
+  margin-top:4px !important;
+  margin-bottom:12px !important;
+}
+
+
+/* v57 - padroniza distância entre botões do topo e o primeiro card */
+.tabs-wrap{
+  margin-bottom: 16px !important;
+}
+
+
+/* v57 - aumenta altura dos botões do topo */
+.tabs-wrap button{
+  padding-top:14px !important;
+  padding-bottom:14px !important;
+}
+
+</style>
     </head>
     <body>
       <h1>Relatório - MetaDriver</h1>
@@ -6089,14 +6264,14 @@ function exportarRelatorioPDF(){
       <script>
         setTimeout(()=>window.print(), 250);
       <\/script>
-    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v28 · app</div>
+    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v57 · app</div>
 </body>
     </html>  `);
   w.document.close();
 }
 
 function atualizar(){
-  // v9 - aplicar tema salvo a cada atualização
+  // v57 - aplicar tema salvo a cada atualização
   try{ aplicarTema(dados.tema || 'meta-escuro'); }catch(e){}
   try{
     const metaDiaInput = document.getElementById("metaDiariaManual");
@@ -6208,7 +6383,7 @@ function atualizar(){
             const valorSessClass = Number(s.valorTotal || 0) < 0 ? "dangerText" : "warning";
             const ghSessClass = Number(s.ganhoHora || 0) < 0 ? "dangerText" : "warning";
             const tempoSess = Number(s.tempoDecorrido || 0);
-            return `<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--line);position:relative;padding-right:40px"><div class="action-menu" style="position:absolute;top:8px;right:0"><button class="kebab-btn" type="button" onclick="event.stopPropagation(); toggleItemMenu('menu_hist_sessao_${dia}_${idxSess}', this)">≡</button><div class="menu-pop" id="menu_hist_sessao_${dia}_${idxSess}"><!-- v8 - menu completo sessão histórico --><button type="button" onclick="editarHorarioSessaoHistorico('${dia}', ${idxSess}, 'inicio')">Editar hora de início</button><button type="button" onclick="editarHorarioSessaoHistorico('${dia}', ${idxSess}, 'fim')">Editar hora de término</button><button type="button" onclick="editarValorSessaoHistorico('${dia}', ${idxSess})">Editar valor</button><button type="button" class="danger" onclick="excluirSessaoHistorico('${dia}', ${idxSess})">Excluir sessão</button></div></div><b>${getNomeSessao(idxSess + 1)} sessão</b><br>Hora de início: ${s.inicio || '-'}<br>Hora de término: ${s.fim || '-'}<br>Valor total: <span class="${valorSessClass}">R$ ${Number(s.valorTotal || 0).toFixed(2)}</span><br>Ganho por hora: <span class="${ghSessClass}">R$ ${Number(s.ganhoHora || 0).toFixed(2)}</span><br>Tempo decorrido: <span class="warning">${formatHorasMinutos(tempoSess)}</span></div>`;
+            return `<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--line);position:relative;padding-right:40px"><div class="action-menu" style="position:absolute;top:8px;right:0"><button class="kebab-btn" type="button" onclick="event.stopPropagation(); toggleItemMenu('menu_hist_sessao_${dia}_${idxSess}', this)">≡</button><div class="menu-pop" id="menu_hist_sessao_${dia}_${idxSess}"><!-- v57 - menu completo sessão histórico --><button type="button" onclick="editarHorarioSessaoHistorico('${dia}', ${idxSess}, 'inicio')">Editar hora de início</button><button type="button" onclick="editarHorarioSessaoHistorico('${dia}', ${idxSess}, 'fim')">Editar hora de término</button><button type="button" onclick="editarValorSessaoHistorico('${dia}', ${idxSess})">Editar valor</button><button type="button" class="danger" onclick="excluirSessaoHistorico('${dia}', ${idxSess})">Excluir sessão</button></div></div><b>${getNomeSessao(idxSess + 1)} sessão</b><br>Hora de início: ${s.inicio || '-'}<br>Hora de término: ${s.fim || '-'}<br>Valor total: <span class="${valorSessClass}">R$ ${Number(s.valorTotal || 0).toFixed(2)}</span><br>Ganho por hora: <span class="${ghSessClass}">R$ ${Number(s.ganhoHora || 0).toFixed(2)}</span><br>Tempo decorrido: <span class="warning">${formatHorasMinutos(tempoSess)}</span></div>`;
           }).join('') : "<div style='padding-top:6px'>Sem sessões salvas nesse dia.</div>") : '';
           return `<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--line);text-align:left"><button type="button" class="btn-historico-link" onclick="toggleHistoricoDiaGanhoHora('${dia}')">${dia}</button><br>Total: <span class="${totalClass}">R$ ${total.toFixed(2)}</span> | <span class="warning">${formatHorasMinutos(horasItem)}</span> | <span class="${ghClass}">R$ ${ganhoHoraItem.toFixed(2)}/h</span>${aberto ? `<div style="margin-top:8px">${detalhes}</div>` : ''}</div>`;
         }).join("");
@@ -6222,6 +6397,8 @@ function atualizar(){
   const elMeta = document.getElementById("metaTotal");
 if(elMeta && document.activeElement !== elMeta){
   elMeta.value = dados.metaTotal || "";
+  try{ lockSaldoAtualByFab(); }catch(e){}
+
 }
   const elData = document.getElementById("dataLimite");
 if(elData && document.activeElement !== elData){
@@ -6235,11 +6412,7 @@ const metaSalvaAgora = !!(
 document.getElementById("metaDiariaManual").value = metaSalvaAgora && (dados.metaDiariaManual || dados.metaDiariaManual === 0) ? dados.metaDiariaManual : "";
   document.getElementById("ganhoDiarioAtual").value = (dados.ganhoDiarioAtual ?? "");
 
-  const modoCombustivel = (dados.combustivelModo === "real") ? "real" : "fixo";
-  const radioFixo = document.getElementById("combustivelModoFixo");
-  const radioReal = document.getElementById("combustivelModoReal");
-  if(radioFixo) radioFixo.checked = modoCombustivel === "fixo";
-  if(radioReal) radioReal.checked = modoCombustivel === "real";
+  const modoCombustivel = "fixo";
 
   const percentualCombustivelEl = document.getElementById("percentualCombustivel");
   const percentualSalvo = [0.30,0.35,0.40,0.45,0.50].includes(Number(dados.combustivelPercentual))
@@ -6338,34 +6511,27 @@ const fuelCfg = getCombustivelConfig(bruto);
   if(metaSalvaAgora){
     document.getElementById("statusMeta").innerHTML =
       "Dias restantes: <span class='" + (diasRestantes < 0 ? "dangerText" : "warning") + "'>" + diasRestantes + "</span><br>" +
-      "Meta bruta necessária total (" + (fuelCfg.modo === "real" ? "combustível real" : "30% combustível") + "): <span class='" + (metaBrutaComGastos < 0 ? "dangerText" : "warning") + "'>R$ " + metaBrutaComGastos.toFixed(2) + "</span><br>" +
+      "Meta bruta total: <span class='" + (metaBrutaComGastos < 0 ? "dangerText" : "warning") + "'>R$ " + metaBrutaComGastos.toFixed(2) + "</span><br>" +
       "Meta bruta restante: <span class='" + (metaRestante < 0 ? "dangerText" : "warning") + "'>R$ " + metaRestante.toFixed(2) + "</span><br>" +
-      "Meta diária (automática): <span class='" + (metaDiariaAuto < 0 ? "dangerText" : "warning") + "'>R$ " + metaDiariaAuto.toFixed(2) + "</span>";
+      "Meta diária (automática): <span class='" + (metaDiariaAuto < 0 ? "dangerText" : "warning") + "'>R$ " + metaDiariaAuto.toFixed(2) + "</span><br>" +
+      "Tempo para meta diária: <span class='" + (horasNecessarias < 0 ? "dangerText" : "warning") + "'>" + formatHorasMinutos(horasNecessarias) + "</span>";
   }else{
     document.getElementById("statusMeta").innerHTML = "";
   }
   const valorRestanteHoras = (metaDia - ganhoDia);
   if(metaSalvaAgora){
     document.getElementById("horasResumo").innerHTML =
-      "Tempo para atingir a meta diária: <span class='" + (horasNecessarias < 0 ? "dangerText" : "warning") + "'>" + formatHorasMinutos(horasNecessarias) + "</span><br>" +
       "Valor restante: <span class='" + (valorRestanteHoras < 0 ? "dangerText" : "warning") + "'>R$ " + valorRestanteHoras.toFixed(2) + "</span><br>" +
       "Tempo restante: <span class='" + (horasRestantes < 0 ? "dangerText" : "warning") + "'>" + formatHorasMinutos(horasRestantes) + "</span>";
   }else{
     document.getElementById("horasResumo").innerHTML = "";
   }
 
-  document.getElementById("fuelResumo").innerHTML =
-    "Modo combustível: <span class='warning'>" + (fuelCfg.modo === "real" ? "Real" : (Math.round(fuelCfg.percentualSelecionado * 100) + "% do bruto")) + "</span><br>" +
-    (fuelCfg.modo === "real"
-      ? ("Combustível previsto real: <span class='" + (combustivelDisponivel < 0 ? "dangerText" : "warning") + "'>R$ " + combustivelDisponivel.toFixed(2) + "</span><br>" +
-         "Base do cálculo: <span class='warning'>" + fuelCfg.kmRodados.toFixed(2) + " km ÷ " + fuelCfg.consumoMedio.toFixed(2) + " km/l × R$ " + fuelCfg.precoLitro.toFixed(2) + "/l</span><br>")
-      : ("")
-    ) +
-    "Total abastecido: <span class='" + (totalAbastecido < 0 ? "dangerText" : "warning") + "'>R$ " + totalAbastecido.toFixed(2) + "</span><br>" +
-    "Saldo disponível p/ abastecer: " +
-    "<span class='" + (saldoCombustivel < 0 ? "dangerText" : "highlight") + "'>" +
-    "R$ " + saldoCombustivel.toFixed(2) +
-    "</span>";
+  const totalAbastecidoLanc = document.getElementById("totalAbastecidoLanc");
+  if(totalAbastecidoLanc){
+    totalAbastecidoLanc.innerHTML =
+      "Total abastecido: <span class='" + (totalAbastecido < 0 ? "dangerText" : "warning") + "'>R$ " + totalAbastecido.toFixed(2) + "</span>";
+  }
 
   document.getElementById("resumo").innerHTML =
     "Bruto total: <span class='" + (bruto < 0 ? "dangerText" : "warning") + "'>R$ " + bruto.toFixed(2) + "</span><br>" +
@@ -6479,6 +6645,8 @@ function syncMetaAutoFromInputs(){
 }
 
 let metaTotalReplaceOnNextInput = false;
+let metaTotalTargetId = "metaTotal";
+let metaTotalTargetMode = "default";
 
 function formatMetaTotalDisplay(valueStr){
   const n = parseFloat(String(valueStr || "").replace(",", ".")) || 0;
@@ -6493,9 +6661,19 @@ function refreshMetaTotalDisplay(){
   }
 }
 
+function getMetaTotalTarget(){
+  return document.getElementById(metaTotalTargetId || "metaTotal") || document.getElementById("metaTotal");
+}
+
+function getMetaTotalTargetMode(){
+  const el = getMetaTotalTarget();
+  if(!el) return metaTotalTargetMode || "default";
+  return el.getAttribute("data-keypad-mode") || metaTotalTargetMode || "default";
+}
+
 function applyMetaTotalValue(){
   const hidden = document.getElementById("metaTotalHiddenInput");
-  const visible = document.getElementById("metaTotal");
+  const visible = getMetaTotalTarget();
   if(!hidden || !visible) return;
   visible.value = String(hidden.value || "");
   syncMetaAutoFromInputs();
@@ -6539,9 +6717,48 @@ function clearMetaTotal(){
   applyMetaTotalValue();
 }
 
+
+function ensureLancamentoInputVisibleAboveKeypad(){
+  try{
+    const visible = getMetaTotalTarget();
+    const panel = document.getElementById("metaTotalPanel");
+    if(!visible || !panel || !panel.classList.contains("show")) return;
+    const mode = getMetaTotalTargetMode();
+    if(mode !== "lancamentos") return;
+
+    const rect = visible.getBoundingClientRect();
+    const panelRect = panel.getBoundingClientRect();
+    const marginTop = 12;
+    const marginBottom = 14;
+
+    const desiredBottom = panelRect.top - marginBottom;
+    const currentBottom = rect.bottom;
+
+    if(currentBottom > desiredBottom){
+      const delta = currentBottom - desiredBottom + marginTop;
+      window.scrollBy({ top: delta, left: 0, behavior: "instant" });
+    }else if(rect.top < marginTop){
+      const deltaUp = rect.top - marginTop;
+      window.scrollBy({ top: deltaUp, left: 0, behavior: "instant" });
+    }
+
+    setTimeout(function(){
+      try{
+        const rect2 = visible.getBoundingClientRect();
+        const panelRect2 = panel.getBoundingClientRect();
+        const desiredBottom2 = panelRect2.top - marginBottom;
+        if(rect2.bottom > desiredBottom2){
+          const delta2 = rect2.bottom - desiredBottom2 + marginTop;
+          window.scrollBy({ top: delta2, left: 0, behavior: "instant" });
+        }
+      }catch(e){}
+    }, 60);
+  }catch(e){}
+}
+
 function positionMetaTotalKeypad(){
   const panel = document.getElementById("metaTotalPanel");
-  const visible = document.getElementById("metaTotal");
+  const visible = getMetaTotalTarget();
   if(!panel || !visible || !panel.classList.contains("show")) return;
   const rect = visible.getBoundingClientRect();
   const cardBody = visible.closest('.card-body');
@@ -6550,10 +6767,24 @@ function positionMetaTotalKeypad(){
   const viewportHeight = window.innerHeight || document.documentElement.clientHeight || 0;
   const margin = viewportWidth <= 420 ? 10 : 12;
   const minPanelWidth = 220;
+  const mode = getMetaTotalTargetMode();
+
+  if(mode === "lancamentos"){
+    panel.style.position = 'fixed';
+    panel.style.left = margin + 'px';
+    panel.style.right = margin + 'px';
+    panel.style.top = 'auto';
+    panel.style.bottom = '12px';
+    panel.style.maxHeight = Math.max(170, Math.min(320, viewportHeight * 0.42)) + 'px';
+    panel.style.overflowY = 'auto';
+    return;
+  }
+
   const left = Math.max(margin, Math.min(cardRect.left, viewportWidth - margin - minPanelWidth));
   const right = Math.max(margin, viewportWidth - Math.max(cardRect.right, left + minPanelWidth));
   const top = Math.max(rect.bottom + 6, margin);
   const maxHeight = Math.max(170, viewportHeight - top - 8);
+  panel.style.position = 'fixed';
   panel.style.left = left + 'px';
   panel.style.right = right + 'px';
   panel.style.top = top + 'px';
@@ -6562,12 +6793,14 @@ function positionMetaTotalKeypad(){
   panel.style.overflowY = 'auto';
 }
 
-function toggleMetaTotalKeypad(forceOpen){
+function toggleMetaTotalKeypad(forceOpen, targetId){
   const panel = document.getElementById("metaTotalPanel");
   const overlay = document.getElementById("metaTotalOverlay");
   const hidden = document.getElementById("metaTotalHiddenInput");
-  const visible = document.getElementById("metaTotal");
+  if(targetId) metaTotalTargetId = targetId;
+  const visible = getMetaTotalTarget();
   if(!panel || !overlay || !hidden || !visible) return;
+  metaTotalTargetMode = visible.getAttribute("data-keypad-mode") || "default";
   const abrir = (typeof forceOpen === "boolean") ? forceOpen : !panel.classList.contains("show");
   panel.classList.toggle("show", abrir);
   overlay.classList.toggle("show", abrir);
@@ -6576,33 +6809,48 @@ function toggleMetaTotalKeypad(forceOpen){
     metaTotalReplaceOnNextInput = true;
     refreshMetaTotalDisplay();
     positionMetaTotalKeypad();
+    try{
+      if(metaTotalTargetMode === "lancamentos"){
+        ensureLancamentoInputVisibleAboveKeypad();
+      }
+    }catch(e){}
   }else{
     metaTotalReplaceOnNextInput = false;
+    metaTotalTargetMode = "default";
     panel.style.top = '';
     panel.style.bottom = '';
     panel.style.left = '';
     panel.style.right = '';
     panel.style.maxHeight = '';
     panel.style.overflowY = '';
+    panel.style.position = '';
   }
 }
 
 window.addEventListener('resize', function(){
   positionMetaTotalKeypad();
+  try{ ensureLancamentoInputVisibleAboveKeypad(); }catch(e){}
 }, { passive:true });
 window.addEventListener('orientationchange', function(){
-  setTimeout(positionMetaTotalKeypad, 50);
+  setTimeout(function(){
+    positionMetaTotalKeypad();
+    try{ ensureLancamentoInputVisibleAboveKeypad(); }catch(e){}
+  }, 50);
 }, { passive:true });
 window.addEventListener('scroll', function(){
   positionMetaTotalKeypad();
 }, { passive:true });
 
 function openMetaTotalKeypad(){
-  toggleMetaTotalKeypad(true);
+  toggleMetaTotalKeypad(true, "metaTotal");
+}
+
+function openMetaTotalKeypadFor(targetId){
+  toggleMetaTotalKeypad(true, targetId);
 }
 
 function confirmMetaTotalKeypad(){
-  const el = document.getElementById("metaTotal");
+  const el = getMetaTotalTarget();
   applyMetaTotalValue();
   toggleMetaTotalKeypad(false);
   try{ if(el) el.blur(); }catch(e){}
@@ -6610,128 +6858,210 @@ function confirmMetaTotalKeypad(){
 }
 
 
+
 function formatQuickBalanceDisplay(valueStr){
   const n = parseFloat(String(valueStr || "").replace(",", ".")) || 0;
   return "R$ " + n.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
+
+
+const QUICK_BALANCE_SELECTED_KEY = "md_quick_balance_selected";
+const QUICK_BALANCE_UBER_KEY = "md_quick_balance_uber";
+const QUICK_BALANCE_99_KEY = "md_quick_balance_99";
+window.__qbState = window.__qbState || {
+  initialized: false,
+  selected: "uber",
+  uber: "",
+  n99: ""
+};
+let quickBalanceReplaceOnNextInput = false;
+
+function qbLoadState(){
+  const s = window.__qbState;
+  if(s.initialized) return s;
+  try{
+    const sel = localStorage.getItem(QUICK_BALANCE_SELECTED_KEY);
+    if(sel === "uber" || sel === "n99") s.selected = sel;
+  }catch(e){}
+  try{
+    const uber = localStorage.getItem(QUICK_BALANCE_UBER_KEY);
+    const n99 = localStorage.getItem(QUICK_BALANCE_99_KEY);
+    if(uber !== null) s.uber = String(uber || "");
+    if(n99 !== null) s.n99 = String(n99 || "");
+  }catch(e){}
+  try{
+    if(window.dados){
+      if(!s.uber && typeof dados.saldoUber !== "undefined") s.uber = String(dados.saldoUber || "");
+      if(!s.n99 && typeof dados.saldo99 !== "undefined") s.n99 = String(dados.saldo99 || "");
+      if((!s.uber && !s.n99) && Number(dados.saldoAtualFora || 0) > 0){
+        if(s.selected === "n99") s.n99 = String(dados.saldoAtualFora || "");
+        else s.uber = String(dados.saldoAtualFora || "");
+      }
+    }
+  }catch(e){}
+  s.initialized = true;
+  return s;
+}
+function qbPersistState(){
+  const s = qbLoadState();
+  try{ localStorage.setItem(QUICK_BALANCE_SELECTED_KEY, s.selected); }catch(e){}
+  try{ localStorage.setItem(QUICK_BALANCE_UBER_KEY, String(s.uber || "")); }catch(e){}
+  try{ localStorage.setItem(QUICK_BALANCE_99_KEY, String(s.n99 || "")); }catch(e){}
+  try{
+    if(window.dados){
+      dados.saldoUber = String(s.uber || "");
+      dados.saldo99 = String(s.n99 || "");
+    }
+  }catch(e){}
+}
+function qbParts(){
+  const s = qbLoadState();
+  const uber = parseFloat(String(s.uber || "").replace(",", ".")) || 0;
+  const n99 = parseFloat(String(s.n99 || "").replace(",", ".")) || 0;
+  return { uber, n99, total: uber + n99 };
+}
+function formatQuickBalanceDisplay(valueStr){
+  const n = parseFloat(String(valueStr || "").replace(",", ".")) || 0;
+  return "R$ " + n.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+function renderQuickBalanceSelection(){
+  const s = qbLoadState();
+  const uberCard = document.getElementById("quickBalanceUberCard");
+  const n99Card = document.getElementById("quickBalance99Card");
+  if(uberCard) uberCard.classList.toggle("active", s.selected === "uber");
+  if(n99Card) n99Card.classList.toggle("active", s.selected === "n99");
+}
 function refreshQuickBalanceDisplay(){
+  const s = qbLoadState();
   const input = document.getElementById("quickSaldoAtual");
   const view = document.getElementById("quickBalanceValue");
-  if(input && view){
-    view.textContent = formatQuickBalanceDisplay(input.value);
-  }
-}
+  const uberView = document.getElementById("quickBalanceUberValue");
+  const n99View = document.getElementById("quickBalance99Value");
+  const parts = qbParts();
+  if(view) view.textContent = formatQuickBalanceDisplay(String(parts.total));
+  if(uberView) uberView.textContent = formatQuickBalanceDisplay(String(parts.uber));
+  if(n99View) n99View.textContent = formatQuickBalanceDisplay(String(parts.n99));
+  if(input) input.value = (s.selected === "uber") ? String(s.uber || "") : String(s.n99 || "");
+  renderQuickBalanceSelection();
+  try{ lockSaldoAtualByFab(); }catch(e){}
 
+}
 function refreshQuickBalanceFabMiniDisplay(){
   const mini = document.getElementById("quickBalanceFabValue");
   if(!mini) return;
-
   let n = 0;
-
   try{
     const saldoInput = document.getElementById("saldoAtualFora");
     if(saldoInput && saldoInput.value !== ""){
       n = Number(String(saldoInput.value).replace(",", ".")) || 0;
-    }else if(window.dados){
-      n = Number(dados.saldoAtualFora || 0);
+    }else{
+      n = qbParts().total || Number((window.dados && dados.saldoAtualFora) || 0);
     }
   }catch(e){
     n = Number((window.dados && dados.saldoAtualFora) || 0);
   }
-
   mini.textContent = "R$ " + n.toLocaleString("pt-BR", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
 }
-
-let quickBalanceReplaceOnNextInput = false;
-
+function selectQuickBalanceTarget(v){
+  const s = qbLoadState();
+  s.selected = (v === "n99") ? "n99" : "uber";
+  qbPersistState();
+  quickBalanceReplaceOnNextInput = true;
+  refreshQuickBalanceDisplay();
+}
 function appendQuickBalanceKey(key){
+  const s = qbLoadState();
   const input = document.getElementById("quickSaldoAtual");
   if(!input) return;
-
-  let current = String(input.value || "");
-
+  let current = (s.selected === "uber") ? String(s.uber || "") : String(s.n99 || "");
   if(quickBalanceReplaceOnNextInput){
     current = "";
     quickBalanceReplaceOnNextInput = false;
   }
-
   if(key === "."){
     if(current.includes(".")) return;
     if(!current) current = "0";
   }
-
-  input.value = current + key;
+  current += key;
+  if(s.selected === "uber") s.uber = current;
+  else s.n99 = current;
+  qbPersistState();
   refreshQuickBalanceDisplay();
 }
-
 function backspaceQuickBalance(){
-  const input = document.getElementById("quickSaldoAtual");
-  if(!input) return;
-
+  const s = qbLoadState();
+  let current = (s.selected === "uber") ? String(s.uber || "") : String(s.n99 || "");
   if(quickBalanceReplaceOnNextInput){
-    input.value = "";
+    current = "";
     quickBalanceReplaceOnNextInput = false;
   }else{
-    input.value = String(input.value || "").slice(0, -1);
+    current = current.slice(0, -1);
   }
-
+  if(s.selected === "uber") s.uber = current;
+  else s.n99 = current;
+  qbPersistState();
   refreshQuickBalanceDisplay();
 }
-
 function clearQuickBalance(){
-  const input = document.getElementById("quickSaldoAtual");
-  if(!input) return;
-  input.value = "";
+  const s = qbLoadState();
+  if(s.selected === "uber") s.uber = "";
+  else s.n99 = "";
   quickBalanceReplaceOnNextInput = false;
+  qbPersistState();
   refreshQuickBalanceDisplay();
 }
-
 function toggleQuickBalancePanel(forceOpen){
   const panel = document.getElementById("quickBalancePanel");
   const overlay = document.getElementById("quickBalanceOverlay");
-  const input = document.getElementById("quickSaldoAtual");
   if(!panel || !overlay) return;
-
   const abrir = (typeof forceOpen === "boolean") ? forceOpen : !panel.classList.contains("show");
   panel.classList.toggle("show", abrir);
   overlay.classList.toggle("show", abrir);
-
+  qbLoadState();
   if(abrir){
-    const saldoAtual = Number(dados.saldoAtualFora || 0);
-    if(input){
-      input.value = saldoAtual ? String(saldoAtual) : "";
-      quickBalanceReplaceOnNextInput = true;
-      refreshQuickBalanceDisplay();
-    }
+    quickBalanceReplaceOnNextInput = true;
+    refreshQuickBalanceDisplay();
   }else{
+    qbPersistState();
     quickBalanceReplaceOnNextInput = false;
   }
+  try{ lockSaldoAtualByFab(); }catch(e){}
+
 }
-
 function salvarSaldoAtualRapido(){
-  const inputRapido = document.getElementById("quickSaldoAtual");
   const saldoInput = document.getElementById("saldoAtualFora");
-  if(!inputRapido || !saldoInput) return;
-
-  const novoSaldo = parseFloat(String(inputRapido.value || "").replace(",", ".")) || 0;
+  if(!saldoInput) return;
+  qbPersistState();
+  const parts = qbParts();
+  const novoSaldo = parts.total;
   saldoInput.value = novoSaldo ? String(novoSaldo) : "";
-
   try{
-    if(window.dados) dados.saldoAtualFora = novoSaldo;
+    if(window.dados){
+      dados.saldoAtualFora = novoSaldo;
+      dados.saldoUber = String(qbLoadState().uber || "");
+      dados.saldo99 = String(qbLoadState().n99 || "");
+      dados.ultimoGanhoDetalhado = { uber: parts.uber, n99: parts.n99, total: parts.total };
+    }
     refreshQuickBalanceFabMiniDisplay();
     salvarGanhosForaTempoReal();
-    syncGanhoDoSaldoRapido(novoSaldo);
+    syncGanhoDoSaldoRapido(novoSaldo, parts.uber, parts.n99);
     salvar();
     atualizar();
     refreshQuickBalanceFabMiniDisplay();
     toggleQuickBalancePanel(false);
     toast("💰 Saldo atual atualizado.");
-  }catch(e){
+  try{ lockSaldoAtualByFab(); }catch(e){}
+
+}catch(e){
     console.error(e);
     toast("Não foi possível atualizar o saldo atual.");
   }
+  try{ lockSaldoAtualByFab(); }catch(e){}
+
 }
+
+
 
 window.addEventListener("keydown", function(e){
   const panel = document.getElementById("quickBalancePanel");
@@ -6821,7 +7151,11 @@ function applyQuickBalanceFabStateHard(){
     fab.style.setProperty("pointer-events", "none", "important");
     fab.style.setProperty("opacity", "0", "important");
     try{ toggleQuickBalancePanel(false); }catch(e){}
-  }
+  try{ lockSaldoAtualByFab(); }catch(e){}
+
+}
+  try{ lockSaldoAtualByFab(); }catch(e){}
+
 }
 
 function abrirSaldoAtualButtonMenu(){
@@ -6852,6 +7186,8 @@ function salvarPreferenciaSaldoAtualButton(){
   applyQuickBalanceFabStateHard();
   fecharSaldoAtualButtonMenu();
   toast(ativo ? "💰 Botão de saldo atual ativado." : "💰 Botão de saldo atual desativado.");
+  try{ lockSaldoAtualByFab(); }catch(e){}
+
 }
 
 
@@ -7006,15 +7342,16 @@ function initQuickBalanceFab(){
 
 document.addEventListener("DOMContentLoaded", function(){ initQuickBalanceFab(); try{ applyQuickBalanceFabStateHard(); }catch(e){} try{ refreshQuickBalanceFabMiniDisplay(); }catch(e){} });
 window.addEventListener("pageshow", function(){ try{ applyQuickBalanceFabStateHard(); }catch(e){} try{ refreshQuickBalanceFabMiniDisplay(); }catch(e){} });
-setInterval(function(){ try{ applyQuickBalanceFabStateHard(); }catch(e){} try{ refreshQuickBalanceFabMiniDisplay(); }catch(e){} }, 800);
+setInterval(function(){ try{ applyQuickBalanceFabStateHard(); }catch(e){} try{ refreshQuickBalanceFabMiniDisplay(); }catch(e){}
+}, 800);
 
 function bootApp(){
-  // v21 - garante visibilidade
+  // v57 - garante visibilidade
   try{
     document.documentElement.style.opacity = '';
     document.documentElement.style.pointerEvents = '';
   }catch(e){}
-  // v16 - calcular altura real da topbar e aplicar nas tabs para sticky preciso
+  // v57 - calcular altura real da topbar e aplicar nas tabs para sticky preciso
   try{
     const topbar = document.querySelector('.topbar');
     const tabsWrap = document.querySelector('.tabs-wrap');
@@ -7028,7 +7365,7 @@ function bootApp(){
   try{ ensureGanhoHoraDiaAtual(); }catch(e){}
   try{ setInterval(function(){ try{ ensureGanhoHoraDiaAtual(); }catch(e){} }, 15000); }catch(e){}
   try{ updateUberClock(); setInterval(updateUberClock, 1000); }catch(e){}
-  // v9 - fix logout: se havia sessão em andamento, retoma o timer automaticamente
+  // v57 - fix logout: se havia sessão em andamento, retoma o timer automaticamente
   try{
     if(String(dados.horarioInicioFora || "").trim()){
       iniciarTimerGanhoHoraTempoReal();
@@ -7037,17 +7374,36 @@ function bootApp(){
   setTimeout(function(){ try{ cloudBoot(true); }catch(e){} }, cloudHasUsefulData(dados) ? 120 : 30);
 }
 if(document.readyState === "loading"){
-  document.addEventListener("DOMContentLoaded", ()=>{ bootApp(); try{ initTabs(); }catch(e){} });
+  document.addEventListener("DOMContentLoaded", ()=>{ bootApp(); try{ initTabs(); }catch(e){}; try{ bindSectionHeaders(); }catch(e){} });
 }else{
   bootApp();
+  try{ bindSectionHeaders(); }catch(e){}
 }
 // Em alguns celulares, ao voltar para o app (bfcache), reaplica o estado
 window.addEventListener("pageshow", ()=>{
   try{ initSectionCollapse(); }catch(e){}
   try{ applyQuickBalanceFabStateHard(); }catch(e){}
-  // v21 - reforça restauração ao reabrir do cache do navegador
+  // v57 - reforça restauração ao reabrir do cache do navegador
   try{ if(window.__mdRestoreScrollBurst) window.__mdRestoreScrollBurst(); else if(window.__mdRestoreScroll) window.__mdRestoreScroll(true); }catch(e){}
 });
+
+function bindSectionHeaders(){
+  try{
+    document.querySelectorAll('.card-header.collapsible-header').forEach(function(header){
+      if(header.dataset.mdBoundCollapse === '1') return;
+      header.dataset.mdBoundCollapse = '1';
+      header.addEventListener('keydown', function(e){
+        if(e.key === 'Enter' || e.key === ' '){
+          e.preventDefault();
+          toggleSection(header);
+        }
+      });
+      header.setAttribute('tabindex','0');
+      header.style.cursor = 'pointer';
+    });
+  }catch(e){}
+}
+
 
 try{ ensureGanhoHoraDiaAtual(); }catch(e){}
 mdInitialHydrateAndRender();
@@ -7107,7 +7463,7 @@ mdInitialHydrateAndRender();
 })();
 
 
-// ===== Abas (Uber / Carro) v7.2.0 =====
+// ===== Abas (Uber / Carro) v57.2.0 =====
 const ACTIVE_TAB_KEY = "controleUberPro_activeTab_v7_2_0";
 
 function bindTabClicks(){
@@ -7582,7 +7938,7 @@ function snoozeCarPopup(){
 
 
 
-// ===== Tabs robustos (v7.2.6) =====
+// ===== Tabs robustos (v57.2.6) =====
 (function(){
   function ensureTabContainers(){
     const tabCarro = document.getElementById("tabCarro");
@@ -7734,7 +8090,7 @@ function bindCarCollapsibles(){
 
 
 
-// ===== KM Atual: expandir/recolher (v7.3.5) =====
+// ===== KM Atual: expandir/recolher (v57.3.5) =====
 function toggleKmAtualForm(forceClose=false){
   const form = document.getElementById("formKmAtual");
   if(!form) return;
@@ -7772,7 +8128,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
 
 
 
-// ===== Manutenção: expandir/recolher formulário (v7.3.7) =====
+// ===== Manutenção: expandir/recolher formulário (v57.3.7) =====
 function toggleManutForm(forceClose=false){
   const form = document.getElementById("formManut");
   if(!form) return;
@@ -7877,7 +8233,7 @@ function atualizarIndicadorAbaManutencao(){
 
 
 
-// ===== Alerta aba Manutenção (forçado) v7.6.2 =====
+// ===== Alerta aba Manutenção (forçado) v57.6.2 =====
 (function(){
   function _coerceKm(v){
     try{ return (typeof parseKm==="function") ? parseKm(v) : (Number(String(v).replace(/\D/g,""))||0); }catch(e){ return 0; }
@@ -7955,32 +8311,42 @@ function atualizarTotalManutencaoConcluidas(){
 function openLancSection(tipo){
   const secGanhos = document.getElementById("secGanhos");
   const secGastos = document.getElementById("secGastos");
+  const secCombustivel = document.getElementById("secCombustivel");
   const btnG = document.getElementById("btnSubGanhos");
   const btnS = document.getElementById("btnSubGastos");
-  if(!secGanhos || !secGastos || !btnG || !btnS) return;
+  const btnC = document.getElementById("btnSubCombustivel");
+  if(!secGanhos || !secGastos || !secCombustivel || !btnG || !btnS || !btnC) return;
 
   const ganhosOpen = !secGanhos.classList.contains("subcard-hidden");
   const gastosOpen = !secGastos.classList.contains("subcard-hidden");
+  const combustivelOpen = !secCombustivel.classList.contains("subcard-hidden");
 
-  // clicar no aberto -> fecha tudo
-  if((tipo === "ganhos" && ganhosOpen) || (tipo === "gastos" && gastosOpen)){
+  if((tipo === "ganhos" && ganhosOpen) || (tipo === "gastos" && gastosOpen) || (tipo === "combustivel" && combustivelOpen)){
     secGanhos.classList.add("subcard-hidden");
     secGastos.classList.add("subcard-hidden");
+    secCombustivel.classList.add("subcard-hidden");
     btnG.classList.remove("active");
     btnS.classList.remove("active");
+    btnC.classList.remove("active");
     return;
   }
 
+  secGanhos.classList.add("subcard-hidden");
+  secGastos.classList.add("subcard-hidden");
+  secCombustivel.classList.add("subcard-hidden");
+  btnG.classList.remove("active");
+  btnS.classList.remove("active");
+  btnC.classList.remove("active");
+
   if(tipo === "ganhos"){
     secGanhos.classList.remove("subcard-hidden");
-    secGastos.classList.add("subcard-hidden");
     btnG.classList.add("active");
-    btnS.classList.remove("active");
-  }else{
+  }else if(tipo === "gastos"){
     secGastos.classList.remove("subcard-hidden");
-    secGanhos.classList.add("subcard-hidden");
     btnS.classList.add("active");
-    btnG.classList.remove("active");
+  }else{
+    secCombustivel.classList.remove("subcard-hidden");
+    btnC.classList.add("active");
   }
 }
 
@@ -7989,12 +8355,16 @@ window.addEventListener("load", ()=>{
   try{
     const secGanhos = document.getElementById("secGanhos");
     const secGastos = document.getElementById("secGastos");
+    const secCombustivel = document.getElementById("secCombustivel");
     const btnG = document.getElementById("btnSubGanhos");
     const btnS = document.getElementById("btnSubGastos");
+    const btnC = document.getElementById("btnSubCombustivel");
     if(secGanhos) secGanhos.classList.add("subcard-hidden");
     if(secGastos) secGastos.classList.add("subcard-hidden");
+    if(secCombustivel) secCombustivel.classList.add("subcard-hidden");
     if(btnG) btnG.classList.remove("active");
     if(btnS) btnS.classList.remove("active");
+    if(btnC) btnC.classList.remove("active");
   }catch(e){}
 });
 
@@ -8149,10 +8519,10 @@ function logoutApp(){
 }
 
 
-/* ===== Logout robusto do app (v9: salva na nuvem antes de sair) ===== */
+/* ===== Logout robusto do app (v57: salva na nuvem antes de sair) ===== */
 async function forceLogout(){
   try{ closeMenu(); }catch(e){}
-  // v9 - garante push pra nuvem antes de limpar token e sair
+  // v57 - garante push pra nuvem antes de limpar token e sair
   try{
     if(typeof salvar === "function") salvar();
     await cloudPushNow();
@@ -8190,18 +8560,31 @@ window.addEventListener("load", function(){
 
 </script>
 
-<button type="button" id="quickBalanceFab" class="quick-balance-fab" onclick="toggleQuickBalancePanel(true)" aria-label="Atualizar saldo atual rápido"><span class="quick-balance-fab-inner"><span class="quick-balance-fab-icon">$</span><span id="quickBalanceFabValue" class="quick-balance-fab-value">R$ 0</span></span></button>
+<button type="button" id="quickBalanceFab" class="quick-balance-fab" onclick="toggleQuickBalancePanel(true)" aria-label="Atualizar saldo atual rápido"><span class="quick-balance-fab-inner"><span id="quickBalanceFabValue" class="quickBalanceFabValue quick-balance-fab-value">R$ 0</span></span></button>
 
 <div id="quickBalanceOverlay" class="quick-balance-overlay" onclick="toggleQuickBalancePanel(false)"></div>
 
 
+
 <div id="quickBalancePanel" class="quick-balance-panel" role="dialog" aria-modal="true" aria-labelledby="quickBalanceTitle">
-    <div class="quick-balance-display">
+  <div class="quick-balance-title" id="quickBalanceTitle">Saldo atual</div>
+  <div class="quick-balance-sub">Atualize rapidamente o saldo atual sem precisar procurar o campo.</div>
+  <div class="quick-balance-display">
     <div class="quick-balance-display-inner">
       <div class="quick-balance-display-top">Saldo atual</div>
       <div class="quick-balance-display-bottom">
         <div id="quickBalanceValue" class="quick-balance-value">R$ 0,00</div>
       </div>
+    </div>
+  </div>
+  <div class="quick-balance-split">
+    <div id="quickBalanceUberCard" class="quick-balance-split-card uber" onclick="selectQuickBalanceTarget('uber')">
+      <div class="quick-balance-split-label">UBER</div>
+      <div id="quickBalanceUberValue" class="quick-balance-split-value">R$ 0,00</div>
+    </div>
+    <div id="quickBalance99Card" class="quick-balance-split-card n99" onclick="selectQuickBalanceTarget('n99')">
+      <div class="quick-balance-split-label">99</div>
+      <div id="quickBalance99Value" class="quick-balance-split-value">R$ 0,00</div>
     </div>
   </div>
   <input type="text" id="quickSaldoAtual" class="quick-balance-hidden-input" inputmode="none" readonly tabindex="-1" aria-hidden="true" placeholder="Ex: 120">
@@ -8227,6 +8610,7 @@ window.addEventListener("load", function(){
     <button type="button" class="secondary" onclick="clearQuickBalance()">Limpar</button>
   </div>
 </div>
+
 
 
 
