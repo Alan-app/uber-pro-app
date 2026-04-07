@@ -18,7 +18,7 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver v67</title>
+<title>MetaDriver v68</title>
 <script>
 document.documentElement.setAttribute("data-md-bootlock","1");
 // v57 - correção de duplicação ao minimizar/restaurar + proteção de rolagem
@@ -2759,7 +2759,7 @@ body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff9d0; }
 }
 
 
-/* v65 - evita piscão das seções no boot */
+/* v68 - evita piscão das seções no boot */
 html[data-md-bootlock="1"] .card .card-body{
   display:none !important;
 }
@@ -2914,7 +2914,7 @@ const DEV_LOCAL_MODE = true;
     <div class="app-title-wrap">
       <svg width="32" height="32" viewBox="0 0 28 28" style="flex:0 0 auto;border-radius:7px;">
         <rect width="28" height="28" rx="7" fill="#0d1b2e"/>
-        
+        <rect width="28" height="28" rx="7" fill="none" stroke="#2563eb" stroke-width="1.5"/>
         <circle cx="14" cy="13" r="7" fill="none" stroke="#22c55e" stroke-width="2"/>
         <line x1="14" y1="6" x2="14" y2="20" stroke="#22c55e" stroke-width="2"/>
         <line x1="7" y1="13" x2="21" y2="13" stroke="#22c55e" stroke-width="2"/>
@@ -2955,7 +2955,7 @@ const DEV_LOCAL_MODE = true;
   <div class="menu-item"><button class="secondary" onclick="abrirSaldoAtualButtonMenu(); closeMenu();">Botão de saldo atual</button></div>
   <div class="menu-item"><button class="secondary" onclick="abrirTemas(); closeMenu();">Temas</button></div>
   <div class="menu-item"><button class="danger" onclick="forceLogout(); return false;">Sair</button></div>
-  <div class="menu-note" style="text-align:center;">v67</div>
+  <div class="menu-note" style="text-align:center;">v68</div>
 </div>
 
 <div id="temasOverlay" class="temas-overlay" onclick="fecharTemas()"></div>
@@ -3328,20 +3328,8 @@ const DEV_LOCAL_MODE = true;
 })();
 
 const STORAGE_KEY = "controleUberProDados";
-const CLOUD_TABLE = "app_cloud_data";
-const CLOUD_SUPABASE_URL = "https://xoqlgwjpmdkiazwpwhmn.supabase.co";
-const CLOUD_SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhvcWxnd2pwbWRraWF6d3B3aG1uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5NjY1OTksImV4cCI6MjA4NzU0MjU5OX0.txohC3MvvEDaCCVRouVPDrmVaAO1PJxY0LawUttj9PA";
-const FIRST_INSTALL_COLLAPSED_KEY = "metadriver_first_install_collapsed_v2";
-const FAB_PREF_KEY = "metadriver_quick_balance_fab_enabled";
-const CLOUD_PENDING_KEY = STORAGE_KEY + "__cloud_pending_v1";
-const CLOUD_LAST_OK_KEY = STORAGE_KEY + "__cloud_last_ok_v1";
-const CLOUD_BACKUP_KEY = STORAGE_KEY + "__cloud_backup_ring_v2";
-const LOCAL_BACKUP_KEY = STORAGE_KEY + "__local_backup_ring_v2";
-const DURABLE_STATE_KEY = STORAGE_KEY + "__durable_snapshot_v1";
-const JOURNAL_KEY = STORAGE_KEY + "__journal_v1";
-const JOURNAL_IDB_KEY = STORAGE_KEY + "__journal_idb_v1";
-const META_SCHEMA_VERSION = 2;
-const OFFLINE_SAFE_SNAPSHOT_KEY = STORAGE_KEY + "__offline_safe_snapshot_v65";
+
+const OFFLINE_SAFE_SNAPSHOT_KEY = STORAGE_KEY + "__offline_safe_v68";
 
 function mdReadOfflineSafeSnapshot(){
   try{
@@ -3358,6 +3346,19 @@ function mdWriteOfflineSafeSnapshot(snapshot){
   }catch(e){}
 }
 
+const CLOUD_TABLE = "app_cloud_data";
+const CLOUD_SUPABASE_URL = "https://xoqlgwjpmdkiazwpwhmn.supabase.co";
+const CLOUD_SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhvcWxnd2pwbWRraWF6d3B3aG1uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5NjY1OTksImV4cCI6MjA4NzU0MjU5OX0.txohC3MvvEDaCCVRouVPDrmVaAO1PJxY0LawUttj9PA";
+const FIRST_INSTALL_COLLAPSED_KEY = "metadriver_first_install_collapsed_v2";
+const FAB_PREF_KEY = "metadriver_quick_balance_fab_enabled";
+const CLOUD_PENDING_KEY = STORAGE_KEY + "__cloud_pending_v1";
+const CLOUD_LAST_OK_KEY = STORAGE_KEY + "__cloud_last_ok_v1";
+const CLOUD_BACKUP_KEY = STORAGE_KEY + "__cloud_backup_ring_v2";
+const LOCAL_BACKUP_KEY = STORAGE_KEY + "__local_backup_ring_v2";
+const DURABLE_STATE_KEY = STORAGE_KEY + "__durable_snapshot_v1";
+const JOURNAL_KEY = STORAGE_KEY + "__journal_v1";
+const JOURNAL_IDB_KEY = STORAGE_KEY + "__journal_idb_v1";
+const META_SCHEMA_VERSION = 2;
 let __cloudSaveTimer = null;
 let __cloudBootStarted = false;
 let __cloudBootDoneOnce = false;
@@ -3535,11 +3536,11 @@ function loadDados(){
       try{ mdWriteOfflineSafeSnapshot(bestLocal); }catch(e){}
       return bestLocal;
     }
-    const emergencySnapshot = mdReadOfflineSafeSnapshot();
-    if(emergencySnapshot && typeof emergencySnapshot === "object"){
-      try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(emergencySnapshot)); }catch(e){}
-      try{ localStorage.setItem(DURABLE_STATE_KEY, JSON.stringify(emergencySnapshot)); }catch(e){}
-      return emergencySnapshot;
+    const offlineSafe = mdReadOfflineSafeSnapshot();
+    if(offlineSafe){
+      try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(offlineSafe)); }catch(e){}
+      try{ localStorage.setItem(DURABLE_STATE_KEY, JSON.stringify(offlineSafe)); }catch(e){}
+      return offlineSafe;
     }
     const legacyKeys = [
       "dadosControleProV641","dadosControleProV63","dadosControleProV631","dadosControleProV632",
@@ -3770,6 +3771,7 @@ function salvar(){
     idbSet(DURABLE_STATE_KEY, payload);
     mdPushBackup(LOCAL_BACKUP_KEY, dados, "save");
     mdAppendJournal(dados, "save");
+      try{ mdWriteOfflineSafeSnapshot(dados); }catch(e){}
   }catch(e){
     try{
       const payload = JSON.stringify(dados);
@@ -4406,6 +4408,7 @@ async function mdInitialHydrateAndRender(){
         if(remoteSnapshot && cloudHasUsefulData(remoteSnapshot)){
           dados = JSON.parse(JSON.stringify(remoteSnapshot));
           mdEnsureDataMeta(dados);
+          try{ mdWriteOfflineSafeSnapshot(dados); }catch(e){}
           if(window.__salvarLocalOriginal) window.__salvarLocalOriginal();
         }
       }
@@ -6616,7 +6619,7 @@ const fuelCfg = getCombustivelConfig(bruto);
       "Meta bruta total: <span class='" + (metaBrutaComGastos < 0 ? "dangerText" : "warning") + "'>R$ " + metaBrutaComGastos.toFixed(2) + "</span><br>" +
       "Meta bruta restante: <span class='" + (metaRestante < 0 ? "dangerText" : "warning") + "'>R$ " + metaRestante.toFixed(2) + "</span><br>" +
       "Meta diária (automática): <span class='" + (metaDiariaAuto < 0 ? "dangerText" : "warning") + "'>R$ " + metaDiariaAuto.toFixed(2) + "</span><br>" +
-      "Tempo para meta diária:<br>Tempo restante: <span class='" + (horasNecessarias < 0 ? "dangerText" : "warning") + "'>" + formatHorasMinutos(horasNecessarias) + "</span>";
+      "Tempo para meta diária: <span class='" + (horasNecessarias < 0 ? "dangerText" : "warning") + "'>" + formatHorasMinutos(horasNecessarias) + "</span>";
   }else{
     document.getElementById("statusMeta").innerHTML = "";
   }
@@ -7497,10 +7500,8 @@ if(document.readyState === "loading"){
 }
 // Em alguns celulares, ao voltar para o app (bfcache), reaplica o estado
 window.addEventListener("pageshow", ()=>{
-  try{ document.documentElement.setAttribute("data-md-bootlock","1"); }catch(e){}
   try{ initSectionCollapse(); }catch(e){}
   try{ applyQuickBalanceFabStateHard(); }catch(e){}
-  try{ document.documentElement.setAttribute("data-md-bootlock","0"); }catch(e){}
   // v57 - reforça restauração ao reabrir do cache do navegador
   try{ if(window.__mdRestoreScrollBurst) window.__mdRestoreScrollBurst(); else if(window.__mdRestoreScroll) window.__mdRestoreScroll(true); }catch(e){}
 });
