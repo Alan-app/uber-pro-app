@@ -18,7 +18,7 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver v88</title>
+<title>MetaDriver v89</title>
 <script>
 // v57 - correção de duplicação ao minimizar/restaurar + proteção de rolagem
 (function(){
@@ -2962,7 +2962,7 @@ const DEV_LOCAL_MODE = true;
   <div class="menu-item"><button class="secondary" onclick="abrirSaldoAtualButtonMenu(); closeMenu();">Botão de saldo atual</button></div>
   <div class="menu-item"><button class="secondary" onclick="abrirTemas(); closeMenu();">Temas</button></div>
   <div class="menu-item"><button class="danger" onclick="forceLogout(); return false;">Sair</button></div>
-  <div class="menu-note" style="text-align:center;">v88</div>
+  <div class="menu-note" style="text-align:center;">v89</div>
 </div>
 
 <div id="temasOverlay" class="temas-overlay" onclick="fecharTemas()"></div>
@@ -3847,18 +3847,34 @@ function cloudReadPendingSnapshot(){
 }
 
 
-function mdPersistImportedSnapshot(importedSnapshot, reason){
+let __mdStateLockUntil = 0;
+function mdLockStateWrites(ms){
+  try{ __mdStateLockUntil = Date.now() + Math.max(0, Number(ms || 0)); }catch(e){ __mdStateLockUntil = 0; }
+}
+function mdStateLocked(){
+  try{ return Date.now() < Number(__mdStateLockUntil || 0); }catch(e){ return false; }
+}
+function mdGetCurrentBestSeq(){
   try{
-    if(!importedSnapshot || typeof importedSnapshot !== "object") return false;
-    dados = JSON.parse(JSON.stringify(importedSnapshot));
+    const localBest = (typeof mdChooseBestLocalSnapshotSync === "function") ? mdChooseBestLocalSnapshotSync() : null;
+    const currentSeq = Number((dados && dados.__local_commit_seq) || 0);
+    const localSeq = Number((localBest && localBest.__local_commit_seq) || 0);
+    return Math.max(currentSeq, localSeq, 0);
+  }catch(e){ return Number((dados && dados.__local_commit_seq) || 0); }
+}
+function mdApplyExternalSnapshot(snapshot, reason, pushNow){
+  try{
+    if(!snapshot || typeof snapshot !== "object") return false;
+    const cloned = JSON.parse(JSON.stringify(snapshot));
+    dados = cloned;
     mdEnsureDataMeta(dados);
 
+    const bestSeq = mdGetCurrentBestSeq();
     dados.__rev = Number(dados.__rev || 0) + 1;
-    dados.__local_commit_seq = Number(dados.__local_commit_seq || 0) + 1;
+    dados.__local_commit_seq = Math.max(Number(dados.__local_commit_seq || 0), bestSeq) + 1;
     dados.__dirty_local = true;
     dados.__last_local_write_at = mdNowIso();
     dados.__updated_at = dados.__last_local_write_at;
-    dados.__cloud_updated_at = dados.__updated_at;
 
     const payload = JSON.stringify(dados);
     try{ localStorage.setItem(STORAGE_KEY, payload); }catch(e){}
@@ -3866,16 +3882,21 @@ function mdPersistImportedSnapshot(importedSnapshot, reason){
     try{ idbSet(IDB_KEY, payload); }catch(e){}
     try{ idbSet(DURABLE_STATE_KEY, payload); }catch(e){}
     try{ if(typeof mdWriteOfflineSafeSnapshot === "function") mdWriteOfflineSafeSnapshot(dados); }catch(e){}
-    try{ mdPushBackup(LOCAL_BACKUP_KEY, dados, reason || "import"); }catch(e){}
-    try{ mdAppendJournal(dados, reason || "import"); }catch(e){}
-    try{ cloudWritePendingSnapshot(JSON.parse(JSON.stringify(dados))); }catch(e){}
-    try{ __cloudDirty = true; }catch(e){}
+    try{ mdPushBackup(LOCAL_BACKUP_KEY, dados, reason || "external"); }catch(e){}
+    try{ mdAppendJournal(dados, reason || "external"); }catch(e){}
+
+    if(pushNow){
+      try{ cloudWritePendingSnapshot(JSON.parse(JSON.stringify(dados))); }catch(e){}
+      try{ __cloudDirty = true; }catch(e){}
+      try{ if(typeof cloudScheduleSave === "function") cloudScheduleSave(0); }catch(e){}
+    }
+
+    mdLockStateWrites(12000);
     try{ atualizar(); }catch(e){}
     try{ atualizarCarro(); }catch(e){}
-    try{ if(typeof cloudScheduleSave === "function") cloudScheduleSave(0); }catch(e){}
     return true;
   }catch(e){
-    try{ console.warn("mdPersistImportedSnapshot", e); }catch(_e){}
+    try{ console.warn("mdApplyExternalSnapshot", e); }catch(_e){}
     return false;
   }
 }
@@ -4205,6 +4226,10 @@ function cloudApplyRemoteData(remoteData){
     if(!remoteData || typeof remoteData !== "object") return;
     mdEnsureDataMeta(dados);
     mdEnsureDataMeta(remoteData);
+    if(mdStateLocked() && mdSnapshotOrderValue(remoteData) <= mdSnapshotOrderValue(dados)){
+      console.warn("MetaDriver: remoto ignorado por trava temporária de estado");
+      return;
+    }
     if(mdRemoteWouldRollback(remoteData)){
       console.warn("MetaDriver: remoto ignorado para evitar rollback local");
       return;
@@ -4445,10 +4470,9 @@ async function mdInitialHydrateAndRender(){
         const remoteWrapped = mdUnwrapCloudPayload(remoteRow && remoteRow.payload ? remoteRow.payload : null);
         const remoteSnapshot = remoteWrapped.snapshot;
         if(remoteSnapshot && cloudHasUsefulData(remoteSnapshot)){
-          dados = JSON.parse(JSON.stringify(remoteSnapshot));
-          mdEnsureDataMeta(dados);
-          try{ mdWriteOfflineSafeSnapshot(dados); }catch(e){}
-          if(window.__salvarLocalOriginal) window.__salvarLocalOriginal();
+          if(!(mdStateLocked() && mdSnapshotOrderValue(remoteSnapshot) <= mdSnapshotOrderValue(dados))){
+            mdApplyExternalSnapshot(remoteSnapshot, "remote-hydrate", false);
+          }
         }
       }
     }
@@ -5300,11 +5324,7 @@ function importarBackup(ev){
         valor: Number(a.valor) || 0
       })).filter(a => a.valor >= 0);
 
-      
-      // Carro / Manutenção
       const carroIn = (novoDados.carro && typeof novoDados.carro === "object") ? novoDados.carro : {};
-
-      // KM atual pode vir em formatos diferentes (compat)
       let kmObj = null;
       if(carroIn.kmAtual && typeof carroIn.kmAtual === "object"){
         const kmN = Number(carroIn.kmAtual.km ?? carroIn.kmAtual.kmAtual) || 0;
@@ -5315,9 +5335,7 @@ function importarBackup(ev){
         const d  = String(carroIn.dataKm ?? carroIn.data ?? "") || "";
         kmObj = { km: kmN, data: (/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(d) ? d : "") };
       }
-
       const manutIn = Array.isArray(carroIn.manut) ? carroIn.manut : [];
-
       safe.carro = {
         kmAtual: kmObj,
         manut: manutIn.map(m => ({
@@ -5330,8 +5348,7 @@ function importarBackup(ev){
           concluida: !!m.concluida
         })).filter(m => m.km > 0 && m.desc)
       };
-
-safe.naoTrabalhados = (safe.naoTrabalhados || []).map(n => ({
+      safe.naoTrabalhados = (safe.naoTrabalhados || []).map(n => ({
         data: (n.data && String(n.data)) || hojeISO(),
         motivo: (n.motivo && String(n.motivo)) || "Dia não trabalhado"
       })).filter(n => /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(n.data));
@@ -5339,34 +5356,16 @@ safe.naoTrabalhados = (safe.naoTrabalhados || []).map(n => ({
       const ok = confirm("Importar vai SUBSTITUIR seus dados atuais por esse backup. Confirmar?");
       if(!ok) return;
 
-      dados = safe;
-      ensureCarro();
-      // v57: garantir seq alto para que import ganhe em qualquer comparação
-      dados.__local_commit_seq = Number(dados.__local_commit_seq || 0) + 1000;
-      dados.__last_local_write_at = mdNowIso();
-      dados.__updated_at = dados.__last_local_write_at;
-      dados.__dirty_local = true;
-      
-      
-      try{ atualizarCarro(); }catch(e){}
-      // v57: após importar, apenas sobe o novo estado; não rearma restore remoto automático
-      try{
-        __cloudDirty = true;
-        cloudWritePendingSnapshot(JSON.parse(JSON.stringify(dados)));
-        cloudPushNow();
-      }catch(e){}
+      const applied = mdApplyExternalSnapshot(safe, "import-backup", true);
+      if(!applied) throw new Error("Falha ao aplicar backup");
       toast("✅ Backup importado com sucesso.");
       closeMenu();
     }catch(e){
+      try{ console.warn("importarBackup", e); }catch(_e){}
       toast("❌ Arquivo inválido. Escolha um backup .json exportado pelo app.");
     }
   };
   reader.readAsText(file, "utf-8");
-  try{
-    if(typeof imported !== "undefined" && imported) return mdPersistImportedSnapshot(imported, "import-backup");
-    if(typeof parsed !== "undefined" && parsed) return mdPersistImportedSnapshot(parsed, "import-backup");
-  }catch(e){}
-
 }
 
 function zerarTudo(){
