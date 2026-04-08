@@ -18,7 +18,7 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver v74</title>
+<title>MetaDriver v71</title>
 <script>
 // v57 - correção de duplicação ao minimizar/restaurar + proteção de rolagem
 (function(){
@@ -223,7 +223,7 @@ setInterval(function(){
 document.addEventListener("DOMContentLoaded", function(){ try{ renderSyncDiagnostic(); }catch(e){} });
 window.addEventListener("focus", function(){ try{ renderSyncDiagnostic(); }catch(e){} });
 window.addEventListener("online", function(){ try{ renderSyncDiagnostic(); }catch(e){} });
-window.addEventListener("pageshow", function(){ try{ renderSyncDiagnostic(); }catch(e){} try{ if(typeof cloudScheduleSave === "function") cloudScheduleSave(true); }catch(e){} });
+window.addEventListener("pageshow", function(){ try{ renderSyncDiagnostic(); }catch(e){} });
 </script>
 
 <style>
@@ -2765,19 +2765,13 @@ body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff9d0; }
 
 /* v71 - diagnóstico de sincronização */
 .sync-diagnostic-bar{
-  position: fixed;
-  bottom: 10px;
-  left: 10px;
-  right: 10px;
-  z-index: 9999;
-  max-height: 40vh;
-  overflow-y: auto;
-  padding: 10px 12px;
-  border-radius: 12px;
-  background: rgba(0,0,0,0.85);
-  border: 1px solid rgba(255,255,255,0.15);
-  font-size: 12px;
-  line-height: 1.45;
+  margin-top:10px;
+  padding:10px 12px;
+  border-radius:12px;
+  background:rgba(255,255,255,0.05);
+  border:1px solid rgba(255,255,255,0.10);
+  font-size:12px;
+  line-height:1.45;
 }
 .sync-diagnostic-bar strong{ color:#fff; }
 .sync-diagnostic-grid{
@@ -2987,7 +2981,7 @@ const DEV_LOCAL_MODE = true;
   <div class="menu-item"><button class="secondary" onclick="abrirSaldoAtualButtonMenu(); closeMenu();">Botão de saldo atual</button></div>
   <div class="menu-item"><button class="secondary" onclick="abrirTemas(); closeMenu();">Temas</button></div>
   <div class="menu-item"><button class="danger" onclick="forceLogout(); return false;">Sair</button></div>
-  <div class="menu-note" style="text-align:center;">v74</div>
+  <div class="menu-note" style="text-align:center;">v71</div>
 
 <div id="syncDiagnosticBar" class="sync-diagnostic-bar">
   <strong>Diagnóstico de sync</strong>
@@ -3418,8 +3412,6 @@ function renderSyncDiagnostic(){
     try{ cloudDirty = (typeof __cloudDirty !== "undefined") ? String(!!__cloudDirty) : "—"; }catch(e){ cloudDirty = "—"; }
     try{ pending = localStorage.getItem("cloud_pending_snapshot") || localStorage.getItem("pending_snapshot") || ""; }catch(e){ pending = ""; }
 
-    const lastPush = (function(){ try{ return localStorage.getItem("md_last_cloud_push_ts") || ""; }catch(e){ return ""; } })();
-    const lastDirty = (function(){ try{ return localStorage.getItem("md_last_cloud_dirty_ts") || ""; }catch(e){ return ""; } })();
     const lines = [
       '<div><span class="sync-diagnostic-tag">arquivo</span>' + appFile + '</div>',
       '<div><span class="sync-diagnostic-tag">token</span>' + (token ? 'ok' : 'ausente') + '</div>',
@@ -3429,8 +3421,6 @@ function renderSyncDiagnostic(){
       '<div><span class="sync-diagnostic-tag">offline-safe</span>' + (offlineSafeRaw ? 'ok' : 'vazio') + '</div>',
       '<div><span class="sync-diagnostic-tag">cloudDirty</span>' + cloudDirty + '</div>',
       '<div><span class="sync-diagnostic-tag">pending</span>' + (pending ? 'sim' : 'não') + '</div>',
-      '<div><span class="sync-diagnostic-tag">último dirty</span>' + (lastDirty || '—') + '</div>',
-      '<div><span class="sync-diagnostic-tag">último push</span>' + (lastPush || '—') + '</div>',
       '<div><span class="sync-diagnostic-tag">ordem local</span>' + (localOrder || '—') + '</div>',
       '<div><span class="sync-diagnostic-tag">ordem remota</span>' + (remoteOrder || '—') + '</div>'
     ];
@@ -3892,10 +3882,6 @@ function salvar(){
     }catch(_){ }
   }
   try{ renderSyncDiagnostic(); }catch(e){}
-
-  try{ __cloudDirty = true; }catch(e){}
-  try{ localStorage.setItem("md_last_cloud_dirty_ts", new Date().toLocaleString("pt-BR")); }catch(e){}
-  try{ if(typeof cloudScheduleSave === "function") cloudScheduleSave(); }catch(e){}
 
 }
 window.__salvarLocalOriginal = salvar;
@@ -4906,20 +4892,12 @@ function salvarMeta(){
   atualizar();
       try{ atualizarCarro(); }catch(e){}
 
-  try{ __cloudDirty = true; }catch(e){}
-  try{ localStorage.setItem("md_last_cloud_dirty_ts", new Date().toLocaleString("pt-BR")); }catch(e){}
-  try{ if(typeof cloudScheduleSave === "function") cloudScheduleSave(); }catch(e){}
-
 }
 
 function salvarHoras(){
   dados.ganhoHoraManual = parseFloat(document.getElementById("ganhoHoraManual").value) || 40;
   salvar();
   atualizar();
-  try{ __cloudDirty = true; }catch(e){}
-  try{ localStorage.setItem("md_last_cloud_dirty_ts", new Date().toLocaleString("pt-BR")); }catch(e){}
-  try{ if(typeof cloudScheduleSave === "function") cloudScheduleSave(); }catch(e){}
-
 }
 
 
@@ -4967,10 +4945,6 @@ function addGanho(){
     document.getElementById("valorGanho").value="";
     document.getElementById("formGanho").classList.remove("open");
   }
-  try{ __cloudDirty = true; }catch(e){}
-  try{ localStorage.setItem("md_last_cloud_dirty_ts", new Date().toLocaleString("pt-BR")); }catch(e){}
-  try{ if(typeof cloudScheduleSave === "function") cloudScheduleSave(); }catch(e){}
-
 }
 
 
@@ -5030,10 +5004,6 @@ function syncGanhoDoSaldoRapido(valorSaldoAtual, uberPart, n99Part){
       n99: 0
     });
   }
-  try{ __cloudDirty = true; }catch(e){}
-  try{ localStorage.setItem("md_last_cloud_dirty_ts", new Date().toLocaleString("pt-BR")); }catch(e){}
-  try{ if(typeof cloudScheduleSave === "function") cloudScheduleSave(); }catch(e){}
-
 }
 
 
@@ -5054,10 +5024,6 @@ function addGasto(){
     document.getElementById("descGasto").value="";
     document.getElementById("formGasto").classList.remove("open");
   }
-  try{ __cloudDirty = true; }catch(e){}
-  try{ localStorage.setItem("md_last_cloud_dirty_ts", new Date().toLocaleString("pt-BR")); }catch(e){}
-  try{ if(typeof cloudScheduleSave === "function") cloudScheduleSave(); }catch(e){}
-
 }
 
 
@@ -5071,10 +5037,6 @@ function addAbastecimento(){
     document.getElementById("valorAbastecimento").value="";
     document.getElementById("formAbastecimento").classList.remove("open");
   }
-  try{ __cloudDirty = true; }catch(e){}
-  try{ localStorage.setItem("md_last_cloud_dirty_ts", new Date().toLocaleString("pt-BR")); }catch(e){}
-  try{ if(typeof cloudScheduleSave === "function") cloudScheduleSave(); }catch(e){}
-
 }
 
 
@@ -6091,10 +6053,6 @@ function salvarGanhosForaTempoReal(){
 
   salvar();
   atualizar();
-  try{ __cloudDirty = true; }catch(e){}
-  try{ localStorage.setItem("md_last_cloud_dirty_ts", new Date().toLocaleString("pt-BR")); }catch(e){}
-  try{ if(typeof cloudScheduleSave === "function") cloudScheduleSave(); }catch(e){}
-
 }
 
 function finalizarSessaoGanhoHora(){

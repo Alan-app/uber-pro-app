@@ -18,8 +18,39 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver v74</title>
+<title>MetaDriver v75</title>
 <script>
+
+/* v75 API DIAGNOSTIC */
+let __lastFetchStatus = "";
+let __lastFetchError = "";
+let __lastSaveStatus = "";
+let __lastSaveError = "";
+
+async function mdDiagFetchWrapper(fn){
+  try{
+    const res = await fn();
+    __lastFetchStatus = "ok";
+    return res;
+  }catch(e){
+    __lastFetchStatus = "erro";
+    __lastFetchError = String(e);
+    throw e;
+  }
+}
+
+async function mdDiagSaveWrapper(fn){
+  try{
+    const res = await fn();
+    __lastSaveStatus = "ok";
+    return res;
+  }catch(e){
+    __lastSaveStatus = "erro";
+    __lastSaveError = String(e);
+    throw e;
+  }
+}
+
 // v57 - correção de duplicação ao minimizar/restaurar + proteção de rolagem
 (function(){
   var KEY_Y = 'md_scroll_y';
@@ -223,7 +254,7 @@ setInterval(function(){
 document.addEventListener("DOMContentLoaded", function(){ try{ renderSyncDiagnostic(); }catch(e){} });
 window.addEventListener("focus", function(){ try{ renderSyncDiagnostic(); }catch(e){} });
 window.addEventListener("online", function(){ try{ renderSyncDiagnostic(); }catch(e){} });
-window.addEventListener("pageshow", function(){ try{ renderSyncDiagnostic(); }catch(e){} try{ if(typeof cloudScheduleSave === "function") cloudScheduleSave(true); }catch(e){} });
+window.addEventListener("pageshow", function(){ try{ renderSyncDiagnostic(); }catch(e){} });
 </script>
 
 <style>
@@ -2987,7 +3018,7 @@ const DEV_LOCAL_MODE = true;
   <div class="menu-item"><button class="secondary" onclick="abrirSaldoAtualButtonMenu(); closeMenu();">Botão de saldo atual</button></div>
   <div class="menu-item"><button class="secondary" onclick="abrirTemas(); closeMenu();">Temas</button></div>
   <div class="menu-item"><button class="danger" onclick="forceLogout(); return false;">Sair</button></div>
-  <div class="menu-note" style="text-align:center;">v74</div>
+  <div class="menu-note" style="text-align:center;">v75</div>
 
 <div id="syncDiagnosticBar" class="sync-diagnostic-bar">
   <strong>Diagnóstico de sync</strong>
@@ -3418,10 +3449,17 @@ function renderSyncDiagnostic(){
     try{ cloudDirty = (typeof __cloudDirty !== "undefined") ? String(!!__cloudDirty) : "—"; }catch(e){ cloudDirty = "—"; }
     try{ pending = localStorage.getItem("cloud_pending_snapshot") || localStorage.getItem("pending_snapshot") || ""; }catch(e){ pending = ""; }
 
-    const lastPush = (function(){ try{ return localStorage.getItem("md_last_cloud_push_ts") || ""; }catch(e){ return ""; } })();
-    const lastDirty = (function(){ try{ return localStorage.getItem("md_last_cloud_dirty_ts") || ""; }catch(e){ return ""; } })();
-    const lines = [
+    const fetchStatus = (typeof __lastFetchStatus!=="undefined")?__lastFetchStatus:"";
+const fetchError = (typeof __lastFetchError!=="undefined")?__lastFetchError:"";
+const saveStatus = (typeof __lastSaveStatus!=="undefined")?__lastSaveStatus:"";
+const saveError = (typeof __lastSaveError!=="undefined")?__lastSaveError:"";
+
+const lines = [
       '<div><span class="sync-diagnostic-tag">arquivo</span>' + appFile + '</div>',
+'<div><span class="sync-diagnostic-tag">fetch</span>'+ (fetchStatus||'—') +'</div>',
+'<div><span class="sync-diagnostic-tag">fetch erro</span>'+ (fetchError||'—') +'</div>',
+'<div><span class="sync-diagnostic-tag">save</span>'+ (saveStatus||'—') +'</div>',
+'<div><span class="sync-diagnostic-tag">save erro</span>'+ (saveError||'—') +'</div>',
       '<div><span class="sync-diagnostic-tag">token</span>' + (token ? 'ok' : 'ausente') + '</div>',
       '<div><span class="sync-diagnostic-tag">userId</span>' + (userId ? userId : 'ausente') + '</div>',
       '<div><span class="sync-diagnostic-tag">local</span>' + (localRaw ? 'ok' : 'vazio') + '</div>',
@@ -3429,8 +3467,6 @@ function renderSyncDiagnostic(){
       '<div><span class="sync-diagnostic-tag">offline-safe</span>' + (offlineSafeRaw ? 'ok' : 'vazio') + '</div>',
       '<div><span class="sync-diagnostic-tag">cloudDirty</span>' + cloudDirty + '</div>',
       '<div><span class="sync-diagnostic-tag">pending</span>' + (pending ? 'sim' : 'não') + '</div>',
-      '<div><span class="sync-diagnostic-tag">último dirty</span>' + (lastDirty || '—') + '</div>',
-      '<div><span class="sync-diagnostic-tag">último push</span>' + (lastPush || '—') + '</div>',
       '<div><span class="sync-diagnostic-tag">ordem local</span>' + (localOrder || '—') + '</div>',
       '<div><span class="sync-diagnostic-tag">ordem remota</span>' + (remoteOrder || '—') + '</div>'
     ];
@@ -3892,10 +3928,6 @@ function salvar(){
     }catch(_){ }
   }
   try{ renderSyncDiagnostic(); }catch(e){}
-
-  try{ __cloudDirty = true; }catch(e){}
-  try{ localStorage.setItem("md_last_cloud_dirty_ts", new Date().toLocaleString("pt-BR")); }catch(e){}
-  try{ if(typeof cloudScheduleSave === "function") cloudScheduleSave(); }catch(e){}
 
 }
 window.__salvarLocalOriginal = salvar;
@@ -4906,20 +4938,12 @@ function salvarMeta(){
   atualizar();
       try{ atualizarCarro(); }catch(e){}
 
-  try{ __cloudDirty = true; }catch(e){}
-  try{ localStorage.setItem("md_last_cloud_dirty_ts", new Date().toLocaleString("pt-BR")); }catch(e){}
-  try{ if(typeof cloudScheduleSave === "function") cloudScheduleSave(); }catch(e){}
-
 }
 
 function salvarHoras(){
   dados.ganhoHoraManual = parseFloat(document.getElementById("ganhoHoraManual").value) || 40;
   salvar();
   atualizar();
-  try{ __cloudDirty = true; }catch(e){}
-  try{ localStorage.setItem("md_last_cloud_dirty_ts", new Date().toLocaleString("pt-BR")); }catch(e){}
-  try{ if(typeof cloudScheduleSave === "function") cloudScheduleSave(); }catch(e){}
-
 }
 
 
@@ -4967,10 +4991,6 @@ function addGanho(){
     document.getElementById("valorGanho").value="";
     document.getElementById("formGanho").classList.remove("open");
   }
-  try{ __cloudDirty = true; }catch(e){}
-  try{ localStorage.setItem("md_last_cloud_dirty_ts", new Date().toLocaleString("pt-BR")); }catch(e){}
-  try{ if(typeof cloudScheduleSave === "function") cloudScheduleSave(); }catch(e){}
-
 }
 
 
@@ -5030,10 +5050,6 @@ function syncGanhoDoSaldoRapido(valorSaldoAtual, uberPart, n99Part){
       n99: 0
     });
   }
-  try{ __cloudDirty = true; }catch(e){}
-  try{ localStorage.setItem("md_last_cloud_dirty_ts", new Date().toLocaleString("pt-BR")); }catch(e){}
-  try{ if(typeof cloudScheduleSave === "function") cloudScheduleSave(); }catch(e){}
-
 }
 
 
@@ -5054,10 +5070,6 @@ function addGasto(){
     document.getElementById("descGasto").value="";
     document.getElementById("formGasto").classList.remove("open");
   }
-  try{ __cloudDirty = true; }catch(e){}
-  try{ localStorage.setItem("md_last_cloud_dirty_ts", new Date().toLocaleString("pt-BR")); }catch(e){}
-  try{ if(typeof cloudScheduleSave === "function") cloudScheduleSave(); }catch(e){}
-
 }
 
 
@@ -5071,10 +5083,6 @@ function addAbastecimento(){
     document.getElementById("valorAbastecimento").value="";
     document.getElementById("formAbastecimento").classList.remove("open");
   }
-  try{ __cloudDirty = true; }catch(e){}
-  try{ localStorage.setItem("md_last_cloud_dirty_ts", new Date().toLocaleString("pt-BR")); }catch(e){}
-  try{ if(typeof cloudScheduleSave === "function") cloudScheduleSave(); }catch(e){}
-
 }
 
 
@@ -6091,10 +6099,6 @@ function salvarGanhosForaTempoReal(){
 
   salvar();
   atualizar();
-  try{ __cloudDirty = true; }catch(e){}
-  try{ localStorage.setItem("md_last_cloud_dirty_ts", new Date().toLocaleString("pt-BR")); }catch(e){}
-  try{ if(typeof cloudScheduleSave === "function") cloudScheduleSave(); }catch(e){}
-
 }
 
 function finalizarSessaoGanhoHora(){
