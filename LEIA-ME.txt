@@ -422,3 +422,44 @@ ARQUIVOS ALTERADOS:
 
 STATUS:
 - Aguardando teste — testar: import+minimize, reinstalação, login zerado, dia seguinte
+
+
+VERSÃO v84 - fix-critico-urls-supabase-v57
+
+FEEDBACK DA v83:
+- Reinstalar o app zera tudo — dados não são restaurados da nuvem
+- App inicia zerado após reinstalação mesmo com dados no banco
+
+CAUSA RAIZ IDENTIFICADA — BUG CRÍTICO DE URL:
+O ChatGPT introduziu um erro nas URLs da API do Supabase:
+  ERRADO: /auth/v57/token  (não existe)
+  ERRADO: /auth/v57/user   (não existe)
+  ERRADO: /rest/v57/app_cloud_data  (não existe)
+  CORRETO: /auth/v1/token
+  CORRETO: /auth/v1/user
+  CORRETO: /rest/v1/app_cloud_data
+
+Isso quebrava silenciosamente:
+1. Renovação de token → cloudGetToken() retornava vazio
+2. Busca do userId → cloudResolveUserId() falhava → cloudBoot parava
+3. Leitura da nuvem → dados não carregavam ao reinstalar
+4. Escrita na nuvem → dados não subiam → perda total ao reinstalar
+
+O app funcionava parcialmente porque o login.html usava a URL correta (/auth/v1/)
+e salvava o token no localStorage. Mas qualquer operação subsequente de sync falhava.
+
+O QUE FOI FEITO:
+- Corrigidas as 4 URLs: /auth/v57/ → /auth/v1/ e /rest/v57/ → /rest/v1/
+- Atualizada versão para v84 em todos os arquivos
+
+ARQUIVOS ALTERADOS:
+- app30_app.html
+- index.html
+- login.html
+- admin.html
+- painel.html
+- reset.html
+- LEIA-ME.txt
+
+STATUS:
+- Aguardando teste — testar reinstalação e recuperação de dados da nuvem
