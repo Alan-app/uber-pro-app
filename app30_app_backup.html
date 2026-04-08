@@ -18,7 +18,7 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver v71</title>
+<title>MetaDriver v76</title>
 <script>
 // v57 - correção de duplicação ao minimizar/restaurar + proteção de rolagem
 (function(){
@@ -2765,13 +2765,19 @@ body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff9d0; }
 
 /* v71 - diagnóstico de sincronização */
 .sync-diagnostic-bar{
-  margin-top:10px;
-  padding:10px 12px;
-  border-radius:12px;
-  background:rgba(255,255,255,0.05);
-  border:1px solid rgba(255,255,255,0.10);
-  font-size:12px;
-  line-height:1.45;
+  position: fixed;
+  bottom: 10px;
+  left: 10px;
+  right: 10px;
+  z-index: 9999;
+  max-height: 40vh;
+  overflow-y: auto;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(0,0,0,0.85);
+  border: 1px solid rgba(255,255,255,0.15);
+  font-size: 12px;
+  line-height: 1.45;
 }
 .sync-diagnostic-bar strong{ color:#fff; }
 .sync-diagnostic-grid{
@@ -2981,7 +2987,7 @@ const DEV_LOCAL_MODE = true;
   <div class="menu-item"><button class="secondary" onclick="abrirSaldoAtualButtonMenu(); closeMenu();">Botão de saldo atual</button></div>
   <div class="menu-item"><button class="secondary" onclick="abrirTemas(); closeMenu();">Temas</button></div>
   <div class="menu-item"><button class="danger" onclick="forceLogout(); return false;">Sair</button></div>
-  <div class="menu-note" style="text-align:center;">v71</div>
+  <div class="menu-note" style="text-align:center;">v76</div>
 
 <div id="syncDiagnosticBar" class="sync-diagnostic-bar">
   <strong>Diagnóstico de sync</strong>
@@ -3362,6 +3368,38 @@ const DEV_LOCAL_MODE = true;
 })();
 
 const STORAGE_KEY = "controleUberProDados";
+
+/* v76 - diagnóstico real de API */
+window.__mdApiDiag = window.__mdApiDiag || {
+  fetchStatus: "",
+  fetchError: "",
+  saveStatus: "",
+  saveError: "",
+  lastFetchAt: "",
+  lastSaveAt: "",
+  lastFetchInfo: "",
+  lastSaveInfo: ""
+};
+function mdDiagStamp(){
+  try{ return new Date().toLocaleString("pt-BR"); }catch(e){ return ""; }
+}
+function mdDiagSetFetch(status, error, info){
+  try{
+    __mdApiDiag.fetchStatus = status || "";
+    __mdApiDiag.fetchError = error || "";
+    __mdApiDiag.lastFetchAt = mdDiagStamp();
+    __mdApiDiag.lastFetchInfo = info || "";
+  }catch(e){}
+}
+function mdDiagSetSave(status, error, info){
+  try{
+    __mdApiDiag.saveStatus = status || "";
+    __mdApiDiag.saveError = error || "";
+    __mdApiDiag.lastSaveAt = mdDiagStamp();
+    __mdApiDiag.lastSaveInfo = info || "";
+  }catch(e){}
+}
+
 
 /* v71 - diagnóstico de sincronização */
 function mdDiagGetRemoteOrder(){
@@ -4147,7 +4185,9 @@ function cloudHasUsefulData(obj){
   }catch(e){ return false; }
 }
 
-async function cloudFetchRow(token, userId){
+async function cloudFetchRow(token, userId){  try{ mdDiagSetFetch("start", "", "cloudFetchRow"); }catch(e){
+    try{ mdDiagSetFetch("erro", String(e), "exception"); }catch(_e){}}
+
   const res = await fetch(
     CLOUD_SUPABASE_URL + "/rest/v57/" + CLOUD_TABLE + "?select=payload,updated_at&user_id=eq." + encodeURIComponent(userId),
     {
@@ -4402,7 +4442,9 @@ async function cloudPushNow(snapshotOverride){
 }
 
 let __cloudSaveRetries = 0;
-function cloudScheduleSave(delayMs){
+function cloudScheduleSave(delayMs){  try{ mdDiagSetSave("start", "", "cloudScheduleSave"); }catch(e){
+    try{ mdDiagSetSave("erro", String(e), "cloudScheduleSave exception"); }catch(_e){}}
+
   clearTimeout(__cloudSaveTimer);
   const wait = typeof delayMs === "number" ? delayMs : 180;
   __cloudSaveTimer = setTimeout(async function(){
