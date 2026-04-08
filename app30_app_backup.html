@@ -18,7 +18,7 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver v84</title>
+<title>MetaDriver v86</title>
 <script>
 // v57 - correção de duplicação ao minimizar/restaurar + proteção de rolagem
 (function(){
@@ -3821,7 +3821,17 @@ salvar = function(){
   const r = window.__salvarLocalOriginal.apply(this, arguments);
   try{
     if(typeof dados === "object" && dados){
-      cloudWritePendingSnapshot(JSON.parse(JSON.stringify(dados)));
+      
+cloudWritePendingSnapshot(JSON.parse(
+try{
+  if(typeof cloudSendNow === "function"){
+    cloudSendNow();
+  }else if(typeof cloudScheduleSave === "function"){
+    cloudScheduleSave(0);
+  }
+}catch(e){}
+
+JSON.stringify(dados)));
     }
   }catch(e){}
   __cloudDirty = true;
@@ -3969,7 +3979,9 @@ async function mdRunRollbackSelfTest(){
     try{ if(typeof window.__salvarLocalOriginal === 'function') window.__salvarLocalOriginal(); }catch(e){}
     const pendingBefore = cloudReadPendingSnapshot();
     if(!(pendingBefore && pendingBefore.payload && cloudHasUsefulData(pendingBefore.payload))){
-      cloudWritePendingSnapshot(JSON.parse(JSON.stringify(dados)));
+      
+cloudWritePendingSnapshot(JSON.parse(
+JSON.stringify(dados)));
     }
     const fakeRemote = JSON.parse(JSON.stringify(dados || {}));
     mdEnsureDataMeta(fakeRemote);
@@ -4396,12 +4408,16 @@ async function cloudBoot(force){
       dados = JSON.parse(JSON.stringify(localBest));
       mdEnsureDataMeta(dados);
       if(window.__salvarLocalOriginal) window.__salvarLocalOriginal();
-      cloudWritePendingSnapshot(JSON.parse(JSON.stringify(dados)));
+      
+cloudWritePendingSnapshot(JSON.parse(
+JSON.stringify(dados)));
       cloudScheduleSave(120);
     }
 
     if(cloudHasUsefulData(dados)){
-      cloudWritePendingSnapshot(JSON.parse(JSON.stringify(dados)));
+      
+cloudWritePendingSnapshot(JSON.parse(
+JSON.stringify(dados)));
       cloudScheduleSave(120);
     }
     __cloudBootDoneOnce = false;
@@ -5340,7 +5356,9 @@ safe.naoTrabalhados = (safe.naoTrabalhados || []).map(n => ({
       // v57: após importar, apenas sobe o novo estado; não rearma restore remoto automático
       try{
         __cloudDirty = true;
-        cloudWritePendingSnapshot(JSON.parse(JSON.stringify(dados)));
+        
+cloudWritePendingSnapshot(JSON.parse(
+JSON.stringify(dados)));
         cloudPushNow();
       }catch(e){}
       toast("✅ Backup importado com sucesso.");
