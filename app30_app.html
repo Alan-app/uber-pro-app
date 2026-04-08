@@ -233,17 +233,6 @@ window.addEventListener("pageshow", function(){
   try{ mdInitialHydrateAndRender(); }catch(e){}
 });
 
-
-window.addEventListener("load", function(){
-  try{ cloudBoot(true); }catch(e){}
-});
-window.addEventListener("focus", function(){
-  try{ cloudBoot(true); }catch(e){}
-});
-window.addEventListener("online", function(){
-  try{ cloudBoot(true); }catch(e){}
-});
-
 </script>
 
 <style>
@@ -2922,17 +2911,6 @@ const DEV_LOCAL_MODE = true;
     }
   });
 })();
-
-window.addEventListener("load", function(){
-  try{ cloudBoot(true); }catch(e){}
-});
-window.addEventListener("focus", function(){
-  try{ cloudBoot(true); }catch(e){}
-});
-window.addEventListener("online", function(){
-  try{ cloudBoot(true); }catch(e){}
-});
-
 </script>
 
 </head>
@@ -2984,7 +2962,7 @@ window.addEventListener("online", function(){
   <div class="menu-item"><button class="secondary" onclick="abrirSaldoAtualButtonMenu(); closeMenu();">Botão de saldo atual</button></div>
   <div class="menu-item"><button class="secondary" onclick="abrirTemas(); closeMenu();">Temas</button></div>
   <div class="menu-item"><button class="danger" onclick="forceLogout(); return false;">Sair</button></div>
-  <div class="menu-note" style="text-align:center;">v83</div>
+  <div class="menu-note" style="text-align:center;">v86</div>
 </div>
 
 <div id="temasOverlay" class="temas-overlay" onclick="fecharTemas()"></div>
@@ -3821,17 +3799,7 @@ salvar = function(){
   const r = window.__salvarLocalOriginal.apply(this, arguments);
   try{
     if(typeof dados === "object" && dados){
-      
-cloudWritePendingSnapshot(JSON.parse(
-try{
-  if(typeof cloudSendNow === "function"){
-    cloudSendNow();
-  }else if(typeof cloudScheduleSave === "function"){
-    cloudScheduleSave(0);
-  }
-}catch(e){}
-
-JSON.stringify(dados)));
+      cloudWritePendingSnapshot(JSON.parse(JSON.stringify(dados)));
     }
   }catch(e){}
   __cloudDirty = true;
@@ -3979,9 +3947,7 @@ async function mdRunRollbackSelfTest(){
     try{ if(typeof window.__salvarLocalOriginal === 'function') window.__salvarLocalOriginal(); }catch(e){}
     const pendingBefore = cloudReadPendingSnapshot();
     if(!(pendingBefore && pendingBefore.payload && cloudHasUsefulData(pendingBefore.payload))){
-      
-cloudWritePendingSnapshot(JSON.parse(
-JSON.stringify(dados)));
+      cloudWritePendingSnapshot(JSON.parse(JSON.stringify(dados)));
     }
     const fakeRemote = JSON.parse(JSON.stringify(dados || {}));
     mdEnsureDataMeta(fakeRemote);
@@ -4408,19 +4374,15 @@ async function cloudBoot(force){
       dados = JSON.parse(JSON.stringify(localBest));
       mdEnsureDataMeta(dados);
       if(window.__salvarLocalOriginal) window.__salvarLocalOriginal();
-      
-cloudWritePendingSnapshot(JSON.parse(
-JSON.stringify(dados)));
+      cloudWritePendingSnapshot(JSON.parse(JSON.stringify(dados)));
       cloudScheduleSave(120);
     }
 
     if(cloudHasUsefulData(dados)){
-      
-cloudWritePendingSnapshot(JSON.parse(
-JSON.stringify(dados)));
+      cloudWritePendingSnapshot(JSON.parse(JSON.stringify(dados)));
       cloudScheduleSave(120);
     }
-    __cloudBootDoneOnce = false;
+    __cloudBootDoneOnce = true;
   }catch(e){
     console.warn("cloudBoot", e);
   }finally{
@@ -5356,9 +5318,7 @@ safe.naoTrabalhados = (safe.naoTrabalhados || []).map(n => ({
       // v57: após importar, apenas sobe o novo estado; não rearma restore remoto automático
       try{
         __cloudDirty = true;
-        
-cloudWritePendingSnapshot(JSON.parse(
-JSON.stringify(dados)));
+        cloudWritePendingSnapshot(JSON.parse(JSON.stringify(dados)));
         cloudPushNow();
       }catch(e){}
       toast("✅ Backup importado com sucesso.");
@@ -8653,17 +8613,6 @@ window.addEventListener("load", function(){
       pararTimerGanhoHoraTempoReal();
     }
   }catch(e){}
-});
-
-
-window.addEventListener("load", function(){
-  try{ cloudBoot(true); }catch(e){}
-});
-window.addEventListener("focus", function(){
-  try{ cloudBoot(true); }catch(e){}
-});
-window.addEventListener("online", function(){
-  try{ cloudBoot(true); }catch(e){}
 });
 
 </script>
