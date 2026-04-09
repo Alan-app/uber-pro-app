@@ -18,7 +18,7 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver v114</title>
+<title>MetaDriver v115</title>
 <script>
 // v57 - correção de duplicação ao minimizar/restaurar + proteção de rolagem
 (function(){
@@ -229,6 +229,30 @@ window.addEventListener("online", function(){
 window.addEventListener("pageshow", function(){
   try{ mdResumeRestoreSafely(); }catch(e){}
 });
+
+
+/* v115 minimal debug */
+window.__mdDebugState = window.__mdDebugState || {};
+function mdDebugSet(key, value){
+  try{
+    window.__mdDebugState[key] = value;
+    localStorage.setItem("md_debug_v115", JSON.stringify(window.__mdDebugState));
+  }catch(e){}
+}
+function mdDebugDump(){
+  try{
+    const cur = JSON.parse(localStorage.getItem("md_debug_v115") || "{}");
+    alert(JSON.stringify(cur, null, 2));
+  }catch(e){
+    alert("Sem debug disponível");
+  }
+}
+(function(){
+  try{
+    const cur = JSON.parse(localStorage.getItem("md_debug_v115") || "{}");
+    if(cur && typeof cur === "object") window.__mdDebugState = cur;
+  }catch(e){}
+})();
 
 </script>
 
@@ -881,45 +905,6 @@ input.negative-value, input.negative-value::placeholder{
   overflow:hidden;
   text-overflow:ellipsis;
 }
-
-/* v114 diag */
-.md-diag-fab{
-  position:fixed !important;
-  left:12px !important;
-  bottom:12px !important;
-  z-index:999999 !important;
-  width:auto !important;
-  min-width:64px !important;
-  height:42px !important;
-  padding:0 14px !important;
-  border:none !important;
-  border-radius:999px !important;
-  background:#111827 !important;
-  color:#fff !important;
-  font-weight:900 !important;
-  box-shadow:0 10px 24px rgba(0,0,0,.35) !important;
-}
-.md-diag-overlay{
-  position:fixed; inset:0; z-index:999997; background:rgba(0,0,0,.6); display:none;
-}
-.md-diag-overlay.show{display:block;}
-.md-diag-panel{
-  position:fixed; inset:12px; z-index:999998; display:none;
-  background:rgba(15,23,42,.98); color:#fff; border:1px solid rgba(255,255,255,.12);
-  border-radius:18px; box-shadow:0 20px 50px rgba(0,0,0,.45); overflow:hidden;
-}
-.md-diag-panel.show{display:flex; flex-direction:column;}
-.md-diag-head{
-  display:flex; align-items:center; justify-content:space-between; gap:10px;
-  padding:12px 14px; border-bottom:1px solid rgba(255,255,255,.08); font-weight:900;
-}
-.md-diag-head-actions{display:flex; gap:8px;}
-.md-diag-head-actions button{width:auto; min-width:0; padding:8px 10px; border-radius:10px; font-size:12px;}
-.md-diag-body{
-  padding:12px 14px; overflow:auto; font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
-  white-space:pre-wrap; word-break:break-word; font-size:12px; line-height:1.45; flex:1;
-}
-
 .quick-balance-overlay{
   position:fixed;
   inset:0;
@@ -2982,7 +2967,8 @@ const DEV_LOCAL_MODE = true;
 
   async function refreshAccessTokenIfNeeded(force){
     const sess = readStoredSession();
-    if(!force && hasUsableToken(sess)) return sess.access_token || "";
+    if(!force && hasUsableToken(sess)) mdDebugSet("cloudGetToken_result", { token_present: !!(sess.access_token || ""), expires_at: String(sess.expires_at || "") });
+    return sess.access_token || "";
     if(!sess.refresh_token) return sess.access_token || "";
 
     try{
@@ -3081,13 +3067,14 @@ const DEV_LOCAL_MODE = true;
   <div class="menu-item"><button class="secondary" onclick="document.getElementById('importFile').click()">Importar backup</button></div>
   <div class="menu-item"><button class="secondary" onclick="exportarRelatorioPDF(); closeMenu();">Exportar relatório (PDF)</button></div>
   <div class="menu-item"><button class="secondary" onclick="mdRunRollbackSelfTest(); closeMenu();">Autoteste anti-rollback</button></div>
+  <div class="menu-item"><button class="secondary" onclick="mdDebugDump(); closeMenu();">Debug restore</button></div>
   <div class="menu-item"><button class="secondary" onclick="mdExportDiagnostics(); closeMenu();">Exportar diagnóstico</button></div>
   <div class="menu-item"><button class="danger" onclick="openZerar(); closeMenu();">Zerar dados (cuidado)</button></div>
   <div class="menu-item"><button class="secondary" onclick="location.href='painel.html'; closeMenu();">Gerenciar APP</button></div>
   <div class="menu-item"><button class="secondary" onclick="abrirSaldoAtualButtonMenu(); closeMenu();">Botão de saldo atual</button></div>
   <div class="menu-item"><button class="secondary" onclick="abrirTemas(); closeMenu();">Temas</button></div>
   <div class="menu-item"><button class="danger" onclick="forceLogout(); return false;">Sair</button></div>
-  <div class="menu-note" style="text-align:center;">v114</div>
+  <div class="menu-note" style="text-align:center;">v115</div>
 </div>
 
 <div id="temasOverlay" class="temas-overlay" onclick="fecharTemas()"></div>
@@ -3945,6 +3932,7 @@ function cloudGetStoredTokenSync(){
   try{ return localStorage.getItem("sb_token") || ""; }catch(e){ return ""; }
 }
 async function cloudGetToken(){
+  mdDebugSet("cloudGetToken_called", new Date().toISOString());
   let fast = "";
   try{ fast = localStorage.getItem("sb_token") || ""; }catch(e){ fast = ""; }
   try{
@@ -4073,7 +4061,7 @@ function mdBuildDiagnosticsObject(){
     const durableObj = mdSafeJsonParse(durableRaw);
     const diag = {
       generated_at: mdNowIso(),
-      app_version: 'MetaDriver v114',
+      app_version: 'MetaDriver v115',
       cloud_table: CLOUD_TABLE,
       device_id: mdEnsureDeviceId(),
       visibility_state: document.visibilityState,
@@ -4229,10 +4217,13 @@ async function cloudGetUser(token){
   return user;
 }
 async function cloudResolveUserId(token){
+  mdDebugSet("cloudResolveUserId_called", { token_present: !!token, at: new Date().toISOString() });
   const cached = cloudReadCachedUserId();
-  if(cached) return cached;
+  if(cached){ mdDebugSet("cloudResolveUserId_cached", { user_id: String(cached || "") }); return cached; }
   const user = await cloudGetUser(token);
-  return (user && user.id) ? user.id : "";
+  const __uid = (user && user.id) ? user.id : "";
+  mdDebugSet("cloudResolveUserId_result", { user_id: String(__uid || "") });
+  return __uid;
 }
 
 function cloudHasUsefulData(obj){
@@ -4270,6 +4261,7 @@ function cloudHasUsefulData(obj){
 }
 
 async function cloudFetchRow(token, userId){
+  mdDebugSet("cloudFetchRow_called", { token_present: !!token, user_id: String(userId || ""), at: new Date().toISOString() });
   const res = await fetch(
     CLOUD_SUPABASE_URL + "/rest/v1/" + CLOUD_TABLE + "?select=payload,updated_at&user_id=eq." + encodeURIComponent(userId),
     {
@@ -4282,7 +4274,9 @@ async function cloudFetchRow(token, userId){
   );
   if(!res.ok) throw new Error("Falha ao ler nuvem");
   const rows = await res.json();
-  return (Array.isArray(rows) && rows.length) ? rows[0] : null;
+  const __row = (Array.isArray(rows) && rows.length) ? rows[0] : null;
+  mdDebugSet("cloudFetchRow_result", { has_row: !!__row, updated_at: __row && __row.updated_at || "", has_payload: !!(__row && __row.payload) });
+  return __row;
 }
 
 function mdSyncBackupsFromCloud(backups){
@@ -4435,6 +4429,7 @@ async function cloudPushNow(snapshotOverride){
     const remoteRow = await cloudFetchRow(token, userId).catch(function(){ return null; });
     const remoteWrapped = mdUnwrapCloudPayload(remoteRow && remoteRow.payload ? remoteRow.payload : null);
     const remoteSnapshot = remoteWrapped && remoteWrapped.snapshot ? remoteWrapped.snapshot : null;
+    mdDebugSet("cloudBoot_remote", { has_remote_snapshot: !!remoteSnapshot, remote_useful: !!(remoteSnapshot && cloudHasUsefulData(remoteSnapshot)), remote_updated_at: remoteSnapshot && (remoteSnapshot.__updated_at || remoteSnapshot.__cloud_updated_at) || "" });
 
     const localSeq = Number(best.__local_commit_seq || 0);
     const remoteSeq = Number(remoteSnapshot && remoteSnapshot.__local_commit_seq || 0);
@@ -4508,6 +4503,7 @@ function cloudScheduleSave(delayMs){
 }
 
 async function cloudBoot(force){
+  mdDebugSet("cloudBoot_called", { force: force === true, at: new Date().toISOString() });
   if(__cloudBootStarted) return;
   if(__cloudBootDoneOnce && force !== true) return;
   __cloudBootStarted = true;
@@ -4527,6 +4523,7 @@ async function cloudBoot(force){
     ]) || dados;
 
     const localUseful = localBest && cloudHasUsefulData(localBest);
+    mdDebugSet("cloudBoot_local", { local_useful: !!localUseful, current_counts: { ganhos: Array.isArray(localBest && localBest.ganhos) ? localBest.ganhos.length : 0, gastos: Array.isArray(localBest && localBest.gastos) ? localBest.gastos.length : 0 } });
 
     // v108 - prioridade local absoluta:
     // se já há dado local útil, nuvem NÃO sobrescreve automaticamente.
@@ -4570,6 +4567,7 @@ async function cloudBoot(force){
 
     __cloudBootDoneOnce = cloudHasUsefulData(dados);
   }catch(e){
+    mdDebugSet("cloudBoot_error", { message: String((e && e.message) || e || "") });
     console.warn("cloudBoot", e);
   }finally{
     __cloudBootStarted = false;
@@ -6604,94 +6602,6 @@ function exportarRelatorioPDF(){
         setTimeout(()=>window.print(), 250);
       <\/script>
     <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v84 · app</div>
-
-<button type="button" id="mdDiagFab" class="md-diag-fab" onclick="window.mdOpenDiagPanel && window.mdOpenDiagPanel()">DIAG</button>
-<div id="mdDiagOverlay" class="md-diag-overlay" onclick="window.mdCloseDiagPanel && window.mdCloseDiagPanel()"></div>
-<div id="mdDiagPanel" class="md-diag-panel" role="dialog" aria-modal="true" aria-labelledby="mdDiagTitle">
-  <div class="md-diag-head">
-    <div id="mdDiagTitle">Diagnóstico restore v114</div>
-    <div class="md-diag-head-actions">
-      <button type="button" class="secondary" onclick="window.mdCopyDiag && window.mdCopyDiag()">Copiar</button>
-      <button type="button" class="secondary" onclick="window.mdRefreshDiag && window.mdRefreshDiag()">Atualizar</button>
-      <button type="button" class="cancel" onclick="window.mdCloseDiagPanel && window.mdCloseDiagPanel()">Fechar</button>
-    </div>
-  </div>
-  <div id="mdDiagBody" class="md-diag-body">Carregando…</div>
-</div>
-<script>
-(function(){
-  function getVal(k){ try{ return localStorage.getItem(k)||""; }catch(e){ return ""; } }
-  function getJson(k){ try{ const raw=localStorage.getItem(k); return raw?JSON.parse(raw):null; }catch(e){ return null; } }
-  function cloudUseful(obj){
-    try{
-      if(typeof cloudHasUsefulData === "function") return !!cloudHasUsefulData(obj||{});
-    }catch(e){}
-    return !!obj;
-  }
-  window.mdBuildDiagSnapshot = function(){
-    const localObj = getJson("controleUberProDados");
-    const durableObj = getJson("controleUberProDados__durable_snapshot_v1");
-    const pendingObj = getJson("controleUberProDados__cloud_pending_v1");
-    return {
-      app_version: "MetaDriver v114",
-      now: new Date().toISOString(),
-      token_present: !!getVal("sb_token"),
-      refresh_present: !!getVal("sb_refresh_token"),
-      sb_user_id: getVal("sb_user_id"),
-      current_useful: cloudUseful(window.dados || {}),
-      current_commit_seq: Number(window.dados && window.dados.__local_commit_seq || 0),
-      current_updated_at: window.dados && (window.dados.__updated_at || window.dados.__cloud_updated_at) || "",
-      current_counts: {
-        ganhos: Array.isArray(window.dados && window.dados.ganhos) ? window.dados.ganhos.length : 0,
-        gastos: Array.isArray(window.dados && window.dados.gastos) ? window.dados.gastos.length : 0,
-        abastecimentos: Array.isArray(window.dados && window.dados.abastecimentos) ? window.dados.abastecimentos.length : 0,
-        naoTrabalhados: Array.isArray(window.dados && window.dados.naoTrabalhados) ? window.dados.naoTrabalhados.length : 0,
-        ganhoHoraSessoes: Array.isArray(window.dados && window.dados.ganhoHoraSessoes) ? window.dados.ganhoHoraSessoes.length : 0
-      },
-      local_storage_present: !!localObj,
-      local_storage_useful: cloudUseful(localObj || {}),
-      local_storage_commit_seq: Number(localObj && localObj.__local_commit_seq || 0),
-      local_storage_updated_at: localObj && (localObj.__updated_at || localObj.__cloud_updated_at) || "",
-      durable_present: !!durableObj,
-      durable_useful: cloudUseful(durableObj || {}),
-      durable_commit_seq: Number(durableObj && durableObj.__local_commit_seq || 0),
-      durable_updated_at: durableObj && (durableObj.__updated_at || durableObj.__cloud_updated_at) || "",
-      pending_present: !!(pendingObj && pendingObj.payload),
-      pending_commit_seq: Number(pendingObj && pendingObj.payload && pendingObj.payload.__local_commit_seq || 0),
-      pending_updated_at: pendingObj && pendingObj.updated_at || "",
-      cloud_boot_started: !!window.__cloudBootStarted,
-      cloud_boot_done_once: !!window.__cloudBootDoneOnce,
-      cloud_dirty: !!window.__cloudDirty
-    };
-  };
-  window.mdRefreshDiag = function(){
-    var body = document.getElementById("mdDiagBody");
-    if(!body) return;
-    body.textContent = JSON.stringify(window.mdBuildDiagSnapshot(), null, 2);
-  };
-  window.mdOpenDiagPanel = function(){
-    var ov = document.getElementById("mdDiagOverlay");
-    var pa = document.getElementById("mdDiagPanel");
-    if(ov) ov.classList.add("show");
-    if(pa) pa.classList.add("show");
-    window.mdRefreshDiag();
-  };
-  window.mdCloseDiagPanel = function(){
-    var ov = document.getElementById("mdDiagOverlay");
-    var pa = document.getElementById("mdDiagPanel");
-    if(ov) ov.classList.remove("show");
-    if(pa) pa.classList.remove("show");
-  };
-  window.mdCopyDiag = function(){
-    try{
-      var text = JSON.stringify(window.mdBuildDiagSnapshot(), null, 2);
-      if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text);
-      if(typeof toast === "function") toast("📋 Diagnóstico copiado.");
-    }catch(e){}
-  };
-})();
-</script>
-
 </body>
     </html>  `);
   w.document.close();
