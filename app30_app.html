@@ -18,7 +18,7 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver v97</title>
+<title>MetaDriver v96</title>
 <script>
 // v57 - correção de duplicação ao minimizar/restaurar + proteção de rolagem
 (function(){
@@ -2959,7 +2959,7 @@ const DEV_LOCAL_MODE = true;
   <div class="menu-item"><button class="secondary" onclick="abrirSaldoAtualButtonMenu(); closeMenu();">Botão de saldo atual</button></div>
   <div class="menu-item"><button class="secondary" onclick="abrirTemas(); closeMenu();">Temas</button></div>
   <div class="menu-item"><button class="danger" onclick="forceLogout(); return false;">Sair</button></div>
-  <div class="menu-note" style="text-align:center;">v97</div>
+  <div class="menu-note" style="text-align:center;">v96</div>
 </div>
 
 <div id="temasOverlay" class="temas-overlay" onclick="fecharTemas()"></div>
@@ -4415,6 +4415,9 @@ function cloudScheduleSave(delayMs){
 }
 
 async function cloudBoot(force){
+  if (dados && Object.keys(dados).length > 0 && force !== true) {
+    return;
+  }
   if(__cloudBootStarted) return;
   if(__cloudBootDoneOnce && force !== true) return;
   __cloudBootStarted = true;
@@ -4484,6 +4487,11 @@ async function cloudBoot(force){
 }
 
 async function mdInitialHydrateAndRender(){
+  if (dados && Object.keys(dados).length > 0) {
+    try { atualizar(); } catch(e){}
+    try { atualizarCarro(); } catch(e){}
+    return;
+  }
   try{
     const localUseful = cloudHasUsefulData(dados);
     if(!localUseful){
@@ -4513,7 +4521,6 @@ async function mdInitialHydrateAndRender(){
   }catch(e){}
   try{ atualizar(); }catch(e){}
   try{ atualizarCarro(); }catch(e){}
-  setTimeout(function(){ try{ cloudBoot(true); }catch(e){} }, 40);
 }
 
 window.addEventListener("pagehide", function(){
@@ -4527,33 +4534,7 @@ window.addEventListener('scroll', function(){
 }, { passive: true });
 
 document.addEventListener("visibilitychange", function(){
-  try{
-    if(document.visibilityState === "hidden"){
-      try{
-        var _sy = window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0;
-        localStorage.setItem('md_scroll_y', String(_sy));
-      }catch(e){}
-      // v57: salva local E sobe pra nuvem ao minimizar
-      try{ if(typeof window.__salvarLocalOriginal === "function") window.__salvarLocalOriginal(); }catch(e){}
-      try{ cloudPushNow(); }catch(e){}
-    }
-    if(document.visibilityState === "visible"){
-      try{
-        document.documentElement.style.opacity = '';
-        document.documentElement.style.pointerEvents = '';
-      }catch(e){}
-      try{ refreshQuickBalanceFabMiniDisplay(); }catch(e){}
-      // v57: ao voltar, NÃO puxa remoto para evitar rollback visual/local.
-      // Apenas garante persistência local e, se houver pendência, agenda push.
-      try{ if(typeof window.__salvarLocalOriginal === "function") window.__salvarLocalOriginal(); }catch(e){}
-      try{
-        const pending = cloudReadPendingSnapshot();
-        if(__cloudDirty || (pending && pending.payload && cloudHasUsefulData(pending.payload))){
-          cloudScheduleSave(120);
-        }
-      }catch(e){}
-    }
-  }catch(e){}
+  // v96 fix: não fazer nada no minimize
 });
 // v57 - save inteligente a cada 60s: só envia pra nuvem se houve mudança real
 setInterval(function(){
@@ -6374,48 +6355,6 @@ function exportarRelatorioPDF(){
         setTimeout(()=>window.print(), 250);
       <\/script>
     <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v84 · app</div>
-
-<script>
-// v96 STATE LOCK
-let __LOCK_STATE = false;
-
-function lockState(){ __LOCK_STATE = true; }
-function unlockState(){ __LOCK_STATE = false; }
-
-const _setDadosOriginal = (v)=>{ dados = v };
-
-function setDadosSafe(v){
-  if(__LOCK_STATE) return;
-  dados = v;
-}
-
-// intercept overwrite attempts
-const _loadDadosOriginal = loadDados;
-loadDados = function(){
-  if(__LOCK_STATE) return dados;
-  return _loadDadosOriginal();
-};
-
-// block resume events overwrite
-window.addEventListener("focus", ()=>{});
-window.addEventListener("pageshow", ()=>{});
-document.addEventListener("visibilitychange", ()=>{});
-
-// patch import
-const _import = importarBackup;
-importarBackup = function(ev){
-  _import(ev);
-  lockState();
-};
-
-// patch update (after any manual change)
-const _atualizar = atualizar;
-atualizar = function(){
-  _atualizar();
-  lockState();
-};
-</script>
-
 </body>
     </html>  `);
   w.document.close();
@@ -8832,48 +8771,6 @@ window.addEventListener("load", function(){
     <button type="button" class="secondary" onclick="fecharSaldoAtualButtonMenu()">Fechar</button>
   </div>
 </div>
-
-
-<script>
-// v96 STATE LOCK
-let __LOCK_STATE = false;
-
-function lockState(){ __LOCK_STATE = true; }
-function unlockState(){ __LOCK_STATE = false; }
-
-const _setDadosOriginal = (v)=>{ dados = v };
-
-function setDadosSafe(v){
-  if(__LOCK_STATE) return;
-  dados = v;
-}
-
-// intercept overwrite attempts
-const _loadDadosOriginal = loadDados;
-loadDados = function(){
-  if(__LOCK_STATE) return dados;
-  return _loadDadosOriginal();
-};
-
-// block resume events overwrite
-window.addEventListener("focus", ()=>{});
-window.addEventListener("pageshow", ()=>{});
-document.addEventListener("visibilitychange", ()=>{});
-
-// patch import
-const _import = importarBackup;
-importarBackup = function(ev){
-  _import(ev);
-  lockState();
-};
-
-// patch update (after any manual change)
-const _atualizar = atualizar;
-atualizar = function(){
-  _atualizar();
-  lockState();
-};
-</script>
 
 </body>
 </html>
