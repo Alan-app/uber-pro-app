@@ -18,7 +18,7 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver v108</title>
+<title>MetaDriver v109</title>
 <script>
 // v57 - correção de duplicação ao minimizar/restaurar + proteção de rolagem
 (function(){
@@ -3048,7 +3048,7 @@ const DEV_LOCAL_MODE = true;
   <div class="menu-item"><button class="secondary" onclick="abrirSaldoAtualButtonMenu(); closeMenu();">Botão de saldo atual</button></div>
   <div class="menu-item"><button class="secondary" onclick="abrirTemas(); closeMenu();">Temas</button></div>
   <div class="menu-item"><button class="danger" onclick="forceLogout(); return false;">Sair</button></div>
-  <div class="menu-note" style="text-align:center;">v108</div>
+  <div class="menu-note" style="text-align:center;">v109</div>
 </div>
 
 <div id="temasOverlay" class="temas-overlay" onclick="fecharTemas()"></div>
@@ -4034,7 +4034,7 @@ function mdBuildDiagnosticsObject(){
     const durableObj = mdSafeJsonParse(durableRaw);
     const diag = {
       generated_at: mdNowIso(),
-      app_version: 'MetaDriver v108',
+      app_version: 'MetaDriver v109',
       cloud_table: CLOUD_TABLE,
       device_id: mdEnsureDeviceId(),
       visibility_state: document.visibilityState,
@@ -4489,8 +4489,7 @@ async function cloudBoot(force){
 
     const localUseful = localBest && cloudHasUsefulData(localBest);
 
-    // v108 - prioridade local absoluta:
-    // se já há dado local útil, nuvem NÃO sobrescreve automaticamente.
+    // v109 - se existe local útil, local ganha e a nuvem não sobrescreve automaticamente
     if(localUseful){
       dados = JSON.parse(JSON.stringify(localBest));
       mdEnsureDataMeta(dados);
@@ -4503,7 +4502,8 @@ async function cloudBoot(force){
       return;
     }
 
-    const token = await cloudGetToken();
+    // v109 - se local está vazio/inútil, restore remoto passa a ser obrigatório
+    const token = await cloudGetToken().catch(function(){ return ""; });
     if(!token){
       __cloudBootDoneOnce = false;
       return;
@@ -4519,14 +4519,20 @@ async function cloudBoot(force){
     mdSyncBackupsFromCloud(remoteWrapped && remoteWrapped.backups ? remoteWrapped.backups : []);
     const remoteSnapshot = remoteWrapped && remoteWrapped.snapshot ? remoteWrapped.snapshot : null;
 
-    // Só aplica remoto se o local estiver vazio/inútil
-    if(!localUseful && remoteSnapshot && cloudHasUsefulData(remoteSnapshot)){
-      cloudApplyRemoteData(remoteSnapshot);
-    }
-
-    const pending = cloudReadPendingSnapshot();
-    if(__cloudDirty || (pending && pending.payload && cloudHasUsefulData(pending.payload))){
-      cloudScheduleSave(120);
+    if(remoteSnapshot && cloudHasUsefulData(remoteSnapshot)){
+      const restored = mdApplyExternalSnapshot(remoteSnapshot, "remote-restore-v109", false);
+      if(restored){
+        try{
+          const payload = JSON.stringify(dados);
+          localStorage.setItem(STORAGE_KEY, payload);
+          localStorage.setItem(DURABLE_STATE_KEY, payload);
+          idbSet(IDB_KEY, payload);
+          idbSet(DURABLE_STATE_KEY, payload);
+          if(typeof mdWriteOfflineSafeSnapshot === "function") mdWriteOfflineSafeSnapshot(dados);
+        }catch(e){}
+        __cloudBootDoneOnce = true;
+        return;
+      }
     }
 
     __cloudBootDoneOnce = cloudHasUsefulData(dados);
@@ -7693,7 +7699,7 @@ function bootApp(){
       iniciarTimerGanhoHoraTempoReal();
     }
   }catch(e){}
-  setTimeout(function(){ try{ cloudBoot(true); }catch(e){} }, cloudHasUsefulData(dados) ? 120 : 30);
+  setTimeout(function(){ try{ cloudBoot(true); }catch(e){} }, 30);
   try{
     requestAnimationFrame(function(){
       requestAnimationFrame(function(){
