@@ -18,7 +18,7 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver v106</title>
+<title>MetaDriver v105</title>
 <script>
 // v57 - correção de duplicação ao minimizar/restaurar + proteção de rolagem
 (function(){
@@ -230,6 +230,13 @@ window.addEventListener("pageshow", function(){
   try{ mdResumeRestoreSafely(); }catch(e){}
 });
 
+
+/* prevent pull refresh */
+document.addEventListener('touchmove', function(e){
+  if((document.scrollingElement||document.documentElement).scrollTop===0){
+    e.preventDefault();
+  }
+},{passive:false});
 </script>
 
 <style>
@@ -409,6 +416,16 @@ h1{text-align:center;margin:8px 0 14px;letter-spacing:0.2px;}
   letter-spacing:0.2px;
 }
 .card-body{padding:14px;}
+
+/* v104 fixes */
+body.preload .card, body.preload .tabs-wrap, body.preload .topbar{visibility:hidden}
+.quick-balance-panel{
+  top:12px !important;
+  max-height:calc(100vh - 24px) !important;
+  overflow-y:auto;
+}
+html,body{overscroll-behavior-y:none;}
+
 
 label{display:block;margin-top:8px;font-size:13px;opacity:0.95;}
 input,select,button{
@@ -2911,7 +2928,7 @@ const DEV_LOCAL_MODE = true;
 </script>
 
 </head>
-<body>
+<body class="preload">
 
 <div class="topbar">
   <div class="topbar-inner">
@@ -2959,7 +2976,7 @@ const DEV_LOCAL_MODE = true;
   <div class="menu-item"><button class="secondary" onclick="abrirSaldoAtualButtonMenu(); closeMenu();">Botão de saldo atual</button></div>
   <div class="menu-item"><button class="secondary" onclick="abrirTemas(); closeMenu();">Temas</button></div>
   <div class="menu-item"><button class="danger" onclick="forceLogout(); return false;">Sair</button></div>
-  <div class="menu-note" style="text-align:center;">v106</div>
+  <div class="menu-note" style="text-align:center;">v104</div>
 </div>
 
 <div id="temasOverlay" class="temas-overlay" onclick="fecharTemas()"></div>
@@ -3258,7 +3275,7 @@ const DEV_LOCAL_MODE = true;
       <div id="formKmAtual" class="form hidden" style="display:none;">
         <div class="row">
           <input type="date" id="kmAtualData" />
-          <input type="number" id="kmAtualValor" inputmode="numeric" placeholder="KM atual" />
+          <input type="number" id="kmAtualValor" inputmode="none" readonly onclick="openMetaTotalKeypadFor('kmAtualValor')" placeholder="KM atual" />
         </div>
         <button type="button" onclick="salvarKmAtual()">Salvar</button>
       </div>
@@ -3331,9 +3348,29 @@ const DEV_LOCAL_MODE = true;
   }catch(e){}
 })();
 
+const STORAGE_KEY_BASE = "controleUberProDados";
+// v105 FIX CRÍTICO: isolar dados por usuário
+// Chaves fixas fazem dados de um usuário aparecerem para outro no mesmo dispositivo
+function mdGetUserScopedKey(base){
+  try{
+    const uid = localStorage.getItem("sb_user_id") || "";
+    if(uid) return base + "__u_" + uid.replace(/[^a-zA-Z0-9_-]/g,"_").slice(0,32);
+  }catch(e){}
+  return base; // fallback: sem usuário, usa chave base
+}
+// STORAGE_KEY principal também precisa ser isolado por usuário
+// mas mantemos compatibilidade: tentamos ler tanto com uid quanto sem
 const STORAGE_KEY = "controleUberProDados";
 
-const OFFLINE_SAFE_SNAPSHOT_KEY = STORAGE_KEY + "__offline_safe_snapshot_v83";
+// v105: chaves dinâmicas por usuário — evita vazamento entre contas
+function mdOfflineSafeKey(){ return mdGetUserScopedKey(STORAGE_KEY + "__offline_safe_snapshot_v83"); }
+function mdDurableKey(){ return mdGetUserScopedKey(STORAGE_KEY + "__durable_snapshot_v1"); }
+function mdLocalBackupKey(){ return mdGetUserScopedKey(STORAGE_KEY + "__local_backup_ring_v2"); }
+function mdCloudBackupKey(){ return mdGetUserScopedKey(STORAGE_KEY + "__cloud_backup_ring_v2"); }
+function mdPendingKey(){ return mdGetUserScopedKey(STORAGE_KEY + "__cloud_pending_v1"); }
+function mdJournalKey(){ return mdGetUserScopedKey(STORAGE_KEY + "__journal_v1"); }
+function mdScopedStorageKey(){ return mdGetUserScopedKey(STORAGE_KEY); }
+const OFFLINE_SAFE_SNAPSHOT_KEY = STORAGE_KEY + "__offline_safe_snapshot_v83"; // legado
 function mdReadOfflineSafeSnapshot(){
   try{
     const raw = localStorage.getItem(OFFLINE_SAFE_SNAPSHOT_KEY);
@@ -3474,6 +3511,12 @@ function mdAppendJournal(snapshot, reason){
 function mdReadDurableLocalCandidates(){
   const out = [];
   try{
+    // v105: tenta chave com userId primeiro (dados isolados por usuário)
+    const scopedKey = mdGetUserScopedKey(STORAGE_KEY);
+    if(scopedKey !== STORAGE_KEY){
+      const scoped = mdSafeJsonParse(localStorage.getItem(scopedKey));
+      if(scoped) out.push({ snapshot: scoped, source: "storage-scoped" });
+    }
     const direct = mdSafeJsonParse(localStorage.getItem(STORAGE_KEY));
     if(direct) out.push({ snapshot: direct, source: "storage" });
   }catch(e){}
@@ -3531,106 +3574,37 @@ async function mdRecoverDurableStateFromIDB(){
 
 function loadDados(){
   try{
-    const userId = mdGetActiveUserIdSync();
-    const storageKey = mdGetStorageKey(STORAGE_KEY);
-    const durableKey = mdGetStorageKey(DURABLE_STATE_KEY);
-    const candidates = [];
-    try{
-      const raw = localStorage.getItem(storageKey);
-      if(raw){
-        const parsed = JSON.parse(raw);
-        if(parsed && typeof parsed === "object" && mdNormalizeUserId(parsed.__owner_user_id || userId) === userId){
-          candidates.push({ snapshot: parsed, source: "scoped-storage" });
-        }
-      }
-    }catch(e){}
-    try{
-      const raw = localStorage.getItem(durableKey);
-      if(raw){
-        const parsed = JSON.parse(raw);
-        if(parsed && typeof parsed === "object" && mdNormalizeUserId(parsed.__owner_user_id || userId) === userId){
-          candidates.push({ snapshot: parsed, source: "scoped-durable" });
-        }
-      }
-    }catch(e){}
-    try{
-      const bestLocal = mdChooseBestLocalSnapshotSync();
-      if(bestLocal && mdNormalizeUserId(bestLocal.__owner_user_id || userId) === userId){
-        candidates.push({ snapshot: bestLocal, source: "best-local" });
-      }
-    }catch(e){}
-    try{
-      const offlineSafe = (typeof mdReadOfflineSafeSnapshot === "function") ? mdReadOfflineSafeSnapshot() : null;
-      if(offlineSafe && mdNormalizeUserId(offlineSafe.__owner_user_id || userId) === userId){
-        candidates.push({ snapshot: offlineSafe, source: "offline-safe" });
-      }
-    }catch(e){}
+    const bestLocal = mdChooseBestLocalSnapshotSync();
+    if(bestLocal){
+      try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(bestLocal)); }catch(e){}
+      try{ localStorage.setItem(DURABLE_STATE_KEY, JSON.stringify(bestLocal)); }catch(e){}
+      try{ mdWriteOfflineSafeSnapshot(bestLocal); }catch(e){}
+      return bestLocal;
+    }
+    const offlineSafe = (typeof mdReadOfflineSafeSnapshot === "function") ? mdReadOfflineSafeSnapshot() : null;
+    if(offlineSafe){
+      try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(offlineSafe)); }catch(e){}
+      try{ localStorage.setItem(DURABLE_STATE_KEY, JSON.stringify(offlineSafe)); }catch(e){}
+      return offlineSafe;
+    }
     const legacyKeys = [
       "dadosControleProV641","dadosControleProV63","dadosControleProV631","dadosControleProV632",
       "dadosControleProV633","dadosControleProV64","dadosControleProV640","dadosControleProV641",
       "dadosControleProV70","dadosControleProV71","dadosControleProV72"
     ];
     for(const k of legacyKeys){
-      try{
-        const v = localStorage.getItem(k);
-        if(v){
+      const v = localStorage.getItem(k);
+      if(v){
+        try{
           const parsed = JSON.parse(v);
-          if(parsed && typeof parsed === "object" && mdNormalizeUserId(parsed.__owner_user_id || userId) === userId){
-            candidates.push({ snapshot: parsed, source: k });
-          }
-        }
-      }catch(e){}
-    }
-    const best = (typeof mdPickBestSnapshot === "function")
-      ? mdPickBestSnapshot(candidates)
-      : (candidates[0] ? candidates[0].snapshot : null);
-
-    if(best){
-      const tagged = mdGetOwnerTaggedSnapshot(best);
-      try{ localStorage.setItem(storageKey, JSON.stringify(tagged)); }catch(e){}
-      try{ localStorage.setItem(durableKey, JSON.stringify(tagged)); }catch(e){}
-      try{ if(typeof mdWriteOfflineSafeSnapshot === "function") mdWriteOfflineSafeSnapshot(tagged); }catch(e){}
-      return tagged;
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
+          localStorage.setItem(DURABLE_STATE_KEY, JSON.stringify(parsed));
+          return parsed;
+        }catch(e){}
+      }
     }
   }catch(e){}
   return null;
-}
-
-
-function mdNormalizeUserId(raw){
-  try{
-    const s = String(raw || '').trim();
-    return s ? s : 'anon';
-  }catch(e){ return 'anon'; }
-}
-function mdGetActiveUserIdSync(){
-  try{
-    const direct = cloudReadCachedUserId();
-    if(direct) try{ mdSetActiveUserId(direct); }catch(e){}
-    if(direct) return mdNormalizeUserId(direct);
-  }catch(e){}
-  try{
-    const cached = localStorage.getItem("md_active_user_id_v106");
-    if(cached) return mdNormalizeUserId(cached);
-  }catch(e){}
-  return 'anon';
-}
-function mdSetActiveUserId(userId){
-  try{ localStorage.setItem("md_active_user_id_v106", mdNormalizeUserId(userId)); }catch(e){}
-}
-function mdStorageKeyForUser(baseKey, userId){
-  return String(baseKey || '') + '::' + mdNormalizeUserId(userId);
-}
-function mdGetStorageKey(baseKey){
-  return mdStorageKeyForUser(baseKey, mdGetActiveUserIdSync());
-}
-function mdGetOwnerTaggedSnapshot(obj){
-  try{
-    if(!obj || typeof obj !== 'object') return obj;
-    const cloned = JSON.parse(JSON.stringify(obj));
-    cloned.__owner_user_id = mdNormalizeUserId(mdGetActiveUserIdSync());
-    return cloned;
-  }catch(e){ return obj; }
 }
 
 let dados = loadDados() || {
@@ -3665,39 +3639,6 @@ let dados = loadDados() || {
   ganhoHoraSessaoAtiva: false
 };
 
-try{
-  const __activeUser = mdGetActiveUserIdSync();
-  if(dados && typeof dados === "object" && dados.__owner_user_id && mdNormalizeUserId(dados.__owner_user_id) !== __activeUser){
-    dados = null;
-  }
-}catch(e){}
-if(!dados) dados = {
-  ganhos: [],
-  gastos: [],
-  abastecimentos: [],
-  naoTrabalhados: [],
-  metaTotal: 0,
-  dataLimite: "",
-  metaDiariaManual: 0,
-  ganhoDiarioAtual: 0,
-  ganhoHoraManual: 40,
-  saldoAtualFora: 0,
-  horarioInicioFora: "",
-  horasDecorridasFora: 0,
-  ganhoHoraAtualFora: 0,
-  saldoAnteriorFora: 0,
-  ganhoHoraSessoes: [],
-  ganhoHoraHistorico: [],
-  ganhoHoraHistoricoAberto: false,
-  ganhoHoraHistoricoExpandidos: {},
-  ganhoHoraDiaRef: dataUberISO(),
-  ganhoHoraSessaoDiaRef: "",
-  combustivelModo: "fixo",
-  combustivelPercentual: 0.30,
-  combustivelReal: { kmRodados: 0, consumoMedio: 0, precoLitro: 0 },
-  metaSalva: false,
-  ganhoHoraSessaoAtiva: false
-};
 if(typeof dados.saldoAtualButtonAtivo !== "boolean"){ dados.saldoAtualButtonAtivo = getQuickBalanceFabPref ? getQuickBalanceFabPref() : true; }
 if(!dados.saldoAtualButtonPos || typeof dados.saldoAtualButtonPos !== "object"){
   dados.saldoAtualButtonPos = null;
@@ -3809,6 +3750,21 @@ function mdPushBackup(key, snapshot, reason){
   }catch(e){}
 }
 
+// v105 FIX: mdWrapCloudPayload estava indefinida — causava erro silencioso no cloudPushNow
+function mdWrapCloudPayload(snapshot, backups){
+  try{
+    return {
+      schema_version: META_SCHEMA_VERSION,
+      device_id: mdEnsureDeviceId(),
+      snapshot: JSON.parse(JSON.stringify(snapshot || {})),
+      backups: (Array.isArray(backups) ? backups : []).slice(0, 8),
+      exported_at: mdNowIso()
+    };
+  }catch(e){
+    return { schema_version: META_SCHEMA_VERSION, snapshot: snapshot || {}, backups: [] };
+  }
+}
+
 function mdUnwrapCloudPayload(payload){
   try{
     if(!payload || typeof payload !== "object") return { snapshot:null, backups:[] };
@@ -3860,30 +3816,30 @@ function salvar(){
     dados.__dirty_local = true;
     dados.__last_local_write_at = mdNowIso();
     dados.__updated_at = dados.__last_local_write_at;
-    dados = mdGetOwnerTaggedSnapshot(dados);
-  const payload = JSON.stringify(dados);
+    const payload = JSON.stringify(dados);
     const anterior = localStorage.getItem(STORAGE_KEY);
     if(anterior && anterior.length > 0 && payload.length < anterior.length * 0.6){
       console.warn("MetaDriver: payload muito menor que anterior, salvando backup e verificando");
       mdPushBackup(LOCAL_BACKUP_KEY, dados, "small-payload-warning");
     }
-    localStorage.setItem(mdGetStorageKey(STORAGE_KEY), payload);
-    localStorage.setItem(mdGetStorageKey(DURABLE_STATE_KEY), payload);
+    localStorage.setItem(STORAGE_KEY, payload);
+    // v105: também grava na chave com userId para isolamento
+    try{ localStorage.setItem(mdGetUserScopedKey(STORAGE_KEY), payload); }catch(e){}
+    localStorage.setItem(DURABLE_STATE_KEY, payload);
     const verificacao = localStorage.getItem(STORAGE_KEY);
     if(verificacao !== payload){
       throw new Error("Verificação de escrita falhou");
     }
-    idbSet(mdGetStorageKey(IDB_KEY), payload);
-    idbSet(mdGetStorageKey(DURABLE_STATE_KEY), payload);
+    idbSet(IDB_KEY, payload);
+    idbSet(DURABLE_STATE_KEY, payload);
     mdPushBackup(LOCAL_BACKUP_KEY, dados, "save");
     mdAppendJournal(dados, "save");
     try{ mdWriteOfflineSafeSnapshot(dados); }catch(e){}
   }catch(e){
     try{
-      dados = mdGetOwnerTaggedSnapshot(dados);
-  const payload = JSON.stringify(dados);
-      idbSet(mdGetStorageKey(IDB_KEY), payload);
-      idbSet(mdGetStorageKey(DURABLE_STATE_KEY), payload);
+      const payload = JSON.stringify(dados);
+      idbSet(IDB_KEY, payload);
+      idbSet(DURABLE_STATE_KEY, payload);
       mdPushBackup(LOCAL_BACKUP_KEY, dados, "fallback-idb");
       mdAppendJournal(dados, "fallback-idb");
       toast("⚠️ Falha ao salvar localmente. Abra no Chrome normal (não anônimo).");
@@ -4003,7 +3959,7 @@ function mdGetCurrentBestSeq(){
 function mdApplyExternalSnapshot(snapshot, reason, pushNow){
   try{
     if(!snapshot || typeof snapshot !== "object") return false;
-    const cloned = mdGetOwnerTaggedSnapshot(JSON.parse(JSON.stringify(snapshot)));
+    const cloned = JSON.parse(JSON.stringify(snapshot));
     dados = cloned;
     mdEnsureDataMeta(dados);
 
@@ -4015,10 +3971,10 @@ function mdApplyExternalSnapshot(snapshot, reason, pushNow){
     dados.__updated_at = dados.__last_local_write_at;
 
     const payload = JSON.stringify(dados);
-    try{ localStorage.setItem(mdGetStorageKey(STORAGE_KEY), payload); }catch(e){}
-    try{ localStorage.setItem(mdGetStorageKey(DURABLE_STATE_KEY), payload); }catch(e){}
-    try{ idbSet(mdGetStorageKey(IDB_KEY), payload); }catch(e){}
-    try{ idbSet(mdGetStorageKey(DURABLE_STATE_KEY), payload); }catch(e){}
+    try{ localStorage.setItem(STORAGE_KEY, payload); }catch(e){}
+    try{ localStorage.setItem(DURABLE_STATE_KEY, payload); }catch(e){}
+    try{ idbSet(IDB_KEY, payload); }catch(e){}
+    try{ idbSet(DURABLE_STATE_KEY, payload); }catch(e){}
     try{ if(typeof mdWriteOfflineSafeSnapshot === "function") mdWriteOfflineSafeSnapshot(dados); }catch(e){}
     try{ mdPushBackup(LOCAL_BACKUP_KEY, dados, reason || "external"); }catch(e){}
     try{ mdAppendJournal(dados, reason || "external"); }catch(e){}
@@ -4043,13 +3999,13 @@ function mdApplyExternalSnapshot(snapshot, reason, pushNow){
 function mdBuildDiagnosticsObject(){
   try{
     const pending = cloudReadPendingSnapshot();
-    const localRaw = localStorage.getItem(mdGetStorageKey(STORAGE_KEY));
-    const durableRaw = localStorage.getItem(mdGetStorageKey(DURABLE_STATE_KEY));
+    const localRaw = localStorage.getItem(STORAGE_KEY);
+    const durableRaw = localStorage.getItem(DURABLE_STATE_KEY);
     const localObj = mdSafeJsonParse(localRaw);
     const durableObj = mdSafeJsonParse(durableRaw);
     const diag = {
       generated_at: mdNowIso(),
-      app_version: 'MetaDriver v106',
+      app_version: 'MetaDriver v105',
       cloud_table: CLOUD_TABLE,
       device_id: mdEnsureDeviceId(),
       visibility_state: document.visibilityState,
@@ -4246,27 +4202,19 @@ function cloudHasUsefulData(obj){
 }
 
 async function cloudFetchRow(token, userId){
-  try{
-    const url = CLOUD_SUPABASE_URL + "/rest/v1/" + CLOUD_TABLE
-      + "?select=payload,updated_at,commit_seq,user_id"
-      + "&user_id=eq." + encodeURIComponent(userId)
-      + "&order=commit_seq.desc,updated_at.desc"
-      + "&limit=1";
-
-    const resp = await fetch(url, {
+  const res = await fetch(
+    CLOUD_SUPABASE_URL + "/rest/v1/" + CLOUD_TABLE + "?select=payload,updated_at&user_id=eq." + encodeURIComponent(userId),
+    {
       headers: {
         "apikey": CLOUD_SUPABASE_KEY,
-        "Authorization": "Bearer " + token
+        "Authorization": "Bearer " + token,
+        "Accept": "application/json"
       }
-    }).catch(function(){ return null; });
-
-    if(!resp || !resp.ok) return null;
-    const rows = await resp.json().catch(function(){ return []; });
-    return Array.isArray(rows) && rows.length ? rows[0] : null;
-  }catch(e){
-    console.warn("cloudFetchRow", e);
-    return null;
-  }
+    }
+  );
+  if(!res.ok) throw new Error("Falha ao ler nuvem");
+  const rows = await res.json();
+  return (Array.isArray(rows) && rows.length) ? rows[0] : null;
 }
 
 function mdSyncBackupsFromCloud(backups){
@@ -4429,18 +4377,16 @@ async function cloudPushNow(snapshotOverride){
     const token = await cloudGetToken();
     if(!token) return false;
     const userId = await cloudResolveUserId(token).catch(function(){ return ""; });
-    if(userId) try{ mdSetActiveUserId(userId); }catch(e){}
-    if(userId) try{ mdSetActiveUserId(userId); }catch(e){}
     if(!userId) return false;
 
     const pending = snapshotOverride || cloudReadPendingSnapshot();
     const pendingPayload = pending && pending.payload ? pending.payload : null;
     const localPayload = (typeof dados === "object" && dados) ? dados : null;
 
-    const best = mdGetOwnerTaggedSnapshot(mdPickBestSnapshot([
+    const best = mdPickBestSnapshot([
       { snapshot: pendingPayload },
       { snapshot: localPayload }
-    ]));
+    ]);
 
     if(!best || !cloudHasUsefulData(best)) return false;
 
@@ -4475,7 +4421,7 @@ async function cloudPushNow(snapshotOverride){
       schema_version: 1
     };
 
-    const resp = await fetch(CLOUD_SUPABASE_URL + "/rest/v1/" + CLOUD_TABLE + "?on_conflict=user_id", {
+    const resp = await fetch(CLOUD_SUPABASE_URL + "/rest/v1/" + CLOUD_TABLE, {
       method: "POST",
       headers: {
         "apikey": CLOUD_SUPABASE_KEY,
@@ -4644,7 +4590,30 @@ window.addEventListener('scroll', function(){
 }, { passive: true });
 
 document.addEventListener("visibilitychange", function(){
-  // v96 fix: não fazer nada no minimize
+  try{
+    if(document.visibilityState === "hidden"){
+      // v105: salva local e sobe pra nuvem ao minimizar
+      try{
+        var _sy = window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0;
+        localStorage.setItem('md_scroll_y', String(_sy));
+      }catch(e){}
+      try{ if(typeof window.__salvarLocalOriginal === "function") window.__salvarLocalOriginal(); }catch(e){}
+      try{ cloudPushNow(); }catch(e){}
+    }
+    if(document.visibilityState === "visible"){
+      try{
+        document.documentElement.style.opacity = '';
+        document.documentElement.style.pointerEvents = '';
+      }catch(e){}
+      try{ refreshQuickBalanceFabMiniDisplay(); }catch(e){}
+      // v105: sincroniza com nuvem ao voltar
+      try{
+        __cloudBootStarted = false;
+        __cloudBootDoneOnce = false;
+        cloudBoot(true);
+      }catch(e){}
+    }
+  }catch(e){}
 });
 // v57 - save inteligente a cada 60s: só envia pra nuvem se houve mudança real
 setInterval(function(){
@@ -6530,7 +6499,7 @@ function exportarRelatorioPDF(){
       <script>
         setTimeout(()=>window.print(), 250);
       <\/script>
-    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v84 · app</div>
+    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v105 · app</div>
 </body>
     </html>  `);
   w.document.close();
@@ -7632,6 +7601,7 @@ try{ syncSaldoAtualLockWithFab(); }catch(e){}
 setInterval(function(){ try{ applyQuickBalanceFabStateHard(); }catch(e){} try{ refreshQuickBalanceFabMiniDisplay(); }catch(e){} try{ syncSaldoAtualLockWithFab(); }catch(e){} }, 800);
 
 function bootApp(){
+try{document.body.classList.add('preload')}catch(e){}
   // v57 - garante visibilidade
   try{
     document.documentElement.style.opacity = '';
@@ -7657,7 +7627,8 @@ function bootApp(){
       iniciarTimerGanhoHoraTempoReal();
     }
   }catch(e){}
-  setTimeout(function(){ try{ cloudBoot(true); }catch(e){} }, cloudHasUsefulData(dados) ? 120 : 30);
+  setTimeout(function(){ try{ cloudBoot(true);
+try{requestAnimationFrame(()=>requestAnimationFrame(()=>document.body.classList.remove('preload')))}catch(e){document.body.classList.remove('preload')} }catch(e){} }, cloudHasUsefulData(dados) ? 120 : 30);
 }
 if(document.readyState === "loading"){
   document.addEventListener("DOMContentLoaded", ()=>{ bootApp(); try{ initTabs(); }catch(e){}; try{ bindSectionHeaders(); }catch(e){} });
