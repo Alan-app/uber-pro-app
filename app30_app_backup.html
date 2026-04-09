@@ -18,7 +18,7 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver v97</title>
+<title>MetaDriver v90</title>
 <script>
 // v57 - correção de duplicação ao minimizar/restaurar + proteção de rolagem
 (function(){
@@ -221,13 +221,13 @@ setInterval(function(){
 
 
 window.addEventListener("focus", function(){
-  try{ (dbg('CALL resume'), mdResumeRestoreSafely()); }catch(e){}
+  try{ mdResumeRestoreSafely(); }catch(e){}
 });
 window.addEventListener("online", function(){
-  try{ (dbg('CALL resume'), mdResumeRestoreSafely()); }catch(e){}
+  try{ mdResumeRestoreSafely(); }catch(e){}
 });
 window.addEventListener("pageshow", function(){
-  try{ (dbg('CALL resume'), mdResumeRestoreSafely()); }catch(e){}
+  try{ mdResumeRestoreSafely(); }catch(e){}
 });
 
 </script>
@@ -2912,25 +2912,6 @@ const DEV_LOCAL_MODE = true;
 
 </head>
 <body>
-<style>
-#debugPanel{
-position:fixed;bottom:0;left:0;width:100%;
-background:#000;color:#0f0;font-size:12px;
-z-index:9999;padding:4px;font-family:monospace;
-}
-</style>
-<div id="debugPanel">INIT</div>
-
-<script>
-function dbg(msg){
-  try{
-    const el=document.getElementById('debugPanel');
-    if(el) el.innerText=msg;
-    console.log("DBG:",msg);
-  }catch(e){}
-}
-</script>
-
 
 <div class="topbar">
   <div class="topbar-inner">
@@ -2978,7 +2959,7 @@ function dbg(msg){
   <div class="menu-item"><button class="secondary" onclick="abrirSaldoAtualButtonMenu(); closeMenu();">Botão de saldo atual</button></div>
   <div class="menu-item"><button class="secondary" onclick="abrirTemas(); closeMenu();">Temas</button></div>
   <div class="menu-item"><button class="danger" onclick="forceLogout(); return false;">Sair</button></div>
-  <div class="menu-note" style="text-align:center;">v97</div>
+  <div class="menu-note" style="text-align:center;">v90</div>
 </div>
 
 <div id="temasOverlay" class="temas-overlay" onclick="fecharTemas()"></div>
@@ -3548,7 +3529,7 @@ async function mdRecoverDurableStateFromIDB(){
 }
 
 
-function (dbg('CALL loadDados'), loadDados()){
+function loadDados(){
   try{
     const bestLocal = mdChooseBestLocalSnapshotSync();
     if(bestLocal){
@@ -3583,7 +3564,7 @@ function (dbg('CALL loadDados'), loadDados()){
   return null;
 }
 
-let dbg('SET dados'); dados = (dbg('CALL loadDados'), loadDados()) || {
+let dados = loadDados() || {
   ganhos: [],
   gastos: [],
   abastecimentos: [],
@@ -3807,14 +3788,14 @@ function salvar(){
 window.__salvarLocalOriginal = salvar;
 salvar = function(){
   try{
-    if(typeof dbg('SET dados'); dados === "object" && dados){
+    if(typeof dados === "object" && dados){
       mdEnsureDataMeta(dados);
       dados.__cloud_updated_at = mdNowIso();
     }
   }catch(e){}
   const r = window.__salvarLocalOriginal.apply(this, arguments);
   try{
-    if(typeof dbg('SET dados'); dados === "object" && dados){
+    if(typeof dados === "object" && dados){
       cloudWritePendingSnapshot(JSON.parse(JSON.stringify(dados)));
     }
   }catch(e){}
@@ -3918,7 +3899,7 @@ function mdApplyExternalSnapshot(snapshot, reason, pushNow){
   try{
     if(!snapshot || typeof snapshot !== "object") return false;
     const cloned = JSON.parse(JSON.stringify(snapshot));
-    dbg('SET dados'); dados = cloned;
+    dados = cloned;
     mdEnsureDataMeta(dados);
 
     const bestSeq = mdGetCurrentBestSeq();
@@ -4323,7 +4304,7 @@ function cloudApplyRemoteData(remoteData){
     merged.__rev = Math.max(Number(dados.__rev || 0), Number(remoteData.__rev || 0));
     merged.__updated_at = mdPickBestSnapshot([{snapshot:dados},{snapshot:remoteData}]).__updated_at || mdNowIso();
     merged.__cloud_updated_at = mdNowIso();
-    dbg('SET dados'); dados = merged;
+    dados = merged;
     mdPushBackup(LOCAL_BACKUP_KEY, dados, "merge-remote");
     if(window.__salvarLocalOriginal) window.__salvarLocalOriginal();
     try{
@@ -4345,7 +4326,7 @@ async function cloudPushNow(snapshotOverride){
 
     const pending = snapshotOverride || cloudReadPendingSnapshot();
     const pendingPayload = pending && pending.payload ? pending.payload : null;
-    const localPayload = (typeof dbg('SET dados'); dados === "object" && dados) ? dados : null;
+    const localPayload = (typeof dados === "object" && dados) ? dados : null;
     const remoteRow = await cloudFetchRow(token, userId).catch(function(){ return null; });
     const remoteWrapped = mdUnwrapCloudPayload(remoteRow && remoteRow.payload ? remoteRow.payload : null);
     const remoteSnapshot = remoteWrapped.snapshot;
@@ -4398,7 +4379,7 @@ async function cloudPushNow(snapshotOverride){
     if(!res.ok) throw new Error("Falha ao salvar na nuvem");
 
     if(localPayload === dados){
-      dbg('SET dados'); dados = best;
+      dados = best;
       mdEnsureDataMeta(dados);
       dados.__last_synced_commit_seq = Number(dados.__local_commit_seq || 0);
       dados.__dirty_local = false;
@@ -4433,14 +4414,14 @@ function cloudScheduleSave(delayMs){
   }, wait);
 }
 
-async function dbg('CALL cloudBoot'); cloudBoot(force){
+async function cloudBoot(force){
   if(__cloudBootStarted) return;
   if(__cloudBootDoneOnce && force !== true) return;
   __cloudBootStarted = true;
   try{
     const recovered = await mdRecoverDurableStateFromIDB().catch(function(){ return null; });
     if(recovered && mdSnapshotOrderValue(recovered) > mdSnapshotOrderValue(dados) && !mdShouldBlockSnapshot(recovered)){
-      dbg('SET dados'); dados = JSON.parse(JSON.stringify(recovered));
+      dados = JSON.parse(JSON.stringify(recovered));
       mdEnsureDataMeta(dados);
       try{ atualizar(); }catch(e){}
       try{ atualizarCarro(); }catch(e){}
@@ -4478,12 +4459,12 @@ async function dbg('CALL cloudBoot'); cloudBoot(force){
       if(!localUseful || remoteOrder >= localOrder){
         cloudApplyRemoteData(remoteSnapshot);
       } else {
-        dbg('SET dados'); dados = JSON.parse(JSON.stringify(localBest));
+        dados = JSON.parse(JSON.stringify(localBest));
         mdEnsureDataMeta(dados);
         if(window.__salvarLocalOriginal) window.__salvarLocalOriginal();
       }
     } else if(localUseful){
-      dbg('SET dados'); dados = JSON.parse(JSON.stringify(localBest));
+      dados = JSON.parse(JSON.stringify(localBest));
       mdEnsureDataMeta(dados);
       if(window.__salvarLocalOriginal) window.__salvarLocalOriginal();
       cloudWritePendingSnapshot(JSON.parse(JSON.stringify(dados)));
@@ -4502,7 +4483,7 @@ async function dbg('CALL cloudBoot'); cloudBoot(force){
   }
 }
 
-async function (dbg('CALL hydrate'), mdInitialHydrateAndRender()){
+async function mdInitialHydrateAndRender(){
   try{
     const localUseful = cloudHasUsefulData(dados);
     if(!localUseful){
@@ -4532,7 +4513,7 @@ async function (dbg('CALL hydrate'), mdInitialHydrateAndRender()){
   }catch(e){}
   try{ atualizar(); }catch(e){}
   try{ atualizarCarro(); }catch(e){}
-  setTimeout(function(){ try{ dbg('CALL cloudBoot'); cloudBoot(true); }catch(e){} }, 40);
+  setTimeout(function(){ try{ cloudBoot(true); }catch(e){} }, 40);
 }
 
 window.addEventListener("pagehide", function(){
@@ -5429,7 +5410,7 @@ function zerarTudo(){
     localStorage.removeItem(CLOUD_PENDING_KEY);
     localStorage.removeItem(CLOUD_LAST_OK_KEY);
   }catch(e){}
-  dbg('SET dados'); dados = {
+  dados = {
     ganhos: [],
     gastos: [],
     abastecimentos: [],
@@ -6118,7 +6099,7 @@ function getCombustivelConfig(brutoBase){
   const percentualSelecionado = [0.30,0.35,0.40,0.45,0.50].includes(Number(dados.combustivelPercentual))
     ? Number(dados.combustivelPercentual)
     : 0.30;
-  const kmRodbg('SET dados'); dados = Number(dados?.combustivelReal?.kmRodados || 0);
+  const kmRodados = Number(dados?.combustivelReal?.kmRodados || 0);
   const consumoMedio = Number(dados?.combustivelReal?.consumoMedio || 0);
   const precoLitro = Number(dados?.combustivelReal?.precoLitro || 0);
 
@@ -6342,25 +6323,6 @@ function exportarRelatorioPDF(){
 </style>
     </head>
     <body>
-<style>
-#debugPanel{
-position:fixed;bottom:0;left:0;width:100%;
-background:#000;color:#0f0;font-size:12px;
-z-index:9999;padding:4px;font-family:monospace;
-}
-</style>
-<div id="debugPanel">INIT</div>
-
-<script>
-function dbg(msg){
-  try{
-    const el=document.getElementById('debugPanel');
-    if(el) el.innerText=msg;
-    console.log("DBG:",msg);
-  }catch(e){}
-}
-</script>
-
       <h1>Relatório - MetaDriver</h1>
       <p class="sub">Gerado em ${d}/${m}/${y}</p>
 
@@ -6579,7 +6541,7 @@ document.getElementById("metaDiariaManual").value = metaSalvaAgora && (dados.met
     window.__fuelConfigInitialized = true;
   }
 
-  const fuelKmRodbg('SET dados'); dados = document.getElementById("fuelKmRodados");
+  const fuelKmRodados = document.getElementById("fuelKmRodados");
   const fuelConsumoMedio = document.getElementById("fuelConsumoMedio");
   const fuelPrecoLitro = document.getElementById("fuelPrecoLitro");
   if(fuelKmRodados && document.activeElement !== fuelKmRodados) fuelKmRodados.value = Number(dados?.combustivelReal?.kmRodados || 0) || "";
@@ -7538,7 +7500,7 @@ function bootApp(){
       iniciarTimerGanhoHoraTempoReal();
     }
   }catch(e){}
-  setTimeout(function(){ try{ dbg('CALL cloudBoot'); cloudBoot(true); }catch(e){} }, cloudHasUsefulData(dados) ? 120 : 30);
+  setTimeout(function(){ try{ cloudBoot(true); }catch(e){} }, cloudHasUsefulData(dados) ? 120 : 30);
 }
 if(document.readyState === "loading"){
   document.addEventListener("DOMContentLoaded", ()=>{ bootApp(); try{ initTabs(); }catch(e){}; try{ bindSectionHeaders(); }catch(e){} });
@@ -7573,7 +7535,7 @@ function bindSectionHeaders(){
 
 
 try{ ensureGanhoHoraDiaAtual(); }catch(e){}
-(dbg('CALL hydrate'), mdInitialHydrateAndRender());
+mdInitialHydrateAndRender();
 
 (function(){
   const metaIds = ["metaTotal", "dataLimite"];
@@ -8621,7 +8583,7 @@ function restoreFromIDBIfNeeded(){
       try{
         const parsed = JSON.parse(payload);
         if(parsed && typeof parsed === "object"){
-          dbg('SET dados'); dados = parsed;
+          dados = parsed;
           try{ localStorage.setItem(STORAGE_KEY, payload); }catch(e){}
           atualizar();
           try{ atualizarCarro(); }catch(e){}
@@ -8716,13 +8678,13 @@ function logoutApp(){
 }
 
 
-function (dbg('CALL resume'), mdResumeRestoreSafely()){
+function mdResumeRestoreSafely(){
   try{
     if(mdStateLocked() && cloudHasUsefulData(dados)){
       return;
     }
   }catch(e){}
-  try{ (dbg('CALL resume'), mdResumeRestoreSafely()); }catch(e){}
+  try{ mdResumeRestoreSafely(); }catch(e){}
 }
 
 window.addEventListener("load", function(){
