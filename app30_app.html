@@ -18,7 +18,7 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver v102</title>
+<title>MetaDriver v101</title>
 <script>
 // v57 - correção de duplicação ao minimizar/restaurar + proteção de rolagem
 (function(){
@@ -409,23 +409,6 @@ h1{text-align:center;margin:8px 0 14px;letter-spacing:0.2px;}
   letter-spacing:0.2px;
 }
 .card-body{padding:14px;}
-body.preload .topbar,
-body.preload .tabs-wrap,
-body.preload .card{
-  visibility:hidden;
-}
-body.preload{
-  overflow:hidden;
-}
-.topbar{
-  min-height:64px;
-}
-.topbar-inner{
-  min-height:36px;
-}
-.app-title-wrap{
-  min-height:36px;
-}
 
 label{display:block;margin-top:8px;font-size:13px;opacity:0.95;}
 input,select,button{
@@ -1028,78 +1011,6 @@ input.negative-value, input.negative-value::placeholder{
   pointer-events:none;
 }
 
-
-
-/* v102 - modal MetaDriver para virada das 4h */
-.dayturn-overlay{
-  position:fixed;
-  inset:0;
-  z-index:1400;
-  background:rgba(0,0,0,.55);
-  display:none;
-}
-.dayturn-overlay.show{display:block;}
-.dayturn-panel{
-  position:fixed;
-  left:12px;
-  right:12px;
-  top:50%;
-  transform:translateY(-50%);
-  z-index:1401;
-  background:rgba(18,28,44,.98);
-  border:1px solid rgba(255,255,255,.10);
-  border-radius:18px;
-  box-shadow:0 18px 40px rgba(0,0,0,.45);
-  padding:14px;
-  display:none;
-}
-.dayturn-panel.show{display:block;}
-.dayturn-title{
-  font-size:18px;
-  font-weight:900;
-  margin-bottom:6px;
-}
-.dayturn-sub{
-  font-size:13px;
-  opacity:.86;
-  line-height:1.4;
-  margin-bottom:10px;
-}
-.dayturn-display{
-  border:1px solid rgba(255,255,255,.08);
-  background:rgba(255,255,255,.04);
-  border-radius:16px;
-  min-height:86px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  margin-bottom:10px;
-  padding:10px;
-}
-.dayturn-value{
-  font-size:38px;
-  line-height:1;
-  font-weight:900;
-  text-align:center;
-  word-break:break-word;
-}
-.dayturn-keypad{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:8px;
-}
-.dayturn-actions{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:8px;
-  margin-top:10px;
-}
-.dayturn-actions button{
-  min-height:46px;
-  font-size:16px;
-  font-weight:800;
-  border-radius:12px;
-}
 
 .meta-total-overlay{
   background:transparent;
@@ -3000,7 +2911,7 @@ const DEV_LOCAL_MODE = true;
 </script>
 
 </head>
-<body class="preload">
+<body>
 
 <div class="topbar">
   <div class="topbar-inner">
@@ -3048,7 +2959,7 @@ const DEV_LOCAL_MODE = true;
   <div class="menu-item"><button class="secondary" onclick="abrirSaldoAtualButtonMenu(); closeMenu();">Botão de saldo atual</button></div>
   <div class="menu-item"><button class="secondary" onclick="abrirTemas(); closeMenu();">Temas</button></div>
   <div class="menu-item"><button class="danger" onclick="forceLogout(); return false;">Sair</button></div>
-  <div class="menu-note" style="text-align:center;">v102</div>
+  <div class="menu-note" style="text-align:center;">v101</div>
 </div>
 
 <div id="temasOverlay" class="temas-overlay" onclick="fecharTemas()"></div>
@@ -4034,7 +3945,7 @@ function mdBuildDiagnosticsObject(){
     const durableObj = mdSafeJsonParse(durableRaw);
     const diag = {
       generated_at: mdNowIso(),
-      app_version: 'MetaDriver v102',
+      app_version: 'MetaDriver v101',
       cloud_table: CLOUD_TABLE,
       device_id: mdEnsureDeviceId(),
       visibility_state: document.visibilityState,
@@ -5985,150 +5896,8 @@ function finalizarSessaoGanhoHoraInterno(opcoes){
   return true;
 }
 
-
-window.__dayTurn4hState = window.__dayTurn4hState || {
-  open:false,
-  diaAtualUber:"",
-  diaAnteriorUber:"",
-  turnKey:"",
-  replaceOnNext:true
-};
-
-function formatDayTurn4hDisplay(valueStr){
-  const n = parseFloat(String(valueStr || "").replace(",", ".")) || 0;
-  return "R$ " + n.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-}
-function refreshDayTurn4hDisplay(){
-  const hidden = document.getElementById("dayTurn4hHiddenInput");
-  const value = document.getElementById("dayTurn4hValue");
-  if(!hidden || !value) return;
-  value.textContent = formatDayTurn4hDisplay(hidden.value || "");
-}
-function openVirada4hModal(valorInicial, diaAtualUber, diaAnteriorUber, turnKey){
-  const overlay = document.getElementById("dayTurn4hOverlay");
-  const panel = document.getElementById("dayTurn4hPanel");
-  const hidden = document.getElementById("dayTurn4hHiddenInput");
-  if(!overlay || !panel || !hidden) return false;
-  window.__dayTurn4hState = {
-    open:true,
-    diaAtualUber:String(diaAtualUber || ""),
-    diaAnteriorUber:String(diaAnteriorUber || ""),
-    turnKey:String(turnKey || ""),
-    replaceOnNext:true
-  };
-  hidden.value = String(Number(valorInicial || 0));
-  refreshDayTurn4hDisplay();
-  overlay.classList.add("show");
-  panel.classList.add("show");
-  return true;
-}
-function closeVirada4hModal(){
-  const overlay = document.getElementById("dayTurn4hOverlay");
-  const panel = document.getElementById("dayTurn4hPanel");
-  if(overlay) overlay.classList.remove("show");
-  if(panel) panel.classList.remove("show");
-  window.__dayTurn4hState.open = false;
-}
-function cancelVirada4hModal(){
-  closeVirada4hModal();
-  try{ toast("⚠️ Virou 4h. Atualize o saldo final do dia e confirme para encerrar a sessão."); }catch(e){}
-}
-function appendDayTurn4hKey(key){
-  const hidden = document.getElementById("dayTurn4hHiddenInput");
-  if(!hidden) return;
-  let current = String(hidden.value || "");
-  if(window.__dayTurn4hState.replaceOnNext){
-    current = "";
-    window.__dayTurn4hState.replaceOnNext = false;
-  }
-  if(String(key) === "."){
-    if(current.includes(".")) return;
-    if(!current) current = "0";
-  }else if(!/^[0-9]$/.test(String(key))){
-    return;
-  }
-  current += String(key);
-  current = current.replace(/^0+(?=\d)/, "");
-  hidden.value = current;
-  refreshDayTurn4hDisplay();
-}
-function backspaceDayTurn4hValue(){
-  const hidden = document.getElementById("dayTurn4hHiddenInput");
-  if(!hidden) return;
-  if(window.__dayTurn4hState.replaceOnNext){
-    hidden.value = "";
-    window.__dayTurn4hState.replaceOnNext = false;
-  }else{
-    hidden.value = String(hidden.value || "").slice(0,-1);
-  }
-  refreshDayTurn4hDisplay();
-}
-function clearDayTurn4hValue(){
-  const hidden = document.getElementById("dayTurn4hHiddenInput");
-  if(!hidden) return;
-  hidden.value = "";
-  window.__dayTurn4hState.replaceOnNext = false;
-  refreshDayTurn4hDisplay();
-}
-function confirmVirada4hModal(){
-  const hidden = document.getElementById("dayTurn4hHiddenInput");
-  if(!hidden) return false;
-  const valorNormalizado = Number(String(hidden.value || "").trim().replace(",", "."));
-  if(!isFinite(valorNormalizado) || valorNormalizado < 0){
-    try{ toast("❌ Saldo final inválido. Informe um valor válido."); }catch(e){}
-    return false;
-  }
-
-  dados.saldoAtualFora = valorNormalizado;
-  dados.ganhoDiarioAtual = valorNormalizado;
-  try{
-    const saldoAtualElVirada = document.getElementById("saldoAtualFora");
-    if(saldoAtualElVirada) saldoAtualElVirada.value = String(valorNormalizado);
-  }catch(e){}
-
-  try{
-    finalizarSessaoGanhoHoraInterno({
-      silent: true,
-      skipSave: true,
-      skipUpdate: true,
-      naoIniciarProxima: true,
-      horaFim: '04:00',
-      dataFim: getViradaOperacional(new Date())
-    });
-  }catch(e){}
-
-  try{ salvarResumoDiaGanhoHora(window.__dayTurn4hState.diaAnteriorUber); }catch(e){}
-  limparDadosGanhoHora(true);
-  dados.ganhoHoraDiaRef = String(window.__dayTurn4hState.diaAtualUber || dataUberISO());
-  dados.saldoAtualFora = 0;
-  dados.ganhoDiarioAtual = 0;
-  dados.saldoAnteriorFora = 0;
-  dados.ganhoHoraSessaoAtiva = false;
-  dados.horarioInicioFora = "";
-  dados.ganhoHoraSessaoDiaRef = "";
-  dados.horasDecorridasFora = 0;
-  dados.ganhoHoraAtualFora = 0;
-  try{
-    const saldoAtualElNovoDia = document.getElementById("saldoAtualFora");
-    if(saldoAtualElNovoDia) saldoAtualElNovoDia.value = "";
-  }catch(e){}
-  try{
-    const horarioElNovoDia = document.getElementById("horarioInicioFora");
-    if(horarioElNovoDia) horarioElNovoDia.value = "";
-  }catch(e){}
-  try{
-    localStorage.setItem("md_last_4am_turn_key_v102", String(window.__dayTurn4hState.turnKey || ""));
-  }catch(e){}
-  salvar();
-  atualizar();
-  try{ toast("✅ Dia finalizado às 4h. Sessão encerrada e saldo zerado para iniciar o novo dia."); }catch(e){}
-  closeVirada4hModal();
-  return true;
-}
-
 function ensureGanhoHoraDiaAtual(){
   try{
-    if(!!dados.__skip_operational_day_turn) return false;
     if(!Array.isArray(dados.ganhoHoraSessoes)) dados.ganhoHoraSessoes = [];
     if(!dados.ganhoHoraDiaRef) dados.ganhoHoraDiaRef = dataUberISO();
 
@@ -6136,9 +5905,10 @@ function ensureGanhoHoraDiaAtual(){
     const hora = agora.getHours();
     const minuto = agora.getMinutes();
 
+    // v100 - só roda exatamente às 04:00
     if(!(hora === 4 && minuto === 0)) return false;
 
-    const turnKey = (function(){
+    const chaveViradaHoje = (function(){
       const yyyy = agora.getFullYear();
       const mm = String(agora.getMonth()+1).padStart(2,'0');
       const dd = String(agora.getDate()).padStart(2,'0');
@@ -6146,8 +5916,8 @@ function ensureGanhoHoraDiaAtual(){
     })();
 
     try{
-      const ultimaVirada = localStorage.getItem("md_last_4am_turn_key_v102") || "";
-      if(ultimaVirada === turnKey){
+      const ultimaVirada = localStorage.getItem("md_last_4am_turn_key_v100") || "";
+      if(ultimaVirada === chaveViradaHoje){
         return false;
       }
     }catch(e){}
@@ -6169,10 +5939,50 @@ function ensureGanhoHoraDiaAtual(){
     const temSessaoEmAndamento = !!dados.ganhoHoraSessaoAtiva && !!String(dados.horarioInicioFora || '').trim();
 
     if(temSessaoEmAndamento){
-      if(window.__dayTurn4hState && window.__dayTurn4hState.open) return false;
-      openVirada4hModal(Number(dados.saldoAtualFora || 0), diaAtualUber, diaAnteriorUber, turnKey);
-      return false;
+      const mensagemVirada = "Dia finalizado.\nA sessão será finalizada.\n\nAtualize o saldo final do dia e toque em OK para concluir.";
+      let valorInformado = null;
+      try{
+        valorInformado = prompt(mensagemVirada, String(Number(dados.saldoAtualFora || 0)).replace('.', ','));
+      }catch(e){
+        valorInformado = null;
+      }
+
+      if(valorInformado === null){
+        try{
+          toast("⚠️ Virou 4h. Atualize o saldo final do dia e confirme para encerrar a sessão.");
+        }catch(e){}
+        return false;
+      }
+
+      const valorNormalizado = Number(String(valorInformado || '').trim().replace(',', '.'));
+      if(!isFinite(valorNormalizado) || valorNormalizado < 0){
+        try{
+          toast("❌ Saldo final inválido. Informe um valor válido.");
+        }catch(e){}
+        return false;
+      }
+
+      dados.saldoAtualFora = valorNormalizado;
+      dados.ganhoDiarioAtual = valorNormalizado;
+
+      try{
+        const saldoAtualElVirada = document.getElementById("saldoAtualFora");
+        if(saldoAtualElVirada) saldoAtualElVirada.value = String(valorNormalizado);
+      }catch(e){}
+
+      try{
+        finalizarSessaoGanhoHoraInterno({
+          silent: true,
+          skipSave: true,
+          skipUpdate: true,
+          naoIniciarProxima: true,
+          horaFim: '04:00',
+          dataFim: getViradaOperacional(agora)
+        });
+      }catch(e){}
     }
+
+    try{ salvarResumoDiaGanhoHora(diaAnteriorUber); }catch(e){}
 
     limparDadosGanhoHora(true);
     dados.ganhoHoraDiaRef = diaAtualUber;
@@ -6184,14 +5994,23 @@ function ensureGanhoHoraDiaAtual(){
     dados.ganhoHoraSessaoDiaRef = "";
     dados.horasDecorridasFora = 0;
     dados.ganhoHoraAtualFora = 0;
+
     try{
       const saldoAtualElNovoDia = document.getElementById("saldoAtualFora");
       if(saldoAtualElNovoDia) saldoAtualElNovoDia.value = "";
     }catch(e){}
-    try{ localStorage.setItem("md_last_4am_turn_key_v102", turnKey); }catch(e){}
+    try{
+      const horarioElNovoDia = document.getElementById("horarioInicioFora");
+      if(horarioElNovoDia) horarioElNovoDia.value = "";
+    }catch(e){}
+
+    try{ localStorage.setItem("md_last_4am_turn_key_v100", chaveViradaHoje); }catch(e){}
+
     salvar();
     atualizar();
-    try{ toast("✅ Virou 4h. Saldo zerado para iniciar o novo dia."); }catch(e){}
+    try{
+      toast("✅ Dia finalizado às 4h. Sessão encerrada e saldo zerado para iniciar o novo dia.");
+    }catch(e){}
     return true;
   }catch(e){
     return false;
@@ -6199,7 +6018,6 @@ function ensureGanhoHoraDiaAtual(){
 }
 
 function salvarGanhosForaTempoReal(){
-  try{ delete dados.__skip_operational_day_turn; }catch(e){}
   ensureGanhoHoraDiaAtual();
   if(!Array.isArray(dados.ganhoHoraSessoes)) dados.ganhoHoraSessoes = [];
   if(!dados.ganhoHoraDiaRef) dados.ganhoHoraDiaRef = dataUberISO();
@@ -7700,15 +7518,11 @@ try{ syncSaldoAtualLockWithFab(); }catch(e){}
 setInterval(function(){ try{ applyQuickBalanceFabStateHard(); }catch(e){} try{ refreshQuickBalanceFabMiniDisplay(); }catch(e){} try{ syncSaldoAtualLockWithFab(); }catch(e){} }, 800);
 
 function bootApp(){
-  // v102 - mantém UI oculta até aplicar colapsos e layout inicial
-  try{ document.body.classList.add("preload"); }catch(e){}
   // v57 - garante visibilidade
   try{
     document.documentElement.style.opacity = '';
     document.documentElement.style.pointerEvents = '';
   }catch(e){}
-  try{ ensureFirstInstallCollapsed(); }catch(e){}
-  try{ initSectionCollapse(); }catch(e){}
   // v57 - calcular altura real da topbar e aplicar nas tabs para sticky preciso
   try{
     const topbar = document.querySelector('.topbar');
@@ -7718,6 +7532,8 @@ function bootApp(){
       tabsWrap.style.top = h + 'px';
     }
   }catch(e){}
+  try{ ensureFirstInstallCollapsed(); }catch(e){}
+  try{ initSectionCollapse(); }catch(e){}
   try{ ensureGanhoHoraDiaAtual(); }catch(e){}
   try{ setInterval(function(){ try{ ensureGanhoHoraDiaAtual(); }catch(e){} }, 15000); }catch(e){}
   try{ updateUberClock(); setInterval(updateUberClock, 1000); }catch(e){}
@@ -7728,15 +7544,6 @@ function bootApp(){
     }
   }catch(e){}
   setTimeout(function(){ try{ cloudBoot(true); }catch(e){} }, cloudHasUsefulData(dados) ? 120 : 30);
-  try{
-    requestAnimationFrame(function(){
-      requestAnimationFrame(function(){
-        document.body.classList.remove("preload");
-      });
-    });
-  }catch(e){
-    try{ document.body.classList.remove("preload"); }catch(_e){}
-  }
 }
 if(document.readyState === "loading"){
   document.addEventListener("DOMContentLoaded", ()=>{ bootApp(); try{ initTabs(); }catch(e){}; try{ bindSectionHeaders(); }catch(e){} });
@@ -7746,20 +7553,10 @@ if(document.readyState === "loading"){
 }
 // Em alguns celulares, ao voltar para o app (bfcache), reaplica o estado
 window.addEventListener("pageshow", ()=>{
-  try{ document.body.classList.add("preload"); }catch(e){}
   try{ initSectionCollapse(); }catch(e){}
   try{ applyQuickBalanceFabStateHard(); }catch(e){}
   // v57 - reforça restauração ao reabrir do cache do navegador
   try{ if(window.__mdRestoreScrollBurst) window.__mdRestoreScrollBurst(); else if(window.__mdRestoreScroll) window.__mdRestoreScroll(true); }catch(e){}
-  try{
-    requestAnimationFrame(function(){
-      requestAnimationFrame(function(){
-        document.body.classList.remove("preload");
-      });
-    });
-  }catch(e){
-    try{ document.body.classList.remove("preload"); }catch(_e){}
-  }
 });
 
 function bindSectionHeaders(){
@@ -8946,35 +8743,6 @@ window.addEventListener("load", function(){
 </script>
 
 <button type="button" id="quickBalanceFab" class="quick-balance-fab" onclick="toggleQuickBalancePanel(true)" aria-label="Atualizar saldo atual rápido"><span class="quick-balance-fab-inner"><span id="quickBalanceFabValue" class="quickBalanceFabValue quick-balance-fab-value">R$ 0</span></span></button>
-
-
-<div id="dayTurn4hOverlay" class="dayturn-overlay" onclick="if(event.target.id==='dayTurn4hOverlay')cancelVirada4hModal()"></div>
-<div id="dayTurn4hPanel" class="dayturn-panel" role="dialog" aria-modal="true" aria-labelledby="dayTurn4hTitle">
-  <div class="dayturn-title" id="dayTurn4hTitle">Dia finalizado</div>
-  <div class="dayturn-sub">A sessão será finalizada. Atualize o saldo final do dia e toque em OK para concluir.</div>
-  <div class="dayturn-display">
-    <div id="dayTurn4hValue" class="dayturn-value">R$ 0,00</div>
-  </div>
-  <input type="text" id="dayTurn4hHiddenInput" class="quick-balance-hidden-input" inputmode="none" readonly tabindex="-1" aria-hidden="true">
-  <div class="dayturn-keypad">
-    <button type="button" class="quick-balance-key" onclick="appendDayTurn4hKey('1')">1</button>
-    <button type="button" class="quick-balance-key" onclick="appendDayTurn4hKey('2')">2</button>
-    <button type="button" class="quick-balance-key" onclick="appendDayTurn4hKey('3')">3</button>
-    <button type="button" class="quick-balance-key" onclick="appendDayTurn4hKey('4')">4</button>
-    <button type="button" class="quick-balance-key" onclick="appendDayTurn4hKey('5')">5</button>
-    <button type="button" class="quick-balance-key" onclick="appendDayTurn4hKey('6')">6</button>
-    <button type="button" class="quick-balance-key" onclick="appendDayTurn4hKey('7')">7</button>
-    <button type="button" class="quick-balance-key" onclick="appendDayTurn4hKey('8')">8</button>
-    <button type="button" class="quick-balance-key" onclick="appendDayTurn4hKey('9')">9</button>
-    <button type="button" class="quick-balance-key" onclick="clearDayTurn4hValue()">Limpar</button>
-    <button type="button" class="quick-balance-key" onclick="appendDayTurn4hKey('0')">0</button>
-    <button type="button" class="quick-balance-key" onclick="backspaceDayTurn4hValue()">⌫</button>
-  </div>
-  <div class="dayturn-actions">
-    <button type="button" class="cancel" onclick="cancelVirada4hModal()">Cancelar</button>
-    <button type="button" onclick="confirmVirada4hModal()">OK</button>
-  </div>
-</div>
 
 <div id="quickBalanceOverlay" class="quick-balance-overlay" onclick="toggleQuickBalancePanel(false)"></div>
 
