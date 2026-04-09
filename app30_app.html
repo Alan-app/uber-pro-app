@@ -18,7 +18,7 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver v101</title>
+<title>MetaDriver v104</title>
 <script>
 // v57 - correção de duplicação ao minimizar/restaurar + proteção de rolagem
 (function(){
@@ -230,6 +230,13 @@ window.addEventListener("pageshow", function(){
   try{ mdResumeRestoreSafely(); }catch(e){}
 });
 
+
+/* prevent pull refresh */
+document.addEventListener('touchmove', function(e){
+  if((document.scrollingElement||document.documentElement).scrollTop===0){
+    e.preventDefault();
+  }
+},{passive:false});
 </script>
 
 <style>
@@ -409,6 +416,16 @@ h1{text-align:center;margin:8px 0 14px;letter-spacing:0.2px;}
   letter-spacing:0.2px;
 }
 .card-body{padding:14px;}
+
+/* v104 fixes */
+body.preload .card, body.preload .tabs-wrap, body.preload .topbar{visibility:hidden}
+.quick-balance-panel{
+  top:12px !important;
+  max-height:calc(100vh - 24px) !important;
+  overflow-y:auto;
+}
+html,body{overscroll-behavior-y:none;}
+
 
 label{display:block;margin-top:8px;font-size:13px;opacity:0.95;}
 input,select,button{
@@ -2911,7 +2928,7 @@ const DEV_LOCAL_MODE = true;
 </script>
 
 </head>
-<body>
+<body class="preload">
 
 <div class="topbar">
   <div class="topbar-inner">
@@ -2959,7 +2976,7 @@ const DEV_LOCAL_MODE = true;
   <div class="menu-item"><button class="secondary" onclick="abrirSaldoAtualButtonMenu(); closeMenu();">Botão de saldo atual</button></div>
   <div class="menu-item"><button class="secondary" onclick="abrirTemas(); closeMenu();">Temas</button></div>
   <div class="menu-item"><button class="danger" onclick="forceLogout(); return false;">Sair</button></div>
-  <div class="menu-note" style="text-align:center;">v101</div>
+  <div class="menu-note" style="text-align:center;">v104</div>
 </div>
 
 <div id="temasOverlay" class="temas-overlay" onclick="fecharTemas()"></div>
@@ -3258,7 +3275,7 @@ const DEV_LOCAL_MODE = true;
       <div id="formKmAtual" class="form hidden" style="display:none;">
         <div class="row">
           <input type="date" id="kmAtualData" />
-          <input type="number" id="kmAtualValor" inputmode="numeric" placeholder="KM atual" />
+          <input type="number" id="kmAtualValor" inputmode="none" readonly onclick="openMetaTotalKeypadFor('kmAtualValor')" placeholder="KM atual" />
         </div>
         <button type="button" onclick="salvarKmAtual()">Salvar</button>
       </div>
@@ -3945,7 +3962,7 @@ function mdBuildDiagnosticsObject(){
     const durableObj = mdSafeJsonParse(durableRaw);
     const diag = {
       generated_at: mdNowIso(),
-      app_version: 'MetaDriver v101',
+      app_version: 'MetaDriver v104',
       cloud_table: CLOUD_TABLE,
       device_id: mdEnsureDeviceId(),
       visibility_state: document.visibilityState,
@@ -7518,6 +7535,7 @@ try{ syncSaldoAtualLockWithFab(); }catch(e){}
 setInterval(function(){ try{ applyQuickBalanceFabStateHard(); }catch(e){} try{ refreshQuickBalanceFabMiniDisplay(); }catch(e){} try{ syncSaldoAtualLockWithFab(); }catch(e){} }, 800);
 
 function bootApp(){
+try{document.body.classList.add('preload')}catch(e){}
   // v57 - garante visibilidade
   try{
     document.documentElement.style.opacity = '';
@@ -7543,7 +7561,8 @@ function bootApp(){
       iniciarTimerGanhoHoraTempoReal();
     }
   }catch(e){}
-  setTimeout(function(){ try{ cloudBoot(true); }catch(e){} }, cloudHasUsefulData(dados) ? 120 : 30);
+  setTimeout(function(){ try{ cloudBoot(true);
+try{requestAnimationFrame(()=>requestAnimationFrame(()=>document.body.classList.remove('preload')))}catch(e){document.body.classList.remove('preload')} }catch(e){} }, cloudHasUsefulData(dados) ? 120 : 30);
 }
 if(document.readyState === "loading"){
   document.addEventListener("DOMContentLoaded", ()=>{ bootApp(); try{ initTabs(); }catch(e){}; try{ bindSectionHeaders(); }catch(e){} });
