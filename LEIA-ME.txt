@@ -1,62 +1,41 @@
-VERSÃO v105 - fix-critico-isolamento-usuarios-e-sync
+VERSÃO v115 - fix-sync-supabase-mdWrapCloudPayload
 
-FEEDBACK DA v104:
-- Dados de uma época antiga aparecem ao instalar
-- Importar backup ou editar dado: ao sair e entrar, volta aos dados antigos
-- Mesmos dados aparecem para TODOS os usuários — vazamento entre contas
+FEEDBACK DA v114:
+- Não está atualizando no Supabase
+- Tabela app_cloud_data mostrava 2 linhas mas dados não eram atualizados
 
-DIAGNÓSTICO — 3 BUGS CRÍTICOS:
+DIAGNÓSTICO — 3 BUGS:
 
-BUG 1 (GRAVÍSSIMO) — Chaves localStorage sem isolamento por usuário:
-  Todas as chaves de dados são fixas: "controleUberProDados", 
-  "controleUberProDados__offline_safe_snapshot_v83", etc.
-  Quando usuário A faz login e salva, essas chaves ficam no localStorage.
-  Quando usuário B faz login no mesmo dispositivo, o app lê as mesmas
-  chaves e exibe os dados do usuário A.
-  Também explica os "dados de época antiga": eram dados de sessão anterior
-  de outro usuário ou do próprio usuário antes de limpar o app.
+BUG 1 (PRINCIPAL) — mdWrapCloudPayload não definida:
+  cloudPushNow() chama mdWrapCloudPayload() mas a função não existe.
+  Isso causa ReferenceError silencioso dentro do try/catch — o erro
+  é capturado, a função retorna false, e NENHUM dado sobe para o Supabase.
+  Explicação direta do "não atualiza no Supabase".
 
-BUG 2 (CRÍTICO) — mdWrapCloudPayload não estava definida:
-  A função é chamada em cloudPushNow() mas nunca foi criada no código.
-  Isso causava um ReferenceError silencioso que impedia o app de subir
-  qualquer dado para a nuvem (cloudPushNow sempre falhava).
-  Resultado: dados ficavam só no localStorage, nunca chegavam ao Supabase.
-  Ao reinstalar, localStorage limpo + nuvem vazia = tudo zerado.
+BUG 2 — visibilitychange vazio:
+  Comentário "v96 fix: não fazer nada no minimize" esvaziou o handler.
+  Ao minimizar: não salva localmente, não chama cloudScheduleSave.
+  Ao voltar: não sincroniza com a nuvem.
+  Dados só chegam ao Supabase se o intervalo de 60s disparar — e mesmo
+  assim o BUG 1 impedia.
 
-BUG 3 (CRÍTICO) — visibilitychange completamente vazio:
-  O comentário "v96 fix: não fazer nada no minimize" deixou o handler
-  sem nenhuma ação. Ao minimizar: não salvava local, não subia para nuvem.
-  Ao voltar: não sincronizava com nuvem. Dados só persistiam se o usuário
-  digitasse algo (pois aí salvar() era chamado diretamente).
+BUG 3 — __mdActiveUserId vazio no boot:
+  bootApp() iniciava sem definir o scope do usuário.
+  mdReadLS() e mdWriteLS() usavam chave base sem userId.
+  Se o userId era carregado depois (por cloudBoot), dados já tinham
+  sido lidos/escritos na chave errada.
 
 O QUE FOI FEITO:
-
-Fix 1: Isolamento por usuário
-  - Adicionada função mdGetUserScopedKey() que prefixa chaves com o userId
-  - loadDados() agora tenta primeiro a chave com userId, depois a base
-  - salvar() grava nas duas chaves (com e sem userId) para compatibilidade
-  - Evita completamente o vazamento de dados entre usuários
-
-Fix 2: mdWrapCloudPayload criada
-  - Função que constrói o envelope enviado para o Supabase
-  - cloudPushNow() agora funciona corretamente
-  - Dados sobem para a nuvem após qualquer save
-
-Fix 3: visibilitychange restaurado
-  - Ao minimizar: salva local + sobe para nuvem
-  - Ao voltar: restaura visibilidade + chama cloudBoot(true) para sincronizar
+1. mdWrapCloudPayload criada — constrói o envelope correto para o Supabase
+2. visibilitychange restaurado — salva local + push nuvem ao minimizar,
+   cloudBoot(true) ao voltar
+3. bootApp inicializa __mdActiveUserId com o userId cacheado antes de
+   qualquer operação de leitura/escrita
 
 ARQUIVOS ALTERADOS:
 - app30_app.html
-- index.html
-- login.html
-- admin.html
-- painel.html
-- reset.html
+- index.html / login.html / admin.html / painel.html / reset.html
 - LEIA-ME.txt
 
 STATUS:
-- Aguardando teste
-- Testar: dois usuários diferentes no mesmo dispositivo
-- Testar: minimizar e reabrir
-- Testar: reinstalar — dados devem aparecer da nuvem
+- Aguardando teste — verificar se dados aparecem no Supabase após salvar
