@@ -3969,17 +3969,26 @@ function cloudWriteCachedUserId(userId){
 function cloudGetStoredTokenSync(){
   try{ return localStorage.getItem("sb_token") || ""; }catch(e){ return ""; }
 }
-async function cloudGetToken(forceRefresh){
+async function cloudGetToken(){
+  let fast = "";
+  try{ fast = localStorage.getItem("sb_token") || ""; }catch(e){ fast = ""; }
   try{
-    if(typeof window.mdEnsureActiveSession === "function"){
-      const refreshed = await window.mdEnsureActiveSession(!!forceRefresh);
-      if(refreshed){
-        try{ localStorage.setItem("sb_token", refreshed || ""); }catch(_){ }
-        return refreshed;
+    if(fast){
+      if(typeof window.mdEnsureActiveSession === "function"){
+        Promise.resolve().then(function(){ return window.mdEnsureActiveSession(false); }).then(function(renewed){
+          try{ if(renewed) localStorage.setItem("sb_token", renewed || ""); }catch(_){ }
+        }).catch(function(){});
       }
+      return fast;
     }
-  }catch(e){}
-  try{ return localStorage.getItem("sb_token") || ""; }catch(e){ return ""; }
+    if(typeof window.mdEnsureActiveSession === "function"){
+      const renewed = await window.mdEnsureActiveSession(false);
+      if(renewed) return renewed;
+    }
+    return cloudGetStoredTokenSync();
+  }catch(e){
+    return cloudGetStoredTokenSync();
+  }
 }
 
 function cloudReadPendingSnapshot(){
@@ -4253,34 +4262,33 @@ async function cloudResolveUserId(token){
 
 function cloudHasUsefulData(obj){
   try{
-    if(!obj) return false;
+    if(!obj || typeof obj !== "object") return false;
+    const hasItems = function(v){ return Array.isArray(v) && v.length > 0; };
+    const hasPositive = function(v){ return Number(v || 0) > 0; };
+    const hasText = function(v){ return String(v || '').trim() !== ''; };
     return !!(
-      (obj.ganhos && obj.ganhos.length) ||
-      (obj.gastos && obj.gastos.length) ||
-      (obj.abastecimentos && obj.abastecimentos.length) ||
-      (obj.naoTrabalhados && obj.naoTrabalhados.length) ||
-      (obj.ganhoHoraSessoes && obj.ganhoHoraSessoes.length) ||
-      (obj.ganhoHoraHistorico && obj.ganhoHoraHistorico.length) ||
-      Number(obj.metaTotal || 0) > 0 ||
-      String(obj.dataLimite || '').trim() !== '' ||
-      Number(obj.metaDiariaManual || 0) > 0 ||
-      Number(obj.ganhoDiarioAtual || 0) > 0 ||
+      hasItems(obj.ganhos) ||
+      hasItems(obj.gastos) ||
+      hasItems(obj.abastecimentos) ||
+      hasItems(obj.naoTrabalhados) ||
+      hasItems(obj.ganhoHoraSessoes) ||
+      hasItems(obj.ganhoHoraHistorico) ||
+      hasPositive(obj.metaTotal) ||
+      hasText(obj.dataLimite) ||
+      hasPositive(obj.metaDiariaManual) ||
+      hasPositive(obj.ganhoDiarioAtual) ||
       Number(obj.ganhoHoraManual || 40) !== 40 ||
-      Number(obj.saldoAtualFora || 0) > 0 ||
-      Number(obj.saldoAnteriorFora || 0) > 0 ||
-      Number(obj.horasDecorridasFora || 0) > 0 ||
-      Number(obj.ganhoHoraAtualFora || 0) > 0 ||
-      (obj.horarioInicioFora && String(obj.horarioInicioFora).trim() !== "") ||
-      String(obj.ganhoHoraDiaRef || '').trim() !== '' ||
-      String(obj.ganhoHoraSessaoDiaRef || '').trim() !== '' ||
-      typeof obj.ganhoHoraHistoricoAberto === 'boolean' ||
-      typeof obj.saldoAtualButtonAtivo === 'boolean' ||
-      (obj.saldoAtualButtonPos && typeof obj.saldoAtualButtonPos === 'object') ||
+      hasPositive(obj.saldoAtualFora) ||
+      hasPositive(obj.saldoAnteriorFora) ||
+      hasPositive(obj.horasDecorridasFora) ||
+      hasPositive(obj.ganhoHoraAtualFora) ||
+      hasText(obj.horarioInicioFora) ||
+      hasText(obj.ganhoHoraSessaoDiaRef) ||
       Number(obj.combustivelPercentual || 0.30) !== 0.30 ||
-      (obj.combustivelModo && String(obj.combustivelModo) === "real") ||
-      Number(obj?.combustivelReal?.kmRodados || 0) > 0 ||
-      Number(obj?.combustivelReal?.consumoMedio || 0) > 0 ||
-      Number(obj?.combustivelReal?.precoLitro || 0) > 0
+      String(obj.combustivelModo || '') === "real" ||
+      hasPositive(obj?.combustivelReal?.kmRodados) ||
+      hasPositive(obj?.combustivelReal?.consumoMedio) ||
+      hasPositive(obj?.combustivelReal?.precoLitro)
     );
   }catch(e){ return false; }
 }
@@ -4302,29 +4310,26 @@ async function cloudFetchRow(token, userId){
 }
 
 async function cloudUpsertRow(token, userId, body){
+  const existing = await cloudFetchRow(token, userId).catch(function(){ return null; });
   const headers = {
     "apikey": CLOUD_SUPABASE_KEY,
     "Authorization": "Bearer " + token,
     "Content-Type": "application/json",
     "Prefer": "return=representation"
   };
-
-  const existing = await cloudFetchRow(token, userId).catch(function(){ return null; });
   if(existing && existing.id){
-    const resp = await fetch(CLOUD_SUPABASE_URL + "/rest/v1/" + CLOUD_TABLE + "?id=eq." + encodeURIComponent(existing.id), {
+    const resp = await fetch(CLOUD_SUPABASE_URL + "/rest/v1/" + CLOUD_TABLE + "?user_id=eq." + encodeURIComponent(userId), {
       method: "PATCH",
       headers: headers,
       body: JSON.stringify(body)
     }).catch(function(){ return null; });
     if(resp && resp.ok) return resp;
   }
-
-  const resp = await fetch(CLOUD_SUPABASE_URL + "/rest/v1/" + CLOUD_TABLE + "?on_conflict=user_id", {
+  return await fetch(CLOUD_SUPABASE_URL + "/rest/v1/" + CLOUD_TABLE, {
     method: "POST",
     headers: Object.assign({}, headers, {"Prefer":"resolution=merge-duplicates,return=representation"}),
     body: JSON.stringify(body)
   }).catch(function(){ return null; });
-  return resp;
 }
 
 function mdSyncBackupsFromCloud(backups){
@@ -4428,20 +4433,22 @@ function mdRemoteWouldRollback(remoteData){
 
 function cloudApplyRemoteData(remoteData){
   try{
-    if(!remoteData || typeof remoteData !== "object") return false;
+    if(!remoteData || typeof remoteData !== "object") return;
     mdEnsureDataMeta(dados);
     mdEnsureDataMeta(remoteData);
     if(mdShouldBlockSnapshot(remoteData)){
       console.warn("MetaDriver: remoto ignorado por trava temporária de estado");
-      return false;
+      return;
     }
     if(mdRemoteWouldRollback(remoteData)){
       console.warn("MetaDriver: remoto ignorado para evitar rollback local");
-      return false;
+      return;
     }
+    // v108 - não mescla e não sobrescreve local útil automaticamente
+    if(cloudHasUsefulData(dados)) return;
     dados = JSON.parse(JSON.stringify(remoteData));
     mdEnsureDataMeta(dados);
-    mdPushBackup(LOCAL_BACKUP_KEY, dados, "remote-apply-v114");
+    mdPushBackup(LOCAL_BACKUP_KEY, dados, "remote-apply-v108");
     if(window.__salvarLocalOriginal) window.__salvarLocalOriginal();
     try{
       if(String(dados.horarioInicioFora || "").trim()) iniciarTimerGanhoHoraTempoReal();
@@ -4449,20 +4456,18 @@ function cloudApplyRemoteData(remoteData){
     }catch(e){}
     try{ atualizar(); }catch(e){}
     try{ atualizarCarro(); }catch(e){}
-    return true;
   }catch(e){
     console.warn("cloudApplyRemoteData", e);
-    return false;
   }
 }
 
 async function cloudPushNow(snapshotOverride){
   try{
-    const token = await cloudGetToken(true);
+    const token = await cloudGetToken();
     if(token){ try{ await mdBootstrapUserScope(token); }catch(e){} }
-    if(!token){ console.warn("SYNC ERROR: sem token"); return false; }
+    if(!token) return false;
     const userId = await cloudResolveUserId(token).catch(function(){ return ""; });
-    if(!userId){ console.warn("SYNC ERROR: sem user_id"); return false; }
+    if(!userId) return false;
 
     const pending = snapshotOverride || cloudReadPendingSnapshot();
     const pendingPayload = pending && pending.payload ? pending.payload : null;
@@ -4473,7 +4478,7 @@ async function cloudPushNow(snapshotOverride){
       { snapshot: localPayload }
     ]);
 
-    if(!best || !cloudHasUsefulData(best)){ console.warn("SYNC ERROR: snapshot inútil"); return false; }
+    if(!best || !cloudHasUsefulData(best)) { console.warn("cloudPushNow: snapshot sem dados úteis"); return false; }
 
     const remoteRow = await cloudFetchRow(token, userId).catch(function(){ return null; });
     const remoteWrapped = mdUnwrapCloudPayload(remoteRow && remoteRow.payload ? remoteRow.payload : null);
@@ -4484,9 +4489,10 @@ async function cloudPushNow(snapshotOverride){
     const localTs = new Date(best.__updated_at || best.__cloud_updated_at || 0).getTime() || 0;
     const remoteTs = new Date(remoteSnapshot && (remoteSnapshot.__updated_at || remoteSnapshot.__cloud_updated_at) || 0).getTime() || 0;
 
+    // v101 - envia snapshot único completo; não sobe se remoto for claramente mais novo
     if(remoteSnapshot && cloudHasUsefulData(remoteSnapshot)){
-      if(remoteSeq > localSeq) { console.warn("SYNC SKIP: remoto mais novo"); return false; }
-      if(remoteSeq === localSeq && remoteTs > localTs) { console.warn("SYNC SKIP: remoto mais recente"); return false; }
+      if(remoteSeq > localSeq) return false;
+      if(remoteSeq === localSeq && remoteTs > localTs) return false;
     }
 
     const payloadToSend = JSON.parse(JSON.stringify(best));
@@ -4506,21 +4512,19 @@ async function cloudPushNow(snapshotOverride){
     };
 
     const resp = await cloudUpsertRow(token, userId, body);
+
     if(!resp || !resp.ok){
-      let raw = "";
-      try{ raw = await resp.text(); }catch(_e){}
-      console.warn("SYNC ERROR", raw || (resp && resp.status) || "sem resposta");
+      try{ const raw = resp ? await resp.text() : ""; console.warn("cloudPushNow: write failed", raw); }catch(_e){}
       return false;
     }
+    console.log("SYNC OK", payloadToSend.__cloud_updated_at, payloadToSend.__local_commit_seq);
 
     dados = JSON.parse(JSON.stringify(payloadToSend));
     mdEnsureDataMeta(dados);
     __cloudDirty = false;
     cloudClearPendingSnapshot();
-    cloudMarkLastOk(payloadToSend.__cloud_updated_at);
     try{ if(typeof mdWriteOfflineSafeSnapshot === "function") mdWriteOfflineSafeSnapshot(dados); }catch(e){}
     if(window.__salvarLocalOriginal) window.__salvarLocalOriginal();
-    console.log("SYNC OK", payloadToSend.__cloud_updated_at);
     return true;
   }catch(e){
     console.warn("cloudPushNow", e);
@@ -4549,43 +4553,60 @@ async function cloudBoot(force){
   if(__cloudBootDoneOnce && force !== true) return;
   __cloudBootStarted = true;
   try{
+    const bootUserId = await mdBootstrapUserScope().catch(function(){ return ""; });
     const recovered = await mdRecoverDurableStateFromIDB().catch(function(){ return null; });
-    const offlineSafe = (typeof mdReadOfflineSafeSnapshot === "function" ? mdReadOfflineSafeSnapshot() : null);
-    const pending = cloudReadPendingSnapshot();
-    const pendingPayload = pending && pending.payload ? pending.payload : null;
-
-    let token = await cloudGetToken(false);
-    let userId = "";
-    let remoteSnapshot = null;
-    if(token){
-      try{ userId = await cloudResolveUserId(token); }catch(e){ userId = ""; }
-      if(userId){
-        const remoteRow = await cloudFetchRow(token, userId).catch(function(){ return null; });
-        const remoteWrapped = mdUnwrapCloudPayload(remoteRow && remoteRow.payload ? remoteRow.payload : null);
-        mdSyncBackupsFromCloud(remoteWrapped && remoteWrapped.backups ? remoteWrapped.backups : []);
-        remoteSnapshot = remoteWrapped && remoteWrapped.snapshot ? remoteWrapped.snapshot : null;
-      }
+    if(recovered && mdSnapshotOrderValue(recovered) > mdSnapshotOrderValue(dados) && !mdShouldBlockSnapshot(recovered)){
+      dados = JSON.parse(JSON.stringify(recovered));
+      mdEnsureDataMeta(dados);
+      try{ atualizar(); }catch(e){}
+      try{ atualizarCarro(); }catch(e){}
     }
 
-    const best = mdPickBestSnapshot([
+    const localBest = mdPickBestSnapshot([
       { snapshot: dados },
       { snapshot: recovered },
-      { snapshot: offlineSafe },
-      { snapshot: pendingPayload },
-      { snapshot: remoteSnapshot }
-    ]);
+      { snapshot: (typeof mdReadOfflineSafeSnapshot === "function" ? mdReadOfflineSafeSnapshot() : null) }
+    ]) || dados;
 
-    if(best && cloudHasUsefulData(best) && !mdShouldBlockSnapshot(best)){
-      const bestOrder = mdSnapshotOrderValue(best);
-      const currentOrder = mdSnapshotOrderValue(dados || {});
-      if(bestOrder > currentOrder || !cloudHasUsefulData(dados)){
-        if(remoteSnapshot && best === remoteSnapshot) cloudApplyRemoteData(remoteSnapshot);
-        else mdApplyExternalSnapshot(best, "boot-hydrate", false);
+    const localUseful = localBest && cloudHasUsefulData(localBest);
+
+    // v114 - só prioriza local quando houver dado realmente útil.
+    // Estado padrão / vazio não bloqueia restore remoto.
+    if(localUseful){
+      dados = JSON.parse(JSON.stringify(localBest));
+      mdEnsureDataMeta(dados);
+      if(window.__salvarLocalOriginal) window.__salvarLocalOriginal();
+      const pending = cloudReadPendingSnapshot();
+      if(__cloudDirty || (pending && pending.payload && cloudHasUsefulData(pending.payload))){
+        cloudScheduleSave(120);
       }
+      __cloudBootDoneOnce = true;
+      return;
     }
 
-    if(mdHasUnsyncedLocalChanges() || (pendingPayload && cloudHasUsefulData(pendingPayload))){
-      __cloudDirty = true;
+    const token = await cloudGetToken();
+    if(!token){
+      __cloudBootDoneOnce = false;
+      return;
+    }
+    const userId = await cloudResolveUserId(token).catch(function(){ return ""; });
+    if(!userId){
+      __cloudBootDoneOnce = false;
+      return;
+    }
+
+    const remoteRow = await cloudFetchRow(token, userId).catch(function(){ return null; });
+    const remoteWrapped = mdUnwrapCloudPayload(remoteRow && remoteRow.payload ? remoteRow.payload : null);
+    mdSyncBackupsFromCloud(remoteWrapped && remoteWrapped.backups ? remoteWrapped.backups : []);
+    const remoteSnapshot = remoteWrapped && remoteWrapped.snapshot ? remoteWrapped.snapshot : null;
+
+    // Só aplica remoto se o local estiver vazio/inútil
+    if(!localUseful && remoteSnapshot && cloudHasUsefulData(remoteSnapshot)){
+      cloudApplyRemoteData(remoteSnapshot);
+    }
+
+    const pending = cloudReadPendingSnapshot();
+    if(__cloudDirty || (pending && pending.payload && cloudHasUsefulData(pending.payload))){
       cloudScheduleSave(120);
     }
 
@@ -4598,8 +4619,39 @@ async function cloudBoot(force){
 }
 
 async function mdInitialHydrateAndRender(){
+  if (dados && Object.keys(dados).length > 0 && cloudHasUsefulData(dados)) {
+    try { atualizar(); } catch(e){}
+    try { atualizarCarro(); } catch(e){}
+    return;
+  }
   try{
-    await cloudBoot(true);
+    const localUseful = cloudHasUsefulData(dados);
+    if(!localUseful){
+      // v57: busca da nuvem sem depender de cachedUserId — tenta token direto
+      let token = cloudGetStoredTokenSync();
+      if(token){ try{ await mdBootstrapUserScope(token); }catch(e){} }
+      if(!token){
+        try{ token = await cloudGetToken(); }catch(e){}
+      }
+      let userId = cloudReadCachedUserId();
+      if(!userId && token){
+        try{
+          const u = await cloudGetUser(token).catch(function(){ return null; });
+          userId = u && u.id ? u.id : "";
+        }catch(e){}
+      }
+      if(token && userId){
+        const remoteRow = await cloudFetchRow(token, userId).catch(function(){ return null; });
+        const remoteWrapped = mdUnwrapCloudPayload(remoteRow && remoteRow.payload ? remoteRow.payload : null);
+        const remoteSnapshot = remoteWrapped.snapshot;
+        if(remoteSnapshot && cloudHasUsefulData(remoteSnapshot)){
+          try{ mdSetActiveUserScope(userId); }catch(e){}
+          if(!mdShouldBlockSnapshot(remoteSnapshot)){
+            mdApplyExternalSnapshot(remoteSnapshot, "remote-hydrate", false);
+          }
+        }
+      }
+    }
   }catch(e){}
   try{ atualizar(); }catch(e){}
   try{ atualizarCarro(); }catch(e){}
@@ -7724,7 +7776,16 @@ function bootApp(){
       iniciarTimerGanhoHoraTempoReal();
     }
   }catch(e){}
-  // preload será liberado após a hidratação inicial cloud-first
+  setTimeout(function(){ try{ cloudBoot(true); }catch(e){} }, cloudHasUsefulData(dados) ? 120 : 30);
+  try{
+    requestAnimationFrame(function(){
+      requestAnimationFrame(function(){
+        document.body.classList.remove("preload");
+      });
+    });
+  }catch(e){
+    try{ document.body.classList.remove("preload"); }catch(_e){}
+  }
 }
 if(document.readyState === "loading"){
   document.addEventListener("DOMContentLoaded", ()=>{ bootApp(); try{ initTabs(); }catch(e){}; try{ bindSectionHeaders(); }catch(e){} });
@@ -7739,7 +7800,15 @@ window.addEventListener("pageshow", ()=>{
   try{ applyQuickBalanceFabStateHard(); }catch(e){}
   // v57 - reforça restauração ao reabrir do cache do navegador
   try{ if(window.__mdRestoreScrollBurst) window.__mdRestoreScrollBurst(); else if(window.__mdRestoreScroll) window.__mdRestoreScroll(true); }catch(e){}
-  // preload será liberado após a hidratação inicial cloud-first
+  try{
+    requestAnimationFrame(function(){
+      requestAnimationFrame(function(){
+        document.body.classList.remove("preload");
+      });
+    });
+  }catch(e){
+    try{ document.body.classList.remove("preload"); }catch(_e){}
+  }
 });
 
 function bindSectionHeaders(){
@@ -7761,7 +7830,7 @@ function bindSectionHeaders(){
 
 
 try{ ensureGanhoHoraDiaAtual(); }catch(e){}
-Promise.resolve(mdInitialHydrateAndRender()).finally(function(){ try{ document.body.classList.remove("preload"); }catch(e){} });
+mdInitialHydrateAndRender();
 
 (function(){
   const metaIds = ["metaTotal", "dataLimite"];
@@ -8876,11 +8945,13 @@ function logoutApp(){
 
 /* ===== Logout robusto do app (v57: salva na nuvem antes de sair) ===== */
 async function forceLogout(){
+  console.log("LOGOUT start");
   try{ closeMenu(); }catch(e){}
   // v57 - garante push pra nuvem antes de limpar token e sair
   try{
     if(typeof salvar === "function") salvar();
     await cloudPushNow();
+    console.log("LOGOUT sync attempted");
   }catch(e){}
   try{
     const keysToRemove = [];

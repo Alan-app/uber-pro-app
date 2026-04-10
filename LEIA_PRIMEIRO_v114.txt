@@ -1,0 +1,5 @@
+v114
+- Corrigido cloudHasUsefulData: o app tratava estado vazio/default como dado util.
+- Isso bloqueava restore remoto e podia manter app zerado apos limpar dados/logout.
+- Arquivos alterados: app30_app.html, app30_app_backup.html.
+- Teste: alterar dado, verificar updated_at no app_cloud_data, fazer logout/login, limpar dados do Chrome e entrar novamente.
