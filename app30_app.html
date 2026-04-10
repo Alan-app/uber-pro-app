@@ -18,7 +18,7 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver v118</title>
+<title>MetaDriver v121</title>
 <script>
 // v57 - correção de duplicação ao minimizar/restaurar + proteção de rolagem
 (function(){
@@ -3048,7 +3048,7 @@ const DEV_LOCAL_MODE = true;
   <div class="menu-item"><button class="secondary" onclick="abrirSaldoAtualButtonMenu(); closeMenu();">Botão de saldo atual</button></div>
   <div class="menu-item"><button class="secondary" onclick="abrirTemas(); closeMenu();">Temas</button></div>
   <div class="menu-item"><button class="danger" onclick="forceLogout(); return false;">Sair</button></div>
-  <div class="menu-note" style="text-align:center;">v118</div>
+  <div class="menu-note" style="text-align:center;">v121</div>
 </div>
 
 <div id="temasOverlay" class="temas-overlay" onclick="fecharTemas()"></div>
@@ -3426,7 +3426,7 @@ function mdSanitizeStorageSuffix(value){
   try{ return String(value || "").replace(/[^a-zA-Z0-9_-]/g, "_"); }catch(e){ return ""; }
 }
 function mdScopedDataKey(baseKey, userId){
-  const suffix = mdSanitizeStorageSuffix(typeof userId === "string" ? userId : (__mdActiveUserId || cloudReadCachedUserId && cloudReadCachedUserId() || ""));
+  const suffix = mdSanitizeStorageSuffix(typeof userId === "string" ? userId : (__mdActiveUserId || ""));
   return suffix ? (baseKey + "__u_" + suffix) : baseKey;
 }
 function mdCurrentDataKey(baseKey){
@@ -3500,12 +3500,13 @@ let __cloudDirty = false; // v57 - flag: só envia pra nuvem se houve mudança r
 
 async function mdBootstrapUserScope(preferredToken){
   try{
-    let userId = cloudReadCachedUserId();
+    let userId = "";
+    const token = preferredToken || await cloudGetToken().catch(function(){ return ""; });
+    if(token){
+      userId = await cloudResolveUserId(token).catch(function(){ return ""; });
+    }
     if(!userId){
-      const token = preferredToken || await cloudGetToken().catch(function(){ return ""; });
-      if(token){
-        userId = await cloudResolveUserId(token).catch(function(){ return ""; });
-      }
+      userId = cloudReadCachedUserId();
     }
     if(!userId) return "";
     mdSetActiveUserScope(userId);
@@ -3954,6 +3955,7 @@ salvar = function(){
     }
   }catch(e){}
   __cloudDirty = true;
+  try{ Promise.resolve().then(function(){ return cloudPushNow(JSON.parse(JSON.stringify(dados))); }).catch(function(){}); }catch(e){}
   try{ cloudScheduleSave(); }catch(e){}
   try{ if(cloudHasUsefulData(dados)) mdLockStateWrites(15000, mdSnapshotOrderValue(dados || {})); }catch(e){}
   return r;
@@ -3973,21 +3975,16 @@ async function cloudGetToken(){
   let fast = "";
   try{ fast = localStorage.getItem("sb_token") || ""; }catch(e){ fast = ""; }
   try{
-    if(fast){
-      if(typeof window.mdEnsureActiveSession === "function"){
-        Promise.resolve().then(function(){ return window.mdEnsureActiveSession(false); }).then(function(renewed){
-          try{ if(renewed) localStorage.setItem("sb_token", renewed || ""); }catch(_){ }
-        }).catch(function(){});
-      }
-      return fast;
-    }
     if(typeof window.mdEnsureActiveSession === "function"){
-      const renewed = await window.mdEnsureActiveSession(false);
-      if(renewed) return renewed;
+      const renewed = await window.mdEnsureActiveSession(!fast);
+      if(renewed){
+        try{ localStorage.setItem("sb_token", renewed || ""); }catch(_){ }
+        return renewed;
+      }
     }
-    return cloudGetStoredTokenSync();
+    return fast || cloudGetStoredTokenSync();
   }catch(e){
-    return cloudGetStoredTokenSync();
+    return fast || cloudGetStoredTokenSync();
   }
 }
 
@@ -4098,7 +4095,7 @@ function mdBuildDiagnosticsObject(){
     const durableObj = mdSafeJsonParse(durableRaw);
     const diag = {
       generated_at: mdNowIso(),
-      app_version: 'MetaDriver v118',
+      app_version: 'MetaDriver v121',
       cloud_table: CLOUD_TABLE,
       device_id: mdEnsureDeviceId(),
       visibility_state: document.visibilityState,
@@ -4254,22 +4251,34 @@ async function cloudGetUser(token){
   return user;
 }
 async function cloudResolveUserId(token){
+  if(token){
+    const user = await cloudGetUser(token).catch(function(){ return null; });
+    const tokenUserId = (user && user.id) ? String(user.id) : "";
+    if(tokenUserId){
+      try{ cloudWriteCachedUserId(tokenUserId); }catch(e){}
+      try{ mdSetActiveUserScope(tokenUserId); }catch(e){}
+      try{ mdMigrateLegacyGlobalStateToUser(tokenUserId); }catch(e){}
+      return tokenUserId;
+    }
+  }
   const cached = cloudReadCachedUserId();
-  if(cached){ try{ mdSetActiveUserScope(cached); mdMigrateLegacyGlobalStateToUser(cached); }catch(e){} return cached; }
-  const user = await cloudGetUser(token);
-  return (user && user.id) ? user.id : "";
+  if(cached){
+    try{ mdSetActiveUserScope(cached); mdMigrateLegacyGlobalStateToUser(cached); }catch(e){}
+    return cached;
+  }
+  return "";
 }
 
 function cloudHasUsefulData(obj){
   try{
-    if(!obj) return false;
+    if(!obj || typeof obj !== "object") return false;
     return !!(
-      (obj.ganhos && obj.ganhos.length) ||
-      (obj.gastos && obj.gastos.length) ||
-      (obj.abastecimentos && obj.abastecimentos.length) ||
-      (obj.naoTrabalhados && obj.naoTrabalhados.length) ||
-      (obj.ganhoHoraSessoes && obj.ganhoHoraSessoes.length) ||
-      (obj.ganhoHoraHistorico && obj.ganhoHoraHistorico.length) ||
+      (Array.isArray(obj.ganhos) && obj.ganhos.length) ||
+      (Array.isArray(obj.gastos) && obj.gastos.length) ||
+      (Array.isArray(obj.abastecimentos) && obj.abastecimentos.length) ||
+      (Array.isArray(obj.naoTrabalhados) && obj.naoTrabalhados.length) ||
+      (Array.isArray(obj.ganhoHoraSessoes) && obj.ganhoHoraSessoes.length) ||
+      (Array.isArray(obj.ganhoHoraHistorico) && obj.ganhoHoraHistorico.length) ||
       Number(obj.metaTotal || 0) > 0 ||
       String(obj.dataLimite || '').trim() !== '' ||
       Number(obj.metaDiariaManual || 0) > 0 ||
@@ -4282,9 +4291,6 @@ function cloudHasUsefulData(obj){
       (obj.horarioInicioFora && String(obj.horarioInicioFora).trim() !== "") ||
       String(obj.ganhoHoraDiaRef || '').trim() !== '' ||
       String(obj.ganhoHoraSessaoDiaRef || '').trim() !== '' ||
-      typeof obj.ganhoHoraHistoricoAberto === 'boolean' ||
-      typeof obj.saldoAtualButtonAtivo === 'boolean' ||
-      (obj.saldoAtualButtonPos && typeof obj.saldoAtualButtonPos === 'object') ||
       Number(obj.combustivelPercentual || 0.30) !== 0.30 ||
       (obj.combustivelModo && String(obj.combustivelModo) === "real") ||
       Number(obj?.combustivelReal?.kmRodados || 0) > 0 ||
@@ -4445,12 +4451,13 @@ function cloudApplyRemoteData(remoteData){
       console.warn("MetaDriver: remoto ignorado para evitar rollback local");
       return;
     }
-    // v108 - não mescla e não sobrescreve local útil automaticamente
-    if(cloudHasUsefulData(dados)) return;
-    dados = JSON.parse(JSON.stringify(remoteData));
-    mdEnsureDataMeta(dados);
-    mdPushBackup(LOCAL_BACKUP_KEY, dados, "remote-apply-v108");
-    if(window.__salvarLocalOriginal) window.__salvarLocalOriginal();
+    const localUseful = cloudHasUsefulData(dados);
+    const remoteUseful = cloudHasUsefulData(remoteData);
+    if(!remoteUseful) return;
+    const localOrder = mdSnapshotOrderValue(dados || {});
+    const remoteOrder = mdSnapshotOrderValue(remoteData || {});
+    if(localUseful && remoteOrder < localOrder) return;
+    mdApplyExternalSnapshot(remoteData, "remote-apply-v121", false);
     try{
       if(String(dados.horarioInicioFora || "").trim()) iniciarTimerGanhoHoraTempoReal();
       else pararTimerGanhoHoraTempoReal();
@@ -4464,7 +4471,11 @@ function cloudApplyRemoteData(remoteData){
 
 async function cloudPushNow(snapshotOverride){
   try{
-    const token = await cloudGetToken();
+    let token = await cloudGetToken();
+    if(!token && typeof window.mdEnsureActiveSession === "function"){
+      token = await window.mdEnsureActiveSession(true).catch(function(){ return ""; });
+      try{ if(token) localStorage.setItem("sb_token", token || ""); }catch(e){}
+    }
     if(token){ try{ await mdBootstrapUserScope(token); }catch(e){} }
     if(!token) return false;
     const userId = await cloudResolveUserId(token).catch(function(){ return ""; });
@@ -4473,13 +4484,13 @@ async function cloudPushNow(snapshotOverride){
     const pending = snapshotOverride || cloudReadPendingSnapshot();
     const pendingPayload = pending && pending.payload ? pending.payload : null;
     const localPayload = (typeof dados === "object" && dados) ? dados : null;
-
     const best = mdPickBestSnapshot([
       { snapshot: pendingPayload },
       { snapshot: localPayload }
     ]);
-
     if(!best || !cloudHasUsefulData(best)) return false;
+
+    try{ cloudWritePendingSnapshot(JSON.parse(JSON.stringify(best))); }catch(e){}
 
     const remoteRow = await cloudFetchRow(token, userId).catch(function(){ return null; });
     const remoteWrapped = mdUnwrapCloudPayload(remoteRow && remoteRow.payload ? remoteRow.payload : null);
@@ -4489,8 +4500,6 @@ async function cloudPushNow(snapshotOverride){
     const remoteSeq = Number(remoteSnapshot && remoteSnapshot.__local_commit_seq || 0);
     const localTs = new Date(best.__updated_at || best.__cloud_updated_at || 0).getTime() || 0;
     const remoteTs = new Date(remoteSnapshot && (remoteSnapshot.__updated_at || remoteSnapshot.__cloud_updated_at) || 0).getTime() || 0;
-
-    // v101 - envia snapshot único completo; não sobe se remoto for claramente mais novo
     if(remoteSnapshot && cloudHasUsefulData(remoteSnapshot)){
       if(remoteSeq > localSeq) return false;
       if(remoteSeq === localSeq && remoteTs > localTs) return false;
@@ -4513,8 +4522,8 @@ async function cloudPushNow(snapshotOverride){
     };
 
     const resp = await cloudUpsertRow(token, userId, body);
-
     if(!resp || !resp.ok){
+      try{ console.warn('SYNC ERROR', resp ? await resp.text() : 'no-response'); }catch(e){ console.warn('SYNC ERROR'); }
       return false;
     }
 
@@ -4522,8 +4531,10 @@ async function cloudPushNow(snapshotOverride){
     mdEnsureDataMeta(dados);
     __cloudDirty = false;
     cloudClearPendingSnapshot();
+    cloudMarkLastOk(payloadToSend.__cloud_updated_at);
     try{ if(typeof mdWriteOfflineSafeSnapshot === "function") mdWriteOfflineSafeSnapshot(dados); }catch(e){}
     if(window.__salvarLocalOriginal) window.__salvarLocalOriginal();
+    try{ console.log('SYNC OK'); }catch(e){}
     return true;
   }catch(e){
     console.warn("cloudPushNow", e);
@@ -4566,31 +4577,21 @@ async function cloudBoot(force){
       { snapshot: recovered },
       { snapshot: (typeof mdReadOfflineSafeSnapshot === "function" ? mdReadOfflineSafeSnapshot() : null) }
     ]) || dados;
-
     const localUseful = localBest && cloudHasUsefulData(localBest);
-
-    // v108 - prioridade local absoluta:
-    // se já há dado local útil, nuvem NÃO sobrescreve automaticamente.
     if(localUseful){
       dados = JSON.parse(JSON.stringify(localBest));
       mdEnsureDataMeta(dados);
       if(window.__salvarLocalOriginal) window.__salvarLocalOriginal();
-      const pending = cloudReadPendingSnapshot();
-      if(__cloudDirty || (pending && pending.payload && cloudHasUsefulData(pending.payload))){
-        cloudScheduleSave(120);
-      }
-      __cloudBootDoneOnce = true;
-      return;
     }
 
-    const token = await cloudGetToken();
+    let token = await cloudGetToken();
     if(!token){
-      __cloudBootDoneOnce = false;
+      __cloudBootDoneOnce = !!localUseful;
       return;
     }
     const userId = await cloudResolveUserId(token).catch(function(){ return ""; });
     if(!userId){
-      __cloudBootDoneOnce = false;
+      __cloudBootDoneOnce = !!localUseful;
       return;
     }
 
@@ -4598,9 +4599,7 @@ async function cloudBoot(force){
     const remoteWrapped = mdUnwrapCloudPayload(remoteRow && remoteRow.payload ? remoteRow.payload : null);
     mdSyncBackupsFromCloud(remoteWrapped && remoteWrapped.backups ? remoteWrapped.backups : []);
     const remoteSnapshot = remoteWrapped && remoteWrapped.snapshot ? remoteWrapped.snapshot : null;
-
-    // Só aplica remoto se o local estiver vazio/inútil
-    if(!localUseful && remoteSnapshot && cloudHasUsefulData(remoteSnapshot)){
+    if(remoteSnapshot && cloudHasUsefulData(remoteSnapshot)){
       cloudApplyRemoteData(remoteSnapshot);
     }
 
@@ -4618,36 +4617,25 @@ async function cloudBoot(force){
 }
 
 async function mdInitialHydrateAndRender(){
-  if (dados && Object.keys(dados).length > 0) {
-    try { atualizar(); } catch(e){}
-    try { atualizarCarro(); } catch(e){}
-    return;
-  }
   try{
+    mdEnsureDataMeta(dados);
     const localUseful = cloudHasUsefulData(dados);
     if(!localUseful){
-      // v57: busca da nuvem sem depender de cachedUserId — tenta token direto
       let token = cloudGetStoredTokenSync();
-      if(token){ try{ await mdBootstrapUserScope(token); }catch(e){} }
       if(!token){
         try{ token = await cloudGetToken(); }catch(e){}
       }
-      let userId = cloudReadCachedUserId();
-      if(!userId && token){
-        try{
-          const u = await cloudGetUser(token).catch(function(){ return null; });
-          userId = u && u.id ? u.id : "";
-        }catch(e){}
+      let userId = "";
+      if(token){
+        try{ userId = await cloudResolveUserId(token).catch(function(){ return ""; }); }catch(e){}
       }
       if(token && userId){
         const remoteRow = await cloudFetchRow(token, userId).catch(function(){ return null; });
         const remoteWrapped = mdUnwrapCloudPayload(remoteRow && remoteRow.payload ? remoteRow.payload : null);
-        const remoteSnapshot = remoteWrapped.snapshot;
-        if(remoteSnapshot && cloudHasUsefulData(remoteSnapshot)){
+        const remoteSnapshot = remoteWrapped && remoteWrapped.snapshot ? remoteWrapped.snapshot : null;
+        if(remoteSnapshot && cloudHasUsefulData(remoteSnapshot) && !mdShouldBlockSnapshot(remoteSnapshot)){
           try{ mdSetActiveUserScope(userId); }catch(e){}
-          if(!mdShouldBlockSnapshot(remoteSnapshot)){
-            mdApplyExternalSnapshot(remoteSnapshot, "remote-hydrate", false);
-          }
+          cloudApplyRemoteData(remoteSnapshot);
         }
       }
     }
@@ -8945,22 +8933,23 @@ function logoutApp(){
 /* ===== Logout robusto do app (v57: salva na nuvem antes de sair) ===== */
 async function forceLogout(){
   try{ closeMenu(); }catch(e){}
-  // v57 - garante push pra nuvem antes de limpar token e sair
   try{
     if(typeof salvar === "function") salvar();
+    await cloudPushNow();
     await cloudPushNow();
   }catch(e){}
   try{
     const keysToRemove = [];
     for(let i=0;i<localStorage.length;i++){
       const k = localStorage.key(i);
-      if(k && (k === "sb_token" || k === "sb_refresh_token" || k === "sb_expires_at" || k.startsWith("sb-"))){
+      if(k && (k === "sb_token" || k === "sb_refresh_token" || k === "sb_expires_at" || k === "sb_user_id" || k.startsWith("sb-"))){
         keysToRemove.push(k);
       }
     }
     keysToRemove.forEach(function(k){ try{ localStorage.removeItem(k); }catch(e){} });
     try{ sessionStorage.clear(); }catch(e){}
   }catch(e){}
+  try{ mdSetActiveUserScope(""); }catch(e){}
   const target = "login.html?logout=1&t=" + Date.now();
   try{ window.location.replace(target); }catch(e){}
   setTimeout(function(){
