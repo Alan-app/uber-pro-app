@@ -18,7 +18,7 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver v116</title>
+<title>MetaDriver v118</title>
 <script>
 // v57 - correção de duplicação ao minimizar/restaurar + proteção de rolagem
 (function(){
@@ -3048,7 +3048,7 @@ const DEV_LOCAL_MODE = true;
   <div class="menu-item"><button class="secondary" onclick="abrirSaldoAtualButtonMenu(); closeMenu();">Botão de saldo atual</button></div>
   <div class="menu-item"><button class="secondary" onclick="abrirTemas(); closeMenu();">Temas</button></div>
   <div class="menu-item"><button class="danger" onclick="forceLogout(); return false;">Sair</button></div>
-  <div class="menu-note" style="text-align:center;">v113</div>
+  <div class="menu-note" style="text-align:center;">v118</div>
 </div>
 
 <div id="temasOverlay" class="temas-overlay" onclick="fecharTemas()"></div>
@@ -3954,16 +3954,8 @@ salvar = function(){
     }
   }catch(e){}
   __cloudDirty = true;
+  try{ cloudScheduleSave(); }catch(e){}
   try{ if(cloudHasUsefulData(dados)) mdLockStateWrites(15000, mdSnapshotOrderValue(dados || {})); }catch(e){}
-  try{
-    clearTimeout(window.__cloudImmediatePushTimer);
-    window.__cloudImmediatePushTimer = setTimeout(function(){
-      try{ cloudPushNow(); }catch(_e){}
-    }, 80);
-  }catch(e){
-    try{ cloudPushNow(); }catch(_e){}
-  }
-  try{ cloudScheduleSave(600); }catch(e){}
   return r;
 }
 
@@ -4106,7 +4098,7 @@ function mdBuildDiagnosticsObject(){
     const durableObj = mdSafeJsonParse(durableRaw);
     const diag = {
       generated_at: mdNowIso(),
-      app_version: 'MetaDriver v116',
+      app_version: 'MetaDriver v118',
       cloud_table: CLOUD_TABLE,
       device_id: mdEnsureDeviceId(),
       visibility_state: document.visibilityState,
@@ -4453,14 +4445,12 @@ function cloudApplyRemoteData(remoteData){
       console.warn("MetaDriver: remoto ignorado para evitar rollback local");
       return;
     }
+    // v108 - não mescla e não sobrescreve local útil automaticamente
+    if(cloudHasUsefulData(dados)) return;
     dados = JSON.parse(JSON.stringify(remoteData));
     mdEnsureDataMeta(dados);
-    dados.__dirty_local = false;
-    dados.__last_synced_commit_seq = Number(dados.__local_commit_seq || dados.__last_synced_commit_seq || 0);
-    mdPushBackup(LOCAL_BACKUP_KEY, dados, "remote-apply-v116");
+    mdPushBackup(LOCAL_BACKUP_KEY, dados, "remote-apply-v108");
     if(window.__salvarLocalOriginal) window.__salvarLocalOriginal();
-    try{ cloudClearPendingSnapshot(); }catch(e){}
-    try{ __cloudDirty = false; }catch(e){}
     try{
       if(String(dados.horarioInicioFora || "").trim()) iniciarTimerGanhoHoraTempoReal();
       else pararTimerGanhoHoraTempoReal();
@@ -4562,7 +4552,7 @@ async function cloudBoot(force){
   if(__cloudBootDoneOnce && force !== true) return;
   __cloudBootStarted = true;
   try{
-    await mdBootstrapUserScope().catch(function(){ return ""; });
+    const bootUserId = await mdBootstrapUserScope().catch(function(){ return ""; });
     const recovered = await mdRecoverDurableStateFromIDB().catch(function(){ return null; });
     if(recovered && mdSnapshotOrderValue(recovered) > mdSnapshotOrderValue(dados) && !mdShouldBlockSnapshot(recovered)){
       dados = JSON.parse(JSON.stringify(recovered));
@@ -4577,14 +4567,30 @@ async function cloudBoot(force){
       { snapshot: (typeof mdReadOfflineSafeSnapshot === "function" ? mdReadOfflineSafeSnapshot() : null) }
     ]) || dados;
 
+    const localUseful = localBest && cloudHasUsefulData(localBest);
+
+    // v108 - prioridade local absoluta:
+    // se já há dado local útil, nuvem NÃO sobrescreve automaticamente.
+    if(localUseful){
+      dados = JSON.parse(JSON.stringify(localBest));
+      mdEnsureDataMeta(dados);
+      if(window.__salvarLocalOriginal) window.__salvarLocalOriginal();
+      const pending = cloudReadPendingSnapshot();
+      if(__cloudDirty || (pending && pending.payload && cloudHasUsefulData(pending.payload))){
+        cloudScheduleSave(120);
+      }
+      __cloudBootDoneOnce = true;
+      return;
+    }
+
     const token = await cloudGetToken();
     if(!token){
-      __cloudBootDoneOnce = cloudHasUsefulData(localBest);
+      __cloudBootDoneOnce = false;
       return;
     }
     const userId = await cloudResolveUserId(token).catch(function(){ return ""; });
     if(!userId){
-      __cloudBootDoneOnce = cloudHasUsefulData(localBest);
+      __cloudBootDoneOnce = false;
       return;
     }
 
@@ -4593,21 +4599,13 @@ async function cloudBoot(force){
     mdSyncBackupsFromCloud(remoteWrapped && remoteWrapped.backups ? remoteWrapped.backups : []);
     const remoteSnapshot = remoteWrapped && remoteWrapped.snapshot ? remoteWrapped.snapshot : null;
 
-    const localUseful = localBest && cloudHasUsefulData(localBest);
-    const remoteUseful = remoteSnapshot && cloudHasUsefulData(remoteSnapshot);
-    const localOrder = mdSnapshotOrderValue(localBest || {});
-    const remoteOrder = mdSnapshotOrderValue(remoteSnapshot || {});
-
-    if(remoteUseful && (!localUseful || remoteOrder > localOrder)){
+    // Só aplica remoto se o local estiver vazio/inútil
+    if(!localUseful && remoteSnapshot && cloudHasUsefulData(remoteSnapshot)){
       cloudApplyRemoteData(remoteSnapshot);
-    }else if(localBest){
-      dados = JSON.parse(JSON.stringify(localBest));
-      mdEnsureDataMeta(dados);
-      if(window.__salvarLocalOriginal) window.__salvarLocalOriginal();
     }
 
     const pending = cloudReadPendingSnapshot();
-    if(__cloudDirty || (pending && pending.payload && cloudHasUsefulData(pending.payload)) || mdHasUnsyncedLocalChanges()){
+    if(__cloudDirty || (pending && pending.payload && cloudHasUsefulData(pending.payload))){
       cloudScheduleSave(120);
     }
 
@@ -8947,23 +8945,12 @@ function logoutApp(){
 /* ===== Logout robusto do app (v57: salva na nuvem antes de sair) ===== */
 async function forceLogout(){
   try{ closeMenu(); }catch(e){}
+  // v57 - garante push pra nuvem antes de limpar token e sair
   try{
     if(typeof salvar === "function") salvar();
     await cloudPushNow();
-    await new Promise(function(resolve){ setTimeout(resolve, 250); });
-    await cloudPushNow();
   }catch(e){}
   try{
-    const preserveKeys = {};
-    try{
-      const activeUserId = cloudReadCachedUserId();
-      if(activeUserId){
-        preserveKeys.active_scope = activeUserId;
-        preserveKeys.state = mdReadLS(STORAGE_KEY);
-        preserveKeys.durable = mdReadLS(DURABLE_STATE_KEY);
-        preserveKeys.pending = mdReadLS(CLOUD_PENDING_KEY);
-      }
-    }catch(e){}
     const keysToRemove = [];
     for(let i=0;i<localStorage.length;i++){
       const k = localStorage.key(i);
@@ -8973,14 +8960,6 @@ async function forceLogout(){
     }
     keysToRemove.forEach(function(k){ try{ localStorage.removeItem(k); }catch(e){} });
     try{ sessionStorage.clear(); }catch(e){}
-    try{
-      if(preserveKeys.active_scope){
-        localStorage.setItem('sb_user_id', preserveKeys.active_scope);
-        if(preserveKeys.state) mdWriteLS(STORAGE_KEY, preserveKeys.state);
-        if(preserveKeys.durable) mdWriteLS(DURABLE_STATE_KEY, preserveKeys.durable);
-        if(preserveKeys.pending) mdWriteLS(CLOUD_PENDING_KEY, preserveKeys.pending);
-      }
-    }catch(e){}
   }catch(e){}
   const target = "login.html?logout=1&t=" + Date.now();
   try{ window.location.replace(target); }catch(e){}
