@@ -18,7 +18,7 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver v141</title>
+<title>MetaDriver v145</title>
 <script>
 // v57 - correção de duplicação ao minimizar/restaurar + proteção de rolagem
 (function(){
@@ -898,9 +898,14 @@ input.negative-value, input.negative-value::placeholder{
 .quick-balance-overlay.show{display:block;}
 .quick-balance-panel{
   position:fixed;
-  inset:0;
+  top:0;
+  right:0;
+  bottom:0;
+  left:0;
+  width:100vw;
+  height:100dvh;
   z-index:1201;
-  background:rgba(15,23,42,.995);
+  background:rgba(15,23,42,1);
   border:none;
   border-radius:0;
   box-shadow:none;
@@ -910,9 +915,11 @@ input.negative-value, input.negative-value::placeholder{
   margin:0;
   max-height:none;
   overflow:hidden;
-  flex-direction:column;
+  box-sizing:border-box;
+  grid-template-rows:auto 1fr auto;
+  gap:8px;
 }
-.quick-balance-panel.show{display:flex;}
+.quick-balance-panel.show{display:grid;}
 .quick-balance-title{
   font-weight:900;
   font-size:20px;
@@ -929,7 +936,7 @@ input.negative-value, input.negative-value::placeholder{
   display:flex;
   align-items:center;
   justify-content:center;
-  height:88px;
+  height:76px;
   border-radius:22px;
   border:2px solid rgba(255,255,255,.38);
   background:linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.04));
@@ -983,10 +990,9 @@ input.negative-value, input.negative-value::placeholder{
   display:grid;
   grid-template-columns:repeat(3, 1fr);
   gap:10px;
-  flex:1 1 auto;
   min-height:0;
-  height:auto;
-  grid-auto-rows:minmax(54px,1fr);
+  height:100%;
+  grid-auto-rows:minmax(52px,1fr);
   align-content:stretch;
 }
 
@@ -1011,7 +1017,7 @@ input.negative-value, input.negative-value::placeholder{
   display:grid;
   grid-template-columns:1fr 1fr 1fr;
   gap:10px;
-  margin-top:12px;
+  margin-top:0;
 }
 .quick-balance-actions button{
   min-height:52px;
@@ -1030,7 +1036,7 @@ input.negative-value, input.negative-value::placeholder{
   display:grid;
   grid-template-columns:1fr 1fr 1fr;
   gap:10px;
-  margin-top:12px;
+  margin-top:0;
 }
 .quick-balance-actions button{
   min-height:52px;
@@ -2959,6 +2965,28 @@ body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff9d0; }
   min-height:50px !important;
 }
 
+
+.quick-balance-panel,
+.quick-balance-panel *{
+  box-sizing:border-box;
+}
+.quick-balance-panel{
+  contain:layout paint size;
+}
+.quick-balance-display{
+  min-height:76px;
+  margin:0;
+}
+.quick-balance-key{
+  min-height:0;
+  height:100%;
+}
+.quick-balance-actions{
+  align-self:stretch;
+}
+.quick-balance-actions button{
+  min-height:50px;
+}
 </style>
 
 <script id="auth-guard">
@@ -3075,7 +3103,7 @@ body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff9d0; }
   <div class="menu-item"><button class="secondary" onclick="abrirSaldoAtualButtonMenu(); closeMenu();">Botão de saldo atual</button></div>
   <div class="menu-item"><button class="secondary" onclick="abrirTemas(); closeMenu();">Temas</button></div>
   <div class="menu-item"><button class="danger" onclick="forceLogout(); return false;">Sair</button></div>
-  <div class="menu-note" style="text-align:center;">v141</div>
+  <div class="menu-note" style="text-align:center;">v145</div>
 </div>
 
 <div id="temasOverlay" class="temas-overlay" onclick="fecharTemas()"></div>
@@ -4123,7 +4151,7 @@ function mdBuildDiagnosticsObject(){
     const durableObj = mdSafeJsonParse(durableRaw);
     const diag = {
       generated_at: mdNowIso(),
-      app_version: 'MetaDriver v141',
+      app_version: 'MetaDriver v145',
       cloud_table: CLOUD_TABLE,
       device_id: mdEnsureDeviceId(),
       visibility_state: document.visibilityState,
@@ -6336,6 +6364,18 @@ function finalizarSessaoGanhoHora(){
 
 let ganhoHoraTempoRealTimer = null;
 
+function resumeGanhoHoraTempoRealSafely(){
+  try{
+    const sessaoAtiva = !!dados.ganhoHoraSessaoAtiva && !!String(dados.horarioInicioFora || "").trim();
+    if(sessaoAtiva){
+      recalcularGanhoHoraSessaoEmTempoReal(true);
+      iniciarTimerGanhoHoraTempoReal();
+    }else{
+      pararTimerGanhoHoraTempoReal();
+    }
+  }catch(e){}
+}
+
 function pararTimerGanhoHoraTempoReal(){
   if(ganhoHoraTempoRealTimer){
     clearInterval(ganhoHoraTempoRealTimer);
@@ -6676,7 +6716,7 @@ function exportarRelatorioPDF(){
       <script>
         setTimeout(()=>window.print(), 250);
       <\/script>
-    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v141 · app</div>
+    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v145 · app</div>
 </body>
     </html>  `);
   w.document.close();
@@ -9010,18 +9050,36 @@ function mdResumeRestoreSafely(){
       if(__cloudDirty || (pending && pending.payload && cloudHasUsefulData(pending.payload))){
         cloudScheduleSave(120);
       }
-      return;
+    }else{
+      try{ cloudBoot(true); }catch(e){}
     }
-  }catch(e){}
-  try{ cloudBoot(true); }catch(e){}
+  }catch(e){
+    try{ cloudBoot(true); }catch(_e){}
+  }
+  try{
+    requestAnimationFrame(function(){
+      requestAnimationFrame(function(){
+        resumeGanhoHoraTempoRealSafely();
+      });
+    });
+  }catch(e){
+    try{ resumeGanhoHoraTempoRealSafely(); }catch(_e){}
+  }
 }
 
 window.addEventListener("load", function(){
+  try{ resumeGanhoHoraTempoRealSafely(); }catch(e){}
+});
+window.addEventListener("pageshow", function(){
+  try{ resumeGanhoHoraTempoRealSafely(); }catch(e){}
+});
+window.addEventListener("focus", function(){
+  try{ resumeGanhoHoraTempoRealSafely(); }catch(e){}
+});
+document.addEventListener("visibilitychange", function(){
   try{
-    if(String(dados.horarioInicioFora || '').trim()){
-      iniciarTimerGanhoHoraTempoReal();
-    }else{
-      pararTimerGanhoHoraTempoReal();
+    if(document.visibilityState === "visible"){
+      resumeGanhoHoraTempoRealSafely();
     }
   }catch(e){}
 });
