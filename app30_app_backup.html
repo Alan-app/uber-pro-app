@@ -18,7 +18,7 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver v151</title>
+<title>MetaDriver v152</title>
 <script>
 // v57 - correção de duplicação ao minimizar/restaurar + proteção de rolagem
 (function(){
@@ -3032,6 +3032,53 @@ body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff9d0; }
   flex:0 0 auto !important;
 }
 
+
+/* v152 MetaDriver keyboard: half-screen fixed to bottom */
+#metaTotalPanel{
+  overflow:hidden !important;
+  box-sizing:border-box !important;
+}
+#metaTotalPanel.show{
+  display:flex !important;
+  flex-direction:column !important;
+  justify-content:space-between !important;
+  padding:10px 12px calc(10px + env(safe-area-inset-bottom)) !important;
+  border-radius:18px 18px 0 0 !important;
+}
+#metaTotalPanel .quick-balance-display{
+  flex:0 0 auto !important;
+  height:72px !important;
+  min-height:72px !important;
+  margin-bottom:10px !important;
+}
+#metaTotalPanel .quick-balance-keypad{
+  flex:1 1 auto !important;
+  min-height:0 !important;
+  height:auto !important;
+  display:grid !important;
+  grid-template-columns:repeat(3, 1fr) !important;
+  grid-auto-rows:minmax(48px,1fr) !important;
+  gap:10px !important;
+  align-content:stretch !important;
+  margin-bottom:10px !important;
+}
+#metaTotalPanel .quick-balance-key{
+  height:100% !important;
+  min-height:0 !important;
+}
+#metaTotalPanel .quick-balance-actions{
+  flex:0 0 auto !important;
+  display:flex !important;
+  gap:10px !important;
+  margin-top:0 !important;
+}
+#metaTotalPanel .quick-balance-actions button{
+  flex:1 1 0 !important;
+  height:58px !important;
+  min-height:58px !important;
+  max-height:58px !important;
+}
+
 </style>
 
 <script id="auth-guard">
@@ -3164,7 +3211,7 @@ body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff9d0; }
   <div class="menu-item"><button class="secondary" onclick="abrirSaldoAtualButtonMenu(); closeMenu();">Botão de saldo atual</button></div>
   <div class="menu-item"><button class="secondary" onclick="abrirTemas(); closeMenu();">Temas</button></div>
   <div class="menu-item"><button class="danger" onclick="forceLogout(); return false;">Sair</button></div>
-  <div class="menu-note" style="text-align:center;">v151</div>
+  <div class="menu-note" style="text-align:center;">v152</div>
 </div>
 
 <div id="temasOverlay" class="temas-overlay" onclick="fecharTemas()"></div>
@@ -4212,7 +4259,7 @@ function mdBuildDiagnosticsObject(){
     const durableObj = mdSafeJsonParse(durableRaw);
     const diag = {
       generated_at: mdNowIso(),
-      app_version: 'MetaDriver v151',
+      app_version: 'MetaDriver v152',
       cloud_table: CLOUD_TABLE,
       device_id: mdEnsureDeviceId(),
       visibility_state: document.visibilityState,
@@ -6793,7 +6840,7 @@ function exportarRelatorioPDF(){
       <script>
         setTimeout(()=>window.print(), 250);
       <\/script>
-    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v151 · app</div>
+    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v152 · app</div>
 </body>
     </html>  `);
   w.document.close();
@@ -7274,14 +7321,15 @@ function ensureLancamentoInputVisibleAboveKeypad(){
     const rect = visible.getBoundingClientRect();
     const panelRect = panel.getBoundingClientRect();
     const marginTop = 12;
-    const marginBottom = 14;
+    const marginBottom = 12;
     const desiredBottom = panelRect.top - marginBottom;
 
     if(rect.bottom > desiredBottom){
       const delta = rect.bottom - desiredBottom + marginTop;
-      window.scrollBy(0, delta);
+      window.scrollBy({ top: delta, left: 0, behavior: "instant" });
     }else if(rect.top < marginTop){
-      window.scrollBy(0, rect.top - marginTop);
+      const deltaUp = rect.top - marginTop;
+      window.scrollBy({ top: deltaUp, left: 0, behavior: "instant" });
     }
 
     setTimeout(function(){
@@ -7290,35 +7338,31 @@ function ensureLancamentoInputVisibleAboveKeypad(){
         const panelRect2 = panel.getBoundingClientRect();
         const desiredBottom2 = panelRect2.top - marginBottom;
         if(rect2.bottom > desiredBottom2){
-          window.scrollBy(0, rect2.bottom - desiredBottom2 + marginTop);
+          const delta2 = rect2.bottom - desiredBottom2 + marginTop;
+          window.scrollBy({ top: delta2, left: 0, behavior: "instant" });
         }
       }catch(e){}
-    }, 60);
+    }, 80);
   }catch(e){}
 }
 
 function positionMetaTotalKeypad(){
   const panel = document.getElementById("metaTotalPanel");
-  const visible = getMetaTotalTarget();
-  if(!panel || !visible || !panel.classList.contains("show")) return;
-
-  const viewportWidth = window.innerWidth || document.documentElement.clientWidth || 0;
-  const margin = viewportWidth <= 420 ? 10 : 12;
-  const panelWidth = Math.max(220, Math.min(viewportWidth - (margin * 2), 420));
+  if(!panel || !panel.classList.contains("show")) return;
 
   panel.style.position = 'fixed';
-  panel.style.left = '50%';
-  panel.style.right = 'auto';
-  panel.style.transform = 'translateX(-50%)';
-  panel.style.width = panelWidth + 'px';
-  panel.style.maxWidth = 'calc(100vw - ' + (margin * 2) + 'px)';
+  panel.style.left = '0';
+  panel.style.right = '0';
+  panel.style.width = '100vw';
+  panel.style.maxWidth = '100vw';
+  panel.style.transform = '';
   panel.style.top = 'auto';
-  panel.style.bottom = '12px';
-  panel.style.height = 'auto';
-  panel.style.minHeight = '0';
-  panel.style.maxHeight = 'none';
-  panel.style.overflow = 'visible';
-  panel.style.overflowY = 'visible';
+  panel.style.bottom = '0';
+  panel.style.height = '50vh';
+  panel.style.minHeight = '50vh';
+  panel.style.maxHeight = '50vh';
+  panel.style.overflow = 'hidden';
+  panel.style.overflowY = 'hidden';
 }
 
 function toggleMetaTotalKeypad(forceOpen, targetId){
@@ -7348,7 +7392,10 @@ function toggleMetaTotalKeypad(forceOpen, targetId){
     panel.style.transform = '';
     panel.style.width = '';
     panel.style.maxWidth = '';
+    panel.style.height = '';
+    panel.style.minHeight = '';
     panel.style.maxHeight = '';
+    panel.style.overflow = '';
     panel.style.overflowY = '';
     panel.style.position = '';
   }
