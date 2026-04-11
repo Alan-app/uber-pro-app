@@ -18,7 +18,7 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver v148</title>
+<title>MetaDriver v149</title>
 <script>
 // v57 - correção de duplicação ao minimizar/restaurar + proteção de rolagem
 (function(){
@@ -3135,7 +3135,7 @@ body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff9d0; }
   <div class="menu-item"><button class="secondary" onclick="abrirSaldoAtualButtonMenu(); closeMenu();">Botão de saldo atual</button></div>
   <div class="menu-item"><button class="secondary" onclick="abrirTemas(); closeMenu();">Temas</button></div>
   <div class="menu-item"><button class="danger" onclick="forceLogout(); return false;">Sair</button></div>
-  <div class="menu-note" style="text-align:center;">v148</div>
+  <div class="menu-note" style="text-align:center;">v149</div>
 </div>
 
 <div id="temasOverlay" class="temas-overlay" onclick="fecharTemas()"></div>
@@ -4183,7 +4183,7 @@ function mdBuildDiagnosticsObject(){
     const durableObj = mdSafeJsonParse(durableRaw);
     const diag = {
       generated_at: mdNowIso(),
-      app_version: 'MetaDriver v148',
+      app_version: 'MetaDriver v149',
       cloud_table: CLOUD_TABLE,
       device_id: mdEnsureDeviceId(),
       visibility_state: document.visibilityState,
@@ -6764,7 +6764,7 @@ function exportarRelatorioPDF(){
       <script>
         setTimeout(()=>window.print(), 250);
       <\/script>
-    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v148 · app</div>
+    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v149 · app</div>
 </body>
     </html>  `);
   w.document.close();
@@ -7280,22 +7280,20 @@ function positionMetaTotalKeypad(){
   const cardBody = visible.closest('.card-body');
   const cardRect = cardBody ? cardBody.getBoundingClientRect() : rect;
   const viewportWidth = window.innerWidth || document.documentElement.clientWidth || 0;
-  const viewportHeight = window.innerHeight || document.documentElement.clientHeight || 0;
   const margin = viewportWidth <= 420 ? 10 : 12;
   const minPanelWidth = 220;
 
   const left = Math.max(margin, Math.min(cardRect.left, viewportWidth - margin - minPanelWidth));
   const right = Math.max(margin, viewportWidth - Math.max(cardRect.right, left + minPanelWidth));
   const top = Math.max(rect.bottom + 6, margin);
-  const maxHeight = Math.max(170, viewportHeight - top - 8);
 
   panel.style.position = 'fixed';
   panel.style.left = left + 'px';
   panel.style.right = right + 'px';
   panel.style.top = top + 'px';
   panel.style.bottom = 'auto';
-  panel.style.maxHeight = maxHeight + 'px';
-  panel.style.overflowY = 'auto';
+  panel.style.maxHeight = '';
+  panel.style.overflowY = '';
 }
 
 function toggleMetaTotalKeypad(forceOpen, targetId){
