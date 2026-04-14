@@ -18,7 +18,7 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver v03</title>
+<title>MetaDriver v04</title>
 <script>
 // v57 - correção de duplicação ao minimizar/restaurar + proteção de rolagem
 (function(){
@@ -3166,7 +3166,7 @@ body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff9d0; }
   <div class="menu-item"><button class="secondary" onclick="abrirSaldoAtualButtonMenu(); closeMenu();">Botão de saldo atual</button></div>
   <div class="menu-item"><button class="secondary" onclick="abrirTemas(); closeMenu();">Temas</button></div>
   <div class="menu-item"><button class="danger" onclick="forceLogout(); return false;">Sair</button></div>
-  <div class="menu-note" style="text-align:center;">v03</div>
+  <div class="menu-note" style="text-align:center;">v04</div>
 </div>
 
 <div id="temasOverlay" class="temas-overlay" onclick="fecharTemas()"></div>
@@ -4214,7 +4214,7 @@ function mdBuildDiagnosticsObject(){
     const durableObj = mdSafeJsonParse(durableRaw);
     const diag = {
       generated_at: mdNowIso(),
-      app_version: 'MetaDriver v03',
+      app_version: 'MetaDriver v04',
       cloud_table: CLOUD_TABLE,
       device_id: mdEnsureDeviceId(),
       visibility_state: document.visibilityState,
@@ -6214,19 +6214,25 @@ function confirmVirada4hModal(){
 
   try{
     if(!Array.isArray(dados.ganhos)) dados.ganhos = [];
-    dados.ganhos = dados.ganhos.filter(function(item){
-      const dataItem = String((item && item.data) || "").slice(0,10);
-      const appItem = String((item && item.app) || "").trim();
-      return !(dataItem === diaAnteriorUber && appItem === "Saldo final 4h");
+    let idx = dados.ganhos.findIndex(function(g){
+      return g &&
+        String(g.data || "").slice(0,10) === diaAnteriorUber &&
+        String(g.app || "").trim() === "Saldo atual (botão)";
     });
-    dados.ganhos.push({
-      data: diaAnteriorUber,
-      hora: "04:00",
-      app: "Saldo final 4h",
-      valor: valorNormalizado,
-      uber: 0,
-      n99: 0
-    });
+    if(idx < 0){
+      idx = dados.ganhos.findIndex(function(g){
+        return g && String(g.data || "").slice(0,10) === diaAnteriorUber;
+      });
+    }
+    if(idx >= 0){
+      const prev = dados.ganhos[idx] || {};
+      dados.ganhos[idx] = Object.assign({}, prev, {
+        data: diaAnteriorUber,
+        hora: "04:00",
+        app: String(prev.app || "Saldo atual (botão)"),
+        valor: valorNormalizado
+      });
+    }
   }catch(e){}
 
   try{
@@ -6268,21 +6274,20 @@ function confirmVirada4hModal(){
   }catch(e){}
 
   try{
-    const s = qbLoadState();
-    s.uber = "";
-    s.n99 = "";
-    s.selected = "uber";
-    s.initialized = true;
-    qbPersistState();
-    if(window.dados){
-      dados.saldoUber = "";
-      dados.saldo99 = "";
-      dados.ultimoGanhoDetalhado = { uber: 0, n99: 0, total: 0 };
+    if(window.__qbState){
+      window.__qbState.uber = "";
+      window.__qbState.n99 = "";
+      window.__qbState.selected = "uber";
+      window.__qbState.initialized = true;
     }
-    const quickInput = document.getElementById("quickSaldoAtual");
-    if(quickInput) quickInput.value = "";
-    refreshQuickBalanceDisplay();
-    refreshQuickBalanceFabMiniDisplay();
+    if(typeof QUICK_BALANCE_UBER_KEY !== "undefined") localStorage.removeItem(QUICK_BALANCE_UBER_KEY);
+    if(typeof QUICK_BALANCE_99_KEY !== "undefined") localStorage.removeItem(QUICK_BALANCE_99_KEY);
+    if(typeof QUICK_BALANCE_SELECTED_KEY !== "undefined") localStorage.removeItem(QUICK_BALANCE_SELECTED_KEY);
+    dados.saldoUber = "";
+    dados.saldo99 = "";
+    dados.ultimoGanhoDetalhado = { uber: 0, n99: 0, total: 0 };
+    try{ refreshQuickBalanceDisplay(); }catch(e){}
+    try{ refreshQuickBalanceFabMiniDisplay(); }catch(e){}
   }catch(e){}
 
   try{
@@ -6779,7 +6784,7 @@ function exportarRelatorioPDF(){
       <script>
         setTimeout(()=>window.print(), 250);
       <\/script>
-    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v03 · app</div>
+    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v04 · app</div>
 </body>
     </html>  `);
   w.document.close();
