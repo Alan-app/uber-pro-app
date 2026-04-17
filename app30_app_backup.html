@@ -18,7 +18,7 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver v05</title>
+<title>MetaDriver v06</title>
 <script>
 // v57 - correção de duplicação ao minimizar/restaurar + proteção de rolagem
 (function(){
@@ -3166,7 +3166,7 @@ body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff9d0; }
   <div class="menu-item"><button class="secondary" onclick="abrirSaldoAtualButtonMenu(); closeMenu();">Botão de saldo atual</button></div>
   <div class="menu-item"><button class="secondary" onclick="abrirTemas(); closeMenu();">Temas</button></div>
   <div class="menu-item"><button class="danger" onclick="forceLogout(); return false;">Sair</button></div>
-  <div class="menu-note" style="text-align:center;">v05</div>
+  <div class="menu-note" style="text-align:center;">v06</div>
 </div>
 
 <div id="temasOverlay" class="temas-overlay" onclick="fecharTemas()"></div>
@@ -4214,7 +4214,7 @@ function mdBuildDiagnosticsObject(){
     const durableObj = mdSafeJsonParse(durableRaw);
     const diag = {
       generated_at: mdNowIso(),
-      app_version: 'MetaDriver v05',
+      app_version: 'MetaDriver v06',
       cloud_table: CLOUD_TABLE,
       device_id: mdEnsureDeviceId(),
       visibility_state: document.visibilityState,
@@ -6807,7 +6807,7 @@ function exportarRelatorioPDF(){
       <script>
         setTimeout(()=>window.print(), 250);
       <\/script>
-    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v05 · app</div>
+    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v06 · app</div>
 </body>
     </html>  `);
   w.document.close();
