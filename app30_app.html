@@ -18,7 +18,7 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver v09</title>
+<title>MetaDriver v06</title>
 <script>
 // v57 - correção de duplicação ao minimizar/restaurar + proteção de rolagem
 (function(){
@@ -3050,20 +3050,6 @@ body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff9d0; }
   border-radius:12px !important;
 }
 
-
-/* v09 - restaura botões Uber/99 no teclado flutuante */
-#quickBalancePanel .quick-balance-split{
-  display:grid !important;
-  grid-template-columns:1fr 1fr !important;
-  gap:8px !important;
-  margin-bottom:10px !important;
-}
-#quickBalancePanel .quick-balance-split-card{
-  display:block !important;
-  visibility:visible !important;
-  opacity:1 !important;
-}
-
 </style>
 
 <script id="auth-guard">
@@ -4228,7 +4214,7 @@ function mdBuildDiagnosticsObject(){
     const durableObj = mdSafeJsonParse(durableRaw);
     const diag = {
       generated_at: mdNowIso(),
-      app_version: 'MetaDriver v09',
+      app_version: 'MetaDriver v06',
       cloud_table: CLOUD_TABLE,
       device_id: mdEnsureDeviceId(),
       visibility_state: document.visibilityState,
@@ -6821,7 +6807,7 @@ function exportarRelatorioPDF(){
       <script>
         setTimeout(()=>window.print(), 250);
       <\/script>
-    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v09 · app</div>
+    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v06 · app</div>
 </body>
     </html>  `);
   w.document.close();
