@@ -1,16 +1,21 @@
-VERSÃO v09 - correção teclado Uber/99
+VERSÃO v10 - correção virada das 4h na v09
 
-O QUE FOI PEDIDO:
-- Restaurar os botões Uber e 99 do teclado virtual do botão flutuante.
+BASE:
+- MetaDriver_v09_FIX
 
-O QUE FOI FEITO:
-- Corrigido CSS que escondia os botões.
-- Restaurada exibição dos cards Uber e 99.
-- Mantida a lógica existente de saldo separado.
+REFERÊNCIA USADA:
+- MetaDriver_FINAL_OK-1, somente na lógica relacionada à virada operacional das 4h e zeragem do saldo.
+
+O QUE FOI ALTERADO:
+- A v09 passou a usar a lógica da Final OK para detectar mudança do dia operacional às 04:00.
+- Removido o comportamento extra da v09 que podia zerar/fechar dia fora da regra correta.
+- Ao virar 4h, o saldo atual, ganho diário, saldo anterior, sessão ativa e campos do botão flutuante Uber/99 são zerados.
+- Corrigido o saldo anterior da sessão para usar o último valor total da sessão do dia, igual à Final OK, em vez de somar sessões.
 
 O QUE NÃO FOI ALTERADO:
-- Virada das 4h
-- Metas
-- Sincronismo
+- Layout geral
 - Login
 - Admin
+- Metas
+- Supabase
+- Demais funções do app

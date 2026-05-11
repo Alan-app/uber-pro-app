@@ -5842,13 +5842,13 @@ function getSessoesGanhoHoraDoDiaAtual(){
 function getUltimoValorTotalSessaoDoDiaAtual(){
   const sessoesDia = getSessoesGanhoHoraDoDiaAtual();
   if(!sessoesDia.length) return 0;
-  return sessoesDia.reduce(function(total, s){
-    return total + Number((s && s.valorTotal) || 0);
-  }, 0);
+  return Number((sessoesDia[sessoesDia.length - 1] || {}).valorTotal || 0);
 }
 
 function getSaldoAnteriorCorretoSessaoAtual(){
-  return getUltimoValorTotalSessaoDoDiaAtual();
+  const sessoesDia = getSessoesGanhoHoraDoDiaAtual();
+  if(!sessoesDia.length) return 0;
+  return Number((sessoesDia[sessoesDia.length - 1] || {}).valorTotal || 0);
 }
 
 function syncSaldoAnteriorSessaoAtual(){
@@ -6300,99 +6300,85 @@ function confirmVirada4hModal(){
   return true;
 }
 
-function ensureGanhoHoraDiaAtual(){
+function limparSaldosBotaoFlutuanteVirada4h(){
   try{
-    if(!!dados.__skip_operational_day_turn) return false;
-    if(!Array.isArray(dados.ganhoHoraSessoes)) dados.ganhoHoraSessoes = [];
-    if(!dados.ganhoHoraDiaRef) dados.ganhoHoraDiaRef = dataUberISO();
-
-    const agora = new Date();
-    const hora = agora.getHours();
-    if(hora < 4) return false;
-
-    const turnKey = (function(){
-      const yyyy = agora.getFullYear();
-      const mm = String(agora.getMonth()+1).padStart(2,'0');
-      const dd = String(agora.getDate()).padStart(2,'0');
-      return yyyy + "-" + mm + "-" + dd;
-    })();
-
-    try{
-      const ultimaVirada = localStorage.getItem("md_last_4am_turn_key_v102") || "";
-      if(ultimaVirada === turnKey){
-        return false;
-      }
-    }catch(e){}
-
-    const diaAtualUber = dataUberISO();
-    const diaAnteriorUber = (function(){
-      const d = new Date(agora.getTime());
-      d.setDate(d.getDate() - 1);
-      const base = new Date(d.getTime());
-      if(base.getHours() < 4){
-        base.setDate(base.getDate() - 1);
-      }
-      const yyyy = base.getFullYear();
-      const mm = String(base.getMonth()+1).padStart(2,'0');
-      const dd = String(base.getDate()).padStart(2,'0');
-      return yyyy + "-" + mm + "-" + dd;
-    })();
-
-    const temSessaoEmAndamento = !!dados.ganhoHoraSessaoAtiva && !!String(dados.horarioInicioFora || '').trim();
-
-    if(temSessaoEmAndamento){
-      if(window.__dayTurn4hState && window.__dayTurn4hState.open) return false;
-      openVirada4hModal(Number(dados.saldoAtualFora || 0), diaAtualUber, diaAnteriorUber, turnKey);
-      try{ toast("⚠️ Virou 4h. Atualize o saldo final para encerrar a sessão."); }catch(e){}
-      return false;
+    if(window.__qbState){
+      window.__qbState.uber = "";
+      window.__qbState.n99 = "";
+      window.__qbState.selected = "uber";
+      window.__qbState.initialized = true;
     }
+    try{ if(typeof QUICK_BALANCE_UBER_KEY !== "undefined") localStorage.removeItem(QUICK_BALANCE_UBER_KEY); }catch(e){}
+    try{ if(typeof QUICK_BALANCE_99_KEY !== "undefined") localStorage.removeItem(QUICK_BALANCE_99_KEY); }catch(e){}
+    try{ if(typeof QUICK_BALANCE_SELECTED_KEY !== "undefined") localStorage.removeItem(QUICK_BALANCE_SELECTED_KEY); }catch(e){}
+    dados.saldoUber = "";
+    dados.saldo99 = "";
+    dados.ultimoGanhoDetalhado = { uber: 0, n99: 0, total: 0 };
+    try{ refreshQuickBalanceDisplay(); }catch(e){}
+    try{ refreshQuickBalanceFabMiniDisplay(); }catch(e){}
+  }catch(e){}
+}
 
-    try{
-      if(!Array.isArray(dados.ganhos)) dados.ganhos = [];
-      const valorSilencioso = Number(dados.saldoAtualFora || 0);
-      let idx = dados.ganhos.findIndex(function(g){
-        return g &&
-          String(g.data || "").slice(0,10) === diaAnteriorUber &&
-          String(g.app || "").trim() === "Saldo atual (botão)";
-      });
-      if(idx < 0){
-        idx = dados.ganhos.findIndex(function(g){
-          return g && String(g.data || "").slice(0,10) === diaAnteriorUber;
-        });
-      }
-      if(idx >= 0){
-        const prev = dados.ganhos[idx] || {};
-        dados.ganhos[idx] = Object.assign({}, prev, {
-          data: diaAnteriorUber,
-          hora: "04:00",
-          app: String(prev.app || "Saldo atual (botão)"),
-          valor: valorSilencioso
-        });
-      }
-    }catch(e){}
+function ensureGanhoHoraDiaAtual(){
+  const diaAtualUber = dataUberISO();
+  const agora = new Date();
+  const sessoes = Array.isArray(dados.ganhoHoraSessoes) ? dados.ganhoHoraSessoes : [];
+  const temSessaoLegadaSemDia = sessoes.some(s => s && !String(s.diaRef || '').trim());
+  const sessaoEmAndamentoDia = String(dados.ganhoHoraSessaoDiaRef || '').trim();
 
-    limparDadosGanhoHora(true);
+  if(!dados.ganhoHoraDiaRef){
     dados.ganhoHoraDiaRef = diaAtualUber;
-    dados.saldoAtualFora = 0;
-    dados.ganhoDiarioAtual = 0;
-    dados.saldoAnteriorFora = 0;
-    dados.ganhoHoraSessaoAtiva = false;
-    dados.horarioInicioFora = "";
-    dados.ganhoHoraSessaoDiaRef = "";
-    dados.horasDecorridasFora = 0;
-    dados.ganhoHoraAtualFora = 0;
-    try{
-      const saldoAtualElNovoDia = document.getElementById("saldoAtualFora");
-      if(saldoAtualElNovoDia) saldoAtualElNovoDia.value = "";
-    }catch(e){}
-    try{ localStorage.setItem("md_last_4am_turn_key_v102", turnKey); }catch(e){}
-    salvar();
-    atualizar();
-    try{ toast("✅ Virou 4h. Saldo zerado para iniciar o novo dia."); }catch(e){}
-    return true;
-  }catch(e){
-    return false;
   }
+
+  const mudouDia = dados.ganhoHoraDiaRef !== diaAtualUber;
+  const precisaCorrigirLegado = agora.getHours() >= 4 && (
+    temSessaoLegadaSemDia ||
+    (sessaoEmAndamentoDia && sessaoEmAndamentoDia !== diaAtualUber)
+  );
+
+  if(!mudouDia && !precisaCorrigirLegado) return false;
+
+  const temSessaoEmAndamento = String(dados.horarioInicioFora || '').trim();
+  if(temSessaoEmAndamento){
+    try{
+      finalizarSessaoGanhoHoraInterno({
+        silent: true,
+        skipSave: true,
+        skipUpdate: true,
+        naoIniciarProxima: true,
+        horaFim: '04:00',
+        dataFim: getViradaOperacional(new Date())
+      });
+    }catch(e){}
+  }
+
+  limparDadosGanhoHora();
+  dados.ganhoHoraDiaRef = diaAtualUber;
+  dados.saldoAtualFora = 0;
+  dados.ganhoDiarioAtual = 0;
+  dados.saldoAnteriorFora = 0;
+  dados.ganhoHoraSessaoAtiva = false;
+  dados.horarioInicioFora = "";
+  dados.ganhoHoraSessaoDiaRef = "";
+  dados.horasDecorridasFora = 0;
+  dados.ganhoHoraAtualFora = 0;
+  limparSaldosBotaoFlutuanteVirada4h();
+
+  try{
+    const saldoAtualEl = document.getElementById("saldoAtualFora");
+    if(saldoAtualEl) saldoAtualEl.value = "";
+    const saldoAnteriorEl = document.getElementById("saldoAnteriorFora");
+    if(saldoAnteriorEl) saldoAnteriorEl.value = "";
+    const horarioEl = document.getElementById("horarioInicioFora");
+    if(horarioEl) horarioEl.value = "";
+  }catch(e){}
+
+  salvar();
+  atualizar();
+  try{
+    toast("✅ Virou 4h: novo dia iniciado e saldo zerado.");
+  }catch(e){}
+  return true;
 }
 
 function salvarGanhosForaTempoReal(){
