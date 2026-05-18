@@ -18,7 +18,7 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver v4</title>
+<title>MetaDriver v8</title>
 <script>
 // v57 - correção de duplicação ao minimizar/restaurar + proteção de rolagem
 (function(){
@@ -2837,7 +2837,7 @@ body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff9d0; }
 }
 
 
-/* v71n - botão flutuante Uber / 99 com transparência maior */
+/* v61n - botão flutuante Uber / 99 com transparência maior */
 .quick-balance-split{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
 .quick-balance-split-card{border:1px solid rgba(255,255,255,.10);border-radius:16px;padding:10px 12px;cursor:pointer;user-select:none;transition:opacity .15s ease, box-shadow .15s ease;}
 .quick-balance-split-card.active{box-shadow:0 0 0 2px rgba(255,255,255,.14) inset;opacity:1;}
@@ -2850,7 +2850,7 @@ body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff9d0; }
 .quick-balance-split-value{font-size:24px;line-height:1;font-weight:900;min-height:24px;}
 
 
-/* v71n - UX seleção Uber/99 refinada */
+/* v61n - UX seleção Uber/99 refinada */
 .quick-balance-split-card,
 .quick-balance-split-card *{
   -webkit-tap-highlight-color: transparent !important;
@@ -2888,7 +2888,7 @@ body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff9d0; }
 }
 
 
-/* v71n - trava visual do saldo atual quando FAB ativo */
+/* v61n - trava visual do saldo atual quando FAB ativo */
 #saldoAtualFora[readonly]{
   opacity:.78 !important;
   cursor:not-allowed !important;
@@ -3166,7 +3166,7 @@ body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff9d0; }
   <div class="menu-item"><button class="secondary" onclick="abrirSaldoAtualButtonMenu(); closeMenu();">Botão de saldo atual</button></div>
   <div class="menu-item"><button class="secondary" onclick="abrirTemas(); closeMenu();">Temas</button></div>
   <div class="menu-item"><button class="danger" onclick="forceLogout(); return false;">Sair</button></div>
-  <div class="menu-note" style="text-align:center;">v4</div>
+  <div class="menu-note" style="text-align:center;">v8</div>
 </div>
 
 <div id="temasOverlay" class="temas-overlay" onclick="fecharTemas()"></div>
@@ -4214,7 +4214,7 @@ function mdBuildDiagnosticsObject(){
     const durableObj = mdSafeJsonParse(durableRaw);
     const diag = {
       generated_at: mdNowIso(),
-      app_version: 'MetaDriver v4',
+      app_version: 'MetaDriver v8',
       cloud_table: CLOUD_TABLE,
       device_id: mdEnsureDeviceId(),
       visibility_state: document.visibilityState,
@@ -5327,7 +5327,7 @@ function mdCommitLancamentoMutation(reason){
   try{ atualizar(); }catch(e){}
   try{ if(typeof refreshQuickBalanceFabMiniDisplay === "function") refreshQuickBalanceFabMiniDisplay(); }catch(e){}
   try{ if(typeof updateQuickBalanceFabUI === "function") updateQuickBalanceFabUI(); }catch(e){}
-  try{ if(typeof toast === "function" && reason) console.info("MetaDriver v4 mutation:", reason); }catch(e){}
+  try{ if(typeof toast === "function" && reason) console.info("MetaDriver v8 mutation:", reason); }catch(e){}
 }
 
 function editarValor(tipo, index){
@@ -6866,7 +6866,7 @@ function exportarRelatorioPDF(){
       <script>
         setTimeout(()=>window.print(), 250);
       <\/script>
-    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v4 · app</div>
+    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v8 · app</div>
 </body>
     </html>  `);
   w.document.close();

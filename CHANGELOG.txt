@@ -1,4 +1,6 @@
-MetaDriver v4
-- Corrigida tela azul/travamento causado por lock de hidratação/preload.
-- Edição de gastos/ganhos/abastecimentos em qualquer data agora força normalização, salvamento e atualização global.
-- Mantido versionamento v4 em app, menu, arquivos auxiliares e manifest.
+MetaDriver v8
+
+- Rollback seguro da tentativa v7 que travava a interface.
+- Versionamento corrigido em app, menu, login, admin, painel, backup, manifest e ZIP.
+- Mantida base funcional v5 com correção anti-duplicidade da virada das 4h.
+- Sem bloqueio agressivo de tela que causava travamento.

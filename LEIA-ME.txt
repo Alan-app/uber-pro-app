@@ -1,3 +1,3 @@
-MetaDriver v4
+MetaDriver v8
 
-Correção de estabilidade: remove trava de tela azul/preload, preserva abertura do app e força recálculo dos lançamentos ao adicionar, editar ou excluir ganhos, gastos e abastecimentos em qualquer data.
+Versão estável baseada na v5 funcional, com versionamento corrigido em todas as telas visíveis e arquivos auxiliares.
