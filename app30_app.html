@@ -18,11 +18,11 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver v5</title>
-<style id="md-hydration-lock">body{visibility:visible!important;} body.md-ready{visibility:visible!important;}</style>
+<title>MetaDriver v6</title>
+<style id="md-hydration-lock">body{visibility:hidden!important;background:#0f172a!important;} body.md-ready{visibility:visible!important;}</style>
 
 <script>
-// v57 - correção de duplicação ao minimizar/restaurar + proteção de rolagem
+// v67 - correção de duplicação ao minimizar/restaurar + proteção de rolagem
 (function(){
   var KEY_Y = 'md_scroll_y';
   var KEY_X = 'md_scroll_x';
@@ -33,15 +33,15 @@
   var rafSave = 0;
 
   function storageGet(key){
-    // fix v57: localStorage tem prioridade — sobrevive ao Android matar o processo
+    // fix v67: localStorage tem prioridade — sobrevive ao Android matar o processo
     // sessionStorage é destruído quando o processo morre
     try{
       var v = localStorage.getItem(key);
       if(v !== null && v !== undefined && v !== '') return v;
     }catch(e){}
     try{
-      var v57 = sessionStorage.getItem(key);
-      if(v57 !== null && v57 !== undefined && v57 !== '') return v57;
+      var v67 = sessionStorage.getItem(key);
+      if(v67 !== null && v67 !== undefined && v67 !== '') return v67;
     }catch(e){}
     return null;
   }
@@ -301,7 +301,7 @@ h1{text-align:center;margin:8px 0 14px;letter-spacing:0.2px;}
   font-weight:400;
   color:var(--text);
 }
-/* v57 - botão menu tamanho ajustado */
+/* v67 - botão menu tamanho ajustado */
 .menu-btn{
   width:36px;
   height:36px;
@@ -321,7 +321,7 @@ h1{text-align:center;margin:8px 0 14px;letter-spacing:0.2px;}
 .menu-btn:active{transform:scale(0.97);}
 
 
-/* v57 - menu tamanho ajustado */
+/* v67 - menu tamanho ajustado */
 /* Menu overlay */
 .overlay{
   position:fixed; inset:0; z-index:90;
@@ -355,7 +355,7 @@ h1{text-align:center;margin:8px 0 14px;letter-spacing:0.2px;}
   border-bottom:1px solid rgba(255,255,255,0.05);
 }
 .menu-item:last-child{border-bottom:none;}
-/* v57 - menu: tamanho ajustado e botões com diferenciação visual agradável */
+/* v67 - menu: tamanho ajustado e botões com diferenciação visual agradável */
 .menu-item button{
   width:100%;
   padding:8px 10px;
@@ -744,7 +744,7 @@ input.negative-value, input.negative-value::placeholder{
 
 
 /* ===== Abas ===== */
-/* v57 - abas fixas abaixo da topbar */
+/* v67 - abas fixas abaixo da topbar */
 .tabs-wrap{
   padding:8px 15px 10px;
   position:sticky;
@@ -1264,7 +1264,7 @@ input.negative-value, input.negative-value::placeholder{
 }
 
 
-/* ===== Fix layout Manutenções (mobile) v57.2.9 ===== */
+/* ===== Fix layout Manutenções (mobile) v67.2.9 ===== */
 .checkline{
   display:flex !important;
   align-items:center !important;
@@ -1722,7 +1722,7 @@ input.negative-value, input.negative-value::placeholder{
 /* ===== Modal editar valor (teclado numérico) ===== */
 
 
-/* v57 - modal editar data/motivo (substitui prompt nativo que falha no Android) */
+/* v67 - modal editar data/motivo (substitui prompt nativo que falha no Android) */
 .edit-data-overlay{
   position:fixed; inset:0; z-index:400;
   background:rgba(0,0,0,0.55);
@@ -1753,7 +1753,7 @@ input.negative-value, input.negative-value::placeholder{
 .edit-data-actions button{ flex:1; height:44px; border-radius:12px; font-size:14px; font-weight:700; border:none; cursor:pointer; font-family:inherit; }
 .edit-data-actions .btn-cancelar{ background:rgba(255,255,255,0.10); color:var(--text); }
 
-/* v57 - modal exportar backup */
+/* v67 - modal exportar backup */
 .export-backup-overlay{
   position:fixed; inset:0; z-index:300;
   background:rgba(0,0,0,0.55);
@@ -2300,7 +2300,7 @@ body[data-tema="meta-claro"]{
   --warn:#ca8a04;
   --danger:#e11d48;
 }
-/* v57 - preto: identidade Uber (preto total + branco puro) */
+/* v67 - preto: identidade Uber (preto total + branco puro) */
 body[data-tema="preto-escuro"]{
   --bg:#000000;
   --card:#111111;
@@ -2325,7 +2325,7 @@ body[data-tema="preto-claro"]{
   --warn:#000000;
   --danger:#ff3b30;
 }
-/* v57 - amarelo: identidade 99 (preto + amarelo vibrante) */
+/* v67 - amarelo: identidade 99 (preto + amarelo vibrante) */
 body[data-tema="amarelo-escuro"]{
   --bg:#0d0d0d;
   --card:#1a1a00;
@@ -2350,7 +2350,7 @@ body[data-tema="amarelo-claro"]{
   --warn:#c68a00;
   --danger:#dc2626;
 }
-/* v57 - color-scheme por modo */
+/* v67 - color-scheme por modo */
 body[data-tema="meta-claro"],
 body[data-tema="preto-claro"],
 body[data-tema="amarelo-claro"]{ color-scheme:light; }
@@ -2814,20 +2814,20 @@ body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff9d0; }
 }
 
 
-/* v57 - padroniza distância entre botões do topo e o primeiro card */
+/* v67 - padroniza distância entre botões do topo e o primeiro card */
 .tabs-wrap{
   margin-bottom: 16px !important;
 }
 
 
-/* v57 - aumenta altura dos botões do topo */
+/* v67 - aumenta altura dos botões do topo */
 .tabs-wrap button{
   padding-top:14px !important;
   padding-bottom:14px !important;
 }
 
 
-/* v57 safe patch - botão flutuante sem $ e com valor maior */
+/* v67 safe patch - botão flutuante sem $ e com valor maior */
 .quick-balance-fab-inner{
   justify-content:center !important;
 }
@@ -3118,13 +3118,13 @@ body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff9d0; }
 }
 
 
-/* v57 - padroniza distância entre botões do topo e o primeiro card */
+/* v67 - padroniza distância entre botões do topo e o primeiro card */
 .tabs-wrap{
   margin-bottom: 16px !important;
 }
 
 
-/* v57 - aumenta altura dos botões do topo */
+/* v67 - aumenta altura dos botões do topo */
 .tabs-wrap button{
   padding-top:14px !important;
   padding-bottom:14px !important;
@@ -3134,7 +3134,7 @@ body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff9d0; }
 
 
 </head>
-<body class="md-ready"><script>window.mdFailsafeNoBlueScreen=true;setTimeout(function(){try{document.body.classList.remove("preload");document.body.classList.add("md-ready");var st=document.getElementById("md-hydration-lock");if(st)st.remove();}catch(e){}},300);window.addEventListener("error",function(){try{document.body.classList.remove("preload");document.body.classList.add("md-ready");}catch(e){}},true);</script>
+<body class="preload"><script>window.mdFailsafeNoBlueScreen=true;setTimeout(function(){try{document.body.classList.remove("preload");document.body.classList.add("md-ready");var st=document.getElementById("md-hydration-lock");if(st)st.remove();}catch(e){}},50);window.addEventListener("error",function(){try{document.body.classList.remove("preload");document.body.classList.add("md-ready");}catch(e){}},true);</script>
 
 <div class="topbar">
   <div class="topbar-inner">
@@ -3341,7 +3341,7 @@ body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff9d0; }
 <div style="margin-top:10px;">
   <span style="display:inline-flex;align-items:center;gap:8px;">
     <button type="button" id="btnHistoricoGanhoHora" class="btn-historico-link" onclick="toggleHistoricoGanhoHora()">Histórico</button>
-    <!-- v57 - botão limpar histórico -->
+    <!-- v67 - botão limpar histórico -->
     <button type="button" onclick="limparHistoricoGanhoHora()" title="Limpar histórico" style="background:none;border:none;cursor:pointer;font-size:11px;color:var(--danger);opacity:0.55;padding:0;line-height:1;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.55">🗑</button>
   </span>
   <div id="historicoGanhoHoraWrap" class="muted" style="display:none;margin-top:8px;text-align:left;"></div>
@@ -3428,7 +3428,7 @@ body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff9d0; }
 
 
 
-<!-- v57 - modal editar data/motivo de dias não trabalhados -->
+<!-- v67 - modal editar data/motivo de dias não trabalhados -->
 <div id="editDataOverlay" class="edit-data-overlay" onclick="if(event.target.id==='editDataOverlay')fecharEditData()">
   <div class="edit-data-modal" onclick="event.stopPropagation()">
     <div class="edit-data-title" id="editDataTitle">Editar data</div>
@@ -3441,7 +3441,7 @@ body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff9d0; }
   </div>
 </div>
 
-<!-- v57 - modal exportar backup -->
+<!-- v67 - modal exportar backup -->
 <div id="exportBackupOverlay" class="export-backup-overlay" onclick="if(event.target.id==='exportBackupOverlay')fecharExportBackup()">
   <div class="export-backup-modal" onclick="event.stopPropagation()">
     <div class="export-backup-title">Exportar Backup</div>
@@ -3630,7 +3630,7 @@ const META_SCHEMA_VERSION = 2;
 let __cloudSaveTimer = null;
 let __cloudBootStarted = false;
 let __cloudBootDoneOnce = false;
-let __cloudDirty = false; // v57 - flag: só envia pra nuvem se houve mudança real
+let __cloudDirty = false; // v67 - flag: só envia pra nuvem se houve mudança real
 
 async function mdBootstrapUserScope(preferredToken){
   try{
@@ -4037,7 +4037,7 @@ function mdPickBestSnapshot(candidates){
 mdEnsureDataMeta(dados);
     try{ dados.__skip_operational_day_turn = true; }catch(e){}
 // Migração desativada (substituída por loadDados com legacyKeys)
-// v57.11 - salvar local-first durável com journal append-only
+// v67.11 - salvar local-first durável com journal append-only
 function salvar(){
   try{
     mdEnsureDataMeta(dados);
@@ -4230,7 +4230,7 @@ function mdBuildDiagnosticsObject(){
     const durableObj = mdSafeJsonParse(durableRaw);
     const diag = {
       generated_at: mdNowIso(),
-      app_version: 'MetaDriver v5',
+      app_version: 'MetaDriver v6',
       cloud_table: CLOUD_TABLE,
       device_id: mdEnsureDeviceId(),
       visibility_state: document.visibilityState,
@@ -4503,7 +4503,7 @@ function mdSyncBackupsFromCloud(backups){
   }catch(e){}
 }
 
-// v57 - stringify canônico para impedir duplicações por ordem de chaves diferente
+// v67 - stringify canônico para impedir duplicações por ordem de chaves diferente
 function mdCanonicalStringify(value){
   try{
     const seen = new WeakSet();
@@ -4544,7 +4544,7 @@ function mdSanitizeDuplicatedData(){
   }catch(e){}
 }
 
-// v57 - fix crítico: merge inteligente — nunca sobrescreve array local com array menor
+// v67 - fix crítico: merge inteligente — nunca sobrescreve array local com array menor
 function cloudMergeArrays(local, remote){
   if(!Array.isArray(remote)) return mdDedupArrayExact(Array.isArray(local) ? local : []);
   if(!Array.isArray(local) || local.length === 0) return mdDedupArrayExact(remote.slice());
@@ -4777,7 +4777,7 @@ window.addEventListener("pagehide", function(){
 });
 window.addEventListener("beforeunload", function(){ try{ cloudPushNow(JSON.parse(JSON.stringify(dados || {}))); }catch(e){} });
 window.addEventListener("online", function(){ try{ if(__cloudDirty || (cloudReadPendingSnapshot() && cloudReadPendingSnapshot().payload)) cloudPushNow(); }catch(e){} });
-// v57 - salva scroll continuamente
+// v67 - salva scroll continuamente
 window.addEventListener('scroll', function(){
   try{ if(window.__mdSaveScroll) window.__mdSaveScroll(); }catch(e){}
 }, { passive: true });
@@ -4787,7 +4787,7 @@ document.addEventListener("visibilitychange", function(){
     if(document.visibilityState === "hidden") cloudPushNow(JSON.parse(JSON.stringify(dados || {})));
   }catch(e){}
 });
-// v57 - save inteligente a cada 60s: só envia pra nuvem se houve mudança real
+// v67 - save inteligente a cada 60s: só envia pra nuvem se houve mudança real
 setInterval(function(){
   try{
     if(document.visibilityState !== "visible") return;
@@ -5347,7 +5347,7 @@ function mdCommitLancamentoMutation(reason){
   try{ atualizar(); }catch(e){}
   try{ if(typeof refreshQuickBalanceFabMiniDisplay === "function") refreshQuickBalanceFabMiniDisplay(); }catch(e){}
   try{ if(typeof updateQuickBalanceFabUI === "function") updateQuickBalanceFabUI(); }catch(e){}
-  try{ if(typeof toast === "function" && reason) console.info("MetaDriver v5 mutation:", reason); }catch(e){}
+  try{ if(typeof toast === "function" && reason) console.info("MetaDriver v6 mutation:", reason); }catch(e){}
 }
 
 function editarValor(tipo, index){
@@ -5417,7 +5417,7 @@ function confirmEditValor(){
 
 
 
-// v57 - editarData e editarMotivo: modal próprio substituindo prompt() nativo (falha no Android)
+// v67 - editarData e editarMotivo: modal próprio substituindo prompt() nativo (falha no Android)
 window.__editDataCtx = null;
 
 function editarData(tipo, index){
@@ -5487,7 +5487,7 @@ function excluirItem(tipo, index){
   mdCommitLancamentoMutation("delete-" + tipo);
 }
 
-// v57 - funções de tema (corrigido: funções estavam ausentes)
+// v67 - funções de tema (corrigido: funções estavam ausentes)
 function aplicarTema(tema){
   document.body.setAttribute('data-tema', tema || 'meta-escuro');
   document.querySelectorAll('[data-tema-option]').forEach(function(el){
@@ -5513,7 +5513,7 @@ function fecharTemas(){
   if(panel) panel.classList.remove('show');
 }
 
-// v57 - exportar backup agora abre modal com opção de nome e escolha de pasta
+// v67 - exportar backup agora abre modal com opção de nome e escolha de pasta
 function getExportBackupBlob(){
   const payload = {
     app: "MetaDriver",
@@ -5840,7 +5840,7 @@ function toggleHistoricoDiaGanhoHora(diaUber){
 }
 
 
-// v57 - editar horário de sessões no histórico
+// v67 - editar horário de sessões no histórico
 function editarHorarioSessaoHistorico(diaUber, indice, campo){
   const item = (dados.ganhoHoraHistorico || []).find(function(h){ return String((h && h.diaUber) || '').trim() === String(diaUber || '').trim(); });
   if(!item || !Array.isArray(item.sessoes) || !item.sessoes[indice]) return;
@@ -5873,7 +5873,7 @@ function editarHorarioSessaoHistorico(diaUber, indice, campo){
   toast('✅ Sessão do histórico atualizada.');
 }
 
-// v57 - excluir sessão do histórico
+// v67 - excluir sessão do histórico
 function excluirSessaoHistorico(diaUber, indice){
   if(!confirm('Excluir esta sessão do histórico?')) return;
   const idx = (dados.ganhoHoraHistorico || []).findIndex(function(h){ return String((h && h.diaUber) || '').trim() === String(diaUber || '').trim(); });
@@ -5888,7 +5888,7 @@ function excluirSessaoHistorico(diaUber, indice){
   toast('✅ Sessão do histórico excluída.');
 }
 
-// v57 - limpar todo o histórico
+// v67 - limpar todo o histórico
 function limparHistoricoGanhoHora(){
   if(!dados.ganhoHoraHistorico || !dados.ganhoHoraHistorico.length){
     toast('Histórico já está vazio.');
@@ -6849,13 +6849,13 @@ function exportarRelatorioPDF(){
 }
 
 
-/* v57 - padroniza distância entre botões do topo e o primeiro card */
+/* v67 - padroniza distância entre botões do topo e o primeiro card */
 .tabs-wrap{
   margin-bottom: 16px !important;
 }
 
 
-/* v57 - aumenta altura dos botões do topo */
+/* v67 - aumenta altura dos botões do topo */
 .tabs-wrap button{
   padding-top:14px !important;
   padding-bottom:14px !important;
@@ -6914,7 +6914,7 @@ function exportarRelatorioPDF(){
       <script>
         setTimeout(()=>window.print(), 250);
       <\/script>
-    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v5 · app</div>
+    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v6 · app</div>
 
 
 <script>
@@ -6944,7 +6944,7 @@ function exportarRelatorioPDF(){
 }
 
 function atualizar(){
-  // v57 - aplicar tema salvo a cada atualização
+  // v67 - aplicar tema salvo a cada atualização
   try{ aplicarTema(dados.tema || 'meta-escuro'); }catch(e){}
   try{
     const metaDiaInput = document.getElementById("metaDiariaManual");
@@ -7056,7 +7056,7 @@ function atualizar(){
             const valorSessClass = Number(s.valorTotal || 0) < 0 ? "dangerText" : "warning";
             const ghSessClass = Number(s.ganhoHora || 0) < 0 ? "dangerText" : "warning";
             const tempoSess = Number(s.tempoDecorrido || 0);
-            return `<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--line);position:relative;padding-right:40px"><div class="action-menu" style="position:absolute;top:8px;right:0"><button class="kebab-btn" type="button" onclick="event.stopPropagation(); toggleItemMenu('menu_hist_sessao_${dia}_${idxSess}', this)">≡</button><div class="menu-pop" id="menu_hist_sessao_${dia}_${idxSess}"><!-- v57 - menu completo sessão histórico --><button type="button" onclick="editarHorarioSessaoHistorico('${dia}', ${idxSess}, 'inicio')">Editar hora de início</button><button type="button" onclick="editarHorarioSessaoHistorico('${dia}', ${idxSess}, 'fim')">Editar hora de término</button><button type="button" onclick="editarValorSessaoHistorico('${dia}', ${idxSess})">Editar valor</button><button type="button" class="danger" onclick="excluirSessaoHistorico('${dia}', ${idxSess})">Excluir sessão</button></div></div><b>${getNomeSessao(idxSess + 1)} sessão</b><br>Hora de início: ${s.inicio || '-'}<br>Hora de término: ${s.fim || '-'}<br>Valor total: <span class="${valorSessClass}">R$ ${Number(s.valorTotal || 0).toFixed(2)}</span><br>Ganho por hora: <span class="${ghSessClass}">R$ ${Number(s.ganhoHora || 0).toFixed(2)}</span><br>Tempo decorrido: <span class="warning">${formatHorasMinutos(tempoSess)}</span></div>`;
+            return `<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--line);position:relative;padding-right:40px"><div class="action-menu" style="position:absolute;top:8px;right:0"><button class="kebab-btn" type="button" onclick="event.stopPropagation(); toggleItemMenu('menu_hist_sessao_${dia}_${idxSess}', this)">≡</button><div class="menu-pop" id="menu_hist_sessao_${dia}_${idxSess}"><!-- v67 - menu completo sessão histórico --><button type="button" onclick="editarHorarioSessaoHistorico('${dia}', ${idxSess}, 'inicio')">Editar hora de início</button><button type="button" onclick="editarHorarioSessaoHistorico('${dia}', ${idxSess}, 'fim')">Editar hora de término</button><button type="button" onclick="editarValorSessaoHistorico('${dia}', ${idxSess})">Editar valor</button><button type="button" class="danger" onclick="excluirSessaoHistorico('${dia}', ${idxSess})">Excluir sessão</button></div></div><b>${getNomeSessao(idxSess + 1)} sessão</b><br>Hora de início: ${s.inicio || '-'}<br>Hora de término: ${s.fim || '-'}<br>Valor total: <span class="${valorSessClass}">R$ ${Number(s.valorTotal || 0).toFixed(2)}</span><br>Ganho por hora: <span class="${ghSessClass}">R$ ${Number(s.ganhoHora || 0).toFixed(2)}</span><br>Tempo decorrido: <span class="warning">${formatHorasMinutos(tempoSess)}</span></div>`;
           }).join('') : "<div style='padding-top:6px'>Sem sessões salvas nesse dia.</div>") : '';
           return `<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--line);text-align:left"><button type="button" class="btn-historico-link" onclick="toggleHistoricoDiaGanhoHora('${dia}')">${dia}</button><br>Total: <span class="${totalClass}">R$ ${total.toFixed(2)}</span> | <span class="warning">${formatHorasMinutos(horasItem)}</span> | <span class="${ghClass}">R$ ${ganhoHoraItem.toFixed(2)}/h</span>${aberto ? `<div style="margin-top:8px">${detalhes}</div>` : ''}</div>`;
         }).join("");
@@ -8017,14 +8017,14 @@ setInterval(function(){ try{ applyQuickBalanceFabStateHard(); }catch(e){} try{ r
 function bootApp(){
   // v102 - mantém UI oculta até aplicar colapsos e layout inicial
   try{ document.body.classList.add("preload"); }catch(e){}
-  // v57 - garante visibilidade
+  // v67 - garante visibilidade
   try{
     document.documentElement.style.opacity = '';
     document.documentElement.style.pointerEvents = '';
   }catch(e){}
   try{ ensureFirstInstallCollapsed(); }catch(e){}
   try{ initSectionCollapse(); }catch(e){}
-  // v57 - calcular altura real da topbar e aplicar nas tabs para sticky preciso
+  // v67 - calcular altura real da topbar e aplicar nas tabs para sticky preciso
   try{
     const topbar = document.querySelector('.topbar');
     const tabsWrap = document.querySelector('.tabs-wrap');
@@ -8036,7 +8036,7 @@ function bootApp(){
   try{ ensureGanhoHoraDiaAtual(); }catch(e){}
   try{ setInterval(function(){ try{ ensureGanhoHoraDiaAtual(); }catch(e){} }, 15000); }catch(e){}
   try{ updateUberClock(); setInterval(updateUberClock, 1000); }catch(e){}
-  // v57 - fix logout: se havia sessão em andamento, retoma o timer automaticamente
+  // v67 - fix logout: se havia sessão em andamento, retoma o timer automaticamente
   try{
     if(String(dados.horarioInicioFora || "").trim()){
       iniciarTimerGanhoHoraTempoReal();
@@ -8064,7 +8064,7 @@ window.addEventListener("pageshow", ()=>{
   try{ document.body.classList.add("preload"); }catch(e){}
   try{ initSectionCollapse(); }catch(e){}
   try{ applyQuickBalanceFabStateHard(); }catch(e){}
-  // v57 - reforça restauração ao reabrir do cache do navegador
+  // v67 - reforça restauração ao reabrir do cache do navegador
   try{ if(window.__mdRestoreScrollBurst) window.__mdRestoreScrollBurst(); else if(window.__mdRestoreScroll) window.__mdRestoreScroll(true); }catch(e){}
   try{
     requestAnimationFrame(function(){
@@ -8153,7 +8153,7 @@ mdInitialHydrateAndRender();
 })();
 
 
-// ===== Abas (Uber / Carro) v57.2.0 =====
+// ===== Abas (Uber / Carro) v67.2.0 =====
 const ACTIVE_TAB_KEY = "controleUberPro_activeTab_v7_2_0";
 
 function bindTabClicks(){
@@ -8628,7 +8628,7 @@ function snoozeCarPopup(){
 
 
 
-// ===== Tabs robustos (v57.2.6) =====
+// ===== Tabs robustos (v67.2.6) =====
 (function(){
   function ensureTabContainers(){
     const tabCarro = document.getElementById("tabCarro");
@@ -8780,7 +8780,7 @@ function bindCarCollapsibles(){
 
 
 
-// ===== KM Atual: expandir/recolher (v57.3.5) =====
+// ===== KM Atual: expandir/recolher (v67.3.5) =====
 function toggleKmAtualForm(forceClose=false){
   const form = document.getElementById("formKmAtual");
   if(!form) return;
@@ -8818,7 +8818,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
 
 
 
-// ===== Manutenção: expandir/recolher formulário (v57.3.7) =====
+// ===== Manutenção: expandir/recolher formulário (v67.3.7) =====
 function toggleManutForm(forceClose=false){
   const form = document.getElementById("formManut");
   if(!form) return;
@@ -8923,7 +8923,7 @@ function atualizarIndicadorAbaManutencao(){
 
 
 
-// ===== Alerta aba Manutenção (forçado) v57.6.2 =====
+// ===== Alerta aba Manutenção (forçado) v67.6.2 =====
 (function(){
   function _coerceKm(v){
     try{ return (typeof parseKm==="function") ? parseKm(v) : (Number(String(v).replace(/\D/g,""))||0); }catch(e){ return 0; }
@@ -9209,7 +9209,7 @@ function logoutApp(){
 }
 
 
-/* ===== Logout robusto do app (v57: salva na nuvem antes de sair) ===== */
+/* ===== Logout robusto do app (v67: salva na nuvem antes de sair) ===== */
 async function forceLogout(){
   try{ closeMenu(); }catch(e){}
   try{
