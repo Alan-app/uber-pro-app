@@ -18,7 +18,7 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver v4</title>
+<title>MetaDriver v5</title>
 <style id="md-hydration-lock">body{visibility:visible!important;} body.md-ready{visibility:visible!important;}</style>
 
 <script>
@@ -4230,7 +4230,7 @@ function mdBuildDiagnosticsObject(){
     const durableObj = mdSafeJsonParse(durableRaw);
     const diag = {
       generated_at: mdNowIso(),
-      app_version: 'MetaDriver v4',
+      app_version: 'MetaDriver v5',
       cloud_table: CLOUD_TABLE,
       device_id: mdEnsureDeviceId(),
       visibility_state: document.visibilityState,
@@ -5347,7 +5347,7 @@ function mdCommitLancamentoMutation(reason){
   try{ atualizar(); }catch(e){}
   try{ if(typeof refreshQuickBalanceFabMiniDisplay === "function") refreshQuickBalanceFabMiniDisplay(); }catch(e){}
   try{ if(typeof updateQuickBalanceFabUI === "function") updateQuickBalanceFabUI(); }catch(e){}
-  try{ if(typeof toast === "function" && reason) console.info("MetaDriver v4 mutation:", reason); }catch(e){}
+  try{ if(typeof toast === "function" && reason) console.info("MetaDriver v5 mutation:", reason); }catch(e){}
 }
 
 function editarValor(tipo, index){
@@ -6378,7 +6378,7 @@ function confirmVirada4hModal(){
   }catch(e){}
 
   try{
-    localStorage.setItem("md_last_4am_turn_key_v102", String(window.__dayTurn4hState.turnKey || ""));
+    localStorage.setItem("md_last_4am_turn_key_v102", String(window.__dayTurn4hState.turnKey || "")); dados.meta = dados.meta || {}; dados.meta.last4hTurnKey = String(window.__dayTurn4hState.turnKey || "");
   }catch(e){}
   salvar();
   atualizar();
@@ -6423,11 +6423,25 @@ function ensureGanhoHoraDiaAtual(){
       return yyyy + "-" + mm + "-" + dd;
     })();
 
+    if(!dados.meta || typeof dados.meta !== 'object') dados.meta = {};
     try{
       const ultimaVirada = localStorage.getItem("md_last_4am_turn_key_v102") || "";
-      if(ultimaVirada === turnKey){
+      const ultimaViradaDados = String((dados.meta && dados.meta.last4hTurnKey) || "");
+      if(ultimaVirada === turnKey || ultimaViradaDados === turnKey){
         return false;
       }
+      try{
+        const ganhosExistentes = Array.isArray(dados.ganhos) ? dados.ganhos : [];
+        const jaVirou = ganhosExistentes.some(function(g){
+          try{
+            return String(g.syncKey||"") === ("TURN4H_" + turnKey);
+          }catch(e){ return false; }
+        });
+        if(jaVirou){
+          dados.meta.last4hTurnKey = turnKey;
+          return false;
+        }
+      }catch(e){}
     }catch(e){}
 
     const diaAtualUber = dataUberISO();
@@ -6476,7 +6490,7 @@ function ensureGanhoHoraDiaAtual(){
       if(horarioEl) horarioEl.value = "";
     }catch(e){}
 
-    try{ localStorage.setItem("md_last_4am_turn_key_v102", turnKey); }catch(e){}
+    try{ localStorage.setItem("md_last_4am_turn_key_v102", turnKey); dados.meta = dados.meta || {}; dados.meta.last4hTurnKey = turnKey; }catch(e){}
     salvar();
     try{ refreshQuickBalanceDisplay(); }catch(e){}
     try{ refreshQuickBalanceFabMiniDisplay(); }catch(e){}
@@ -6900,7 +6914,7 @@ function exportarRelatorioPDF(){
       <script>
         setTimeout(()=>window.print(), 250);
       <\/script>
-    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v4 · app</div>
+    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v5 · app</div>
 
 
 <script>
