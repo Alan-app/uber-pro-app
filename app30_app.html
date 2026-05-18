@@ -18,7 +18,9 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver v10.2</title>
+<title>MetaDriver v1</title>
+<style id="md-hydration-lock">body{visibility:hidden!important;} body.md-ready{visibility:visible!important;}</style>
+
 <script>
 // v57 - correção de duplicação ao minimizar/restaurar + proteção de rolagem
 (function(){
@@ -4228,7 +4230,7 @@ function mdBuildDiagnosticsObject(){
     const durableObj = mdSafeJsonParse(durableRaw);
     const diag = {
       generated_at: mdNowIso(),
-      app_version: 'MetaDriver v10.2',
+      app_version: 'MetaDriver v1',
       cloud_table: CLOUD_TABLE,
       device_id: mdEnsureDeviceId(),
       visibility_state: document.visibilityState,
@@ -5682,12 +5684,24 @@ function limparDadosGanhoHora(manterSaldoAtual){
   const saldoAtualMantido = Number(dados.saldoAtualFora || 0);
   dados.saldoAnteriorFora = 0;
   dados.saldoAtualFora = manterSaldoAtual ? saldoAtualMantido : 0;
+  if(!manterSaldoAtual){
+    dados.ganhoUber = 0;
+    dados.ganho99 = 0;
+  }
   dados.ganhoDiarioAtual = dados.saldoAtualFora;
   dados.horarioInicioFora = "";
   dados.horasDecorridasFora = 0;
   dados.ganhoHoraAtualFora = 0;
   dados.ganhoHoraSessoes = [];
   dados.ganhoHoraSessaoDiaRef = "";
+  try{
+    const saldoEl=document.getElementById("saldoAtualFora");
+    if(saldoEl) saldoEl.value = Number(dados.saldoAtualFora||0).toFixed(2);
+    const badge=document.getElementById("saldoAtualButton");
+    if(badge) badge.textContent = 'R$ '+Number(dados.saldoAtualFora||0).toFixed(2);
+  }catch(e){}
+  salvar();
+  atualizar();
 }
 
 function diaUberEhAteDataLimite(diaUber){
@@ -6833,7 +6847,7 @@ function exportarRelatorioPDF(){
       <script>
         setTimeout(()=>window.print(), 250);
       <\/script>
-    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v10.2 · app</div>
+    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v1 · app</div>
 
 
 <script>
@@ -9355,5 +9369,6 @@ document.addEventListener("visibilitychange", function(){
   window.addEventListener('storage', function(){ syncRealtimeUI(); });
 })();
 </script>
+<script>window.addEventListener("load",function(){requestAnimationFrame(function(){document.body.classList.add("md-ready");var s=document.getElementById("md-hydration-lock"); if(s) s.remove();});});</script>
 </body>
     </html>

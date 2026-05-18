@@ -1,6 +1,6 @@
 CHANGELOG
 
-v10.2
+v1
 - Corrigida versão quebrada por JavaScript solto após o fechamento do HTML.
 - Scripts finais realocados corretamente antes de </body>.
 - Versionamento atualizado em app, arquivos auxiliares, README, CHANGELOG e manifest.

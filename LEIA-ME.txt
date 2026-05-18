@@ -1,4 +1,4 @@
-VERSÃO v10.2 - correção de estabilidade, versionamento e relatório diário
+VERSÃO v1 - correção de estabilidade, versionamento e relatório diário
 
 BASE:
 - MetaDriver_v10_RT_FIX
@@ -6,7 +6,7 @@ BASE:
 CORREÇÕES APLICADAS:
 - Corrigido erro estrutural no final do app30_app.html que podia quebrar o carregamento/execução do app.
 - Movidos scripts finais para dentro do HTML antes de </body>, removendo JavaScript solto após </html>.
-- Atualizada versão visual e interna para MetaDriver v10.2.
+- Atualizada versão visual e interna para MetaDriver v1.
 - Atualizado manifest.json com version 10.2.
 - Mantida a correção do Saldo Atual do Relatório Diário com exibição em duas casas decimais.
 - Mantidos reforços de atualização/refresh visual sem alterar a regra da virada das 4h.
