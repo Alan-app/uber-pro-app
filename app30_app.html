@@ -18,7 +18,7 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver v09</title>
+<title>MetaDriver v10.1</title>
 <script>
 // v57 - correção de duplicação ao minimizar/restaurar + proteção de rolagem
 (function(){
@@ -4228,7 +4228,7 @@ function mdBuildDiagnosticsObject(){
     const durableObj = mdSafeJsonParse(durableRaw);
     const diag = {
       generated_at: mdNowIso(),
-      app_version: 'MetaDriver v09',
+      app_version: 'MetaDriver v10.1',
       cloud_table: CLOUD_TABLE,
       device_id: mdEnsureDeviceId(),
       visibility_state: document.visibilityState,
@@ -6833,7 +6833,7 @@ function exportarRelatorioPDF(){
       <script>
         setTimeout(()=>window.print(), 250);
       <\/script>
-    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v09 · app</div>
+    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v10.1 · app</div>
 </body>
     </html>  `);
   w.document.close();
@@ -9326,3 +9326,32 @@ document.addEventListener("visibilitychange", function(){
   }catch(e){}
 })();
 </script>
+
+(function(){
+  function fmt2(v){
+    const n = Number(String(v||0).replace(',', '.'));
+    return isNaN(n) ? '0.00' : n.toFixed(2);
+  }
+  function syncRealtimeUI(){
+    try{
+      const el = document.getElementById('saldoAtualFora');
+      if(el && document.activeElement !== el){
+        el.value = fmt2(el.value || window.dados?.saldoAtualFora || 0);
+      }
+      if(window.renderizarTudo) renderizarTudo();
+      if(window.atualizarInterface) atualizarInterface();
+    }catch(e){}
+  }
+  document.addEventListener('change', function(e){
+    if(e.target && e.target.id === 'saldoAtualFora'){
+      e.target.value = fmt2(e.target.value);
+      try{ if(window.dados) dados.saldoAtualFora = Number(e.target.value.replace(',', '.')); }catch(e){}
+      try{ localStorage.setItem('meta_sync_ts', String(Date.now())); }catch(e){}
+      syncRealtimeUI();
+    }
+  }, true);
+  window.addEventListener('pageshow', syncRealtimeUI, {passive:true});
+  window.addEventListener('focus', syncRealtimeUI, {passive:true});
+  document.addEventListener('visibilitychange', function(){ if(!document.hidden) syncRealtimeUI(); });
+  window.addEventListener('storage', function(){ syncRealtimeUI(); });
+})();
