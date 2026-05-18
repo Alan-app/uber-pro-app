@@ -18,7 +18,7 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver v10.1</title>
+<title>MetaDriver v10.2</title>
 <script>
 // v57 - correção de duplicação ao minimizar/restaurar + proteção de rolagem
 (function(){
@@ -4228,7 +4228,7 @@ function mdBuildDiagnosticsObject(){
     const durableObj = mdSafeJsonParse(durableRaw);
     const diag = {
       generated_at: mdNowIso(),
-      app_version: 'MetaDriver v10.1',
+      app_version: 'MetaDriver v10.2',
       cloud_table: CLOUD_TABLE,
       device_id: mdEnsureDeviceId(),
       visibility_state: document.visibilityState,
@@ -6833,9 +6833,32 @@ function exportarRelatorioPDF(){
       <script>
         setTimeout(()=>window.print(), 250);
       <\/script>
-    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v10.1 · app</div>
-</body>
-    </html>  `);
+    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v10.2 · app</div>
+
+
+<script>
+(function(){
+  try{
+    if(typeof salvar === "function" && !window.__salvarComCloudWrapV125){
+      window.__salvarLocalOriginal = window.__salvarLocalOriginal || salvar;
+      const __originalSalvarV125 = salvar;
+      salvar = function(){
+        const r = __originalSalvarV125.apply(this, arguments);
+        try{
+          __cloudDirty = true;
+          cloudWritePendingSnapshot(dados);
+          Promise.resolve().then(function(){ return cloudPushNow({ payload: JSON.parse(JSON.stringify(dados)) }); }).catch(function(){ cloudScheduleSave(120); });
+        }catch(e){
+          try{ cloudScheduleSave(120); }catch(_){}
+        }
+        return r;
+      };
+      window.__salvarComCloudWrapV125 = true;
+    }
+  }catch(e){}
+})();
+
+`);
   w.document.close();
 }
 
@@ -9300,33 +9323,9 @@ document.addEventListener("visibilitychange", function(){
   </div>
 </div>
 
-</body>
-</html>
 
 
 <script>
-(function(){
-  try{
-    if(typeof salvar === "function" && !window.__salvarComCloudWrapV125){
-      window.__salvarLocalOriginal = window.__salvarLocalOriginal || salvar;
-      const __originalSalvarV125 = salvar;
-      salvar = function(){
-        const r = __originalSalvarV125.apply(this, arguments);
-        try{
-          __cloudDirty = true;
-          cloudWritePendingSnapshot(dados);
-          Promise.resolve().then(function(){ return cloudPushNow({ payload: JSON.parse(JSON.stringify(dados)) }); }).catch(function(){ cloudScheduleSave(120); });
-        }catch(e){
-          try{ cloudScheduleSave(120); }catch(_){}
-        }
-        return r;
-      };
-      window.__salvarComCloudWrapV125 = true;
-    }
-  }catch(e){}
-})();
-</script>
-
 (function(){
   function fmt2(v){
     const n = Number(String(v||0).replace(',', '.'));
@@ -9355,3 +9354,6 @@ document.addEventListener("visibilitychange", function(){
   document.addEventListener('visibilitychange', function(){ if(!document.hidden) syncRealtimeUI(); });
   window.addEventListener('storage', function(){ syncRealtimeUI(); });
 })();
+</script>
+</body>
+    </html>

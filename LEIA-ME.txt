@@ -1,21 +1,25 @@
-VERSÃO v10 - correção virada das 4h na v09
+VERSÃO v10.2 - correção de estabilidade, versionamento e relatório diário
 
 BASE:
-- MetaDriver_v09_FIX
+- MetaDriver_v10_RT_FIX
 
-REFERÊNCIA USADA:
-- MetaDriver_FINAL_OK-1, somente na lógica relacionada à virada operacional das 4h e zeragem do saldo.
+CORREÇÕES APLICADAS:
+- Corrigido erro estrutural no final do app30_app.html que podia quebrar o carregamento/execução do app.
+- Movidos scripts finais para dentro do HTML antes de </body>, removendo JavaScript solto após </html>.
+- Atualizada versão visual e interna para MetaDriver v10.2.
+- Atualizado manifest.json com version 10.2.
+- Mantida a correção do Saldo Atual do Relatório Diário com exibição em duas casas decimais.
+- Mantidos reforços de atualização/refresh visual sem alterar a regra da virada das 4h.
 
-O QUE FOI ALTERADO:
-- A v09 passou a usar a lógica da Final OK para detectar mudança do dia operacional às 04:00.
-- Removido o comportamento extra da v09 que podia zerar/fechar dia fora da regra correta.
-- Ao virar 4h, o saldo atual, ganho diário, saldo anterior, sessão ativa e campos do botão flutuante Uber/99 são zerados.
-- Corrigido o saldo anterior da sessão para usar o último valor total da sessão do dia, igual à Final OK, em vez de somar sessões.
+VALIDAÇÕES REALIZADAS:
+- Extração dos scripts do app30_app.html.
+- Validação de sintaxe JavaScript com node --check.
+- Verificação de ausência de JavaScript solto após </html>.
+- Conferência de versionamento no app principal, telas auxiliares, README, CHANGELOG e manifest.
 
-O QUE NÃO FOI ALTERADO:
-- Layout geral
-- Login
-- Admin
-- Metas
-- Supabase
-- Demais funções do app
+NÃO ALTERADO:
+- LDS.
+- Livro Histórico.
+- Backup.
+- Regra funcional da virada das 4h.
+- Estrutura geral de navegação.

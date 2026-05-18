@@ -1,0 +1,11 @@
+CHANGELOG
+
+v10.2
+- Corrigida versão quebrada por JavaScript solto após o fechamento do HTML.
+- Scripts finais realocados corretamente antes de </body>.
+- Versionamento atualizado em app, arquivos auxiliares, README, CHANGELOG e manifest.
+- Preservada formatação do Saldo Atual do Relatório Diário com duas casas decimais.
+- Mantido reforço de atualização visual em tempo real.
+
+v10.1
+- Ajustes de formatação e atualização em tempo real.
