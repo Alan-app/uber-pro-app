@@ -1,25 +1,12 @@
-VERSÃO v1 - correção de estabilidade, versionamento e relatório diário
+MetaDriver v1 - RT Sync Fix
 
-BASE:
-- MetaDriver_v10_RT_FIX
+Correções aplicadas:
+- Versionamento reiniciado no padrão sequencial v1.
+- Removidas referências visuais e internas antigas em telas auxiliares e backup.
+- Saldo do botão virtual, teclado e Relatório Diário sincronizados.
+- Redução do flash de dados antigos ao abrir/recarregar.
+- manifest.json atualizado com version 1.
 
-CORREÇÕES APLICADAS:
-- Corrigido erro estrutural no final do app30_app.html que podia quebrar o carregamento/execução do app.
-- Movidos scripts finais para dentro do HTML antes de </body>, removendo JavaScript solto após </html>.
-- Atualizada versão visual e interna para MetaDriver v1.
-- Atualizado manifest.json com version 10.2.
-- Mantida a correção do Saldo Atual do Relatório Diário com exibição em duas casas decimais.
-- Mantidos reforços de atualização/refresh visual sem alterar a regra da virada das 4h.
-
-VALIDAÇÕES REALIZADAS:
-- Extração dos scripts do app30_app.html.
-- Validação de sintaxe JavaScript com node --check.
-- Verificação de ausência de JavaScript solto após </html>.
-- Conferência de versionamento no app principal, telas auxiliares, README, CHANGELOG e manifest.
-
-NÃO ALTERADO:
-- LDS.
-- Livro Histórico.
-- Backup.
-- Regra funcional da virada das 4h.
-- Estrutura geral de navegação.
+Validação:
+- Conferidas referências de versão no app, login, admin, painel, backup e manifest.
+- Sintaxe JavaScript validada.
