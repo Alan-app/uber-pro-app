@@ -1,5 +1,5 @@
-v2
-- Corrigido menu que ainda exibia v06.
+v3
+- Corrigido menu que ainda exibia v3.
 - Corrigido flash/piscada de valores antigos no carregamento.
 - Adicionada trava contra aplicação de dados remotos/locais mais antigos sobre dados atuais.
 
