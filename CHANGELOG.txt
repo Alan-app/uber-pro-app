@@ -1,7 +1,4 @@
-v3
-- Corrigido menu que ainda exibia v3.
-- Corrigido flash/piscada de valores antigos no carregamento.
-- Adicionada trava contra aplicação de dados remotos/locais mais antigos sobre dados atuais.
-
-v1
-- Correções de sincronização em tempo real.
+MetaDriver v4
+- Corrigida tela azul/travamento causado por lock de hidratação/preload.
+- Edição de gastos/ganhos/abastecimentos em qualquer data agora força normalização, salvamento e atualização global.
+- Mantido versionamento v4 em app, menu, arquivos auxiliares e manifest.

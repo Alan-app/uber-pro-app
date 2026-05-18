@@ -18,8 +18,8 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver v3</title>
-<style id="md-hydration-lock">body{visibility:hidden!important;} body.md-ready{visibility:visible!important;}</style>
+<title>MetaDriver v4</title>
+<style id="md-hydration-lock">body{visibility:visible!important;} body.md-ready{visibility:visible!important;}</style>
 
 <script>
 // v57 - correção de duplicação ao minimizar/restaurar + proteção de rolagem
@@ -414,10 +414,10 @@ h1{text-align:center;margin:8px 0 14px;letter-spacing:0.2px;}
 body.preload .topbar,
 body.preload .tabs-wrap,
 body.preload .card{
-  visibility:hidden;
+  visibility:visible;
 }
 body.preload{
-  overflow:hidden;
+  overflow:auto;
 }
 .topbar{
   min-height:64px;
@@ -3133,28 +3133,8 @@ body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff9d0; }
 </style>
 
 
-
-<script>
-window.__MD_HYDRATING__=true;
-document.documentElement.style.visibility='hidden';
-window.addEventListener('DOMContentLoaded',()=>{
- setTimeout(()=>{
-   window.__MD_HYDRATING__=false;
-   document.documentElement.style.visibility='visible';
- },120);
-});
-(function(){
- const origSetItem=localStorage.setItem;
- localStorage.setItem=function(k,v){
-   try{
-     if(typeof v==='string' && (v==='{}' || v==='[]')) return;
-   }catch(e){}
-   return origSetItem.apply(this,arguments);
- };
-})();
-</script>
 </head>
-<body class="preload">
+<body class="md-ready"><script>window.mdFailsafeNoBlueScreen=true;setTimeout(function(){try{document.body.classList.remove("preload");document.body.classList.add("md-ready");var st=document.getElementById("md-hydration-lock");if(st)st.remove();}catch(e){}},300);window.addEventListener("error",function(){try{document.body.classList.remove("preload");document.body.classList.add("md-ready");}catch(e){}},true);</script>
 
 <div class="topbar">
   <div class="topbar-inner">
@@ -3202,7 +3182,7 @@ window.addEventListener('DOMContentLoaded',()=>{
   <div class="menu-item"><button class="secondary" onclick="abrirSaldoAtualButtonMenu(); closeMenu();">Botão de saldo atual</button></div>
   <div class="menu-item"><button class="secondary" onclick="abrirTemas(); closeMenu();">Temas</button></div>
   <div class="menu-item"><button class="danger" onclick="forceLogout(); return false;">Sair</button></div>
-  <div class="menu-note" style="text-align:center;">v3</div>
+  <div class="menu-note" style="text-align:center;">v4</div>
 </div>
 
 <div id="temasOverlay" class="temas-overlay" onclick="fecharTemas()"></div>
@@ -4250,7 +4230,7 @@ function mdBuildDiagnosticsObject(){
     const durableObj = mdSafeJsonParse(durableRaw);
     const diag = {
       generated_at: mdNowIso(),
-      app_version: 'MetaDriver v3',
+      app_version: 'MetaDriver v4',
       cloud_table: CLOUD_TABLE,
       device_id: mdEnsureDeviceId(),
       visibility_state: document.visibilityState,
@@ -5275,8 +5255,7 @@ function addGasto(){
 
   if(!isNaN(valor) && data){
     dados.gastos.push({data, hora: horaAtualLancamento(), desc: desc || "Gasto", valor});
-    salvar();
-    atualizar();
+    mdCommitLancamentoMutation("add-gasto");
     document.getElementById("valorGasto").value="";
     document.getElementById("descGasto").value="";
     document.getElementById("formGasto").classList.remove("open");
@@ -5289,8 +5268,7 @@ function addAbastecimento(){
   const data = document.getElementById("dataAbastecimento").value;
   if(!isNaN(valor) && data){
     dados.abastecimentos.push({data, hora: horaAtualLancamento(), valor});
-    salvar();
-    atualizar();
+    mdCommitLancamentoMutation("add-abastecimento");
     document.getElementById("valorAbastecimento").value="";
     document.getElementById("formAbastecimento").classList.remove("open");
   }
@@ -5329,6 +5307,47 @@ function editarValorSessaoFinalizada(index){
   ov.classList.add("show");
   try{ closeAllMenus(); }catch(e){}
   setTimeout(()=>{ try{ inp.focus(); inp.select(); }catch(e){} }, 50);
+}
+
+
+
+/* ===== v4: recálculo seguro de lançamentos em qualquer data ===== */
+function mdNormalizarLancamentoItem(item, tipo){
+  try{
+    if(!item || typeof item !== "object") return item;
+    if(item.data) item.data = String(item.data).slice(0,10);
+    if(!item.data) item.data = dataUberISO();
+    if(typeof item.valor !== "undefined"){
+      const n = Number(String(item.valor).replace(",", "."));
+      item.valor = isNaN(n) ? 0 : Math.round(n * 100) / 100;
+    }
+    if(!item.hora && !item.horario) item.hora = horaAtualLancamento();
+    if(tipo === "gastos" && !item.desc) item.desc = "Gasto";
+    if(tipo === "ganhos" && !item.app) item.app = "Uber";
+  }catch(e){}
+  return item;
+}
+function mdRecalcularLancamentosQualquerData(){
+  try{
+    ["ganhos","gastos","abastecimentos"].forEach(function(tipo){
+      if(!Array.isArray(dados[tipo])) dados[tipo] = [];
+      dados[tipo] = dados[tipo].filter(function(item){ return item && typeof item === "object"; }).map(function(item){ return mdNormalizarLancamentoItem(item, tipo); });
+    });
+    if(Array.isArray(dados.naoTrabalhados)){
+      dados.naoTrabalhados = dados.naoTrabalhados.filter(function(item){ return item && item.data; }).map(function(item){ item.data = String(item.data).slice(0,10); return item; });
+    }
+    dados.__lancamentos_recalc_at = new Date().toISOString();
+  }catch(e){}
+}
+function mdCommitLancamentoMutation(reason){
+  try{ mdRecalcularLancamentosQualquerData(); }catch(e){}
+  try{ reprocessarSessoesGanhoHora(); }catch(e){}
+  try{ reconfigurarSessaoEmAndamentoAposMudancaDeSessoes(); }catch(e){}
+  try{ salvar(); }catch(e){}
+  try{ atualizar(); }catch(e){}
+  try{ if(typeof refreshQuickBalanceFabMiniDisplay === "function") refreshQuickBalanceFabMiniDisplay(); }catch(e){}
+  try{ if(typeof updateQuickBalanceFabUI === "function") updateQuickBalanceFabUI(); }catch(e){}
+  try{ if(typeof toast === "function" && reason) console.info("MetaDriver v4 mutation:", reason); }catch(e){}
 }
 
 function editarValor(tipo, index){
@@ -5387,8 +5406,7 @@ function confirmEditValor(){
       const item = dados[ctx.tipo] && dados[ctx.tipo][ctx.index];
       if(item){
         item.valor = v;
-        salvar();
-        atualizar();
+        mdCommitLancamentoMutation("edit-valor-" + ctx.tipo);
       }
     }
     closeEditValor();
@@ -5459,16 +5477,14 @@ function confirmarEditData(){
     const val = (document.getElementById('editMotivoInput').value || '').trim();
     item.motivo = val || 'Dia não trabalhado';
   }
-  salvar();
-  atualizar();
+  mdCommitLancamentoMutation("edit-data-" + ctx.tipo);
   fecharEditData();
   toast('✅ Atualizado.');
 }
 
 function excluirItem(tipo, index){
   dados[tipo].splice(index, 1);
-  salvar();
-  atualizar();
+  mdCommitLancamentoMutation("delete-" + tipo);
 }
 
 // v57 - funções de tema (corrigido: funções estavam ausentes)
@@ -6832,27 +6848,7 @@ function exportarRelatorioPDF(){
 }
 
 </style>
-    
-<script>
-window.__MD_HYDRATING__=true;
-document.documentElement.style.visibility='hidden';
-window.addEventListener('DOMContentLoaded',()=>{
- setTimeout(()=>{
-   window.__MD_HYDRATING__=false;
-   document.documentElement.style.visibility='visible';
- },120);
-});
-(function(){
- const origSetItem=localStorage.setItem;
- localStorage.setItem=function(k,v){
-   try{
-     if(typeof v==='string' && (v==='{}' || v==='[]')) return;
-   }catch(e){}
-   return origSetItem.apply(this,arguments);
- };
-})();
-</script>
-</head>
+    </head>
     <body>
       <h1>Relatório - MetaDriver</h1>
       <p class="sub">Gerado em ${d}/${m}/${y}</p>
@@ -6904,7 +6900,7 @@ window.addEventListener('DOMContentLoaded',()=>{
       <script>
         setTimeout(()=>window.print(), 250);
       <\/script>
-    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v3 · app</div>
+    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v4 · app</div>
 
 
 <script>

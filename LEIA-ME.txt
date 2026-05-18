@@ -1,6 +1,3 @@
-MetaDriver v3 - Correção de versão e hidratação
+MetaDriver v4
 
-- Menu interno corrigido de v3 para v3.
-- Bloqueio de exibição até hidratar dados atuais.
-- Proteção contra snapshot antigo sobrescrever estado novo.
-- Versionamento atualizado no app, telas auxiliares, manifest, README, changelog e ZIP.
+Correção de estabilidade: remove trava de tela azul/preload, preserva abertura do app e força recálculo dos lançamentos ao adicionar, editar ou excluir ganhos, gastos e abastecimentos em qualquer data.
