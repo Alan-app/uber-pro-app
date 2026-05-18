@@ -1,12 +1,6 @@
-MetaDriver v1 - RT Sync Fix
+MetaDriver v2 - Correção de versão e hidratação
 
-Correções aplicadas:
-- Versionamento reiniciado no padrão sequencial v1.
-- Removidas referências visuais e internas antigas em telas auxiliares e backup.
-- Saldo do botão virtual, teclado e Relatório Diário sincronizados.
-- Redução do flash de dados antigos ao abrir/recarregar.
-- manifest.json atualizado com version 1.
-
-Validação:
-- Conferidas referências de versão no app, login, admin, painel, backup e manifest.
-- Sintaxe JavaScript validada.
+- Menu interno corrigido de v06 para v2.
+- Bloqueio de exibição até hidratar dados atuais.
+- Proteção contra snapshot antigo sobrescrever estado novo.
+- Versionamento atualizado no app, telas auxiliares, manifest, README, changelog e ZIP.

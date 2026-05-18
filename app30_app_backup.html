@@ -18,7 +18,7 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver v1</title>
+<title>MetaDriver v2</title>
 <script>
 // v57 - correção de duplicação ao minimizar/restaurar + proteção de rolagem
 (function(){
@@ -3166,7 +3166,7 @@ body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff9d0; }
   <div class="menu-item"><button class="secondary" onclick="abrirSaldoAtualButtonMenu(); closeMenu();">Botão de saldo atual</button></div>
   <div class="menu-item"><button class="secondary" onclick="abrirTemas(); closeMenu();">Temas</button></div>
   <div class="menu-item"><button class="danger" onclick="forceLogout(); return false;">Sair</button></div>
-  <div class="menu-note" style="text-align:center;">v06</div>
+  <div class="menu-note" style="text-align:center;">v2</div>
 </div>
 
 <div id="temasOverlay" class="temas-overlay" onclick="fecharTemas()"></div>
@@ -4214,7 +4214,7 @@ function mdBuildDiagnosticsObject(){
     const durableObj = mdSafeJsonParse(durableRaw);
     const diag = {
       generated_at: mdNowIso(),
-      app_version: 'MetaDriver v1',
+      app_version: 'MetaDriver v2',
       cloud_table: CLOUD_TABLE,
       device_id: mdEnsureDeviceId(),
       visibility_state: document.visibilityState,
@@ -4567,7 +4567,12 @@ function mdRemoteWouldRollback(remoteData){
 
 function cloudApplyRemoteData(remoteData){
   try{
-    if(!remoteData || typeof remoteData !== "object") return;
+    if(!remoteData || typeof remoteData !== "object") return false;
+    if(typeof mdShouldBlockSnapshot === "function" && mdShouldBlockSnapshot(remoteData)) return false;
+    const incomingOrder = (typeof mdSnapshotOrderValue === "function") ? mdSnapshotOrderValue(remoteData || {}) : 0;
+    const currentOrder = (typeof mdSnapshotOrderValue === "function") ? mdSnapshotOrderValue(dados || {}) : 0;
+    // Nunca aplica um snapshot remoto/local atrasado por cima do estado atual.
+    if(currentOrder > 0 && incomingOrder > 0 && incomingOrder < currentOrder) return false;
     dados = Object.assign({}, dados || {}, remoteData || {});
     mdEnsureDataMeta(dados);
     if(window.__salvarLocalOriginal) window.__salvarLocalOriginal();
@@ -4575,7 +4580,8 @@ function cloudApplyRemoteData(remoteData){
     try{ atualizar(); }catch(e){}
     try{ atualizarCarro(); }catch(e){}
     try{ initTabs(); }catch(e){}
-  }catch(e){}
+    return true;
+  }catch(e){ return false; }
 }
 
 async function cloudPushNow(snapshotOverride){
@@ -4667,10 +4673,15 @@ async function cloudBoot(force){
     const remoteTs = remoteRow && remoteRow.updated_at ? new Date(remoteRow.updated_at).getTime() : 0;
     const localTs = dados && dados.__cloud_updated_at ? new Date(dados.__cloud_updated_at).getTime() : 0;
 
-    if(remoteData && (remoteTs > localTs || !cloudHasUsefulData(dados))){
-      cloudApplyRemoteData(remoteData);
-      try{ toast("☁️ Dados restaurados da nuvem."); }catch(e){}
-      return;
+    if(remoteData){
+      const remoteOrder = mdSnapshotOrderValue(remoteData || {});
+      const localOrder = mdSnapshotOrderValue(dados || {});
+      const deveAplicarRemoto = !mdShouldBlockSnapshot(remoteData) && ((!cloudHasUsefulData(dados)) || remoteOrder > localOrder || (remoteOrder === localOrder && remoteTs > localTs));
+      if(deveAplicarRemoto){
+        const applied = cloudApplyRemoteData(remoteData);
+        if(applied){ try{ toast("☁️ Dados restaurados da nuvem."); }catch(e){} }
+        return;
+      }
     }
 
     if(cloudHasUsefulData(dados)){
@@ -4730,13 +4741,19 @@ async function mdInitialHydrateAndRender(){
       new Date((remoteSnapshot && (remoteSnapshot.__cloud_updated_at || remoteSnapshot.__updated_at || remoteSnapshot.__last_local_write_at)) || 0).getTime() || 0
     );
 
-    if(remoteUseful && (remoteTs >= localTs || !localUseful)){
-      try{ if(userId) mdSetActiveUserScope(userId); }catch(e){}
-      mdApplyExternalSnapshot(remoteSnapshot, "remote-hydrate", false);
+    if(remoteUseful){
+      const remoteOrder = mdSnapshotOrderValue(remoteSnapshot || {});
+      const localOrder = mdSnapshotOrderValue(localBest || dados || {});
+      const deveAplicarRemoto = !mdShouldBlockSnapshot(remoteSnapshot) && ((!localUseful) || remoteOrder > localOrder || (remoteOrder === localOrder && remoteTs > localTs));
+      if(deveAplicarRemoto){
+        try{ if(userId) mdSetActiveUserScope(userId); }catch(e){}
+        mdApplyExternalSnapshot(remoteSnapshot, "remote-hydrate", false);
+      }
     }
   }catch(e){}
   try{ atualizar(); }catch(e){}
   try{ atualizarCarro(); }catch(e){}
+  try{ window.__mdHydrated = true; window.dispatchEvent(new Event("md-hydrated")); }catch(e){}
 }
 
 window.addEventListener("pagehide", function(){
@@ -6813,7 +6830,7 @@ function exportarRelatorioPDF(){
       <script>
         setTimeout(()=>window.print(), 250);
       <\/script>
-    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v1 · app</div>
+    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v2 · app</div>
 </body>
     </html>  `);
   w.document.close();
@@ -7918,7 +7935,7 @@ function bootApp(){
       iniciarTimerGanhoHoraTempoReal();
     }
   }catch(e){}
-  setTimeout(function(){ try{ cloudBoot(true); }catch(e){} }, cloudHasUsefulData(dados) ? 120 : 30);
+  setTimeout(function(){ try{ cloudBoot(true); }catch(e){} }, 1200);
   try{
     requestAnimationFrame(function(){
       requestAnimationFrame(function(){
@@ -9280,10 +9297,6 @@ document.addEventListener("visibilitychange", function(){
   </div>
 </div>
 
-</body>
-</html>
-
-
 <script>
 (function(){
   try{
@@ -9306,3 +9319,25 @@ document.addEventListener("visibilitychange", function(){
   }catch(e){}
 })();
 </script>
+<script>
+(function(){
+  function releaseHydrationLock(){
+    try{
+      requestAnimationFrame(function(){
+        document.body.classList.add("md-ready");
+        var s=document.getElementById("md-hydration-lock");
+        if(s) s.remove();
+      });
+    }catch(e){
+      try{ document.body.classList.add("md-ready"); }catch(_e){}
+    }
+  }
+  if(window.__mdHydrated){ releaseHydrationLock(); }
+  else{
+    window.addEventListener("md-hydrated", releaseHydrationLock, {once:true});
+    window.addEventListener("load", function(){ setTimeout(releaseHydrationLock, 2500); }, {once:true});
+  }
+})();
+</script>
+</body>
+</html>

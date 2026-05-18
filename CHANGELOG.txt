@@ -1,5 +1,7 @@
+v2
+- Corrigido menu que ainda exibia v06.
+- Corrigido flash/piscada de valores antigos no carregamento.
+- Adicionada trava contra aplicação de dados remotos/locais mais antigos sobre dados atuais.
+
 v1
-- Reinício oficial do versionamento sequencial.
-- Corrigidas referências de versão antigas em telas auxiliares e backup.
-- Mantidas correções de sincronização em tempo real do saldo.
-- Manifest, README e CHANGELOG atualizados para v1.
+- Correções de sincronização em tempo real.
