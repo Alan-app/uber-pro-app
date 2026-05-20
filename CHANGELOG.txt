@@ -1,6 +1,1 @@
-MetaDriver v8
-
-- Rollback seguro da tentativa v7 que travava a interface.
-- Versionamento corrigido em app, menu, login, admin, painel, backup, manifest e ZIP.
-- Mantida base funcional v5 com correção anti-duplicidade da virada das 4h.
-- Sem bloqueio agressivo de tela que causava travamento.
+v9 - fixes de virada 4h e hidratação visual

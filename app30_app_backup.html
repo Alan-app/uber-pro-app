@@ -18,7 +18,7 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver v8</title>
+<title>MetaDriver v9</title>
 <script>
 // v57 - correção de duplicação ao minimizar/restaurar + proteção de rolagem
 (function(){
@@ -2262,7 +2262,7 @@ input.negative-value, input.negative-value::placeholder{
 
 .gh-actions{display:flex;gap:8px;flex-wrap:nowrap;align-items:center;}
 .gh-actions button{flex:1 1 0;min-width:0;padding:10px 8px;font-size:14px;}
-/* PATCH_V86_TEMPO_META */
+/* PATCH_V96_TEMPO_META */
 .tempo-meta-stack{display:block;}
 .tempo-meta-stack > div{margin-bottom:0;}
 .tempo-meta-stack label{margin-top:8px;}
@@ -3166,7 +3166,7 @@ body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff9d0; }
   <div class="menu-item"><button class="secondary" onclick="abrirSaldoAtualButtonMenu(); closeMenu();">Botão de saldo atual</button></div>
   <div class="menu-item"><button class="secondary" onclick="abrirTemas(); closeMenu();">Temas</button></div>
   <div class="menu-item"><button class="danger" onclick="forceLogout(); return false;">Sair</button></div>
-  <div class="menu-note" style="text-align:center;">v8</div>
+  <div class="menu-note" style="text-align:center;">v9</div>
 </div>
 
 <div id="temasOverlay" class="temas-overlay" onclick="fecharTemas()"></div>
@@ -3583,7 +3583,7 @@ function mdMigrateLegacyGlobalStateToUser(userId){
   }catch(e){}
 }
 
-const OFFLINE_SAFE_SNAPSHOT_KEY = STORAGE_KEY + "__offline_safe_snapshot_v83";
+const OFFLINE_SAFE_SNAPSHOT_KEY = STORAGE_KEY + "__offline_safe_snapshot_v93";
 function mdReadOfflineSafeSnapshot(){
   try{
     const raw = mdReadLS(OFFLINE_SAFE_SNAPSHOT_KEY);
@@ -4214,7 +4214,7 @@ function mdBuildDiagnosticsObject(){
     const durableObj = mdSafeJsonParse(durableRaw);
     const diag = {
       generated_at: mdNowIso(),
-      app_version: 'MetaDriver v8',
+      app_version: 'MetaDriver v9',
       cloud_table: CLOUD_TABLE,
       device_id: mdEnsureDeviceId(),
       visibility_state: document.visibilityState,
@@ -5327,7 +5327,7 @@ function mdCommitLancamentoMutation(reason){
   try{ atualizar(); }catch(e){}
   try{ if(typeof refreshQuickBalanceFabMiniDisplay === "function") refreshQuickBalanceFabMiniDisplay(); }catch(e){}
   try{ if(typeof updateQuickBalanceFabUI === "function") updateQuickBalanceFabUI(); }catch(e){}
-  try{ if(typeof toast === "function" && reason) console.info("MetaDriver v8 mutation:", reason); }catch(e){}
+  try{ if(typeof toast === "function" && reason) console.info("MetaDriver v9 mutation:", reason); }catch(e){}
 }
 
 function editarValor(tipo, index){
@@ -6866,7 +6866,7 @@ function exportarRelatorioPDF(){
       <script>
         setTimeout(()=>window.print(), 250);
       <\/script>
-    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v8 · app</div>
+    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v9 · app</div>
 </body>
     </html>  `);
   w.document.close();

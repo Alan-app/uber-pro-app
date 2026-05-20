@@ -1,6 +1,6 @@
 {
-  "name": "MetaDriver v8",
-  "short_name": "MetaDriver v8",
+  "name": "MetaDriver v9",
+  "short_name": "MetaDriver v9",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",

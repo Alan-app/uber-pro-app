@@ -1,7 +1,16 @@
 
 <!DOCTYPE html>
 <html lang="pt-br">
-<head>
+<head><script>
+window.__MD_HYDRATED__=false;
+document.documentElement.style.visibility='hidden';
+window.addEventListener('DOMContentLoaded',()=>{
+ requestAnimationFrame(()=>{
+   document.documentElement.style.visibility='visible';
+   window.__MD_HYDRATED__=true;
+ });
+});
+</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#0f172a">
@@ -18,7 +27,7 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver v8</title>
+<title>MetaDriver v9</title>
 <style id="md-hydration-lock">body{visibility:visible!important;} body.md-ready{visibility:visible!important;}</style>
 
 <script>
@@ -2264,7 +2273,7 @@ input.negative-value, input.negative-value::placeholder{
 
 .gh-actions{display:flex;gap:8px;flex-wrap:nowrap;align-items:center;}
 .gh-actions button{flex:1 1 0;min-width:0;padding:10px 8px;font-size:14px;}
-/* PATCH_V86_TEMPO_META */
+/* PATCH_V96_TEMPO_META */
 .tempo-meta-stack{display:block;}
 .tempo-meta-stack > div{margin-bottom:0;}
 .tempo-meta-stack label{margin-top:8px;}
@@ -3182,7 +3191,7 @@ body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff9d0; }
   <div class="menu-item"><button class="secondary" onclick="abrirSaldoAtualButtonMenu(); closeMenu();">Botão de saldo atual</button></div>
   <div class="menu-item"><button class="secondary" onclick="abrirTemas(); closeMenu();">Temas</button></div>
   <div class="menu-item"><button class="danger" onclick="forceLogout(); return false;">Sair</button></div>
-  <div class="menu-note" style="text-align:center;">v8</div>
+  <div class="menu-note" style="text-align:center;">v9</div>
 </div>
 
 <div id="temasOverlay" class="temas-overlay" onclick="fecharTemas()"></div>
@@ -3599,7 +3608,7 @@ function mdMigrateLegacyGlobalStateToUser(userId){
   }catch(e){}
 }
 
-const OFFLINE_SAFE_SNAPSHOT_KEY = STORAGE_KEY + "__offline_safe_snapshot_v83";
+const OFFLINE_SAFE_SNAPSHOT_KEY = STORAGE_KEY + "__offline_safe_snapshot_v93";
 function mdReadOfflineSafeSnapshot(){
   try{
     const raw = mdReadLS(OFFLINE_SAFE_SNAPSHOT_KEY);
@@ -4230,7 +4239,7 @@ function mdBuildDiagnosticsObject(){
     const durableObj = mdSafeJsonParse(durableRaw);
     const diag = {
       generated_at: mdNowIso(),
-      app_version: 'MetaDriver v8',
+      app_version: 'MetaDriver v9',
       cloud_table: CLOUD_TABLE,
       device_id: mdEnsureDeviceId(),
       visibility_state: document.visibilityState,
@@ -5347,7 +5356,7 @@ function mdCommitLancamentoMutation(reason){
   try{ atualizar(); }catch(e){}
   try{ if(typeof refreshQuickBalanceFabMiniDisplay === "function") refreshQuickBalanceFabMiniDisplay(); }catch(e){}
   try{ if(typeof updateQuickBalanceFabUI === "function") updateQuickBalanceFabUI(); }catch(e){}
-  try{ if(typeof toast === "function" && reason) console.info("MetaDriver v8 mutation:", reason); }catch(e){}
+  try{ if(typeof toast === "function" && reason) console.info("MetaDriver v9 mutation:", reason); }catch(e){}
 }
 
 function editarValor(tipo, index){
@@ -6914,7 +6923,7 @@ function exportarRelatorioPDF(){
       <script>
         setTimeout(()=>window.print(), 250);
       <\/script>
-    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v8 · app</div>
+    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v9 · app</div>
 
 
 <script>
@@ -9455,6 +9464,23 @@ document.addEventListener("visibilitychange", function(){
     // fallback de segurança: evita tela branca permanente se a hidratação falhar.
     window.addEventListener("load", function(){ setTimeout(releaseHydrationLock, 2500); }, {once:true});
   }
+})();
+</script>
+
+<button id="mdSim4hBtn" style="position:fixed;bottom:12px;right:12px;z-index:9999;padding:8px 12px">Simular virada 4h</button>
+<script>
+window.METADRIVER_DEV_TOOLS=true;
+(function(){
+ const b=document.getElementById('mdSim4hBtn');
+ if(!window.METADRIVER_DEV_TOOLS){b&&b.remove();return;}
+ b&&b.addEventListener('click',()=>{
+   if(!confirm('Deseja simular a virada das 4h agora?')) return;
+   try{
+      localStorage.removeItem('md_last_4am_turn_key_v102');
+      if(typeof ensureGanhoHoraDiaAtual==='function'){ ensureGanhoHoraDiaAtual(true); }
+      alert('Simulação da virada das 4h executada.');
+   }catch(e){ alert('Erro na simulação'); console.error(e);}
+ });
 })();
 </script>
 </body>

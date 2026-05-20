@@ -1,3 +1,1 @@
-MetaDriver v8
-
-Versão estável baseada na v5 funcional, com versionamento corrigido em todas as telas visíveis e arquivos auxiliares.
+MetaDriver v9
