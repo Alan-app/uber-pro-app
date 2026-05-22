@@ -2,14 +2,18 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head><script>
-window.__MD_HYDRATED__=false;
-document.documentElement.style.visibility='hidden';
-window.addEventListener('DOMContentLoaded',()=>{
- requestAnimationFrame(()=>{
-   document.documentElement.style.visibility='visible';
-   window.__MD_HYDRATED__=true;
- });
-});
+window.__MD_HYDRATED__ = false;
+window.__mdHydrated = false;
+window.__MD_BOOT_RELEASED__ = false;
+function mdReleaseBootOverlay(){
+  if(window.__MD_BOOT_RELEASED__) return;
+  window.__MD_BOOT_RELEASED__ = true;
+  try{ document.documentElement.classList.add('md-hydrated'); }catch(e){}
+  try{ if(document.body){ document.body.classList.remove('preload'); document.body.classList.add('md-ready'); } }catch(e){}
+  try{ var ov=document.getElementById('mdBootOverlay'); if(ov) ov.remove(); }catch(e){}
+}
+window.addEventListener('md-hydrated', mdReleaseBootOverlay, {once:true});
+window.addEventListener('load', function(){ setTimeout(mdReleaseBootOverlay, 4500); }, {once:true});
 </script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
@@ -27,8 +31,12 @@ window.addEventListener('DOMContentLoaded',()=>{
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver v10</title>
-<style id="md-hydration-lock">body{visibility:visible!important;} body.md-ready{visibility:visible!important;}</style>
+<title>MetaDriver v11</title>
+<style id="md-hydration-lock">
+body.preload > *:not(#mdBootOverlay){visibility:hidden!important;}
+#mdBootOverlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#0f172a;color:#fff;z-index:2147483647;font-family:Inter,system-ui,sans-serif;font-weight:800;letter-spacing:.2px;}
+body.md-ready > *{visibility:visible;}
+</style>
 
 <script>
 // v57 - correção de duplicação ao minimizar/restaurar + proteção de rolagem
@@ -3143,7 +3151,7 @@ body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff9d0; }
 
 
 </head>
-<body class="md-ready"><script>window.mdFailsafeNoBlueScreen=true;setTimeout(function(){try{document.body.classList.remove("preload");document.body.classList.add("md-ready");var st=document.getElementById("md-hydration-lock");if(st)st.remove();}catch(e){}},300);window.addEventListener("error",function(){try{document.body.classList.remove("preload");document.body.classList.add("md-ready");}catch(e){}},true);</script>
+<body class="preload"><div id="mdBootOverlay">Carregando dados...</div><script>window.mdFailsafeNoBlueScreen=true;window.addEventListener("error",function(){setTimeout(function(){try{mdReleaseBootOverlay();}catch(e){}},1200);},true);</script>
 
 <div class="topbar">
   <div class="topbar-inner">
@@ -3191,7 +3199,7 @@ body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff9d0; }
   <div class="menu-item"><button class="secondary" onclick="abrirSaldoAtualButtonMenu(); closeMenu();">Botão de saldo atual</button></div>
   <div class="menu-item"><button class="secondary" onclick="abrirTemas(); closeMenu();">Temas</button></div>
   <div class="menu-item"><button class="danger" onclick="forceLogout(); return false;">Sair</button></div>
-  <div class="menu-note" style="text-align:center;">v10</div>
+  <div class="menu-note" style="text-align:center;">v11</div>
 </div>
 
 <div id="temasOverlay" class="temas-overlay" onclick="fecharTemas()"></div>
@@ -4239,7 +4247,7 @@ function mdBuildDiagnosticsObject(){
     const durableObj = mdSafeJsonParse(durableRaw);
     const diag = {
       generated_at: mdNowIso(),
-      app_version: 'MetaDriver v10',
+      app_version: 'MetaDriver v11',
       cloud_table: CLOUD_TABLE,
       device_id: mdEnsureDeviceId(),
       visibility_state: document.visibilityState,
@@ -4776,9 +4784,12 @@ async function mdInitialHydrateAndRender(){
       }
     }
   }catch(e){}
+  try{ window.__mdHydrated = true; window.__MD_HYDRATED__ = true; }catch(e){}
+  try{ delete dados.__skip_operational_day_turn; }catch(e){}
+  try{ ensureGanhoHoraDiaAtual(); }catch(e){}
   try{ atualizar(); }catch(e){}
   try{ atualizarCarro(); }catch(e){}
-  try{ window.__mdHydrated = true; window.dispatchEvent(new Event("md-hydrated")); }catch(e){}
+  try{ window.dispatchEvent(new Event("md-hydrated")); }catch(e){}
 }
 
 window.addEventListener("pagehide", function(){
@@ -5356,7 +5367,7 @@ function mdCommitLancamentoMutation(reason){
   try{ atualizar(); }catch(e){}
   try{ if(typeof refreshQuickBalanceFabMiniDisplay === "function") refreshQuickBalanceFabMiniDisplay(); }catch(e){}
   try{ if(typeof updateQuickBalanceFabUI === "function") updateQuickBalanceFabUI(); }catch(e){}
-  try{ if(typeof toast === "function" && reason) console.info("MetaDriver v10 mutation:", reason); }catch(e){}
+  try{ if(typeof toast === "function" && reason) console.info("MetaDriver v11 mutation:", reason); }catch(e){}
 }
 
 function editarValor(tipo, index){
@@ -6387,7 +6398,7 @@ function confirmVirada4hModal(){
   }catch(e){}
 
   try{
-    localStorage.setItem("md_last_4am_turn_key_v102", String(window.__dayTurn4hState.turnKey || "")); dados.meta = dados.meta || {}; dados.meta.last4hTurnKey = String(window.__dayTurn4hState.turnKey || "");
+    localStorage.setItem("md_last_4am_turn_key_v102", String(window.__dayTurn4hState.turnKey || "")); dados.meta = dados.meta || {}; dados.meta.last4hTurnKey = String(window.__dayTurn4hState.turnKey || ""); dados.meta.last4hGainSyncKey = "turn4h-" + String(window.__dayTurn4hState.diaAnteriorUber || window.__dayTurn4hState.diaRef || window.__dayTurn4hState.turnKey || "").slice(0,10);
   }catch(e){}
   salvar();
   atualizar();
@@ -6417,6 +6428,7 @@ function limparSaldosBotaoFlutuanteVirada4h(){
 
 function ensureGanhoHoraDiaAtual(){
   try{
+    if(!window.__mdHydrated) return false;
     if(!!dados.__skip_operational_day_turn) return false;
     if(!Array.isArray(dados.ganhoHoraSessoes)) dados.ganhoHoraSessoes = [];
     if(!dados.ganhoHoraDiaRef) dados.ganhoHoraDiaRef = dataUberISO();
@@ -6433,26 +6445,6 @@ function ensureGanhoHoraDiaAtual(){
     })();
 
     if(!dados.meta || typeof dados.meta !== 'object') dados.meta = {};
-    try{
-      const ultimaVirada = localStorage.getItem("md_last_4am_turn_key_v102") || "";
-      const ultimaViradaDados = String((dados.meta && dados.meta.last4hTurnKey) || "");
-      if(ultimaVirada === turnKey || ultimaViradaDados === turnKey){
-        return false;
-      }
-      try{
-        const ganhosExistentes = Array.isArray(dados.ganhos) ? dados.ganhos : [];
-        const jaVirou = ganhosExistentes.some(function(g){
-          try{
-            return String(g.syncKey||"") === ("TURN4H_" + turnKey);
-          }catch(e){ return false; }
-        });
-        if(jaVirou){
-          dados.meta.last4hTurnKey = turnKey;
-          return false;
-        }
-      }catch(e){}
-    }catch(e){}
-
     const diaAtualUber = dataUberISO();
     const diaAnteriorUber = (function(){
       const base = new Date(agora.getTime());
@@ -6462,6 +6454,34 @@ function ensureGanhoHoraDiaAtual(){
       const dd = String(base.getDate()).padStart(2,'0');
       return yyyy + "-" + mm + "-" + dd;
     })();
+
+    const turnGainSyncKey = "turn4h-" + diaAnteriorUber;
+    const possibleTurnKeys = [turnKey, diaAnteriorUber];
+    const possibleSyncKeys = [turnGainSyncKey, "turn4h-" + turnKey, "TURN4H_" + turnKey, "virada4h:" + turnKey, "virada4h:" + diaAnteriorUber];
+    try{
+      const ultimaVirada = localStorage.getItem("md_last_4am_turn_key_v102") || "";
+      const ultimaViradaDados = String((dados.meta && dados.meta.last4hTurnKey) || "");
+      const ultimaSyncDados = String((dados.meta && dados.meta.last4hGainSyncKey) || "");
+      if(possibleTurnKeys.indexOf(ultimaVirada) >= 0 || possibleTurnKeys.indexOf(ultimaViradaDados) >= 0 || possibleSyncKeys.indexOf(ultimaSyncDados) >= 0){
+        return false;
+      }
+      const ganhosExistentes = Array.isArray(dados.ganhos) ? dados.ganhos : [];
+      const jaVirou = ganhosExistentes.some(function(g){
+        try{
+          const sk = String(g && g.syncKey || "");
+          const origem = String(g && g.origem || "").toLowerCase();
+          const dataG = String(g && g.data || "").slice(0,10);
+          return possibleSyncKeys.indexOf(sk) >= 0 || (origem.indexOf("virada") >= 0 && (dataG === diaAnteriorUber || dataG === turnKey));
+        }catch(e){ return false; }
+      });
+      if(jaVirou){
+        dados.meta.last4hTurnKey = turnKey;
+        dados.meta.last4hGainSyncKey = turnGainSyncKey;
+        try{ localStorage.setItem("md_last_4am_turn_key_v102", turnKey); }catch(_e){}
+        salvar();
+        return false;
+      }
+    }catch(e){}
 
     const temSessaoEmAndamento = !!dados.ganhoHoraSessaoAtiva && !!String(dados.horarioInicioFora || '').trim();
 
@@ -6476,6 +6496,8 @@ function ensureGanhoHoraDiaAtual(){
       const valorSilencioso = Number(dados.saldoAtualFora || dados.ganhoDiarioAtual || 0);
       const partesVirada = calcularPartesVirada4h(valorSilencioso);
       syncGanhoDoSaldoRapido(valorSilencioso, partesVirada.uber, partesVirada.n99, diaAnteriorUber, "04:00");
+      dados.meta = dados.meta || {};
+      dados.meta.last4hGainSyncKey = turnGainSyncKey;
     }catch(e){}
 
     limparDadosGanhoHora(true);
@@ -6499,7 +6521,7 @@ function ensureGanhoHoraDiaAtual(){
       if(horarioEl) horarioEl.value = "";
     }catch(e){}
 
-    try{ localStorage.setItem("md_last_4am_turn_key_v102", turnKey); dados.meta = dados.meta || {}; dados.meta.last4hTurnKey = turnKey; }catch(e){}
+    try{ localStorage.setItem("md_last_4am_turn_key_v102", turnKey); dados.meta = dados.meta || {}; dados.meta.last4hTurnKey = turnKey; dados.meta.last4hGainSyncKey = turnGainSyncKey; }catch(e){}
     salvar();
     try{ refreshQuickBalanceDisplay(); }catch(e){}
     try{ refreshQuickBalanceFabMiniDisplay(); }catch(e){}
@@ -6923,7 +6945,7 @@ function exportarRelatorioPDF(){
       <script>
         setTimeout(()=>window.print(), 250);
       <\/script>
-    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v10 · app</div>
+    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v11 · app</div>
 
 
 <script>
@@ -8025,7 +8047,7 @@ setInterval(function(){ try{ applyQuickBalanceFabStateHard(); }catch(e){} try{ r
 
 function bootApp(){
   // v102 - mantém UI oculta até aplicar colapsos e layout inicial
-  try{ document.body.classList.add("preload"); }catch(e){}
+  try{ if(!window.__mdHydrated) document.body.classList.add("preload"); }catch(e){}
   // v57 - garante visibilidade
   try{
     document.documentElement.style.opacity = '';
@@ -8052,15 +8074,6 @@ function bootApp(){
     }
   }catch(e){}
   setTimeout(function(){ try{ cloudBoot(true); }catch(e){} }, 1200);
-  try{
-    requestAnimationFrame(function(){
-      requestAnimationFrame(function(){
-        document.body.classList.remove("preload");
-      });
-    });
-  }catch(e){
-    try{ document.body.classList.remove("preload"); }catch(_e){}
-  }
 }
 if(document.readyState === "loading"){
   document.addEventListener("DOMContentLoaded", ()=>{ bootApp(); try{ initTabs(); }catch(e){}; try{ bindSectionHeaders(); }catch(e){} });
@@ -8070,7 +8083,7 @@ if(document.readyState === "loading"){
 }
 // Em alguns celulares, ao voltar para o app (bfcache), reaplica o estado
 window.addEventListener("pageshow", ()=>{
-  try{ document.body.classList.add("preload"); }catch(e){}
+  try{ if(!window.__mdHydrated) document.body.classList.add("preload"); }catch(e){}
   try{ initSectionCollapse(); }catch(e){}
   try{ applyQuickBalanceFabStateHard(); }catch(e){}
   // v57 - reforça restauração ao reabrir do cache do navegador
@@ -9447,22 +9460,11 @@ document.addEventListener("visibilitychange", function(){
 </script>
 <script>
 (function(){
-  function releaseHydrationLock(){
-    try{
-      requestAnimationFrame(function(){
-        document.body.classList.add("md-ready");
-        var s=document.getElementById("md-hydration-lock");
-        if(s) s.remove();
-      });
-    }catch(e){
-      try{ document.body.classList.add("md-ready"); }catch(_e){}
-    }
-  }
+  function releaseHydrationLock(){ try{ mdReleaseBootOverlay(); }catch(e){} }
   if(window.__mdHydrated){ releaseHydrationLock(); }
   else{
     window.addEventListener("md-hydrated", releaseHydrationLock, {once:true});
-    // fallback de segurança: evita tela branca permanente se a hidratação falhar.
-    window.addEventListener("load", function(){ setTimeout(releaseHydrationLock, 2500); }, {once:true});
+    window.addEventListener("load", function(){ setTimeout(releaseHydrationLock, 4500); }, {once:true});
   }
 })();
 </script>

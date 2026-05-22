@@ -1,1 +1,1 @@
-v10 - fixes de virada 4h e hidratação visual
+v11 - correção real de hidratação inicial, flash visual e duplicidade da virada 4h
