@@ -6003,7 +6003,7 @@ function reconfigurarSessaoEmAndamentoAposMudancaDeSessoes(){
     return;
   }
 
-  const saldoAtual = Number(dados.saldoAtualFora || 0);
+  const saldoAtual = Number((typeof window.mdGetQuickBalancePartsV15 === 'function' ? window.mdGetQuickBalancePartsV15().total : dados.saldoAtualFora) || 0);
   const partes = String(dados.horarioInicioFora || '').split(':');
   const hIni = Number(partes[0] || 0);
   const mIni = Number(partes[1] || 0);
@@ -6975,13 +6975,14 @@ function exportarRelatorioPDF(){
 }
 
 function atualizar(){
+  if(window.__mdUpdatingFromRealtime){} else { try{ if(typeof window.mdForceSaldoSync === 'function') window.mdForceSaldoSync(); }catch(e){} }
   // v57 - aplicar tema salvo a cada atualização
   try{ aplicarTema(dados.tema || 'meta-escuro'); }catch(e){}
   try{
     const metaDiaInput = document.getElementById("metaDiariaManual");
     const ganhoDiaInput = document.getElementById("ganhoDiarioAtual");
     const ganhoHoraInput = document.getElementById("ganhoHoraManual");
-    const saldoAtualAuto = Number(dados.saldoAtualFora || 0);
+    const saldoAtualAuto = Number((typeof window.mdGetQuickBalancePartsV15 === 'function' ? window.mdGetQuickBalancePartsV15().total : dados.saldoAtualFora) || 0);
     dados.ganhoDiarioAtual = saldoAtualAuto;
     if(ganhoDiaInput){
       ganhoDiaInput.value = saldoAtualAuto || 0;
@@ -7008,7 +7009,7 @@ function atualizar(){
       saldoAnteriorInput.value = sessaoAtiva && saldoAnterior ? String(dados.saldoAnteriorFora) : "";
     }
     if(saldoInput && document.activeElement !== saldoInput){
-      saldoInput.value = saldoAtual ? String(dados.saldoAtualFora) : "";
+      saldoInput.value = saldoAtual ? Number(saldoAtual).toFixed(2) : "";
     }
     if(horaInput && document.activeElement !== horaInput){
       horaInput.value = horario;
@@ -7650,16 +7651,8 @@ function refreshQuickBalanceFabMiniDisplay(){
   const mini = document.getElementById("quickBalanceFabValue");
   if(!mini) return;
   let n = 0;
-  try{
-    const saldoInput = document.getElementById("saldoAtualFora");
-    if(saldoInput && saldoInput.value !== ""){
-      n = Number(String(saldoInput.value).replace(",", ".")) || 0;
-    }else{
-      n = qbParts().total || Number((window.dados && dados.saldoAtualFora) || 0);
-    }
-  }catch(e){
-    n = Number((window.dados && dados.saldoAtualFora) || 0);
-  }
+  try{ n = (typeof window.mdGetQuickBalancePartsV15 === 'function') ? window.mdGetQuickBalancePartsV15().total : qbParts().total; }
+  catch(e){ n = Number((window.dados && dados.saldoAtualFora) || 0); }
   mini.textContent = "R$ " + n.toLocaleString("pt-BR", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
 }
 function selectQuickBalanceTarget(v){
@@ -7733,6 +7726,7 @@ function salvarSaldoAtualRapido(){
   const saldoInput = document.getElementById("saldoAtualFora");
   if(!saldoInput) return;
   qbPersistState();
+  try{ if(typeof window.mdForceSaldoSync === 'function') window.mdForceSaldoSync(); }catch(e){}
   const parts = qbParts();
   const novoSaldo = parts.total;
   saldoInput.value = novoSaldo ? String(novoSaldo) : "";
@@ -9438,7 +9432,8 @@ document.addEventListener("visibilitychange", function(){
     try{
       const el = document.getElementById('saldoAtualFora');
       if(el && document.activeElement !== el){
-        el.value = fmt2(el.value || window.dados?.saldoAtualFora || 0);
+        try{ if(typeof window.mdForceSaldoSync === 'function') window.mdForceSaldoSync(); }catch(e){}
+        el.value = fmt2(window.dados?.saldoAtualFora || 0);
       }
       if(window.renderizarTudo) renderizarTudo();
       if(window.atualizarInterface) atualizarInterface();

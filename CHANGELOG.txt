@@ -1,1 +1,4 @@
 v11 - correção real de hidratação inicial, flash visual e duplicidade da virada 4h
+
+
+v15 - Corrige Saldo Atual do Relatório Diário para usar a fonte real do botão flutuante/teclado virtual (md_quick_balance_uber + md_quick_balance_99 / saldoUber + saldo99), sem limpar ao fechar e abrir.

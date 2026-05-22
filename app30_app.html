@@ -31,7 +31,7 @@ window.addEventListener('load', function(){ setTimeout(mdReleaseBootOverlay, 450
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver v14</title>
+<title>MetaDriver v15</title>
 <style id="md-hydration-lock">
 body.preload > *:not(#mdBootOverlay){visibility:hidden!important;}
 #mdBootOverlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#0f172a;color:#fff;z-index:2147483647;font-family:Inter,system-ui,sans-serif;font-weight:800;letter-spacing:.2px;}
@@ -3199,7 +3199,7 @@ body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff9d0; }
   <div class="menu-item"><button class="secondary" onclick="abrirSaldoAtualButtonMenu(); closeMenu();">Botão de saldo atual</button></div>
   <div class="menu-item"><button class="secondary" onclick="abrirTemas(); closeMenu();">Temas</button></div>
   <div class="menu-item"><button class="danger" onclick="forceLogout(); return false;">Sair</button></div>
-  <div class="menu-note" style="text-align:center;">v14</div>
+  <div class="menu-note" style="text-align:center;">v15</div>
 </div>
 
 <div id="temasOverlay" class="temas-overlay" onclick="fecharTemas()"></div>
@@ -3903,65 +3903,100 @@ let dados = loadDados() || {
 
 
 try{
-  const uber = Number(dados.ganhoUber || 0);
-  const n99 = Number(dados.ganho99 || 0);
-  const saldoCalculado = Number((uber + n99).toFixed(2));
-  if(saldoCalculado >= 0){
-    dados.saldoAtualFora = saldoCalculado;
+  /* v15: saldoAtualFora não deve nascer de ganhoUber/ganho99.
+     A fonte real do botão flutuante é saldoUber/saldo99 ou localStorage do teclado virtual. */
+  function mdParseMoneyV15(v){
+    const n = Number(String(v == null ? '' : v).replace(',', '.'));
+    return isNaN(n) ? 0 : n;
   }
+  function mdReadQuickBalancePartsV15(){
+    let uber = 0, n99 = 0;
+    try{
+      const lsUber = localStorage.getItem('md_quick_balance_uber');
+      const ls99 = localStorage.getItem('md_quick_balance_99');
+      if(lsUber !== null || ls99 !== null){
+        uber = mdParseMoneyV15(lsUber);
+        n99 = mdParseMoneyV15(ls99);
+      }else if(window.dados){
+        uber = mdParseMoneyV15(dados.saldoUber);
+        n99 = mdParseMoneyV15(dados.saldo99);
+      }
+    }catch(e){
+      try{
+        uber = mdParseMoneyV15(dados.saldoUber);
+        n99 = mdParseMoneyV15(dados.saldo99);
+      }catch(_e){}
+    }
+    return { uber: uber, n99: n99, total: Number((uber + n99).toFixed(2)) };
+  }
+  const parts = mdReadQuickBalancePartsV15();
+  dados.saldoAtualFora = parts.total;
+  dados.ganhoDiarioAtual = parts.total;
 }catch(e){}
 
 
 try{
+window.mdGetQuickBalancePartsV15 = function(){
+  function parse(v){
+    const n = Number(String(v == null ? '' : v).replace(',', '.'));
+    return isNaN(n) ? 0 : n;
+  }
+  try{
+    if(typeof qbParts === 'function'){
+      const p = qbParts() || {};
+      return { uber: Number(p.uber || 0), n99: Number(p.n99 || 0), total: Number((Number(p.total || 0)).toFixed(2)) };
+    }
+  }catch(e){}
+  let uber = 0, n99 = 0;
+  try{
+    const lsUber = localStorage.getItem('md_quick_balance_uber');
+    const ls99 = localStorage.getItem('md_quick_balance_99');
+    if(lsUber !== null || ls99 !== null){
+      uber = parse(lsUber); n99 = parse(ls99);
+    }else if(window.dados){
+      uber = parse(dados.saldoUber); n99 = parse(dados.saldo99);
+    }
+  }catch(e){
+    try{ uber = parse(dados.saldoUber); n99 = parse(dados.saldo99); }catch(_e){}
+  }
+  return { uber: uber, n99: n99, total: Number((uber + n99).toFixed(2)) };
+};
+
 window.mdForceSaldoSync = function(){
   try{
     if(typeof dados !== 'object' || !dados) return;
-    const uber = Number(dados.ganhoUber || 0);
-    const n99 = Number(dados.ganho99 || 0);
-    const saldo = Number((uber + n99).toFixed(2));
+    const parts = window.mdGetQuickBalancePartsV15();
+    const saldo = Number((parts.total || 0).toFixed(2));
 
+    // Fonte única visual: teclado virtual -> botão flutuante -> Relatório Diário.
+    dados.saldoUber = parts.uber ? String(parts.uber) : '';
+    dados.saldo99 = parts.n99 ? String(parts.n99) : '';
     dados.saldoAtualFora = saldo;
     dados.saldoAtual = saldo;
+    dados.ganhoDiarioAtual = saldo;
+    dados.ultimoGanhoDetalhado = { uber: parts.uber, n99: parts.n99, total: saldo };
 
-    var saldoFmt = saldo.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+    const saldoInput = document.getElementById('saldoAtualFora');
+    if(saldoInput && document.activeElement !== saldoInput){
+      saldoInput.value = saldo ? saldo.toFixed(2) : '';
+    }
+    const ganhoDiaInput = document.getElementById('ganhoDiarioAtual');
+    if(ganhoDiaInput && document.activeElement !== ganhoDiaInput){
+      ganhoDiaInput.value = saldo ? saldo.toFixed(2) : 0;
+    }
+
+    try{ if(typeof refreshQuickBalanceFabMiniDisplay === 'function') refreshQuickBalanceFabMiniDisplay(); }catch(e){}
+    try{ if(typeof calcularGanhoHoraFora === 'function') calcularGanhoHoraFora(); }catch(e){}
 
     try{
-      document.querySelectorAll('#saldoAtualValor,.saldo-atual-valor,[data-saldo-atual]').forEach(function(el){
-        el.textContent = saldoFmt;
-      });
-    }catch(e){}
-
-    try{
-      document.querySelectorAll('#floatingBalance,.floating-balance,[data-floating-balance]').forEach(function(el){
-        el.textContent = saldoFmt;
-      });
-    }catch(e){}
-
-    try{
-      localStorage.setItem('md_saldo_sync_v14', JSON.stringify({
-        saldo: saldo,
-        uber: uber,
-        n99: n99,
-        ts: Date.now()
-      }));
+      localStorage.setItem('md_saldo_sync_v15', JSON.stringify({ saldo: saldo, uber: parts.uber, n99: parts.n99, ts: Date.now() }));
     }catch(e){}
   }catch(e){}
 };
 
-setTimeout(function(){
-  try{ window.mdForceSaldoSync(); }catch(e){}
-},0);
-
-document.addEventListener('visibilitychange', function(){
-  if(!document.hidden){
-    try{ window.mdForceSaldoSync(); }catch(e){}
-  }
-});
-
-window.addEventListener('pageshow', function(){
-  try{ window.mdForceSaldoSync(); }catch(e){}
-});
-
+setTimeout(function(){ try{ window.mdForceSaldoSync(); }catch(e){} },0);
+document.addEventListener('visibilitychange', function(){ if(!document.hidden){ try{ window.mdForceSaldoSync(); }catch(e){} } });
+window.addEventListener('pageshow', function(){ try{ window.mdForceSaldoSync(); }catch(e){} });
 }catch(e){}
 
 if(typeof dados.saldoAtualButtonAtivo !== "boolean"){ dados.saldoAtualButtonAtivo = getQuickBalanceFabPref ? getQuickBalanceFabPref() : true; }
@@ -4310,7 +4345,7 @@ function mdBuildDiagnosticsObject(){
     const durableObj = mdSafeJsonParse(durableRaw);
     const diag = {
       generated_at: mdNowIso(),
-      app_version: 'MetaDriver v14',
+      app_version: 'MetaDriver v15',
       cloud_table: CLOUD_TABLE,
       device_id: mdEnsureDeviceId(),
       visibility_state: document.visibilityState,
@@ -5430,7 +5465,7 @@ function mdCommitLancamentoMutation(reason){
   try{ atualizar(); }catch(e){}
   try{ if(typeof refreshQuickBalanceFabMiniDisplay === "function") refreshQuickBalanceFabMiniDisplay(); }catch(e){}
   try{ if(typeof updateQuickBalanceFabUI === "function") updateQuickBalanceFabUI(); }catch(e){}
-  try{ if(typeof toast === "function" && reason) console.info("MetaDriver v14 mutation:", reason); }catch(e){}
+  try{ if(typeof toast === "function" && reason) console.info("MetaDriver v15 mutation:", reason); }catch(e){}
 }
 
 function editarValor(tipo, index){
@@ -6066,7 +6101,7 @@ function reconfigurarSessaoEmAndamentoAposMudancaDeSessoes(){
     return;
   }
 
-  const saldoAtual = Number(dados.saldoAtualFora || 0);
+  const saldoAtual = Number((typeof window.mdGetQuickBalancePartsV15 === 'function' ? window.mdGetQuickBalancePartsV15().total : dados.saldoAtualFora) || 0);
   const partes = String(dados.horarioInicioFora || '').split(':');
   const hIni = Number(partes[0] || 0);
   const mIni = Number(partes[1] || 0);
@@ -7008,7 +7043,7 @@ function exportarRelatorioPDF(){
       <script>
         setTimeout(()=>window.print(), 250);
       <\/script>
-    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v14 · app</div>
+    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v15 · app</div>
 
 
 <script>
@@ -7038,13 +7073,14 @@ function exportarRelatorioPDF(){
 }
 
 function atualizar(){
+  if(window.__mdUpdatingFromRealtime){} else { try{ if(typeof window.mdForceSaldoSync === 'function') window.mdForceSaldoSync(); }catch(e){} }
   // v57 - aplicar tema salvo a cada atualização
   try{ aplicarTema(dados.tema || 'meta-escuro'); }catch(e){}
   try{
     const metaDiaInput = document.getElementById("metaDiariaManual");
     const ganhoDiaInput = document.getElementById("ganhoDiarioAtual");
     const ganhoHoraInput = document.getElementById("ganhoHoraManual");
-    const saldoAtualAuto = Number(dados.saldoAtualFora || 0);
+    const saldoAtualAuto = Number((typeof window.mdGetQuickBalancePartsV15 === 'function' ? window.mdGetQuickBalancePartsV15().total : dados.saldoAtualFora) || 0);
     dados.ganhoDiarioAtual = saldoAtualAuto;
     if(ganhoDiaInput){
       ganhoDiaInput.value = saldoAtualAuto || 0;
@@ -7071,7 +7107,7 @@ function atualizar(){
       saldoAnteriorInput.value = sessaoAtiva && saldoAnterior ? String(dados.saldoAnteriorFora) : "";
     }
     if(saldoInput && document.activeElement !== saldoInput){
-      saldoInput.value = saldoAtual ? String(dados.saldoAtualFora) : "";
+      saldoInput.value = saldoAtual ? Number(saldoAtual).toFixed(2) : "";
     }
     if(horaInput && document.activeElement !== horaInput){
       horaInput.value = horario;
@@ -7713,16 +7749,8 @@ function refreshQuickBalanceFabMiniDisplay(){
   const mini = document.getElementById("quickBalanceFabValue");
   if(!mini) return;
   let n = 0;
-  try{
-    const saldoInput = document.getElementById("saldoAtualFora");
-    if(saldoInput && saldoInput.value !== ""){
-      n = Number(String(saldoInput.value).replace(",", ".")) || 0;
-    }else{
-      n = qbParts().total || Number((window.dados && dados.saldoAtualFora) || 0);
-    }
-  }catch(e){
-    n = Number((window.dados && dados.saldoAtualFora) || 0);
-  }
+  try{ n = (typeof window.mdGetQuickBalancePartsV15 === 'function') ? window.mdGetQuickBalancePartsV15().total : qbParts().total; }
+  catch(e){ n = Number((window.dados && dados.saldoAtualFora) || 0); }
   mini.textContent = "R$ " + n.toLocaleString("pt-BR", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
 }
 function selectQuickBalanceTarget(v){
@@ -7796,6 +7824,7 @@ function salvarSaldoAtualRapido(){
   const saldoInput = document.getElementById("saldoAtualFora");
   if(!saldoInput) return;
   qbPersistState();
+  try{ if(typeof window.mdForceSaldoSync === 'function') window.mdForceSaldoSync(); }catch(e){}
   const parts = qbParts();
   const novoSaldo = parts.total;
   saldoInput.value = novoSaldo ? String(novoSaldo) : "";
@@ -9501,7 +9530,8 @@ document.addEventListener("visibilitychange", function(){
     try{
       const el = document.getElementById('saldoAtualFora');
       if(el && document.activeElement !== el){
-        el.value = fmt2(el.value || window.dados?.saldoAtualFora || 0);
+        try{ if(typeof window.mdForceSaldoSync === 'function') window.mdForceSaldoSync(); }catch(e){}
+        el.value = fmt2(window.dados?.saldoAtualFora || 0);
       }
       if(window.renderizarTudo) renderizarTudo();
       if(window.atualizarInterface) atualizarInterface();
@@ -9532,34 +9562,19 @@ document.addEventListener("visibilitychange", function(){
 })();
 
 try{
-window.mdRealtimeSyncV14=function(){
- try{
-   if(typeof dados!=='object'||!dados)return;
-   const uber=Number(dados.ganhoUber||0);
-   const n99=Number(dados.ganho99||0);
-   const saldo=Number((uber+n99).toFixed(2));
-   dados.saldoAtual=saldo;
-   dados.saldoAtualFora=saldo;
-
-   const fmt=saldo.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
-
-   document.querySelectorAll('#saldoAtualValor,.saldo-atual-valor,[data-saldo-atual]').forEach(el=>el.textContent=fmt);
-   document.querySelectorAll('#floatingBalance,.floating-balance,[data-floating-balance]').forEach(el=>el.textContent=fmt);
-
-   try{
-      if(typeof atualizarGanhoHora==='function'){
-         atualizarGanhoHora();
-      }
-   }catch(e){}
-
- }catch(e){}
+window.mdRealtimeSyncV15=function(){
+  try{
+    if(typeof window.mdForceSaldoSync === 'function') window.mdForceSaldoSync();
+    if(typeof atualizar === 'function' && !window.__mdUpdatingFromRealtime){
+      window.__mdUpdatingFromRealtime = true;
+      try{ atualizar(); }catch(e){}
+      window.__mdUpdatingFromRealtime = false;
+    }
+  }catch(e){ window.__mdUpdatingFromRealtime = false; }
 };
-
-document.addEventListener('DOMContentLoaded',()=>setTimeout(window.mdRealtimeSyncV14,0));
-window.addEventListener('pageshow',()=>setTimeout(window.mdRealtimeSyncV14,0));
-document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout(window.mdRealtimeSyncV14,0);});
-setInterval(()=>{try{window.mdRealtimeSyncV14();}catch(e){}},1000);
-
+document.addEventListener('DOMContentLoaded',()=>setTimeout(window.mdRealtimeSyncV15,0));
+window.addEventListener('pageshow',()=>setTimeout(window.mdRealtimeSyncV15,0));
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout(window.mdRealtimeSyncV15,0);});
 }catch(e){}
 
 </script>
