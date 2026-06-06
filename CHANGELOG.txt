@@ -1,10 +1,12 @@
-v17 - correção real de hidratação inicial, flash visual e duplicidade da virada 4h
+v18 - Restaura funções auxiliares reais da virada 4h, usa fonte correta do botão flutuante e salva marca da virada dentro de dados.meta para evitar repetição após limpeza/restauração.
+
+v18 - correção real de hidratação inicial, flash visual e duplicidade da virada 4h
 
 
-v17 - Corrige Saldo Atual do Relatório Diário para usar a fonte real do botão flutuante/teclado virtual (md_quick_balance_uber + md_quick_balance_99 / saldoUber + saldo99), sem limpar ao fechar e abrir.
+v18 - Corrige Saldo Atual do Relatório Diário para usar a fonte real do botão flutuante/teclado virtual (md_quick_balance_uber + md_quick_balance_99 / saldoUber + saldo99), sem limpar ao fechar e abrir.
 
 
-## MetaDriver v17
+## MetaDriver v18
 - Corrigida a lógica real da virada das 4h.
 - Removido bloqueio indevido causado por comparação com o dia anterior.
 - Modal volta a abrir quando existe sessão em aberto após 4h.

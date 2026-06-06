@@ -31,7 +31,7 @@ window.addEventListener('load', function(){ setTimeout(mdReleaseBootOverlay, 450
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver v17</title>
+<title>MetaDriver v18</title>
 <style id="md-hydration-lock">
 body.preload > *:not(#mdBootOverlay){visibility:hidden!important;}
 #mdBootOverlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#0f172a;color:#fff;z-index:2147483647;font-family:Inter,system-ui,sans-serif;font-weight:800;letter-spacing:.2px;}
@@ -3007,7 +3007,7 @@ body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff9d0; }
   min-height:50px;
 }
 
-/* v173 MetaDriver keyboard only */
+/* v163 MetaDriver keyboard only */
 .meta-total-panel{
   left:0 !important;
   right:0 !important;
@@ -3199,7 +3199,7 @@ body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff9d0; }
   <div class="menu-item"><button class="secondary" onclick="abrirSaldoAtualButtonMenu(); closeMenu();">Botão de saldo atual</button></div>
   <div class="menu-item"><button class="secondary" onclick="abrirTemas(); closeMenu();">Temas</button></div>
   <div class="menu-item"><button class="danger" onclick="forceLogout(); return false;">Sair</button></div>
-  <div class="menu-note" style="text-align:center;">v17</div>
+  <div class="menu-note" style="text-align:center;">v18</div>
 </div>
 
 <div id="temasOverlay" class="temas-overlay" onclick="fecharTemas()"></div>
@@ -3903,40 +3903,40 @@ let dados = loadDados() || {
 
 
 try{
-  /* v17: saldoAtualFora não deve nascer de ganhoUber/ganho99.
+  /* v18: saldoAtualFora não deve nascer de ganhoUber/ganho99.
      A fonte real do botão flutuante é saldoUber/saldo99 ou localStorage do teclado virtual. */
-  function mdParseMoneyV17(v){
+  function mdParseMoneyV16(v){
     const n = Number(String(v == null ? '' : v).replace(',', '.'));
     return isNaN(n) ? 0 : n;
   }
-  function mdReadQuickBalancePartsV17(){
+  function mdReadQuickBalancePartsV16(){
     let uber = 0, n99 = 0;
     try{
       const lsUber = localStorage.getItem('md_quick_balance_uber');
       const ls99 = localStorage.getItem('md_quick_balance_99');
       if(lsUber !== null || ls99 !== null){
-        uber = mdParseMoneyV17(lsUber);
-        n99 = mdParseMoneyV17(ls99);
+        uber = mdParseMoneyV16(lsUber);
+        n99 = mdParseMoneyV16(ls99);
       }else if(window.dados){
-        uber = mdParseMoneyV17(dados.saldoUber);
-        n99 = mdParseMoneyV17(dados.saldo99);
+        uber = mdParseMoneyV16(dados.saldoUber);
+        n99 = mdParseMoneyV16(dados.saldo99);
       }
     }catch(e){
       try{
-        uber = mdParseMoneyV17(dados.saldoUber);
-        n99 = mdParseMoneyV17(dados.saldo99);
+        uber = mdParseMoneyV16(dados.saldoUber);
+        n99 = mdParseMoneyV16(dados.saldo99);
       }catch(_e){}
     }
     return { uber: uber, n99: n99, total: Number((uber + n99).toFixed(2)) };
   }
-  const parts = mdReadQuickBalancePartsV17();
+  const parts = mdReadQuickBalancePartsV16();
   dados.saldoAtualFora = parts.total;
   dados.ganhoDiarioAtual = parts.total;
 }catch(e){}
 
 
 try{
-window.mdGetQuickBalancePartsV17 = function(){
+window.mdGetQuickBalancePartsV16 = function(){
   function parse(v){
     const n = Number(String(v == null ? '' : v).replace(',', '.'));
     return isNaN(n) ? 0 : n;
@@ -3965,7 +3965,7 @@ window.mdGetQuickBalancePartsV17 = function(){
 window.mdForceSaldoSync = function(){
   try{
     if(typeof dados !== 'object' || !dados) return;
-    const parts = window.mdGetQuickBalancePartsV17();
+    const parts = window.mdGetQuickBalancePartsV16();
     const saldo = Number((parts.total || 0).toFixed(2));
 
     // Fonte única visual: teclado virtual -> botão flutuante -> Relatório Diário.
@@ -3989,7 +3989,7 @@ window.mdForceSaldoSync = function(){
     try{ if(typeof calcularGanhoHoraFora === 'function') calcularGanhoHoraFora(); }catch(e){}
 
     try{
-      localStorage.setItem('md_saldo_sync_v17', JSON.stringify({ saldo: saldo, uber: parts.uber, n99: parts.n99, ts: Date.now() }));
+      localStorage.setItem('md_saldo_sync_v18', JSON.stringify({ saldo: saldo, uber: parts.uber, n99: parts.n99, ts: Date.now() }));
     }catch(e){}
   }catch(e){}
 };
@@ -4345,7 +4345,7 @@ function mdBuildDiagnosticsObject(){
     const durableObj = mdSafeJsonParse(durableRaw);
     const diag = {
       generated_at: mdNowIso(),
-      app_version: 'MetaDriver v17',
+      app_version: 'MetaDriver v18',
       cloud_table: CLOUD_TABLE,
       device_id: mdEnsureDeviceId(),
       visibility_state: document.visibilityState,
@@ -5300,6 +5300,125 @@ function addGanho(){
 
 
 
+
+
+/* MetaDriver v18 - Blindagem real da virada das 4h e fonte única do saldo da virada.
+   A virada só roda depois da hidratação; usa o saldo real do teclado/botão flutuante;
+   salva marca dentro de dados.meta para sobreviver à restauração da nuvem após limpeza do Chrome. */
+function mdParseMoney4h(v){
+  if(typeof v === 'number') return isFinite(v) ? v : 0;
+  var s = String(v == null ? '' : v).trim();
+  if(!s) return 0;
+  s = s.replace(/R\$/g,'').replace(/\s/g,'').replace(/\./g,'').replace(',', '.');
+  var n = parseFloat(s);
+  return isFinite(n) ? n : 0;
+}
+function mdTurn4hDates(nowOverride){
+  var agora = nowOverride ? new Date(nowOverride) : new Date();
+  var diaAtualUber = (typeof dataUberISO === 'function') ? dataUberISO(agora) : agora.toISOString().slice(0,10);
+  var prev = new Date(agora.getTime());
+  prev.setDate(prev.getDate() - 1);
+  var diaAnteriorUber = (typeof dataUberISO === 'function') ? dataUberISO(prev) : prev.toISOString().slice(0,10);
+  var turnKey = 'turn4h-' + diaAnteriorUber + '-to-' + diaAtualUber;
+  return { agora:agora, diaAtualUber:diaAtualUber, diaAnteriorUber:diaAnteriorUber, turnKey:turnKey, syncKey:'turn4h-' + diaAnteriorUber };
+}
+function mdReadQuickBalanceParts4h(){
+  var uber = 0, n99 = 0;
+  try{
+    if(typeof qbParts === 'function'){
+      var qp = qbParts();
+      uber = mdParseMoney4h(qp && qp.uber);
+      n99 = mdParseMoney4h(qp && qp.n99);
+    }
+  }catch(e){}
+  try{
+    var lsUber = localStorage.getItem('md_quick_balance_uber');
+    var ls99 = localStorage.getItem('md_quick_balance_99');
+    if(mdParseMoney4h(lsUber) > 0 || mdParseMoney4h(ls99) > 0){
+      uber = mdParseMoney4h(lsUber);
+      n99 = mdParseMoney4h(ls99);
+    }
+  }catch(e){}
+  try{
+    if((uber + n99) <= 0 && window.dados){
+      uber = mdParseMoney4h(dados.saldoUber);
+      n99 = mdParseMoney4h(dados.saldo99);
+    }
+  }catch(e){}
+  uber = Number(Math.max(0, uber).toFixed(2));
+  n99 = Number(Math.max(0, n99).toFixed(2));
+  return { uber:uber, n99:n99, total:Number((uber+n99).toFixed(2)) };
+}
+function mdSaldoAtualFonteBotaoFlutuante4h(fallback){
+  var p = mdReadQuickBalanceParts4h();
+  var f = mdParseMoney4h(fallback);
+  return Number(((p.total > 0 ? p.total : f) || 0).toFixed(2));
+}
+function mdAplicarSaldoAtualUnificado4h(valor){
+  var v = Number(Math.max(0, mdParseMoney4h(valor)).toFixed(2));
+  if(!window.dados) return v;
+  dados.saldoAtualFora = v;
+  dados.ganhoDiarioAtual = v;
+  try{
+    var el = document.getElementById('saldoAtualFora');
+    if(el && document.activeElement !== el) el.value = v ? String(v) : '';
+  }catch(e){}
+  try{ if(typeof refreshQuickBalanceFabMiniDisplay === 'function') refreshQuickBalanceFabMiniDisplay(); }catch(e){}
+  try{ if(typeof refreshQuickBalanceDisplay === 'function') refreshQuickBalanceDisplay(); }catch(e){}
+  return v;
+}
+function mdHasTurn4hGain(diaAnteriorUber, syncKey){
+  try{
+    if(!Array.isArray(dados.ganhos)) return false;
+    return dados.ganhos.some(function(g){
+      if(!g) return false;
+      var gKey = String(g.syncKey || '');
+      var gData = String(g.data || '').slice(0,10);
+      var origem = String(g.origem || '').toLowerCase();
+      return gKey === syncKey || (gData === String(diaAnteriorUber).slice(0,10) && origem.indexOf('virada') >= 0);
+    });
+  }catch(e){ return false; }
+}
+function mdHasTurn4hHistory(diaAnteriorUber){
+  try{
+    var arr = Array.isArray(dados.ganhoHoraHistorico) ? dados.ganhoHoraHistorico : [];
+    return arr.some(function(h){
+      var d = String((h && (h.diaRef || h.data || h.dia)) || '').slice(0,10);
+      return d === String(diaAnteriorUber).slice(0,10) && JSON.stringify(h).indexOf('04:00') >= 0;
+    });
+  }catch(e){ return false; }
+}
+function mdVirada4hJaExecutada(turnKey, diaAnteriorUber, syncKey){
+  try{ if(!dados.meta || typeof dados.meta !== 'object') dados.meta = {}; }catch(e){}
+  var key = String(turnKey || '');
+  var sk = String(syncKey || ('turn4h-' + String(diaAnteriorUber || '').slice(0,10)));
+  try{ if(String(dados.meta.last4hTurnKey || '') === key) return true; }catch(e){}
+  try{ if(String(dados.meta.last4hGainSyncKey || '') === sk) return true; }catch(e){}
+  try{ if(String(localStorage.getItem('md_last_4am_turn_key_v102') || '') === key) return true; }catch(e){}
+  try{ if(mdHasTurn4hGain(diaAnteriorUber, sk)) return true; }catch(e){}
+  try{ if(mdHasTurn4hHistory(diaAnteriorUber)) return true; }catch(e){}
+  return false;
+}
+function mdMarcarVirada4hExecutada(turnKey, diaAnteriorUber, syncKey){
+  try{ if(!dados.meta || typeof dados.meta !== 'object') dados.meta = {}; }catch(e){}
+  try{
+    dados.meta.last4hTurnKey = String(turnKey || '');
+    dados.meta.last4hTurnDia = String(diaAnteriorUber || '').slice(0,10);
+    dados.meta.last4hGainSyncKey = String(syncKey || ('turn4h-' + String(diaAnteriorUber || '').slice(0,10)));
+    dados.meta.last4hTurnAt = new Date().toISOString();
+    dados.meta.last4hTurnSource = 'app_v18';
+  }catch(e){}
+  try{ localStorage.setItem('md_last_4am_turn_key_v102', String(turnKey || '')); }catch(e){}
+}
+function mdExecutarEtapa4h(nome, fn){
+  try{ return fn(); }
+  catch(e){
+    try{ console.error('MetaDriver v18: falha na etapa da virada 4h:', nome, e); }catch(_e){}
+    try{ toast('❌ Falha na virada 4h: ' + nome); }catch(_e){}
+    throw e;
+  }
+}
+
 function syncGanhoDoSaldoRapido(valorSaldoAtual, uberPart, n99Part, dataRefOverride, horaOverride){
   const valor = Math.max(0, Number(valorSaldoAtual || 0));
   const uber = Math.max(0, Number(uberPart || 0));
@@ -5447,7 +5566,7 @@ function mdCommitLancamentoMutation(reason){
   try{ atualizar(); }catch(e){}
   try{ if(typeof refreshQuickBalanceFabMiniDisplay === "function") refreshQuickBalanceFabMiniDisplay(); }catch(e){}
   try{ if(typeof updateQuickBalanceFabUI === "function") updateQuickBalanceFabUI(); }catch(e){}
-  try{ if(typeof toast === "function" && reason) console.info("MetaDriver v17 mutation:", reason); }catch(e){}
+  try{ if(typeof toast === "function" && reason) console.info("MetaDriver v18 mutation:", reason); }catch(e){}
 }
 
 function editarValor(tipo, index){
@@ -6083,7 +6202,7 @@ function reconfigurarSessaoEmAndamentoAposMudancaDeSessoes(){
     return;
   }
 
-  const saldoAtual = Number((typeof window.mdGetQuickBalancePartsV17 === 'function' ? window.mdGetQuickBalancePartsV17().total : dados.saldoAtualFora) || 0);
+  const saldoAtual = Number((typeof window.mdGetQuickBalancePartsV16 === 'function' ? window.mdGetQuickBalancePartsV16().total : dados.saldoAtualFora) || 0);
   const partes = String(dados.horarioInicioFora || '').split(':');
   const hIni = Number(partes[0] || 0);
   const mIni = Number(partes[1] || 0);
@@ -6314,121 +6433,6 @@ function finalizarSessaoGanhoHoraInterno(opcoes){
 }
 
 
-
-/* ===== MetaDriver v17: helpers obrigatórios da virada real das 4h ===== */
-function md4hDateISOFromDate(d){
-  const x = d instanceof Date ? new Date(d.getTime()) : new Date();
-  const yyyy = x.getFullYear();
-  const mm = String(x.getMonth()+1).padStart(2,'0');
-  const dd = String(x.getDate()).padStart(2,'0');
-  return yyyy + '-' + mm + '-' + dd;
-}
-function mdTurn4hDates(refDate){
-  const agora = refDate instanceof Date ? new Date(refDate.getTime()) : new Date();
-  const diaAtual = new Date(agora.getTime());
-  const diaAnterior = new Date(agora.getTime());
-  diaAnterior.setDate(diaAnterior.getDate() - 1);
-  const diaAtualUber = md4hDateISOFromDate(diaAtual);
-  const diaAnteriorUber = md4hDateISOFromDate(diaAnterior);
-  const turnKey = 'turn4h-completed-' + diaAtualUber;
-  const syncKey = 'turn4h-' + diaAnteriorUber;
-  return { agora, diaAtualUber, diaAnteriorUber, turnKey, syncKey };
-}
-function mdEnsureMeta4h(){
-  if(!dados.meta || typeof dados.meta !== 'object') dados.meta = {};
-  if(!Array.isArray(dados.meta.turn4hHistory)) dados.meta.turn4hHistory = [];
-  return dados.meta;
-}
-function mdVirada4hJaExecutada(turnKey, diaAnteriorUber, syncKey){
-  try{
-    const tk = String(turnKey || '');
-    const dk = String(diaAnteriorUber || '').slice(0,10);
-    const sk = String(syncKey || ('turn4h-' + dk));
-    const meta = mdEnsureMeta4h();
-    if(tk && String(meta.last4hTurnKey || '') === tk) return true;
-    if(sk && String(meta.last4hGainSyncKey || '') === sk) return true;
-    if(Array.isArray(meta.turn4hHistory) && meta.turn4hHistory.some(function(x){
-      return String((x && x.turnKey) || '') === tk || String((x && x.syncKey) || '') === sk;
-    })) return true;
-    try{ if(tk && localStorage.getItem('md_last_4am_turn_key_v102') === tk) return true; }catch(e){}
-    if(Array.isArray(dados.ganhos) && dados.ganhos.some(function(g){
-      return String((g && g.syncKey) || '') === sk && String((g && g.origem) || '').toLowerCase().indexOf('virada') >= 0;
-    })) return true;
-    return false;
-  }catch(e){ return false; }
-}
-function mdMarcarVirada4hExecutada(turnKey, diaAnteriorUber, syncKey){
-  try{
-    const meta = mdEnsureMeta4h();
-    const tk = String(turnKey || '');
-    const dk = String(diaAnteriorUber || '').slice(0,10);
-    const sk = String(syncKey || ('turn4h-' + dk));
-    meta.last4hTurnKey = tk;
-    meta.last4hTurnAt = new Date().toISOString();
-    meta.last4hDiaFechado = dk;
-    meta.last4hGainSyncKey = sk;
-    meta.last4hTurnSource = 'real_4h_v17';
-    if(!Array.isArray(meta.turn4hHistory)) meta.turn4hHistory = [];
-    if(!meta.turn4hHistory.some(function(x){ return String((x && x.turnKey) || '') === tk || String((x && x.syncKey) || '') === sk; })){
-      meta.turn4hHistory.push({turnKey:tk, diaFechado:dk, syncKey:sk, at:new Date().toISOString(), source:'real_4h_v17'});
-      if(meta.turn4hHistory.length > 40) meta.turn4hHistory = meta.turn4hHistory.slice(-40);
-    }
-    try{ localStorage.setItem('md_last_4am_turn_key_v102', tk); }catch(e){}
-  }catch(e){}
-}
-function mdReadQuickBalanceParts4h(){
-  try{
-    if(typeof qbPersistState === 'function') qbPersistState();
-  }catch(e){}
-  try{
-    if(typeof qbParts === 'function'){
-      const p = qbParts();
-      return { uber:Number(p.uber||0), n99:Number(p.n99||0), total:Number(p.total||0) };
-    }
-  }catch(e){}
-  let u=0,n=0;
-  try{ u = Number(String(localStorage.getItem('md_quick_balance_uber') || '').replace(',','.')) || 0; }catch(e){}
-  try{ n = Number(String(localStorage.getItem('md_quick_balance_99') || '').replace(',','.')) || 0; }catch(e){}
-  if((u+n) <= 0 && window.dados){
-    u = Number(String(dados.saldoUber || '').replace(',','.')) || 0;
-    n = Number(String(dados.saldo99 || '').replace(',','.')) || 0;
-  }
-  return { uber:u, n99:n, total:u+n };
-}
-function mdSaldoAtualFonteBotaoFlutuante4h(fallback){
-  const p = mdReadQuickBalanceParts4h();
-  const total = Number(p.total || 0);
-  if(total > 0) return Number(total.toFixed(2));
-  return Number(Math.max(0, Number(fallback || 0)).toFixed(2));
-}
-function mdAplicarSaldoAtualUnificado4h(valor){
-  const total = Number(Math.max(0, Number(valor || 0)).toFixed(2));
-  dados.saldoAtualFora = total;
-  dados.ganhoDiarioAtual = total;
-  try{
-    const el = document.getElementById('saldoAtualFora');
-    if(el) el.value = total > 0 ? total.toFixed(2) : '';
-    const badge = document.getElementById('saldoAtualButton');
-    if(badge) badge.textContent = 'R$ ' + total.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
-  }catch(e){}
-  return total;
-}
-function mdForcarZeragemVisual4h(){
-  try{ limparSaldosBotaoFlutuanteVirada4h(); }catch(e){}
-  dados.saldoAtualFora = 0;
-  dados.ganhoDiarioAtual = 0;
-  dados.saldoAnteriorFora = 0;
-  dados.ganhoHoraAtualFora = 0;
-  try{
-    const ids = ['saldoAtualFora','saldoAnteriorFora','horarioInicioFora'];
-    ids.forEach(function(id){ const el=document.getElementById(id); if(el) el.value=''; });
-    const badge = document.getElementById('saldoAtualButton');
-    if(badge) badge.textContent = 'R$ 0,00';
-  }catch(e){}
-  try{ refreshQuickBalanceDisplay(); }catch(e){}
-  try{ refreshQuickBalanceFabMiniDisplay(); }catch(e){}
-}
-
 window.__dayTurn4hState = window.__dayTurn4hState || {
   open:false,
   diaAtualUber:"",
@@ -6535,12 +6539,12 @@ function confirmVirada4hModal(){
 
   mdAplicarSaldoAtualUnificado4h(valorNormalizado);
 
-  try{
+  mdExecutarEtapa4h('lançar ganhos Uber/99', function(){
     const partesVirada = calcularPartesVirada4h(valorNormalizado);
     syncGanhoDoSaldoRapido(valorNormalizado, partesVirada.uber, partesVirada.n99, diaAnteriorUber, '04:00');
-  }catch(e){}
+  });
 
-  try{
+  mdExecutarEtapa4h('finalizar sessão aberta às 04:00', function(){
     dados.ganhoHoraDiaRef = diaAnteriorUber;
     finalizarSessaoGanhoHoraInterno({
       silent:true,
@@ -6551,10 +6555,10 @@ function confirmVirada4hModal(){
       horaFim:'04:00',
       dataFim:getViradaOperacional(new Date())
     });
-  }catch(e){}
+  });
 
-  try{ salvarResumoDiaGanhoHora(diaAnteriorUber); }catch(e){}
-  try{ limparDadosGanhoHora(true); }catch(e){}
+  mdExecutarEtapa4h('salvar histórico consolidado', function(){ salvarResumoDiaGanhoHora(diaAnteriorUber); });
+  mdExecutarEtapa4h('limpar sessões do dia', function(){ limparDadosGanhoHora(true); });
 
   dados.ganhoHoraDiaRef = diaAtualUber;
   dados.saldoAtualFora = 0;
@@ -6565,7 +6569,7 @@ function confirmVirada4hModal(){
   dados.ganhoHoraSessaoDiaRef = '';
   dados.horasDecorridasFora = 0;
   dados.ganhoHoraAtualFora = 0;
-  try{ mdForcarZeragemVisual4h(); }catch(e){}
+  try{ limparSaldosBotaoFlutuanteVirada4h(); }catch(e){}
   try{
     const saldoAtualElNovoDia = document.getElementById('saldoAtualFora');
     if(saldoAtualElNovoDia) saldoAtualElNovoDia.value = '';
@@ -6635,12 +6639,12 @@ function ensureGanhoHoraDiaAtual(){
       return false;
     }
 
-    try{
+    mdExecutarEtapa4h('lançar ganhos Uber/99 sem sessão aberta', function(){
       const partesVirada = calcularPartesVirada4h(valorAtual);
       syncGanhoDoSaldoRapido(valorAtual, partesVirada.uber, partesVirada.n99, d4.diaAnteriorUber, '04:00');
-    }catch(e){}
+    });
 
-    try{ limparDadosGanhoHora(true); }catch(e){}
+    mdExecutarEtapa4h('limpar dados do ganho por hora sem sessão aberta', function(){ limparDadosGanhoHora(true); });
     dados.ganhoHoraDiaRef = d4.diaAtualUber;
     dados.saldoAtualFora = 0;
     dados.ganhoDiarioAtual = 0;
@@ -6650,7 +6654,7 @@ function ensureGanhoHoraDiaAtual(){
     dados.ganhoHoraSessaoDiaRef = '';
     dados.horasDecorridasFora = 0;
     dados.ganhoHoraAtualFora = 0;
-    mdForcarZeragemVisual4h();
+    limparSaldosBotaoFlutuanteVirada4h();
     try{
       const saldoAtualElNovoDia = document.getElementById('saldoAtualFora');
       if(saldoAtualElNovoDia) saldoAtualElNovoDia.value = '';
@@ -7084,7 +7088,7 @@ function exportarRelatorioPDF(){
       <script>
         setTimeout(()=>window.print(), 250);
       <\/script>
-    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v17 · app</div>
+    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v18 · app</div>
 
 
 <script>
@@ -7121,7 +7125,7 @@ function atualizar(){
     const metaDiaInput = document.getElementById("metaDiariaManual");
     const ganhoDiaInput = document.getElementById("ganhoDiarioAtual");
     const ganhoHoraInput = document.getElementById("ganhoHoraManual");
-    const saldoAtualAuto = Number((typeof window.mdGetQuickBalancePartsV17 === 'function' ? window.mdGetQuickBalancePartsV17().total : dados.saldoAtualFora) || 0);
+    const saldoAtualAuto = Number((typeof window.mdGetQuickBalancePartsV16 === 'function' ? window.mdGetQuickBalancePartsV16().total : dados.saldoAtualFora) || 0);
     dados.ganhoDiarioAtual = saldoAtualAuto;
     if(ganhoDiaInput){
       ganhoDiaInput.value = saldoAtualAuto || 0;
@@ -7790,7 +7794,7 @@ function refreshQuickBalanceFabMiniDisplay(){
   const mini = document.getElementById("quickBalanceFabValue");
   if(!mini) return;
   let n = 0;
-  try{ n = (typeof window.mdGetQuickBalancePartsV17 === 'function') ? window.mdGetQuickBalancePartsV17().total : qbParts().total; }
+  try{ n = (typeof window.mdGetQuickBalancePartsV16 === 'function') ? window.mdGetQuickBalancePartsV16().total : qbParts().total; }
   catch(e){ n = Number((window.dados && dados.saldoAtualFora) || 0); }
   mini.textContent = "R$ " + n.toLocaleString("pt-BR", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
 }
@@ -9603,7 +9607,7 @@ document.addEventListener("visibilitychange", function(){
 })();
 
 try{
-window.mdRealtimeSyncV17=function(){
+window.mdRealtimeSyncV16=function(){
   try{
     if(typeof window.mdForceSaldoSync === 'function') window.mdForceSaldoSync();
     if(typeof atualizar === 'function' && !window.__mdUpdatingFromRealtime){
@@ -9613,9 +9617,9 @@ window.mdRealtimeSyncV17=function(){
     }
   }catch(e){ window.__mdUpdatingFromRealtime = false; }
 };
-document.addEventListener('DOMContentLoaded',()=>setTimeout(window.mdRealtimeSyncV17,0));
-window.addEventListener('pageshow',()=>setTimeout(window.mdRealtimeSyncV17,0));
-document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout(window.mdRealtimeSyncV17,0);});
+document.addEventListener('DOMContentLoaded',()=>setTimeout(window.mdRealtimeSyncV16,0));
+window.addEventListener('pageshow',()=>setTimeout(window.mdRealtimeSyncV16,0));
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout(window.mdRealtimeSyncV16,0);});
 }catch(e){}
 
 </script>

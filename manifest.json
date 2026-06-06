@@ -1,6 +1,6 @@
 {
-  "name": "MetaDriver v17",
-  "short_name": "MetaDriver v17",
+  "name": "MetaDriver v18",
+  "short_name": "MetaDriver v18",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
@@ -19,5 +19,5 @@
       "type": "image/png"
     }
   ],
-  "version": "v17"
+  "version": "v18"
 }
