@@ -31,16 +31,48 @@ window.addEventListener('load', function(){ setTimeout(mdReleaseBootOverlay, 450
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver v22</title>
+<title>MetaDriver v24</title>
 <style id="md-hydration-lock">
 body.preload > *:not(#mdBootOverlay){visibility:hidden!important;}
 #mdBootOverlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#0f172a;color:#fff;z-index:2147483647;font-family:Inter,system-ui,sans-serif;font-weight:800;letter-spacing:.2px;}
 body.md-ready > *{visibility:visible;}
 
-/* v22 - estado visual dos botões de sessão */
+/* v24 - estado visual dos botões de sessão */
 .md-session-disabled{opacity:.42 !important; filter:saturate(.45) brightness(.85); cursor:not-allowed !important;}
 .md-session-enabled{opacity:1 !important; filter:none !important; cursor:pointer !important;}
 #saldoAtualForaWrap,#saldoAtualFabMirrorWrap{display:none !important;}
+
+
+/* v24 - modal compacto e estado real dos botões de sessão */
+#inicioSessaoOverlay{
+  position:fixed !important;
+  inset:0 !important;
+  display:none;
+  align-items:center !important;
+  justify-content:center !important;
+  padding:18px !important;
+  background:rgba(0,0,0,.48) !important;
+  z-index:99999 !important;
+}
+#inicioSessaoOverlay.md-show{display:flex !important;}
+#inicioSessaoOverlay .editvalor-modal{
+  width:min(88vw,360px) !important;
+  max-width:360px !important;
+  min-height:auto !important;
+  height:auto !important;
+  max-height:80vh !important;
+  border-radius:18px !important;
+  padding:18px !important;
+  box-shadow:0 18px 48px rgba(0,0,0,.35) !important;
+}
+#inicioSessaoOverlay .editvalor-actions{
+  display:flex !important;
+  gap:10px !important;
+  justify-content:flex-end !important;
+  flex-direction:row !important;
+}
+.md-session-disabled{opacity:.38 !important;filter:saturate(.35) brightness(.86) !important;cursor:not-allowed !important;pointer-events:none !important;}
+.md-session-enabled{opacity:1 !important;filter:none !important;cursor:pointer !important;pointer-events:auto !important;}
 
 </style>
 
@@ -1986,7 +2018,7 @@ input.negative-value, input.negative-value::placeholder{
 }
 
 
-/* ===== V22 override: manutenção checkbox + menu lado a lado ===== */
+/* ===== V24 override: manutenção checkbox + menu lado a lado ===== */
 #tabCarro #listaManut .action-menu.manut-actions{
   display:flex !important;
   flex-direction:row !important;
@@ -2020,7 +2052,7 @@ input.negative-value, input.negative-value::placeholder{
 }
 
 
-/* ===== V23 override: manutenção com menu no topo direito e checkbox abaixo ===== */
+/* ===== V24 override: manutenção com menu no topo direito e checkbox abaixo ===== */
 #tabCarro #listaManut .table-row{
   position:relative !important;
   padding-right:78px !important;
@@ -3205,7 +3237,7 @@ body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff9d0; }
   <div class="menu-item"><button class="secondary" onclick="abrirSaldoAtualButtonMenu(); closeMenu();">Botão de saldo atual</button></div>
   <div class="menu-item"><button class="secondary" onclick="abrirTemas(); closeMenu();">Temas</button></div>
   <div class="menu-item"><button class="danger" onclick="forceLogout(); return false;">Sair</button></div>
-  <div class="menu-note" style="text-align:center;">v22</div>
+  <div class="menu-note" style="text-align:center;">v24</div>
 </div>
 
 <div id="temasOverlay" class="temas-overlay" onclick="fecharTemas()"></div>
@@ -3279,7 +3311,7 @@ body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff9d0; }
   </div>
 </div>
 
-<div id="inicioSessaoOverlay" class="editvalor-overlay" role="dialog" aria-modal="true" aria-label="Iniciar sessão" style="display:none;">
+<div id="inicioSessaoOverlay" class="editvalor-overlay" role="dialog" aria-modal="true" aria-label="Iniciar sessão">
   <div class="editvalor-modal">
     <div class="editvalor-title">Iniciar sessão</div>
     <label style="display:block;margin-top:8px;text-align:left;">Horário de início</label>
@@ -3923,7 +3955,7 @@ let dados = loadDados() || {
 
 
 try{
-  /* v22: saldoAtualFora não deve nascer de ganhoUber/ganho99.
+  /* v24: saldoAtualFora não deve nascer de ganhoUber/ganho99.
      A fonte real do botão flutuante é saldoUber/saldo99 ou localStorage do teclado virtual. */
   function mdParseMoneyV19(v){
     const n = Number(String(v == null ? '' : v).replace(',', '.'));
@@ -4042,7 +4074,7 @@ window.mdForceSaldoSync = function(){
     try{ if(typeof calcularGanhoHoraFora === 'function') calcularGanhoHoraFora(); }catch(e){}
 
     try{
-      localStorage.setItem('md_saldo_sync_v22', JSON.stringify({ saldo: saldo, uber: parts.uber, n99: parts.n99, ts: Date.now() }));
+      localStorage.setItem('md_saldo_sync_v24', JSON.stringify({ saldo: saldo, uber: parts.uber, n99: parts.n99, ts: Date.now() }));
     }catch(e){}
   }catch(e){}
 };
@@ -4398,7 +4430,7 @@ function mdBuildDiagnosticsObject(){
     const durableObj = mdSafeJsonParse(durableRaw);
     const diag = {
       generated_at: mdNowIso(),
-      app_version: 'MetaDriver v22',
+      app_version: 'MetaDriver v24',
       cloud_table: CLOUD_TABLE,
       device_id: mdEnsureDeviceId(),
       visibility_state: document.visibilityState,
@@ -5355,7 +5387,7 @@ function addGanho(){
 
 
 
-/* ===== MetaDriver v22: virada 4h blindada, saldo por usuário e fonte única ===== */
+/* ===== MetaDriver v24: virada 4h blindada, saldo por usuário e fonte única ===== */
 function mdIsoDateLocal4h(d){
   const x = d instanceof Date ? new Date(d.getTime()) : new Date();
   const yyyy = x.getFullYear();
@@ -5604,7 +5636,7 @@ function mdCommitLancamentoMutation(reason){
   try{ atualizar(); }catch(e){}
   try{ if(typeof refreshQuickBalanceFabMiniDisplay === "function") refreshQuickBalanceFabMiniDisplay(); }catch(e){}
   try{ if(typeof updateQuickBalanceFabUI === "function") updateQuickBalanceFabUI(); }catch(e){}
-  try{ if(typeof toast === "function" && reason) console.info("MetaDriver v22 mutation:", reason); }catch(e){}
+  try{ if(typeof toast === "function" && reason) console.info("MetaDriver v24 mutation:", reason); }catch(e){}
 }
 
 function editarValor(tipo, index){
@@ -7088,7 +7120,7 @@ function exportarRelatorioPDF(){
       <script>
         setTimeout(()=>window.print(), 250);
       <\/script>
-    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v22 · app</div>
+    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v24 · app</div>
 
 
 <script>
@@ -7750,7 +7782,7 @@ function qbLoadState(){
     if(window.dados){
       if(!s.uber && typeof dados.saldoUber !== "undefined") s.uber = String(dados.saldoUber || "");
       if(!s.n99 && typeof dados.saldo99 !== "undefined") s.n99 = String(dados.saldo99 || "");
-      /* v22: proibido reconstruir o botão flutuante a partir de saldoAtualFora.
+      /* v24: proibido reconstruir o botão flutuante a partir de saldoAtualFora.
          Fonte oficial: teclado do botão flutuante (saldoUber/saldo99 + chaves md_quick_balance por usuário). */
     }
   }catch(e){}
@@ -8267,10 +8299,16 @@ function bindSectionHeaders(){
 
 
 
-// ===== v22 - Relatório Diário: sessão por modal e saldo atual oculto =====
+
+// ===== v24 - Relatório Diário: sessão por modal compacto e botões coerentes =====
 (function(){
-  function isSessaoAtiva(){
-    try{ return !!(window.dados && dados.ganhoHoraSessaoAtiva && String(dados.horarioInicioFora || '').trim()); }catch(e){ return false; }
+  function getHiddenHorario(){ return document.getElementById('horarioInicioFora'); }
+  function isSessaoAtivaReal(){
+    try{
+      var hDom = String((getHiddenHorario() && getHiddenHorario().value) || '').trim();
+      var hDados = String((window.dados && dados.horarioInicioFora) || '').trim();
+      return !!(hDom || hDados || (window.dados && dados.ganhoHoraSessaoAtiva));
+    }catch(e){ return false; }
   }
   function setBtnState(btn, enabled){
     if(!btn) return;
@@ -8279,68 +8317,94 @@ function bindSectionHeaders(){
     btn.classList.toggle('md-session-disabled', !enabled);
     btn.classList.toggle('md-session-enabled', !!enabled);
   }
-  window.mdUpdateSessionButtons = function(){
+  window.mdUpdateSessionButtons = function(forceActive){
     try{
-      var ativa = isSessaoAtiva();
+      var ativa = (typeof forceActive === 'boolean') ? forceActive : isSessaoAtivaReal();
       setBtnState(document.getElementById('btnIniciarSessaoGH'), !ativa);
       setBtnState(document.getElementById('btnFinalizarSessaoGH'), ativa);
       var wrap=document.getElementById('saldoAtualForaWrap'); if(wrap) wrap.style.display='none';
       var mirror=document.getElementById('saldoAtualFabMirrorWrap'); if(mirror) mirror.style.display='none';
+      var hora=document.getElementById('horarioInicioFora'); if(hora) hora.type='hidden';
     }catch(e){}
   };
   window.openInicioSessaoModal = function(){
     try{
-      if(isSessaoAtiva()){ try{ toast('Já existe sessão em andamento.'); }catch(e){}; mdUpdateSessionButtons(); return false; }
+      if(isSessaoAtivaReal()){ try{ toast('Já existe sessão em andamento.'); }catch(e){}; mdUpdateSessionButtons(true); return false; }
       var ov=document.getElementById('inicioSessaoOverlay');
       var input=document.getElementById('inicioSessaoHoraModal');
-      var hidden=document.getElementById('horarioInicioFora');
+      var hidden=getHiddenHorario();
       var now=new Date();
       var atual=String((hidden && hidden.value) || (window.dados && dados.horarioInicioFora) || '').trim();
       if(!atual) atual=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
       if(input) input.value=atual;
-      if(ov) ov.style.display='flex';
+      if(ov){ ov.classList.add('md-show'); ov.style.display='flex'; }
       setTimeout(function(){ try{ input && input.focus(); }catch(e){} },50);
       return true;
-    }catch(e){ try{ console.error(e); }catch(_e){} return false; }
+    }catch(e){ try{ console.error(e); toast('Erro ao abrir início de sessão.'); }catch(_e){} return false; }
   };
   window.closeInicioSessaoModal = function(){
-    try{ var ov=document.getElementById('inicioSessaoOverlay'); if(ov) ov.style.display='none'; }catch(e){}
+    try{ var ov=document.getElementById('inicioSessaoOverlay'); if(ov){ ov.classList.remove('md-show'); ov.style.display='none'; } }catch(e){}
   };
   window.confirmInicioSessaoModal = function(){
     try{
       var input=document.getElementById('inicioSessaoHoraModal');
       var valor=String((input && input.value) || '').trim();
       if(!/^([01]?\d|2[0-3]):[0-5]\d$/.test(valor)){ try{ toast('Informe um horário válido.'); }catch(e){} return false; }
-      var hidden=document.getElementById('horarioInicioFora');
+      var hidden=getHiddenHorario();
       if(hidden) hidden.value=valor;
-      if(window.dados){ dados.horarioInicioFora=valor; dados.ganhoHoraSessaoAtiva=true; dados.ganhoHoraSessaoDiaRef=String(dados.ganhoHoraDiaRef || (typeof dataUberISO==='function' ? dataUberISO() : '')); }
-      if(typeof salvarGanhosForaTempoReal === 'function') salvarGanhosForaTempoReal();
+      if(window.dados){
+        dados.horarioInicioFora=valor;
+        dados.ganhoHoraSessaoAtiva=true;
+        dados.ganhoHoraSessaoDiaRef=String(dados.ganhoHoraDiaRef || (typeof dataUberISO==='function' ? dataUberISO() : ''));
+      }
+      try{ if(typeof iniciarTimerGanhoHoraTempoReal === 'function') iniciarTimerGanhoHoraTempoReal(); }catch(e){}
+      try{ if(typeof salvarGanhosForaTempoReal === 'function') salvarGanhosForaTempoReal(); else if(typeof salvar === 'function') salvar(); }catch(e){ try{ console.error('Erro ao salvar início de sessão', e); }catch(_e){} }
       closeInicioSessaoModal();
-      mdUpdateSessionButtons();
+      mdUpdateSessionButtons(true);
+      try{ if(typeof atualizar === 'function') atualizar(); }catch(e){}
+      setTimeout(function(){ try{ mdUpdateSessionButtons(true); }catch(e){} },0);
       return true;
     }catch(e){ try{ console.error(e); toast('Erro ao iniciar sessão.'); }catch(_e){} return false; }
   };
+  function finalizarSessaoProxy(){
+    try{
+      if(!isSessaoAtivaReal()){ try{ toast('Nenhuma sessão em andamento para finalizar.'); }catch(e){} mdUpdateSessionButtons(false); return false; }
+      var ok = true;
+      if(typeof window.__mdOriginalFinalizarSessaoGanhoHora === 'function'){
+        var r = window.__mdOriginalFinalizarSessaoGanhoHora.apply(this, arguments);
+        if(r === false) ok = false;
+      }else if(typeof finalizarSessaoGanhoHoraInterno === 'function'){
+        var r2 = finalizarSessaoGanhoHoraInterno({ naoIniciarProxima:true });
+        if(r2 === false) ok = false;
+      }
+      if(ok){
+        var hidden=getHiddenHorario(); if(hidden) hidden.value='';
+        if(window.dados){ dados.horarioInicioFora=''; dados.ganhoHoraSessaoAtiva=false; dados.ganhoHoraSessaoDiaRef=''; }
+        try{ if(typeof pararTimerGanhoHoraTempoReal === 'function') pararTimerGanhoHoraTempoReal(); }catch(e){}
+        try{ if(typeof salvar === 'function') salvar(); }catch(e){}
+        mdUpdateSessionButtons(false);
+        try{ if(typeof atualizar === 'function') atualizar(); }catch(e){}
+        setTimeout(function(){ try{ mdUpdateSessionButtons(false); }catch(e){} },0);
+      }
+      return ok;
+    }catch(e){ try{ console.error(e); toast('Erro ao finalizar sessão.'); }catch(_e){} return false; }
+  }
   try{
-    var _atualizar = window.atualizar;
-    if(typeof _atualizar === 'function' && !_atualizar.__mdV22Wrapped){
-      window.atualizar = function(){ var r=_atualizar.apply(this, arguments); try{ mdUpdateSessionButtons(); }catch(e){} return r; };
-      window.atualizar.__mdV22Wrapped = true;
+    if(typeof window.finalizarSessaoGanhoHora === 'function' && !window.__mdOriginalFinalizarSessaoGanhoHora){
+      window.__mdOriginalFinalizarSessaoGanhoHora = window.finalizarSessaoGanhoHora;
     }
+    window.finalizarSessaoGanhoHora = finalizarSessaoProxy;
   }catch(e){}
   try{
-    var _finalizar = window.finalizarSessaoGanhoHora;
-    if(typeof _finalizar === 'function' && !_finalizar.__mdV22Wrapped){
-      window.finalizarSessaoGanhoHora = function(){
-        if(!isSessaoAtiva()){ try{ toast('Nenhuma sessão em andamento para finalizar.'); }catch(e){} mdUpdateSessionButtons(); return false; }
-        var r=_finalizar.apply(this, arguments);
-        try{ mdUpdateSessionButtons(); }catch(e){}
-        return r;
-      };
-      window.finalizarSessaoGanhoHora.__mdV22Wrapped = true;
+    var _atualizar = window.atualizar;
+    if(typeof _atualizar === 'function' && !_atualizar.__mdV24Wrapped){
+      window.atualizar = function(){ var r=_atualizar.apply(this, arguments); try{ mdUpdateSessionButtons(); }catch(e){} return r; };
+      window.atualizar.__mdV24Wrapped = true;
     }
   }catch(e){}
   document.addEventListener('DOMContentLoaded', function(){ setTimeout(function(){ try{ mdUpdateSessionButtons(); }catch(e){} },0); });
   window.addEventListener('pageshow', function(){ setTimeout(function(){ try{ mdUpdateSessionButtons(); }catch(e){} },0); });
+  setTimeout(function(){ try{ mdUpdateSessionButtons(); }catch(e){} },0);
 })();
 
 try{ ensureGanhoHoraDiaAtual(); }catch(e){}
