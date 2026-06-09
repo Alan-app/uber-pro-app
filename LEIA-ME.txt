@@ -1,8 +1,4 @@
-MetaDriver v18
-
-Correção: virada das 4h blindada após hidratação/login, fonte correta do saldo do botão flutuante e marca persistida em dados.meta.
-
-MetaDriver v18
+MetaDriver v21
 Correção de flash visual, saldo unificado e virada 4h sem duplicidade.
 
-Versão v18: Saldo Atual do Relatório Diário sincronizado obrigatoriamente com o botão flutuante.
+Versão v21: Saldo Atual do Relatório Diário sincronizado obrigatoriamente com o botão flutuante.
