@@ -1,6 +1,6 @@
 {
-  "name": "MetaDriver v24",
-  "short_name": "MetaDriver v24",
+  "name": "MetaDriver v26",
+  "short_name": "MetaDriver v26",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
@@ -19,5 +19,5 @@
       "type": "image/png"
     }
   ],
-  "version": "v24"
+  "version": "v26"
 }

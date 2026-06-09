@@ -31,11 +31,26 @@ window.addEventListener('load', function(){ setTimeout(mdReleaseBootOverlay, 450
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver v24</title>
+<title>MetaDriver v26</title>
 <style id="md-hydration-lock">
 body.preload > *:not(#mdBootOverlay){visibility:hidden!important;}
 #mdBootOverlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#0f172a;color:#fff;z-index:2147483647;font-family:Inter,system-ui,sans-serif;font-weight:800;letter-spacing:.2px;}
 body.md-ready > *{visibility:visible;}
+
+/* v26 - modal de início: campo centralizado */
+#inicioSessaoOverlay #inicioSessaoHoraModal{
+  display:block !important;
+  width:min(220px,76%) !important;
+  max-width:220px !important;
+  margin:10px auto 0 auto !important;
+  text-align:center !important;
+  box-sizing:border-box !important;
+}
+#inicioSessaoOverlay .editvalor-modal{
+  box-sizing:border-box !important;
+  overflow:hidden !important;
+}
+
 </style>
 
 <script>
@@ -1980,7 +1995,7 @@ input.negative-value, input.negative-value::placeholder{
 }
 
 
-/* ===== V24 override: manutenção checkbox + menu lado a lado ===== */
+/* ===== V26 override: manutenção checkbox + menu lado a lado ===== */
 #tabCarro #listaManut .action-menu.manut-actions{
   display:flex !important;
   flex-direction:row !important;
@@ -2014,7 +2029,7 @@ input.negative-value, input.negative-value::placeholder{
 }
 
 
-/* ===== V24 override: manutenção com menu no topo direito e checkbox abaixo ===== */
+/* ===== V26 override: manutenção com menu no topo direito e checkbox abaixo ===== */
 #tabCarro #listaManut .table-row{
   position:relative !important;
   padding-right:78px !important;
@@ -2054,7 +2069,7 @@ input.negative-value, input.negative-value::placeholder{
 }
 
 
-/* ===== V24 override: manutenção como antes, só checkbox pendente abaixo do menu ===== */
+/* ===== V26 override: manutenção como antes, só checkbox pendente abaixo do menu ===== */
 #tabCarro #listaManut .table-row{
   position:relative !important;
   padding-right:78px !important;
@@ -2098,7 +2113,7 @@ input.negative-value, input.negative-value::placeholder{
 }
 
 
-/* ===== V25 override: menu topo, checkbox abaixo com espaço maior, tag concluído abaixo ===== */
+/* ===== V26 override: menu topo, checkbox abaixo com espaço maior, tag concluído abaixo ===== */
 #tabCarro #listaManut .table-row{
   position:relative !important;
   padding-right:112px !important;
@@ -3199,7 +3214,7 @@ body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff9d0; }
   <div class="menu-item"><button class="secondary" onclick="abrirSaldoAtualButtonMenu(); closeMenu();">Botão de saldo atual</button></div>
   <div class="menu-item"><button class="secondary" onclick="abrirTemas(); closeMenu();">Temas</button></div>
   <div class="menu-item"><button class="danger" onclick="forceLogout(); return false;">Sair</button></div>
-  <div class="menu-note" style="text-align:center;">v24</div>
+  <div class="menu-note" style="text-align:center;">v26</div>
 </div>
 
 <div id="temasOverlay" class="temas-overlay" onclick="fecharTemas()"></div>
@@ -3909,7 +3924,7 @@ let dados = loadDados() || {
 
 
 try{
-  /* v24: saldoAtualFora não deve nascer de ganhoUber/ganho99.
+  /* v26: saldoAtualFora não deve nascer de ganhoUber/ganho99.
      A fonte real do botão flutuante é saldoUber/saldo99 ou localStorage do teclado virtual. */
   function mdParseMoneyV19(v){
     const n = Number(String(v == null ? '' : v).replace(',', '.'));
@@ -4028,7 +4043,7 @@ window.mdForceSaldoSync = function(){
     try{ if(typeof calcularGanhoHoraFora === 'function') calcularGanhoHoraFora(); }catch(e){}
 
     try{
-      localStorage.setItem('md_saldo_sync_v24', JSON.stringify({ saldo: saldo, uber: parts.uber, n99: parts.n99, ts: Date.now() }));
+      localStorage.setItem('md_saldo_sync_v26', JSON.stringify({ saldo: saldo, uber: parts.uber, n99: parts.n99, ts: Date.now() }));
     }catch(e){}
   }catch(e){}
 };
@@ -4384,7 +4399,7 @@ function mdBuildDiagnosticsObject(){
     const durableObj = mdSafeJsonParse(durableRaw);
     const diag = {
       generated_at: mdNowIso(),
-      app_version: 'MetaDriver v24',
+      app_version: 'MetaDriver v26',
       cloud_table: CLOUD_TABLE,
       device_id: mdEnsureDeviceId(),
       visibility_state: document.visibilityState,
@@ -5341,7 +5356,7 @@ function addGanho(){
 
 
 
-/* ===== MetaDriver v24: virada 4h blindada, saldo por usuário e fonte única ===== */
+/* ===== MetaDriver v26: virada 4h blindada, saldo por usuário e fonte única ===== */
 function mdIsoDateLocal4h(d){
   const x = d instanceof Date ? new Date(d.getTime()) : new Date();
   const yyyy = x.getFullYear();
@@ -5590,7 +5605,7 @@ function mdCommitLancamentoMutation(reason){
   try{ atualizar(); }catch(e){}
   try{ if(typeof refreshQuickBalanceFabMiniDisplay === "function") refreshQuickBalanceFabMiniDisplay(); }catch(e){}
   try{ if(typeof updateQuickBalanceFabUI === "function") updateQuickBalanceFabUI(); }catch(e){}
-  try{ if(typeof toast === "function" && reason) console.info("MetaDriver v24 mutation:", reason); }catch(e){}
+  try{ if(typeof toast === "function" && reason) console.info("MetaDriver v26 mutation:", reason); }catch(e){}
 }
 
 function editarValor(tipo, index){
@@ -7074,7 +7089,7 @@ function exportarRelatorioPDF(){
       <script>
         setTimeout(()=>window.print(), 250);
       <\/script>
-    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v24 · app</div>
+    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v26 · app</div>
 
 
 <script>
@@ -7736,7 +7751,7 @@ function qbLoadState(){
     if(window.dados){
       if(!s.uber && typeof dados.saldoUber !== "undefined") s.uber = String(dados.saldoUber || "");
       if(!s.n99 && typeof dados.saldo99 !== "undefined") s.n99 = String(dados.saldo99 || "");
-      /* v24: proibido reconstruir o botão flutuante a partir de saldoAtualFora.
+      /* v26: proibido reconstruir o botão flutuante a partir de saldoAtualFora.
          Fonte oficial: teclado do botão flutuante (saldoUber/saldo99 + chaves md_quick_balance por usuário). */
     }
   }catch(e){}
@@ -9437,6 +9452,124 @@ document.addEventListener("visibilitychange", function(){
     }
   }catch(e){}
 });
+
+
+// ===== v26 - correção REAL da sessão por modal =====
+(function(){
+  function el(id){ return document.getElementById(id); }
+  function horaValida(v){ return /^([01]?\d|2[0-3]):[0-5]\d$/.test(String(v||'').trim()); }
+  function sessaoAbertaReal(){
+    try{
+      return !!(window.dados && dados.ganhoHoraSessaoAtiva === true && String(dados.horarioInicioFora || '').trim());
+    }catch(e){ return false; }
+  }
+  function setBtn(btn, ativo){
+    if(!btn) return;
+    btn.disabled = !ativo;
+    btn.setAttribute('aria-disabled', ativo ? 'false' : 'true');
+    btn.classList.toggle('md-session-disabled', !ativo);
+    btn.classList.toggle('md-session-enabled', !!ativo);
+  }
+  window.mdUpdateSessionButtons = function(){
+    try{
+      var aberta = sessaoAbertaReal();
+      setBtn(el('btnIniciarSessaoGH'), !aberta);
+      setBtn(el('btnFinalizarSessaoGH'), aberta);
+      var saldoWrap=el('saldoAtualForaWrap'); if(saldoWrap) saldoWrap.style.display='none';
+      var mirror=el('saldoAtualFabMirrorWrap'); if(mirror) mirror.style.display='none';
+      var hora=el('horarioInicioFora'); if(hora) hora.type='hidden';
+    }catch(e){}
+  };
+  window.openInicioSessaoModal = function(){
+    try{
+      if(sessaoAbertaReal()){
+        try{ toast('Já existe sessão em andamento.'); }catch(e){}
+        mdUpdateSessionButtons();
+        return false;
+      }
+      var ov=el('inicioSessaoOverlay');
+      var input=el('inicioSessaoHoraModal');
+      var now=new Date();
+      var valor=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+      if(input){
+        input.value=valor;
+        input.style.display='block';
+        input.style.width='min(220px,76%)';
+        input.style.maxWidth='220px';
+        input.style.margin='10px auto 0 auto';
+        input.style.textAlign='center';
+        input.style.boxSizing='border-box';
+      }
+      if(ov){ ov.classList.add('md-show'); ov.style.display='flex'; }
+      setTimeout(function(){ try{ if(input) input.focus(); }catch(e){} },80);
+      return true;
+    }catch(e){ try{ console.error('Erro ao abrir modal de início', e); toast('Erro ao abrir início de sessão.'); }catch(_e){} return false; }
+  };
+  window.closeInicioSessaoModal = function(){
+    try{ var ov=el('inicioSessaoOverlay'); if(ov){ ov.classList.remove('md-show'); ov.style.display='none'; } }catch(e){}
+  };
+  window.confirmInicioSessaoModal = function(){
+    try{
+      var input=el('inicioSessaoHoraModal');
+      var valor=String((input && input.value) || '').trim();
+      if(!horaValida(valor)){ try{ toast('Informe um horário válido.'); }catch(e){} return false; }
+      if(sessaoAbertaReal()){
+        closeInicioSessaoModal();
+        mdUpdateSessionButtons();
+        return true;
+      }
+      if(!window.dados || typeof dados !== 'object') throw new Error('dados indisponível');
+      if(!Array.isArray(dados.ganhoHoraSessoes)) dados.ganhoHoraSessoes=[];
+      if(!dados.ganhoHoraDiaRef && typeof dataUberISO==='function') dados.ganhoHoraDiaRef=dataUberISO();
+      dados.horarioInicioFora=valor;
+      dados.ganhoHoraSessaoAtiva=true;
+      dados.ganhoHoraSessaoDiaRef=String(dados.ganhoHoraDiaRef || (typeof dataUberISO==='function' ? dataUberISO() : '')).slice(0,10);
+      dados.horasDecorridasFora=0;
+      dados.ganhoHoraAtualFora=0;
+      var hidden=el('horarioInicioFora'); if(hidden) hidden.value=valor;
+      try{ if(typeof syncSaldoAnteriorSessaoAtual==='function') syncSaldoAnteriorSessaoAtual(); }catch(e){}
+      try{ if(typeof iniciarTimerGanhoHoraTempoReal==='function') iniciarTimerGanhoHoraTempoReal(); }catch(e){}
+      try{ if(typeof salvar==='function') salvar(); }catch(e){ console.error('Erro ao salvar sessão iniciada', e); throw e; }
+      closeInicioSessaoModal();
+      try{ if(typeof atualizar==='function') atualizar(); }catch(e){}
+      mdUpdateSessionButtons();
+      setTimeout(function(){ try{ mdUpdateSessionButtons(); }catch(e){} },150);
+      try{ toast('✅ Sessão iniciada.'); }catch(e){}
+      return true;
+    }catch(e){ try{ console.error('Erro real ao iniciar sessão', e); toast('Erro ao iniciar sessão: ' + (e && e.message ? e.message : e)); }catch(_e){} return false; }
+  };
+  window.finalizarSessaoGanhoHora = function(){
+    try{
+      if(!sessaoAbertaReal()){
+        try{ toast('Nenhuma sessão iniciada para finalizar.'); }catch(e){}
+        mdUpdateSessionButtons();
+        return false;
+      }
+      var ok=false;
+      if(typeof finalizarSessaoGanhoHoraInterno==='function'){
+        ok = finalizarSessaoGanhoHoraInterno({ naoIniciarProxima:true }) !== false;
+      }else{
+        throw new Error('finalizarSessaoGanhoHoraInterno não encontrada');
+      }
+      if(ok){
+        dados.horarioInicioFora='';
+        dados.ganhoHoraSessaoAtiva=false;
+        dados.ganhoHoraSessaoDiaRef='';
+        var hidden=el('horarioInicioFora'); if(hidden) hidden.value='';
+        try{ if(typeof pararTimerGanhoHoraTempoReal==='function') pararTimerGanhoHoraTempoReal(); }catch(e){}
+        try{ if(typeof salvar==='function') salvar(); }catch(e){}
+        try{ if(typeof atualizar==='function') atualizar(); }catch(e){}
+        mdUpdateSessionButtons();
+        return true;
+      }
+      mdUpdateSessionButtons();
+      return false;
+    }catch(e){ try{ console.error('Erro real ao finalizar sessão', e); toast('Erro ao finalizar sessão: ' + (e && e.message ? e.message : e)); }catch(_e){} return false; }
+  };
+  document.addEventListener('DOMContentLoaded', function(){ setTimeout(function(){ try{ mdUpdateSessionButtons(); }catch(e){} },0); });
+  window.addEventListener('pageshow', function(){ setTimeout(function(){ try{ mdUpdateSessionButtons(); }catch(e){} },0); });
+  setTimeout(function(){ try{ mdUpdateSessionButtons(); }catch(e){} },0);
+})();
 
 </script>
 
