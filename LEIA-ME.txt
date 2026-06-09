@@ -1,4 +1,4 @@
-MetaDriver v26
+MetaDriver v27
 Correção de flash visual, saldo unificado e virada 4h sem duplicidade.
 
-Versão v26: Saldo Atual do Relatório Diário sincronizado obrigatoriamente com o botão flutuante.
+Versão v27: Saldo Atual do Relatório Diário sincronizado obrigatoriamente com o botão flutuante.
