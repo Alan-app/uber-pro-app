@@ -1,4 +1,4 @@
-MetaDriver v35
+MetaDriver v36
 Correção de flash visual, saldo unificado e virada 4h sem duplicidade.
 
-Versão v35: Saldo Atual do Relatório Diário sincronizado obrigatoriamente com o botão flutuante.
+Versão v36: Saldo Atual do Relatório Diário sincronizado obrigatoriamente com o botão flutuante.
