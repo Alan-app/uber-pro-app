@@ -1,4 +1,4 @@
-MetaDriver v32
+MetaDriver v33
 Correção de flash visual, saldo unificado e virada 4h sem duplicidade.
 
-Versão v32: Saldo Atual do Relatório Diário sincronizado obrigatoriamente com o botão flutuante.
+Versão v33: Saldo Atual do Relatório Diário sincronizado obrigatoriamente com o botão flutuante.

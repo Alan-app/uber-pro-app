@@ -1,12 +1,12 @@
-v32 - Corrige virada das 4h com saldo congelado antes da limpeza, impede duplicidade no dia atual, preserva histórico/sessões finalizadas e isola saldo rápido por usuário.
+v33 - Corrige virada das 4h com saldo congelado antes da limpeza, impede duplicidade no dia atual, preserva histórico/sessões finalizadas e isola saldo rápido por usuário.
 
-v32 - correção real de hidratação inicial, flash visual e duplicidade da virada 4h
-
-
-v32 - Corrige Saldo Atual do Relatório Diário para usar a fonte real do botão flutuante/teclado virtual (md_quick_balance_uber + md_quick_balance_99 / saldoUber + saldo99), sem limpar ao fechar e abrir.
+v33 - correção real de hidratação inicial, flash visual e duplicidade da virada 4h
 
 
-## MetaDriver v32
+v33 - Corrige Saldo Atual do Relatório Diário para usar a fonte real do botão flutuante/teclado virtual (md_quick_balance_uber + md_quick_balance_99 / saldoUber + saldo99), sem limpar ao fechar e abrir.
+
+
+## MetaDriver v33
 - Corrigida a lógica real da virada das 4h.
 - Removido bloqueio indevido causado por comparação com o dia anterior.
 - Modal volta a abrir quando existe sessão em aberto após 4h.
@@ -15,4 +15,4 @@ v32 - Corrige Saldo Atual do Relatório Diário para usar a fonte real do botão
 - Proteção idempotente por turnKey e syncKey para evitar duplicidade.
 
 
-v32 - Correção real do modal de início de sessão: OK cria sessão real, botões dependem do estado real e campo de horário centralizado.
+v33 - Correção real do modal de início de sessão: OK cria sessão real, botões dependem do estado real e campo de horário centralizado.
