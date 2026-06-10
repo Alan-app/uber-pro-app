@@ -1,6 +1,6 @@
 {
-  "name": "MetaDriver v31",
-  "short_name": "MetaDriver v31",
+  "name": "MetaDriver v32",
+  "short_name": "MetaDriver v32",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
@@ -19,5 +19,5 @@
       "type": "image/png"
     }
   ],
-  "version": "v31"
+  "version": "v32"
 }
