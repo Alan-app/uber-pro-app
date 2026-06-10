@@ -15,7 +15,7 @@ function mdReleaseBootOverlay(){
 window.addEventListener('md-hydrated', mdReleaseBootOverlay, {once:true});
 window.addEventListener('load', function(){ setTimeout(mdReleaseBootOverlay, 4500); }, {once:true});
 
-// ===== v30 - ponte segura entre `let dados` e window.dados =====
+// ===== v31 - ponte segura entre `let dados` e window.dados =====
 try{
   if(!Object.prototype.hasOwnProperty.call(window, 'dados')){
     Object.defineProperty(window, 'dados', {
@@ -43,19 +43,19 @@ try{
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver v30</title>
+<title>MetaDriver v31</title>
 <style id="md-hydration-lock">
 body.preload > *:not(#mdBootOverlay){visibility:hidden!important;}
 #mdBootOverlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#0f172a;color:#fff;z-index:2147483647;font-family:Inter,system-ui,sans-serif;font-weight:800;letter-spacing:.2px;}
 body.md-ready > *{visibility:visible;}
 
-/* v30 - estado visual dos botões de sessão */
+/* v31 - estado visual dos botões de sessão */
 .md-session-disabled{opacity:.42 !important; filter:saturate(.45) brightness(.85); cursor:not-allowed !important;}
 .md-session-enabled{opacity:1 !important; filter:none !important; cursor:pointer !important;}
 #saldoAtualForaWrap,#saldoAtualFabMirrorWrap{display:none !important;}
 
 
-/* v30 - modal compacto e estado real dos botões de sessão */
+/* v31 - modal compacto e estado real dos botões de sessão */
 #inicioSessaoOverlay{
   position:fixed !important;
   inset:0 !important;
@@ -87,7 +87,7 @@ body.md-ready > *{visibility:visible;}
 .md-session-enabled{opacity:1 !important;filter:none !important;cursor:pointer !important;pointer-events:auto !important;}
 
 
-/* v30 - modal de início: campo centralizado */
+/* v31 - modal de início: campo centralizado */
 #inicioSessaoOverlay #inicioSessaoHoraModal{
   display:block !important;
   width:min(220px,76%) !important;
@@ -2045,7 +2045,7 @@ input.negative-value, input.negative-value::placeholder{
 }
 
 
-/* ===== V30 override: manutenção checkbox + menu lado a lado ===== */
+/* ===== V31 override: manutenção checkbox + menu lado a lado ===== */
 #tabCarro #listaManut .action-menu.manut-actions{
   display:flex !important;
   flex-direction:row !important;
@@ -2079,7 +2079,7 @@ input.negative-value, input.negative-value::placeholder{
 }
 
 
-/* ===== V30 override: manutenção com menu no topo direito e checkbox abaixo ===== */
+/* ===== V31 override: manutenção com menu no topo direito e checkbox abaixo ===== */
 #tabCarro #listaManut .table-row{
   position:relative !important;
   padding-right:78px !important;
@@ -2119,7 +2119,7 @@ input.negative-value, input.negative-value::placeholder{
 }
 
 
-/* ===== V30 override: manutenção como antes, só checkbox pendente abaixo do menu ===== */
+/* ===== V31 override: manutenção como antes, só checkbox pendente abaixo do menu ===== */
 #tabCarro #listaManut .table-row{
   position:relative !important;
   padding-right:78px !important;
@@ -2163,7 +2163,7 @@ input.negative-value, input.negative-value::placeholder{
 }
 
 
-/* ===== V30 override: menu topo, checkbox abaixo com espaço maior, tag concluído abaixo ===== */
+/* ===== V31 override: menu topo, checkbox abaixo com espaço maior, tag concluído abaixo ===== */
 #tabCarro #listaManut .table-row{
   position:relative !important;
   padding-right:112px !important;
@@ -2210,7 +2210,7 @@ input.negative-value, input.negative-value::placeholder{
 }
 
 
-/* ===== V30 override: checkbox à esquerda, menu à direita, sem mexer na posição ===== */
+/* ===== V31 override: checkbox à esquerda, menu à direita, sem mexer na posição ===== */
 #tabCarro #listaManut .table-row{
   position:relative !important;
   padding-right:116px !important;
@@ -2274,7 +2274,7 @@ input.negative-value, input.negative-value::placeholder{
 }
 
 
-/* ===== V30 override: controles fixos; concluído abaixo sem descer checkbox/menu ===== */
+/* ===== V31 override: controles fixos; concluído abaixo sem descer checkbox/menu ===== */
 #tabCarro #listaManut .table-row{
   position:relative !important;
   padding-right:120px !important;
@@ -3264,7 +3264,7 @@ body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff9d0; }
   <div class="menu-item"><button class="secondary" onclick="abrirSaldoAtualButtonMenu(); closeMenu();">Botão de saldo atual</button></div>
   <div class="menu-item"><button class="secondary" onclick="abrirTemas(); closeMenu();">Temas</button></div>
   <div class="menu-item"><button class="danger" onclick="forceLogout(); return false;">Sair</button></div>
-  <div class="menu-note" style="text-align:center;">v30</div>
+  <div class="menu-note" style="text-align:center;">v31</div>
 </div>
 
 <div id="temasOverlay" class="temas-overlay" onclick="fecharTemas()"></div>
@@ -3982,7 +3982,7 @@ let dados = loadDados() || {
 
 
 try{
-  /* v30: saldoAtualFora não deve nascer de ganhoUber/ganho99.
+  /* v31: saldoAtualFora não deve nascer de ganhoUber/ganho99.
      A fonte real do botão flutuante é saldoUber/saldo99 ou localStorage do teclado virtual. */
   function mdParseMoneyV19(v){
     const n = Number(String(v == null ? '' : v).replace(',', '.'));
@@ -4101,7 +4101,7 @@ window.mdForceSaldoSync = function(){
     try{ if(typeof calcularGanhoHoraFora === 'function') calcularGanhoHoraFora(); }catch(e){}
 
     try{
-      localStorage.setItem('md_saldo_sync_v30', JSON.stringify({ saldo: saldo, uber: parts.uber, n99: parts.n99, ts: Date.now() }));
+      localStorage.setItem('md_saldo_sync_v31', JSON.stringify({ saldo: saldo, uber: parts.uber, n99: parts.n99, ts: Date.now() }));
     }catch(e){}
   }catch(e){}
 };
@@ -4273,7 +4273,7 @@ function salvar(){
     dados.__dirty_local = true;
     dados.__last_local_write_at = mdNowIso();
     dados.__updated_at = dados.__last_local_write_at;
-    const payload = JSON.stringify(dados);
+    const payload = JSON.stringify(mdExportarBackupCompletoV31(Object.assign({}, dados)));
     const anterior = mdReadLS(STORAGE_KEY);
     if(anterior && anterior.length > 0 && payload.length < anterior.length * 0.6){
       console.warn("MetaDriver: payload muito menor que anterior, salvando backup e verificando");
@@ -4292,7 +4292,7 @@ function salvar(){
     try{ mdWriteOfflineSafeSnapshot(dados); }catch(e){}
   }catch(e){
     try{
-      const payload = JSON.stringify(dados);
+      const payload = JSON.stringify(mdExportarBackupCompletoV31(Object.assign({}, dados)));
       idbSet(mdCurrentDataKey(IDB_KEY), payload);
       idbSet(mdCurrentDataKey(DURABLE_STATE_KEY), payload);
       mdPushBackup(LOCAL_BACKUP_KEY, dados, "fallback-idb");
@@ -4313,7 +4313,7 @@ salvar = function(){
   try{ __cloudDirty = true; }catch(e){}
   try{
     if(typeof dados === "object" && dados){
-      const snap = JSON.parse(JSON.stringify(dados));
+      const snap = JSON.parse(JSON.stringify(mdExportarBackupCompletoV31(Object.assign({}, dados))));
       Promise.resolve().then(function(){ return cloudPushNow(snap); }).catch(function(){});
     }else{
       Promise.resolve().then(function(){ return cloudPushNow(); }).catch(function(){});
@@ -4422,7 +4422,7 @@ function mdApplyExternalSnapshot(snapshot, reason, pushNow){
     dados.__last_local_write_at = mdNowIso();
     dados.__updated_at = dados.__last_local_write_at;
 
-    const payload = JSON.stringify(dados);
+    const payload = JSON.stringify(mdExportarBackupCompletoV31(Object.assign({}, dados)));
     try{ mdWriteLS(STORAGE_KEY, payload); }catch(e){}
     try{ mdWriteLS(DURABLE_STATE_KEY, payload); }catch(e){}
     try{ idbSet(mdCurrentDataKey(IDB_KEY), payload); }catch(e){}
@@ -4432,7 +4432,7 @@ function mdApplyExternalSnapshot(snapshot, reason, pushNow){
     try{ mdAppendJournal(dados, reason || "external"); }catch(e){}
 
     if(pushNow){
-      try{ cloudWritePendingSnapshot(JSON.parse(JSON.stringify(dados))); }catch(e){}
+      try{ cloudWritePendingSnapshot(JSON.parse(JSON.stringify(mdExportarBackupCompletoV31(Object.assign({}, dados))))); }catch(e){}
       try{ __cloudDirty = true; }catch(e){}
       try{ if(typeof cloudScheduleSave === "function") cloudScheduleSave(0); }catch(e){}
     }
@@ -4457,7 +4457,7 @@ function mdBuildDiagnosticsObject(){
     const durableObj = mdSafeJsonParse(durableRaw);
     const diag = {
       generated_at: mdNowIso(),
-      app_version: 'MetaDriver v30',
+      app_version: 'MetaDriver v31',
       cloud_table: CLOUD_TABLE,
       device_id: mdEnsureDeviceId(),
       visibility_state: document.visibilityState,
@@ -4549,7 +4549,7 @@ async function mdRunRollbackSelfTest(){
     try{ if(typeof window.__salvarLocalOriginal === 'function') window.__salvarLocalOriginal(); }catch(e){}
     const pendingBefore = cloudReadPendingSnapshot();
     if(!(pendingBefore && pendingBefore.payload && cloudHasUsefulData(pendingBefore.payload))){
-      cloudWritePendingSnapshot(JSON.parse(JSON.stringify(dados)));
+      cloudWritePendingSnapshot(JSON.parse(JSON.stringify(mdExportarBackupCompletoV31(Object.assign({}, dados)))));
     }
     const fakeRemote = JSON.parse(JSON.stringify(dados || {}));
     mdEnsureDataMeta(fakeRemote);
@@ -4928,7 +4928,7 @@ async function cloudBoot(force){
     }
 
     if(cloudHasUsefulData(dados)){
-      cloudPushNow(JSON.parse(JSON.stringify(dados)));
+      cloudPushNow(JSON.parse(JSON.stringify(mdExportarBackupCompletoV31(Object.assign({}, dados)))));
     }
   }catch(e){
     console.warn("cloudBoot", e);
@@ -5414,7 +5414,7 @@ function addGanho(){
 
 
 
-/* ===== MetaDriver v30: virada 4h blindada, saldo por usuário e fonte única ===== */
+/* ===== MetaDriver v31: virada 4h blindada, saldo por usuário e fonte única ===== */
 function mdIsoDateLocal4h(d){
   const x = d instanceof Date ? new Date(d.getTime()) : new Date();
   const yyyy = x.getFullYear();
@@ -5499,7 +5499,7 @@ function mdMarcarVirada4hExecutada(turnKey, diaAnteriorUber, syncKey){
   }catch(e){}
 }
 function mdResetNovoDiaAposVirada4h(diaAtualUber){
-  // v30: só deve ser chamada depois de histórico/ganhos salvos com sucesso.
+  // v31: só deve ser chamada depois de histórico/ganhos salvos com sucesso.
   dados.ganhoHoraDiaRef = String(diaAtualUber || dataUberISO()).slice(0,10);
   dados.saldoAtualFora = 0;
   dados.ganhoDiarioAtual = 0;
@@ -5518,8 +5518,156 @@ function mdResetNovoDiaAposVirada4h(diaAtualUber){
   }catch(e){}
 }
 
+
+// ===== v31 - proteção pós-importação de backup contra duplicidade do saldo do dia =====
+function mdIsGanhoAutomaticoSaldoDiaV31(g){
+  try{
+    const origem = String((g && g.origem) || '').toLowerCase();
+    const sync = String((g && g.syncKey) || '');
+    const desc = String((g && (g.descricao || g.description || g.obs || g.observacao)) || '').toLowerCase();
+    return (
+      origem === 'saldo_rapido' ||
+      origem === 'saldo-rapido' ||
+      origem === 'virada_4h' ||
+      sync.indexOf('saldo-dia-') === 0 ||
+      sync.indexOf('saldo-rapido-') === 0 ||
+      sync.indexOf('turn4h-') === 0 ||
+      desc.indexOf('saldo') >= 0
+    );
+  }catch(e){ return false; }
+}
+
+function mdGanhoAppV31(g){
+  const app = String((g && (g.app || g.tipo || g.plataforma)) || '').toLowerCase();
+  if(app.indexOf('99') >= 0) return '99';
+  return 'uber';
+}
+
+function mdNormalizarGanhosAutomaticosBackupV31(){
+  try{
+    if(!dados || !Array.isArray(dados.ganhos)) return;
+    const vistos = {};
+    const resultado = [];
+
+    dados.ganhos.forEach(function(g){
+      if(!g) return;
+
+      if(!mdIsGanhoAutomaticoSaldoDiaV31(g)){
+        resultado.push(g);
+        return;
+      }
+
+      const data = String((g.data || '')).slice(0,10);
+      if(!data){
+        resultado.push(g);
+        return;
+      }
+
+      const app = mdGanhoAppV31(g);
+      const chave = data + '|' + app;
+      const hora = String(g.hora || '').trim();
+
+      const normalizado = Object.assign({}, g, {
+        data: data,
+        app: app === '99' ? '99' : 'Uber',
+        syncKey: (String(g.syncKey || '').indexOf('turn4h-') === 0 ? 'turn4h-' : 'saldo-dia-') + data + '-' + app,
+        origem: String(g.origem || '').toLowerCase().indexOf('virada') >= 0 ? 'virada_4h' : 'saldo_rapido',
+        updatedAt: g.updatedAt || new Date().toISOString()
+      });
+
+      if(!vistos[chave]){
+        vistos[chave] = normalizado;
+        resultado.push(normalizado);
+        return;
+      }
+
+      const idx = resultado.indexOf(vistos[chave]);
+      const existente = vistos[chave];
+      const horaExistente = String((existente && existente.hora) || '').trim();
+
+      // Preferir o registro com horário real; porém horário "-" continua válido e não autoriza duplicar.
+      const novoTemHoraReal = hora && hora !== '-';
+      const existenteTemHoraReal = horaExistente && horaExistente !== '-';
+
+      if(novoTemHoraReal && !existenteTemHoraReal && idx >= 0){
+        resultado[idx] = normalizado;
+        vistos[chave] = normalizado;
+      }else{
+        // Se ambos representam o mesmo saldo do mesmo dia/app, manter um só.
+        // Nunca somar os dois, pois saldo do dia é espelho do botão flutuante.
+      }
+    });
+
+    dados.ganhos = resultado;
+  }catch(e){
+    try{ console.warn('Falha ao normalizar ganhos automáticos do backup v31', e); }catch(_e){}
+  }
+}
+
+function mdExportarBackupCompletoV31(payload){
+  try{
+    if(!payload || typeof payload !== 'object') payload = {};
+    payload.__metaBackup = Object.assign({}, payload.__metaBackup || {}, {
+      versaoBackup: 'v31',
+      exportadoEm: new Date().toISOString(),
+      incluiSaldoBotaoFlutuante: true
+    });
+
+    const uber = (typeof mdGetQuickBalancePart === 'function') ? mdGetQuickBalancePart('uber') : Number(localStorage.getItem('md_quick_balance_uber') || dados.saldoUber || 0);
+    const n99 = (typeof mdGetQuickBalancePart === 'function') ? mdGetQuickBalancePart('99') : Number(localStorage.getItem('md_quick_balance_99') || dados.saldo99 || 0);
+
+    payload.saldoUber = Number(uber || 0);
+    payload.saldo99 = Number(n99 || 0);
+    payload.saldoBotaoFlutuante = Number((Number(uber || 0) + Number(n99 || 0)).toFixed(2));
+    payload.quickBalance = {
+      uber: payload.saldoUber,
+      n99: payload.saldo99,
+      total: payload.saldoBotaoFlutuante
+    };
+  }catch(e){}
+  return payload;
+}
+
+function mdAplicarBackupCompletoV31(){
+  try{
+    if(!dados || typeof dados !== 'object') return;
+    mdNormalizarGanhosAutomaticosBackupV31();
+
+    const qb = dados.quickBalance || {};
+    const uber = Number(
+      dados.saldoUber != null ? dados.saldoUber :
+      qb.uber != null ? qb.uber :
+      0
+    );
+    const n99 = Number(
+      dados.saldo99 != null ? dados.saldo99 :
+      qb.n99 != null ? qb.n99 :
+      0
+    );
+
+    dados.saldoUber = Number((uber || 0).toFixed(2));
+    dados.saldo99 = Number((n99 || 0).toFixed(2));
+
+    try{
+      if(typeof mdSetQuickBalancePart === 'function'){
+        mdSetQuickBalancePart('uber', dados.saldoUber);
+        mdSetQuickBalancePart('99', dados.saldo99);
+      }else{
+        localStorage.setItem('md_quick_balance_uber', String(dados.saldoUber));
+        localStorage.setItem('md_quick_balance_99', String(dados.saldo99));
+      }
+    }catch(e){}
+
+    // Importação não deve disparar criação duplicada. Primeiro normaliza, depois salva/renderiza.
+    try{ salvarDados(); }catch(e){}
+    try{ atualizar(); }catch(e){}
+  }catch(e){
+    try{ console.warn('Falha ao aplicar backup completo v31', e); }catch(_e){}
+  }
+}
+
 function syncGanhoDoSaldoRapido(valorSaldoAtual, uberPart, n99Part, dataRefOverride, horaOverride){
-  // v30: saldo do dia em lançamentos é ESPELHO do botão flutuante.
+  // v31: saldo do dia em lançamentos é ESPELHO do botão flutuante.
   // Não acumula e não duplica: para cada dia operacional + app há no máximo 1 registro automático.
   const valor = Math.max(0, Number(valorSaldoAtual || 0));
   const uber = Math.max(0, Number(uberPart || 0));
@@ -5541,7 +5689,9 @@ function syncGanhoDoSaldoRapido(valorSaldoAtual, uberPart, n99Part, dataRefOverr
       const appOk = String(appName).toLowerCase() === 'uber'
         ? (gApp.indexOf('uber') >= 0 || gApp === '')
         : (gApp.indexOf('99') >= 0);
+      const gDesc = String((g && (g.descricao || g.description || g.obs || g.observacao)) || '').toLowerCase();
       const autoOk =
+        gDesc.indexOf('saldo') >= 0 ||
         gSync === syncKeyBase ||
         gSync === (syncKeyBase + '-' + String(appName).toLowerCase()) ||
         gSync.indexOf('turn4h-' + dataRef) === 0 ||
@@ -5590,7 +5740,7 @@ function syncGanhoDoSaldoRapido(valorSaldoAtual, uberPart, n99Part, dataRefOverr
 }
 
 
-// ===== v30 - limpeza de duplicidade pós-virada no dia novo =====
+// ===== v31 - limpeza de duplicidade pós-virada no dia novo =====
 function mdRemoverSaldoViradaDuplicadoNoDiaNovo(diaNovo, valorCapturado){
   try{
     const dia = String(diaNovo || dataUberISO()).slice(0,10);
@@ -5727,7 +5877,7 @@ function mdCommitLancamentoMutation(reason){
   try{ atualizar(); }catch(e){}
   try{ if(typeof refreshQuickBalanceFabMiniDisplay === "function") refreshQuickBalanceFabMiniDisplay(); }catch(e){}
   try{ if(typeof updateQuickBalanceFabUI === "function") updateQuickBalanceFabUI(); }catch(e){}
-  try{ if(typeof toast === "function" && reason) console.info("MetaDriver v30 mutation:", reason); }catch(e){}
+  try{ if(typeof toast === "function" && reason) console.info("MetaDriver v31 mutation:", reason); }catch(e){}
 }
 
 function editarValor(tipo, index){
@@ -6675,7 +6825,7 @@ function clearDayTurn4hValue(){
   refreshDayTurn4hDisplay();
 }
 
-// ===== v30 - histórico seguro da virada 4h antes de limpar sessões =====
+// ===== v31 - histórico seguro da virada 4h antes de limpar sessões =====
 function mdSalvarHistoricoVirada4hSeguro(diaRef){
   const dia = String(diaRef || dataUberISO()).slice(0,10);
   if(!Array.isArray(dados.ganhoHoraSessoes)) dados.ganhoHoraSessoes = [];
@@ -7270,7 +7420,7 @@ function exportarRelatorioPDF(){
       <script>
         setTimeout(()=>window.print(), 250);
       <\/script>
-    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v30 · app</div>
+    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v31 · app</div>
 
 
 <script>
@@ -7284,7 +7434,7 @@ function exportarRelatorioPDF(){
         try{
           __cloudDirty = true;
           cloudWritePendingSnapshot(dados);
-          Promise.resolve().then(function(){ return cloudPushNow({ payload: JSON.parse(JSON.stringify(dados)) }); }).catch(function(){ cloudScheduleSave(120); });
+          Promise.resolve().then(function(){ return cloudPushNow({ payload: JSON.parse(JSON.stringify(mdExportarBackupCompletoV31(Object.assign({}, dados)))) }); }).catch(function(){ cloudScheduleSave(120); });
         }catch(e){
           try{ cloudScheduleSave(120); }catch(_){}
         }
@@ -7300,6 +7450,7 @@ function exportarRelatorioPDF(){
 }
 
 function atualizar(){
+  try{ mdNormalizarGanhosAutomaticosBackupV31(); }catch(e){}
   if(window.__mdUpdatingFromRealtime){} else { try{ if(typeof window.mdForceSaldoSync === 'function') window.mdForceSaldoSync(); }catch(e){} }
   // v57 - aplicar tema salvo a cada atualização
   try{ aplicarTema(dados.tema || 'meta-escuro'); }catch(e){}
@@ -7932,7 +8083,7 @@ function qbLoadState(){
     if(window.dados){
       if(!s.uber && typeof dados.saldoUber !== "undefined") s.uber = String(dados.saldoUber || "");
       if(!s.n99 && typeof dados.saldo99 !== "undefined") s.n99 = String(dados.saldo99 || "");
-      /* v30: proibido reconstruir o botão flutuante a partir de saldoAtualFora.
+      /* v31: proibido reconstruir o botão flutuante a partir de saldoAtualFora.
          Fonte oficial: teclado do botão flutuante (saldoUber/saldo99 + chaves md_quick_balance por usuário). */
     }
   }catch(e){}
@@ -8450,7 +8601,7 @@ function bindSectionHeaders(){
 
 
 
-// ===== v30 - Relatório Diário: sessão por modal compacto e botões coerentes =====
+// ===== v31 - Relatório Diário: sessão por modal compacto e botões coerentes =====
 (function(){
   function getHiddenHorario(){ return document.getElementById('horarioInicioFora'); }
   function isSessaoAtivaReal(){
@@ -8547,9 +8698,9 @@ function bindSectionHeaders(){
   }catch(e){}
   try{
     var _atualizar = window.atualizar;
-    if(typeof _atualizar === 'function' && !_atualizar.__mdV30Wrapped){
+    if(typeof _atualizar === 'function' && !_atualizar.__mdV31Wrapped){
       window.atualizar = function(){ var r=_atualizar.apply(this, arguments); try{ mdUpdateSessionButtons(); }catch(e){} return r; };
-      window.atualizar.__mdV30Wrapped = true;
+      window.atualizar.__mdV31Wrapped = true;
     }
   }catch(e){}
   document.addEventListener('DOMContentLoaded', function(){ setTimeout(function(){ try{ mdUpdateSessionButtons(); }catch(e){} },0); });
@@ -9744,7 +9895,7 @@ document.addEventListener("visibilitychange", function(){
 });
 
 
-// ===== v30 - correção REAL da sessão por modal =====
+// ===== v31 - correção REAL da sessão por modal =====
 (function(){
   function el(id){ return document.getElementById(id); }
   function horaValida(v){ return /^([01]?\d|2[0-3]):[0-5]\d$/.test(String(v||'').trim()); }
