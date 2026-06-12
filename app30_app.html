@@ -43,7 +43,7 @@ try{
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver v40</title>
+<title>MetaDriver v44</title>
 <style id="md-hydration-lock">
 body.preload > *:not(#mdBootOverlay){visibility:hidden!important;}
 #mdBootOverlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#0f172a;color:#fff;z-index:2147483647;font-family:Inter,system-ui,sans-serif;font-weight:800;letter-spacing:.2px;}
@@ -3341,7 +3341,7 @@ body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff9d0; }
   <div class="menu-item"><button class="secondary" onclick="abrirSaldoAtualButtonMenu(); closeMenu();">Botão de saldo atual</button></div>
   <div class="menu-item"><button class="secondary" onclick="abrirTemas(); closeMenu();">Temas</button></div>
   <div class="menu-item"><button class="danger" onclick="forceLogout(); return false;">Sair</button></div>
-  <div class="menu-note" style="text-align:center;">v40</div>
+  <div class="menu-note" style="text-align:center;">v44</div>
 </div>
 
 <div id="temasOverlay" class="temas-overlay" onclick="fecharTemas()"></div>
@@ -4544,7 +4544,7 @@ function mdBuildDiagnosticsObject(){
     const durableObj = mdSafeJsonParse(durableRaw);
     const diag = {
       generated_at: mdNowIso(),
-      app_version: 'MetaDriver v40',
+      app_version: 'MetaDriver v44',
       cloud_table: CLOUD_TABLE,
       device_id: mdEnsureDeviceId(),
       visibility_state: document.visibilityState,
@@ -5908,7 +5908,7 @@ function mdCommitLancamentoMutation(reason){
   try{ atualizar(); }catch(e){}
   try{ if(typeof refreshQuickBalanceFabMiniDisplay === "function") refreshQuickBalanceFabMiniDisplay(); }catch(e){}
   try{ if(typeof updateQuickBalanceFabUI === "function") updateQuickBalanceFabUI(); }catch(e){}
-  try{ if(typeof toast === "function" && reason) console.info("MetaDriver v40 mutation:", reason); }catch(e){}
+  try{ if(typeof toast === "function" && reason) console.info("MetaDriver v44 mutation:", reason); }catch(e){}
 }
 
 function editarValor(tipo, index){
@@ -7157,8 +7157,13 @@ let ganhoHoraTempoRealTimer = null;
 
 function resumeGanhoHoraTempoRealSafely(){
   try{
-    const sessaoAtiva = !!dados.ganhoHoraSessaoAtiva && !!String(dados.horarioInicioFora || "").trim();
+    const horario = String((dados && dados.horarioInicioFora) || "").trim();
+    const sessaoAtiva = (!!dados.ganhoHoraSessaoAtiva || !!horario) && !!horario;
     if(sessaoAtiva){
+      // v44: ao reabrir o app, a sessão já existente precisa religar o mesmo timer em tempo real.
+      // Não depende de alterar/salvar saldo para o ganho por hora voltar a correr.
+      dados.ganhoHoraSessaoAtiva = true;
+      dados.ganhoHoraSessaoDiaRef = String(dados.ganhoHoraSessaoDiaRef || dados.ganhoHoraDiaRef || (typeof dataUberISO === "function" ? dataUberISO() : ""));
       recalcularGanhoHoraSessaoEmTempoReal(true);
       iniciarTimerGanhoHoraTempoReal();
     }else{
@@ -7166,6 +7171,19 @@ function resumeGanhoHoraTempoRealSafely(){
     }
   }catch(e){}
 }
+
+function mdRetomarGanhoHoraAoReabrir(){
+  try{
+    if(!window.__mdHydrated) return;
+    resumeGanhoHoraTempoRealSafely();
+  }catch(e){}
+}
+
+try{
+  window.addEventListener("md-hydrated", function(){
+    try{ mdRetomarGanhoHoraAoReabrir(); }catch(e){}
+  });
+}catch(e){}
 
 function pararTimerGanhoHoraTempoReal(){
   if(ganhoHoraTempoRealTimer){
@@ -7531,7 +7549,7 @@ function exportarRelatorioPDF(){
       <script>
         setTimeout(()=>window.print(), 250);
       <\/script>
-    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v40 · app</div>
+    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v44 · app</div>
 
 
 <script>
@@ -8650,6 +8668,16 @@ window.addEventListener("pageshow", function(){ try{ applyQuickBalanceFabStateHa
 try{ syncSaldoAtualLockWithFab(); }catch(e){}
 setInterval(function(){ try{ applyQuickBalanceFabStateHard(); }catch(e){} try{ refreshQuickBalanceFabMiniDisplay(); }catch(e){} try{ syncSaldoAtualLockWithFab(); }catch(e){} }, 800);
 
+// v44: watchdog leve para impedir que o ganho por hora fique congelado após fechar/reabrir o app.
+setInterval(function(){
+  try{
+    if(window.__mdHydrated && dados && String(dados.horarioInicioFora || '').trim()){
+      if(!dados.ganhoHoraSessaoAtiva) dados.ganhoHoraSessaoAtiva = true;
+      if(!ganhoHoraTempoRealTimer) iniciarTimerGanhoHoraTempoReal();
+    }
+  }catch(e){}
+}, 2000);
+
 function bootApp(){
   // v102 - mantém UI oculta até aplicar colapsos e layout inicial
   try{ if(!window.__mdHydrated) document.body.classList.add("preload"); }catch(e){}
@@ -8672,12 +8700,8 @@ function bootApp(){
   try{ ensureGanhoHoraDiaAtual(); }catch(e){}
   try{ setInterval(function(){ try{ ensureGanhoHoraDiaAtual(); }catch(e){} }, 15000); }catch(e){}
   try{ updateUberClock(); setInterval(updateUberClock, 1000); }catch(e){}
-  // v57 - fix logout: se havia sessão em andamento, retoma o timer automaticamente
-  try{
-    if(String(dados.horarioInicioFora || "").trim()){
-      iniciarTimerGanhoHoraTempoReal();
-    }
-  }catch(e){}
+  // v44 - se havia sessão em andamento, retoma o ganho por hora em tempo real automaticamente
+  try{ mdRetomarGanhoHoraAoReabrir(); }catch(e){}
   setTimeout(function(){ try{ cloudBoot(true); }catch(e){} }, 1200);
 }
 if(document.readyState === "loading"){
@@ -8691,6 +8715,7 @@ window.addEventListener("pageshow", ()=>{
   try{ if(!window.__mdHydrated) document.body.classList.add("preload"); }catch(e){}
   try{ initSectionCollapse(); }catch(e){}
   try{ applyQuickBalanceFabStateHard(); }catch(e){}
+  try{ mdRetomarGanhoHoraAoReabrir(); }catch(e){}
   // v57 - reforça restauração ao reabrir do cache do navegador
   try{ if(window.__mdRestoreScrollBurst) window.__mdRestoreScrollBurst(); else if(window.__mdRestoreScroll) window.__mdRestoreScroll(true); }catch(e){}
   try{

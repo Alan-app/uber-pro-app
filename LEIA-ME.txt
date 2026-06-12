@@ -1,4 +1,4 @@
-MetaDriver v40
+MetaDriver v44
 
-Base: v39.
-Alteração: compactação real do espaçamento vertical entre metas detalhadas em Configurar Metas.
+Base: v40.
+Correção: ganho por hora de sessão em andamento volta a correr automaticamente ao reabrir o app.
