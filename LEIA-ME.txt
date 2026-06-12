@@ -1,4 +1,1 @@
-MetaDriver v44
-
-Base: v40.
-Correção: ganho por hora de sessão em andamento volta a correr automaticamente ao reabrir o app.
+MetaDriver v45 - base v44. Calculadora do botão flutuante com confirmação apenas ao salvar e descarte pelo Home.

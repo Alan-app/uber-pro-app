@@ -1,6 +1,4 @@
-MetaDriver v44 - Retomada do ganho por hora em tempo real
-
-- Base oficial: v40.
-- Descarta alterações visuais de botão das v41, v42 e v43.
-- Corrige retomada do timer do ganho por hora ao reabrir o app com sessão em andamento.
-- Não altera cálculo, saldo, sessões, lançamentos, metas ou virada das 4h.
+MetaDriver v45
+- Ajuste no teclado/calculadora do botão flutuante: valores digitados em Uber/99 ficam em rascunho até Salvar.
+- Botão Home/fechar descarta alterações não salvas.
+- Mantém correção v44 do ganho por hora ao reabrir app com sessão ativa.
