@@ -1,5 +1,5 @@
-MetaDriver v43 - SALDO DO BOTÃO FLUTUANTE AJUSTADO
+MetaDriver v40 - Metas detalhadas compactas corrigidas
 
-- Reverte o rótulo do botão flutuante, mantendo somente o saldo.
-- Ajusta o tamanho do texto para ficar maior, porém sem corte visual.
-- Mantém a lógica da calculadora da v42: valores só são aplicados ao salvar; Home descarta alterações não salvas.
+- Corrigido o espaçamento real entre metas detalhadas.
+- Mantida a descrição e o valor na mesma linha.
+- Mantidos cálculo, persistência, combustível e manutenção sem alteração.

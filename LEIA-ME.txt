@@ -1,3 +1,4 @@
-MetaDriver v43
+MetaDriver v40
 
-Versão baseada na v42, com ajuste visual no tamanho do saldo do botão flutuante para evitar corte.
+Base: v39.
+Alteração: compactação real do espaçamento vertical entre metas detalhadas em Configurar Metas.

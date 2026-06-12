@@ -14,18 +14,6 @@ function mdReleaseBootOverlay(){
 }
 window.addEventListener('md-hydrated', mdReleaseBootOverlay, {once:true});
 window.addEventListener('load', function(){ setTimeout(mdReleaseBootOverlay, 4500); }, {once:true});
-
-// ===== v36 - ponte segura entre `let dados` e window.dados =====
-try{
-  if(!Object.prototype.hasOwnProperty.call(window, 'dados')){
-    Object.defineProperty(window, 'dados', {
-      configurable: true,
-      get: function(){ try{ return dados; }catch(e){ return undefined; } },
-      set: function(v){ try{ dados = v; }catch(e){} }
-    });
-  }
-}catch(e){}
-
 </script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
@@ -43,49 +31,11 @@ try{
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver v43</title>
+<title>MetaDriver v36</title>
 <style id="md-hydration-lock">
 body.preload > *:not(#mdBootOverlay){visibility:hidden!important;}
 #mdBootOverlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#0f172a;color:#fff;z-index:2147483647;font-family:Inter,system-ui,sans-serif;font-weight:800;letter-spacing:.2px;}
 body.md-ready > *{visibility:visible;}
-
-/* v36 - estado visual dos botões de sessão */
-.md-session-disabled{opacity:.42 !important; filter:saturate(.45) brightness(.85); cursor:not-allowed !important;}
-.md-session-enabled{opacity:1 !important; filter:none !important; cursor:pointer !important;}
-#saldoAtualForaWrap,#saldoAtualFabMirrorWrap{display:none !important;}
-
-
-/* v36 - modal compacto e estado real dos botões de sessão */
-#inicioSessaoOverlay{
-  position:fixed !important;
-  inset:0 !important;
-  display:none;
-  align-items:center !important;
-  justify-content:center !important;
-  padding:18px !important;
-  background:rgba(0,0,0,.48) !important;
-  z-index:99999 !important;
-}
-#inicioSessaoOverlay.md-show{display:flex !important;}
-#inicioSessaoOverlay .editvalor-modal{
-  width:min(88vw,360px) !important;
-  max-width:360px !important;
-  min-height:auto !important;
-  height:auto !important;
-  max-height:80vh !important;
-  border-radius:18px !important;
-  padding:18px !important;
-  box-shadow:0 18px 48px rgba(0,0,0,.35) !important;
-}
-#inicioSessaoOverlay .editvalor-actions{
-  display:flex !important;
-  gap:10px !important;
-  justify-content:flex-end !important;
-  flex-direction:row !important;
-}
-.md-session-disabled{opacity:.38 !important;filter:saturate(.35) brightness(.86) !important;cursor:not-allowed !important;pointer-events:none !important;}
-.md-session-enabled{opacity:1 !important;filter:none !important;cursor:pointer !important;pointer-events:auto !important;}
-
 
 /* v36 - modal de início: campo centralizado */
 #inicioSessaoOverlay #inicioSessaoHoraModal{
@@ -99,41 +49,6 @@ body.md-ready > *{visibility:visible;}
 #inicioSessaoOverlay .editvalor-modal{
   box-sizing:border-box !important;
   overflow:hidden !important;
-}
-
-
-
-/* PATCH V40 - Metas detalhadas realmente compactas
-   Mantém Descrição e Valor na mesma linha; reduz só o espaço vertical entre metas. */
-#metasDetalhadasLista{
-  display:flex !important;
-  flex-direction:column !important;
-  gap:2px !important;
-  margin:2px 0 6px 0 !important;
-  padding:0 !important;
-}
-#metasDetalhadasLista .meta-goal-row{
-  margin:0 !important;
-  padding:0 !important;
-  gap:6px !important;
-  align-items:center !important;
-}
-#cardMeta #metasDetalhadasLista .meta-goal-row input.config-meta-input,
-#cardMeta #metasDetalhadasLista .meta-goal-row input.meta-goal-valor,
-#metasDetalhadasLista .meta-goal-row input.config-meta-input,
-#metasDetalhadasLista .meta-goal-row input.meta-goal-valor{
-  margin-top:0 !important;
-  margin-bottom:0 !important;
-  min-height:34px !important;
-  height:34px !important;
-  padding-top:6px !important;
-  padding-bottom:6px !important;
-}
-#metasDetalhadasLista .meta-goal-remove{
-  min-height:34px !important;
-  height:34px !important;
-  margin:0 !important;
-  padding:0 8px !important;
 }
 
 </style>
@@ -998,14 +913,6 @@ input.negative-value, input.negative-value::placeholder{
   align-items:center;
   justify-content:center;
   line-height:1;
-}
-.quick-balance-fab-label{
-  font-size:8px;
-  font-weight:900;
-  line-height:1;
-  text-align:center;
-  white-space:nowrap;
-  margin-bottom:3px;
 }
 .quick-balance-fab-icon{
   font-size:16px;
@@ -2909,48 +2816,6 @@ body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff9d0; }
   margin:0 24px 12px 0 !important;
   display:block !important;
 }
-
-.meta-goals-box{
-  margin:4px 0 12px 0;
-}
-.meta-goal-row{
-  display:grid;
-  grid-template-columns: 1fr minmax(110px, 34%) 38px;
-  gap:8px;
-  align-items:center;
-  margin:3px 0;
-}
-.meta-goal-row input{
-  width:100% !important;
-  box-sizing:border-box !important;
-  margin:0 !important;
-}
-.meta-goal-remove, .meta-goal-add{
-  border:0;
-  border-radius:10px;
-  min-height:38px;
-  font-weight:800;
-  cursor:pointer;
-}
-.meta-goal-remove{
-  background:rgba(239,68,68,.16);
-  color:#fecaca;
-}
-.meta-goal-add{
-  width:100%;
-  margin:6px 0 10px 0;
-  background:rgba(34,197,94,.18);
-  color:#bbf7d0;
-}
-.meta-goal-total{
-  margin:6px 0 12px 0;
-  padding:10px 12px;
-  border:1px solid var(--line);
-  border-radius:12px;
-  font-weight:800;
-  text-align:center;
-}
-
 #fuelPercentFields.config-meta-field{
   margin-top:0 !important;
   margin-bottom:0 !important;
@@ -2994,48 +2859,15 @@ body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff9d0; }
 }
 
 
-/* v42 - botão flutuante com rótulo Saldo Atual acima do valor */
+/* v57 safe patch - botão flutuante sem $ e com valor maior */
 .quick-balance-fab-inner{
   justify-content:center !important;
-  gap:2px !important;
-}
-.quick-balance-fab-label{
-  display:block !important;
-  font-size:8px !important;
-  max-width:64px !important;
-  font-weight:900 !important;
-  line-height:1 !important;
-  text-align:center !important;
-  white-space:nowrap !important;
-  color:#111827 !important;
 }
 .quick-balance-fab-value{
-  font-size:13px !important;
-  max-width:64px !important;
+  font-size:14px !important;
+  max-width:62px !important;
   font-weight:900 !important;
   line-height:1.05 !important;
-}
-
-
-/* v43 - botão flutuante somente saldo, maior possível sem corte */
-.quick-balance-fab-label{
-  display:none !important;
-}
-.quick-balance-fab-inner{
-  justify-content:center !important;
-  gap:0 !important;
-  padding:0 5px !important;
-  box-sizing:border-box !important;
-}
-.quick-balance-fab-value{
-  font-size:17px !important;
-  line-height:1 !important;
-  max-width:62px !important;
-  margin:0 !important;
-  text-align:center !important;
-  white-space:nowrap !important;
-  overflow:visible !important;
-  text-overflow:clip !important;
 }
 
 
@@ -3382,7 +3214,7 @@ body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff9d0; }
   <div class="menu-item"><button class="secondary" onclick="abrirSaldoAtualButtonMenu(); closeMenu();">Botão de saldo atual</button></div>
   <div class="menu-item"><button class="secondary" onclick="abrirTemas(); closeMenu();">Temas</button></div>
   <div class="menu-item"><button class="danger" onclick="forceLogout(); return false;">Sair</button></div>
-  <div class="menu-note" style="text-align:center;">v40</div>
+  <div class="menu-note" style="text-align:center;">v36</div>
 </div>
 
 <div id="temasOverlay" class="temas-overlay" onclick="fecharTemas()"></div>
@@ -3456,17 +3288,6 @@ body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff9d0; }
   </div>
 </div>
 
-<div id="inicioSessaoOverlay" class="editvalor-overlay" role="dialog" aria-modal="true" aria-label="Iniciar sessão">
-  <div class="editvalor-modal">
-    <div class="editvalor-title">Iniciar sessão</div>
-    <label style="display:block;margin-top:8px;text-align:left;">Horário de início</label>
-    <input type="time" id="inicioSessaoHoraModal" style="display:block;width:min(220px,76%);max-width:220px;margin:10px auto 0 auto;text-align:center;box-sizing:border-box;">
-    <div class="editvalor-actions" style="margin-top:12px;">
-      <button type="button" onclick="confirmInicioSessaoModal()">OK</button>
-      <button type="button" class="cancel" onclick="closeInicioSessaoModal()">Cancelar</button>
-    </div>
-  </div>
-</div>
 
 
 <div class="card">
@@ -3475,11 +3296,8 @@ body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff9d0; }
         <span class="collapse-arrow">▼</span>
       </div>
   <div class="card-body">
-    <label class="config-meta-label">Metas líquidas desejadas</label>
-    <div id="metasDetalhadasLista" class="meta-goals-box"></div>
-    <button type="button" class="meta-goal-add" onclick="addMetaDetalhada()">+ Adicionar meta</button>
-    <div class="meta-goal-total">Total das metas: <span id="metaTotalResumo">R$ 0,00</span></div>
-    <input type="hidden" id="metaTotal" value="0">
+    <label class="config-meta-label">Meta líquida desejada (R$)</label>
+    <input class="config-meta-input" type="text" id="metaTotal" inputmode="none" autocomplete="off" readonly onclick="openMetaTotalKeypad()" onfocus="this.blur(); openMetaTotalKeypad();">
     <label class="config-meta-label">Meta de ganho por hora</label>
     <input class="config-meta-input" type="text" id="ganhoHoraManual" inputmode="none" autocomplete="off" readonly onclick="openMetaTotalKeypadFor('ganhoHoraManual')" onfocus="this.blur(); openMetaTotalKeypadFor('ganhoHoraManual');" placeholder="Ex: 40">
 
@@ -3492,11 +3310,6 @@ body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff9d0; }
         <option value="0.45">45%</option>
         <option value="0.50">50%</option>
       </select>
-    </div>
-
-    <div id="maintenancePercentFields" class="config-meta-field">
-      <label class="config-meta-label">Manutenção (%)</label>
-      <input class="config-meta-input" type="text" id="percentualManutencao" inputmode="none" autocomplete="off" readonly data-keypad-mode="percent" onclick="openMetaTotalKeypadFor('percentualManutencao')" onfocus="this.blur(); openMetaTotalKeypadFor('percentualManutencao');" placeholder="Ex: 10%">
     </div>
 
     <label class="config-meta-label">Data limite para atingir a Meta</label>
@@ -3549,13 +3362,16 @@ body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff9d0; }
 <label>Saldo atual (R$)</label>
 <input type="hidden" id="saldoAtualFora" inputmode="decimal" placeholder="Ex: 120" step="0.01" readonly>
 </div>
-<div id="saldoAtualFabMirrorWrap" class="muted" style="display:none !important; margin:6px 0 10px;" aria-hidden="true"><b id="saldoAtualFabMirror" class="warning">R$ 0,00</b></div>
+<div id="saldoAtualFabMirrorWrap" class="muted" style="margin:6px 0 10px;">
+  Saldo atual: <b id="saldoAtualFabMirror" class="warning">R$ 0,00</b>
+</div>
 
-<input type="hidden" id="horarioInicioFora">
+<label>Horário de início</label>
+<input type="time" id="horarioInicioFora">
 
 <div class="gh-actions">
-<button type="button" id="btnIniciarSessaoGH" onclick="openInicioSessaoModal()">Iniciar sessão</button>
-<button type="button" id="btnFinalizarSessaoGH" onclick="finalizarSessaoGanhoHora()">Finalizar sessão</button>
+<button onclick="salvarGanhosForaTempoReal()">Iniciar sessão</button>
+<button onclick="finalizarSessaoGanhoHora()">Finalizar sessão</button>
 </div>
 <div id="ganhosForaResumo" class="muted" style="margin-top:10px;"></div>
 <div id="ganhosForaSessoes" class="muted" style="margin-top:10px;"></div>
@@ -4080,7 +3896,6 @@ let dados = loadDados() || {
   abastecimentos: [],
   naoTrabalhados: [],
   metaTotal: 0,
-  metasDetalhadas: [],
   dataLimite: "",
   metaDiariaManual: 0,
   ganhoDiarioAtual: 0,
@@ -4098,7 +3913,6 @@ let dados = loadDados() || {
   ganhoHoraSessaoDiaRef: "",
   combustivelModo: "fixo",
   combustivelPercentual: 0.30,
-  manutencaoPercentual: 0,
   combustivelReal: {
     kmRodados: 0,
     consumoMedio: 0,
@@ -4585,7 +4399,7 @@ function mdBuildDiagnosticsObject(){
     const durableObj = mdSafeJsonParse(durableRaw);
     const diag = {
       generated_at: mdNowIso(),
-      app_version: 'MetaDriver v43',
+      app_version: 'MetaDriver v36',
       cloud_table: CLOUD_TABLE,
       device_id: mdEnsureDeviceId(),
       visibility_state: document.visibilityState,
@@ -5465,103 +5279,9 @@ function toggleForm(id){
   }
 }
 
-
-function normalizarMetasDetalhadas(){
-  try{
-    if(!Array.isArray(dados.metasDetalhadas)) dados.metasDetalhadas = [];
-    dados.metasDetalhadas = dados.metasDetalhadas.map(function(m){
-      return {
-        descricao: String((m && m.descricao) || ""),
-        valor: Math.max(0, Number((m && m.valor) || 0) || 0)
-      };
-    });
-    if(dados.metasDetalhadas.length === 0 && Number(dados.metaTotal || 0) > 0){
-      dados.metasDetalhadas.push({ descricao: "Meta", valor: Number(dados.metaTotal || 0) });
-    }
-  }catch(e){ dados.metasDetalhadas = []; }
-}
-
-function calcularTotalMetasDetalhadas(){
-  normalizarMetasDetalhadas();
-  const total = dados.metasDetalhadas.reduce(function(s,m){ return s + (Number(m.valor || 0) || 0); }, 0);
-  dados.metaTotal = Math.max(0, total);
-  const hidden = document.getElementById("metaTotal");
-  if(hidden) hidden.value = String(dados.metaTotal || 0);
-  const resumo = document.getElementById("metaTotalResumo");
-  if(resumo) resumo.textContent = (typeof fmtMoney === "function") ? fmtMoney(dados.metaTotal || 0) : ("R$ " + Number(dados.metaTotal || 0).toFixed(2));
-  return dados.metaTotal;
-}
-
-function renderMetasDetalhadas(){
-  normalizarMetasDetalhadas();
-  if(dados.metasDetalhadas.length === 0){
-    dados.metasDetalhadas.push({ descricao: "", valor: 0 });
-  }
-  const lista = document.getElementById("metasDetalhadasLista");
-  if(!lista) return;
-  const panel = document.getElementById("metaTotalPanel");
-  const editingGoal = panel && panel.classList.contains("show") && String(metaTotalTargetId || "").indexOf("metaGoalValor_") === 0;
-  if(!editingGoal){
-    lista.innerHTML = dados.metasDetalhadas.map(function(m, idx){
-      const valor = Number(m.valor || 0) > 0 ? String(Number(m.valor || 0)).replace(".", ",") : "";
-      const desc = String(m.descricao || "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
-      return '<div class="meta-goal-row">'
-        + '<input class="config-meta-input" type="text" id="metaGoalDesc_'+idx+'" placeholder="Descrição" value="'+desc+'" oninput="updateMetaDetalhadaDescricao('+idx+', this.value)">'
-        + '<input class="config-meta-input meta-goal-valor" type="text" id="metaGoalValor_'+idx+'" inputmode="none" autocomplete="off" readonly placeholder="Valor" value="'+valor+'" onclick="openMetaTotalKeypadFor(\'metaGoalValor_'+idx+'\')" onfocus="this.blur(); openMetaTotalKeypadFor(\'metaGoalValor_'+idx+'\');">'
-        + '<button type="button" class="meta-goal-remove" onclick="removeMetaDetalhada('+idx+')">×</button>'
-        + '</div>';
-    }).join("");
-  }
-  calcularTotalMetasDetalhadas();
-}
-
-function addMetaDetalhada(){
-  normalizarMetasDetalhadas();
-  dados.metasDetalhadas.push({ descricao: "", valor: 0 });
-  calcularTotalMetasDetalhadas();
-  salvar();
-  atualizar();
-  setTimeout(function(){
-    try{ const el = document.getElementById("metaGoalDesc_" + (dados.metasDetalhadas.length - 1)); if(el) el.focus(); }catch(e){}
-  }, 50);
-}
-
-function removeMetaDetalhada(idx){
-  normalizarMetasDetalhadas();
-  dados.metasDetalhadas.splice(idx, 1);
-  if(dados.metasDetalhadas.length === 0) dados.metasDetalhadas.push({ descricao: "", valor: 0 });
-  calcularTotalMetasDetalhadas();
-  dados.metaSalva = !!(Number(dados.metaTotal || 0) > 0 || String(dados.dataLimite || '').trim());
-  salvar();
-  atualizar();
-}
-
-function updateMetaDetalhadaDescricao(idx, value){
-  normalizarMetasDetalhadas();
-  if(!dados.metasDetalhadas[idx]) dados.metasDetalhadas[idx] = { descricao:"", valor:0 };
-  dados.metasDetalhadas[idx].descricao = String(value || "");
-  calcularTotalMetasDetalhadas();
-  dados.metaSalva = !!(Number(dados.metaTotal || 0) > 0 || String(dados.dataLimite || '').trim());
-  salvar();
-}
-
-function updateMetaDetalhadaValorFromInput(inputId){
-  const m = String(inputId || "").match(/^metaGoalValor_(\d+)$/);
-  if(!m) return false;
-  const idx = Number(m[1]);
-  normalizarMetasDetalhadas();
-  if(!dados.metasDetalhadas[idx]) dados.metasDetalhadas[idx] = { descricao:"", valor:0 };
-  const el = document.getElementById(inputId);
-  dados.metasDetalhadas[idx].valor = Math.max(0, parseFloat(String(el && el.value || "").replace(",", ".")) || 0);
-  calcularTotalMetasDetalhadas();
-  dados.metaSalva = !!(Number(dados.metaTotal || 0) > 0 || String(dados.dataLimite || '').trim());
-  return true;
-}
-
 function salvarMeta(){
-  calcularTotalMetasDetalhadas();
+  dados.metaTotal = parseFloat(document.getElementById("metaTotal").value) || 0;
   dados.dataLimite = document.getElementById("dataLimite").value || "";
-  dados.manutencaoPercentual = parsePercentInputValue(document.getElementById("percentualManutencao")?.value || "0");
   dados.metaSalva = !!(Number(dados.metaTotal || 0) > 0 || String(dados.dataLimite || '').trim());
   salvar();
   atualizar();
@@ -5636,7 +5356,7 @@ function addGanho(){
 
 
 
-/* ===== MetaDriver v42: virada 4h blindada, saldo por usuário e fonte única ===== */
+/* ===== MetaDriver v36: virada 4h blindada, saldo por usuário e fonte única ===== */
 function mdIsoDateLocal4h(d){
   const x = d instanceof Date ? new Date(d.getTime()) : new Date();
   const yyyy = x.getFullYear();
@@ -5721,7 +5441,6 @@ function mdMarcarVirada4hExecutada(turnKey, diaAnteriorUber, syncKey){
   }catch(e){}
 }
 function mdResetNovoDiaAposVirada4h(diaAtualUber){
-  // v36: só deve ser chamada depois de histórico/ganhos salvos com sucesso.
   dados.ganhoHoraDiaRef = String(diaAtualUber || dataUberISO()).slice(0,10);
   dados.saldoAtualFora = 0;
   dados.ganhoDiarioAtual = 0;
@@ -5741,94 +5460,31 @@ function mdResetNovoDiaAposVirada4h(diaAtualUber){
 }
 
 function syncGanhoDoSaldoRapido(valorSaldoAtual, uberPart, n99Part, dataRefOverride, horaOverride){
-  // v36: saldo do dia em lançamentos é ESPELHO do botão flutuante.
-  // Não acumula e não duplica: para cada dia operacional + app há no máximo 1 registro automático.
   const valor = Math.max(0, Number(valorSaldoAtual || 0));
   const uber = Math.max(0, Number(uberPart || 0));
   const n99 = Math.max(0, Number(n99Part || 0));
   const dataRef = String(dataRefOverride || dataUberISO()).slice(0,10);
   const hora = String(horaOverride || horaAtualLancamento()).slice(0,5);
   const isVirada4h = !!dataRefOverride || hora === '04:00';
-  const origem = isVirada4h ? 'virada_4h' : 'saldo_rapido';
-  const syncKeyBase = (isVirada4h ? 'turn4h-' : 'saldo-dia-') + dataRef;
-
+  const syncKey = (isVirada4h ? 'turn4h-' : 'saldo-rapido-') + dataRef;
   if(!Array.isArray(dados.ganhos)) dados.ganhos = [];
 
-  function isAutoSaldoDoMesmoDia(g, appName){
-    try{
-      const gData = String((g && g.data) || '').slice(0,10);
-      const gApp = String((g && (g.app || g.tipo || g.plataforma)) || '').toLowerCase();
-      const gSync = String((g && g.syncKey) || '');
-      const gOrigem = String((g && g.origem) || '').toLowerCase();
-      const appOk = String(appName).toLowerCase() === 'uber'
-        ? (gApp.indexOf('uber') >= 0 || gApp === '')
-        : (gApp.indexOf('99') >= 0);
-      const autoOk =
-        gSync === syncKeyBase ||
-        gSync === (syncKeyBase + '-' + String(appName).toLowerCase()) ||
-        gSync.indexOf('turn4h-' + dataRef) === 0 ||
-        gSync.indexOf('saldo-dia-' + dataRef) === 0 ||
-        gSync.indexOf('saldo-rapido-' + dataRef) === 0 ||
-        gOrigem === 'virada_4h' ||
-        gOrigem === 'saldo_rapido' ||
-        gOrigem === 'saldo-rapido';
-      return gData === dataRef && appOk && autoOk;
-    }catch(e){ return false; }
+  // Idempotência: remove/atualiza somente lançamentos da mesma origem e ciclo. Nunca toca gastos.
+  dados.ganhos = dados.ganhos.filter(function(g){
+    try{ return String((g && g.syncKey) || '') !== syncKey; }catch(e){ return true; }
+  });
+
+  const origem = isVirada4h ? 'virada4h' : 'saldo_rapido';
+  if(uber > 0){
+    dados.ganhos.push({ data:dataRef, hora:hora, app:'Uber', valor:Number(uber.toFixed(2)), uber:Number(uber.toFixed(2)), n99:0, syncKey:syncKey, origem:origem });
   }
-
-  function upsertAuto(appName, amount, extra){
-    const val = Number((Math.max(0, Number(amount || 0))).toFixed(2));
-    const idx = dados.ganhos.findIndex(function(g){ return isAutoSaldoDoMesmoDia(g, appName); });
-    if(val <= 0){
-      // Se o saldo do novo dia é zero, remove apenas lançamento automático daquele dia/app.
-      if(idx >= 0) dados.ganhos.splice(idx,1);
-      return;
-    }
-    const item = Object.assign({
-      data: dataRef,
-      hora: hora,
-      app: appName,
-      valor: val,
-      syncKey: syncKeyBase + '-' + String(appName).toLowerCase(),
-      origem: origem,
-      updatedAt: new Date().toISOString()
-    }, extra || {});
-    if(idx >= 0){
-      dados.ganhos[idx] = Object.assign({}, dados.ganhos[idx] || {}, item);
-    }else{
-      dados.ganhos.push(item);
-    }
+  if(n99 > 0){
+    dados.ganhos.push({ data:dataRef, hora:hora, app:'99', valor:Number(n99.toFixed(2)), uber:0, n99:Number(n99.toFixed(2)), syncKey:syncKey, origem:origem });
   }
-
-  upsertAuto('Uber', uber, {uber:Number(uber.toFixed(2)), n99:0});
-  upsertAuto('99', n99, {uber:0, n99:Number(n99.toFixed(2))});
-
-  // Fallback: se só vier valor total, registra como Uber para não perder o saldo capturado.
   if(uber <= 0 && n99 <= 0 && valor > 0){
-    upsertAuto('Uber', valor, {uber:Number(valor.toFixed(2)), n99:0});
+    dados.ganhos.push({ data:dataRef, hora:hora, app:'Uber', valor:Number(valor.toFixed(2)), uber:Number(valor.toFixed(2)), n99:0, syncKey:syncKey, origem:origem });
   }
-
   try{ dados.__last_gain_sync_at = Date.now(); }catch(e){}
-}
-
-
-// ===== v36 - limpeza de duplicidade pós-virada no dia novo =====
-function mdRemoverSaldoViradaDuplicadoNoDiaNovo(diaNovo, valorCapturado){
-  try{
-    const dia = String(diaNovo || dataUberISO()).slice(0,10);
-    const val = Number(Number(valorCapturado || 0).toFixed(2));
-    if(!Array.isArray(dados.ganhos) || val <= 0) return;
-    dados.ganhos = dados.ganhos.filter(function(g){
-      try{
-        const gData = String((g && g.data) || '').slice(0,10);
-        const gValor = Number(Number((g && g.valor) || 0).toFixed(2));
-        const gOrigem = String((g && g.origem) || '').toLowerCase();
-        const gSync = String((g && g.syncKey) || '');
-        const automatico = gOrigem === 'virada_4h' || gOrigem === 'saldo_rapido' || gOrigem === 'saldo-rapido' || gSync.indexOf('turn4h-') === 0 || gSync.indexOf('saldo-dia-') === 0 || gSync.indexOf('saldo-rapido-') === 0;
-        return !(gData === dia && gValor === val && automatico);
-      }catch(e){ return true; }
-    });
-  }catch(e){}
 }
 
 function calcularPartesVirada4h(valorTotal){
@@ -5884,7 +5540,7 @@ function addNaoTrabalhado(){
   if(!data) return;
 
   // preserva campos já digitados em Meta antes de salvar dias não trabalhados
-  calcularTotalMetasDetalhadas();
+  dados.metaTotal = parseFloat(document.getElementById("metaTotal")?.value) || 0;
   dados.dataLimite = document.getElementById("dataLimite")?.value || "";
 
   dados.naoTrabalhados.push({data, motivo: motivo || "Dia não trabalhado"});
@@ -5949,7 +5605,7 @@ function mdCommitLancamentoMutation(reason){
   try{ atualizar(); }catch(e){}
   try{ if(typeof refreshQuickBalanceFabMiniDisplay === "function") refreshQuickBalanceFabMiniDisplay(); }catch(e){}
   try{ if(typeof updateQuickBalanceFabUI === "function") updateQuickBalanceFabUI(); }catch(e){}
-  try{ if(typeof toast === "function" && reason) console.info("MetaDriver v42 mutation:", reason); }catch(e){}
+  try{ if(typeof toast === "function" && reason) console.info("MetaDriver v36 mutation:", reason); }catch(e){}
 }
 
 function editarValor(tipo, index){
@@ -6116,61 +5772,13 @@ function fecharTemas(){
 }
 
 // v57 - exportar backup agora abre modal com opção de nome e escolha de pasta
-
-// ===== v36 - zeragem correta do saldo do MetaDriver =====
-
-function mdPrepararBackupSaldoV36(base){
-  try{
-    const snap = JSON.parse(JSON.stringify(base || {}));
-    let u = 0, n = 0;
-    try{
-      if(typeof qbParts === "function"){
-        const p = qbParts() || {};
-        u = Number(p.uber || 0) || 0;
-        n = Number(p.n99 || 0) || 0;
-      }else{
-        u = Number(snap.saldoUber || localStorage.getItem("md_quick_balance_uber") || 0) || 0;
-        n = Number(snap.saldo99 || localStorage.getItem("md_quick_balance_99") || 0) || 0;
-      }
-    }catch(e){}
-    snap.saldoUber = u;
-    snap.saldo99 = n;
-    snap.saldoBotaoFlutuante = Number((u+n).toFixed(2));
-    snap.quickBalance = {uber:u,n99:n,total:snap.saldoBotaoFlutuante};
-    return snap;
-  }catch(e){ return base; }
-}
-function mdRestaurarSaldoBotaoDoBackupV36(safe){
-  try{
-    if(!safe || typeof safe !== "object") return;
-    const qb = (safe.quickBalance && typeof safe.quickBalance === "object") ? safe.quickBalance : {};
-    const u = Number(safe.saldoUber != null ? safe.saldoUber : qb.uber != null ? qb.uber : 0) || 0;
-    const n = Number(safe.saldo99 != null ? safe.saldo99 : qb.n99 != null ? qb.n99 : qb["99"] != null ? qb["99"] : 0) || 0;
-    if(typeof mdSetQuickBalancePart === "function"){
-      mdSetQuickBalancePart("uber", u);
-      mdSetQuickBalancePart("99", n);
-    }else{
-      localStorage.setItem("md_quick_balance_uber", String(u || ""));
-      localStorage.setItem("md_quick_balance_99", String(n || ""));
-    }
-    if(typeof dados === "object" && dados){
-      dados.saldoUber = u;
-      dados.saldo99 = n;
-      dados.saldoBotaoFlutuante = Number((u+n).toFixed(2));
-      dados.quickBalance = {uber:u,n99:n,total:dados.saldoBotaoFlutuante};
-    }
-    try{ if(typeof refreshQuickBalanceDisplay === "function") refreshQuickBalanceDisplay(); }catch(e){}
-    try{ if(typeof refreshQuickBalanceFabMiniDisplay === "function") refreshQuickBalanceFabMiniDisplay(); }catch(e){}
-  }catch(e){}
-}
-
 function getExportBackupBlob(){
   const payload = {
     app: "MetaDriver",
     version: "8",
     exported_at: new Date().toISOString(),
     storage_key: STORAGE_KEY,
-    dados: mdPrepararBackupSaldoV36(dados)
+    dados
   };
   return new Blob([JSON.stringify(payload, null, 2)], {type:"application/json"});
 }
@@ -6250,7 +5858,6 @@ function importarBackup(ev){
         abastecimentos: Array.isArray(novoDados.abastecimentos) ? novoDados.abastecimentos : [],
         naoTrabalhados: Array.isArray(novoDados.naoTrabalhados) ? novoDados.naoTrabalhados : [],
         metaTotal: Number(novoDados.metaTotal) || 0,
-        metasDetalhadas: Array.isArray(novoDados.metasDetalhadas) ? novoDados.metasDetalhadas : [],
         dataLimite: (novoDados.dataLimite && String(novoDados.dataLimite)) || "",
         metaDiariaManual: Number(novoDados.metaDiariaManual) || 0,
         ganhoDiarioAtual: Number(novoDados.ganhoDiarioAtual) || 0,
@@ -6267,7 +5874,6 @@ function importarBackup(ev){
         ganhoHoraSessaoDiaRef: (novoDados.ganhoHoraSessaoDiaRef && String(novoDados.ganhoHoraSessaoDiaRef)) || "",
         combustivelModo: (String(novoDados.combustivelModo || "fixo") === "real" ? "real" : "fixo"),
         combustivelPercentual: [0.30,0.35,0.40,0.45,0.50].includes(Number(novoDados.combustivelPercentual)) ? Number(novoDados.combustivelPercentual) : 0.30,
-        manutencaoPercentual: Math.max(0, Math.min(0.95, Number(novoDados.manutencaoPercentual || 0) || 0)),
         combustivelReal: {
           kmRodados: Number(novoDados?.combustivelReal?.kmRodados || 0) || 0,
           consumoMedio: Number(novoDados?.combustivelReal?.consumoMedio || 0) || 0,
@@ -6327,8 +5933,6 @@ function importarBackup(ev){
       try{ safe.__skip_operational_day_turn = true; }catch(e){}
       const applied = mdApplyExternalSnapshot(safe, "import-backup", true);
       if(!applied) throw new Error("Falha ao aplicar backup");
-      try{ mdRestaurarSaldoBotaoDoBackupV36(safe); }catch(e){}
-      try{ if(typeof salvarDados === "function") salvarDados(); else if(typeof salvar === "function") salvar(); }catch(e){}
       toast("✅ Backup importado com sucesso.");
       closeMenu();
     }catch(e){
@@ -6340,8 +5944,6 @@ function importarBackup(ev){
 }
 
 function zerarTudo(){
-  try{ mdZerarSaldoBotaoFlutuanteV36(); }catch(e){}
-  try{ mdZerarSaldoBotaoFlutuanteV36(); }catch(e){}
   const ok = confirm("Tem certeza? Isso vai apagar TODOS os dados deste aparelho.");
   if(!ok) return;
   try{ pararTimerGanhoHoraTempoReal(); }catch(e){}
@@ -6355,7 +5957,6 @@ function zerarTudo(){
     abastecimentos: [],
     naoTrabalhados: [],
     metaTotal: 0,
-    metasDetalhadas: [],
     dataLimite: "",
     metaDiariaManual: 0,
     ganhoDiarioAtual: 0,
@@ -6372,7 +5973,6 @@ function zerarTudo(){
     ganhoHoraSessaoDiaRef: "",
     combustivelModo: "fixo",
     combustivelPercentual: 0.30,
-    manutencaoPercentual: 0,
     combustivelReal: { kmRodados: 0, consumoMedio: 0, precoLitro: 0 }
   };
   salvar();
@@ -6611,9 +6211,7 @@ function getUltimoValorTotalSessaoDoDiaAtual(){
 function getSaldoAnteriorCorretoSessaoAtual(){
   const sessoesDia = getSessoesGanhoHoraDoDiaAtual();
   if(!sessoesDia.length) return 0;
-  return sessoesDia.reduce(function(total,s){
-    return total + (Number((s||{}).valorTotal)||0);
-  },0);
+  return Number((sessoesDia[sessoesDia.length - 1] || {}).valorTotal || 0);
 }
 
 function syncSaldoAnteriorSessaoAtual(){
@@ -6952,57 +6550,6 @@ function clearDayTurn4hValue(){
   window.__dayTurn4hState.replaceOnNext = false;
   refreshDayTurn4hDisplay();
 }
-
-// ===== v36 - histórico seguro da virada 4h antes de limpar sessões =====
-function mdSalvarHistoricoVirada4hSeguro(diaRef){
-  const dia = String(diaRef || dataUberISO()).slice(0,10);
-  if(!Array.isArray(dados.ganhoHoraSessoes)) dados.ganhoHoraSessoes = [];
-  if(!Array.isArray(dados.ganhoHoraHistorico)) dados.ganhoHoraHistorico = [];
-
-  const sessoesOriginais = dados.ganhoHoraSessoes.slice();
-  if(!sessoesOriginais.length) return true;
-
-  const sessoesResumo = sessoesOriginais.map(function(s, idx){
-    const base = Object.assign({}, s || {});
-    base.diaRef = dia;
-    let recalculada = base;
-    try{ recalculada = recalcularSessaoGanhoHora(Object.assign({}, base), idx) || base; }catch(e){ recalculada = base; }
-    return {
-      inicio: String(recalculada.inicio || base.inicio || ''),
-      fim: String(recalculada.fim || base.fim || ''),
-      valorTotal: Number(recalculada.valorTotal != null ? recalculada.valorTotal : (base.valorTotal || 0)),
-      ganhoHora: Number(recalculada.ganhoHora != null ? recalculada.ganhoHora : (base.ganhoHora || 0)),
-      tempoDecorrido: Number(recalculada.tempoDecorrido != null ? recalculada.tempoDecorrido : (base.tempoDecorrido || 0)),
-      diaRef: dia
-    };
-  });
-
-  const totalSaldoBase = sessoesResumo.reduce(function(acc, s){ return acc + Number((s && s.valorTotal) || 0); }, 0);
-  const totalHoras = sessoesResumo.reduce(function(acc, s){ return acc + Number((s && s.tempoDecorrido) || 0); }, 0);
-  const totalGanhoHora = totalHoras > 0 ? (totalSaldoBase / totalHoras) : 0;
-
-  const resumo = {
-    diaUber: dia,
-    totalSaldoBase: totalSaldoBase,
-    totalHoras: totalHoras,
-    totalGanhoHora: totalGanhoHora,
-    sessoes: sessoesResumo
-  };
-
-  const idx = dados.ganhoHoraHistorico.findIndex(function(item){
-    return String((item && item.diaUber) || '').slice(0,10) === dia;
-  });
-  if(idx >= 0) dados.ganhoHoraHistorico[idx] = resumo;
-  else dados.ganhoHoraHistorico.push(resumo);
-
-  dados.ganhoHoraHistorico.sort(function(a,b){
-    const da = String((a && a.diaUber) || '');
-    const db = String((b && b.diaUber) || '');
-    return da < db ? 1 : da > db ? -1 : 0;
-  });
-  return true;
-}
-
 function confirmVirada4hModal(){
   const hidden = document.getElementById('dayTurn4hHiddenInput');
   if(!hidden) return false;
@@ -7042,7 +6589,7 @@ function confirmVirada4hModal(){
     });
     if(!okSessao) throw new Error('Falha ao finalizar sessão da virada das 4h');
 
-    if(!mdSalvarHistoricoVirada4hSeguro(diaAnteriorUber)){
+    if(!salvarResumoDiaGanhoHora(diaAnteriorUber)){
       throw new Error('Falha ao salvar histórico consolidado da virada das 4h');
     }
 
@@ -7111,15 +6658,9 @@ function ensureGanhoHoraDiaAtual(){
       return false;
     }
 
-    // Sem sessão aberta: primeiro salva histórico das sessões já finalizadas, depois lança saldo do DIA ENCERRADO uma única vez e zera o novo dia.
-    if(Array.isArray(dados.ganhoHoraSessoes) && dados.ganhoHoraSessoes.length){
-      if(!mdSalvarHistoricoVirada4hSeguro(d4.diaAnteriorUber)){
-        throw new Error('Falha ao salvar histórico antes de limpar sessões na virada das 4h');
-      }
-    }
+    // Sem sessão aberta: lança saldo do DIA ENCERRADO uma única vez e zera o novo dia.
     const partesVirada = calcularPartesVirada4h(valorAtual);
     syncGanhoDoSaldoRapido(valorAtual, partesVirada.uber, partesVirada.n99, d4.diaAnteriorUber, '04:00');
-    mdRemoverSaldoViradaDuplicadoNoDiaNovo(d4.diaAtualUber, valorAtual);
     mdMarcarVirada4hExecutada(d4.turnKey, d4.diaAnteriorUber, d4.syncKey);
     mdResetNovoDiaAposVirada4h(d4.diaAtualUber);
 
@@ -7269,26 +6810,6 @@ function iniciarTimerGanhoHoraTempoReal(){
 }
 
 
-function getManutencaoPercentual(){
-  try{
-    const n = Number(dados && dados.manutencaoPercentual || 0);
-    return Math.max(0, Math.min(0.95, isFinite(n) ? n : 0));
-  }catch(e){
-    return 0;
-  }
-}
-
-function formatPercentInputValue(decimalValue){
-  const pct = Math.max(0, (Number(decimalValue || 0) || 0) * 100);
-  if(Math.abs(pct - Math.round(pct)) < 0.0001) return String(Math.round(pct)) + "%";
-  return String(Number(pct.toFixed(2))).replace(".", ",") + "%";
-}
-
-function parsePercentInputValue(value){
-  const n = Number(String(value == null ? "" : value).replace("%", "").replace(",", "."));
-  return Math.max(0, Math.min(0.95, (isFinite(n) ? n : 0) / 100));
-}
-
 function getCombustivelConfig(brutoBase){
   const modo = "fixo";
   const percentualSelecionado = [0.30,0.35,0.40,0.45,0.50].includes(Number(dados.combustivelPercentual))
@@ -7300,9 +6821,8 @@ function getCombustivelConfig(brutoBase){
 
   let combustivelEstimado = brutoBase * percentualSelecionado;
   let taxaCombustivel = percentualSelecionado;
-  const manutencaoPercentual = getManutencaoPercentual();
   let tituloResumo = "Combustível disponível (" + Math.round(percentualSelecionado * 100) + "% do bruto)";
-  let detalheResumo = "Modo % do bruto ativo em " + Math.round(percentualSelecionado * 100) + "%. Manutenção na meta: " + Math.round(manutencaoPercentual * 100) + "%.";
+  let detalheResumo = "Modo % do bruto ativo em " + Math.round(percentualSelecionado * 100) + "%.";
 
   if(modo === "real"){
     const litrosEstimados = (kmRodados > 0 && consumoMedio > 0) ? (kmRodados / consumoMedio) : 0;
@@ -7312,8 +6832,8 @@ function getCombustivelConfig(brutoBase){
     taxaCombustivel = Math.max(0, Math.min(0.95, taxaCombustivel));
     tituloResumo = "Combustível previsto real";
     detalheResumo = (kmRodados > 0 && consumoMedio > 0 && precoLitro > 0)
-      ? ("Modo real ativo: " + kmRodados.toFixed(2) + " km ÷ " + consumoMedio.toFixed(2) + " km/l × R$ " + precoLitro.toFixed(2) + "/l. Manutenção na meta: " + Math.round(manutencaoPercentual * 100) + "%.")
-      : "Modo real ativo, mas faltam preencher KM rodados, consumo médio e preço do litro. Manutenção na meta: " + Math.round(manutencaoPercentual * 100) + "%.";
+      ? ("Modo real ativo: " + kmRodados.toFixed(2) + " km ÷ " + consumoMedio.toFixed(2) + " km/l × R$ " + precoLitro.toFixed(2) + "/l")
+      : "Modo real ativo, mas faltam preencher KM rodados, consumo médio e preço do litro.";
   }
 
   return {
@@ -7324,8 +6844,6 @@ function getCombustivelConfig(brutoBase){
     precoLitro,
     combustivelEstimado,
     taxaCombustivel,
-    manutencaoPercentual,
-    taxaMeta: Math.max(0, Math.min(0.95, Number(taxaCombustivel || 0) + Number(manutencaoPercentual || 0))),
     tituloResumo,
     detalheResumo
   };
@@ -7358,7 +6876,6 @@ function salvarConfigCombustivel(showToast){
   const percentualEl = document.getElementById("percentualCombustivel");
   const percentualSelecionado = percentualEl ? Number(percentualEl.value || 0.30) : 0.30;
   dados.combustivelPercentual = [0.30,0.35,0.40,0.45,0.50].includes(percentualSelecionado) ? percentualSelecionado : 0.30;
-  dados.manutencaoPercentual = parsePercentInputValue(document.getElementById("percentualManutencao")?.value || "0");
   dados.combustivelReal = {
     kmRodados: parseFloat(document.getElementById("fuelKmRodados")?.value) || 0,
     consumoMedio: parseFloat(document.getElementById("fuelConsumoMedio")?.value) || 0,
@@ -7417,7 +6934,7 @@ function exportarRelatorioPDF(){
   }
   const diasRestantes = Math.max(0, diasCalendario - diasNaoTrabalhadosNoPeriodo);
   const faltanteLiquido = Math.max(0, (dados.metaTotal || 0) - liquido);
-  const divisorMeta = Math.max(0.05, 1 - Number(fuelCfg.taxaMeta || fuelCfg.taxaCombustivel || 0));
+  const divisorMeta = Math.max(0.05, 1 - Number(fuelCfg.taxaCombustivel || 0));
   const metaRestante = (faltanteLiquido > 0) ? (faltanteLiquido / divisorMeta) : 0;
   const metaDiariaAuto = (diasRestantes > 0) ? (metaRestante / diasRestantes) : 0;
 
@@ -7572,7 +7089,7 @@ function exportarRelatorioPDF(){
       <script>
         setTimeout(()=>window.print(), 250);
       <\/script>
-    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v43 · app</div>
+    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v36 · app</div>
 
 
 <script>
@@ -7726,9 +7243,14 @@ function atualizar(){
 
   if(!Array.isArray(dados.naoTrabalhados)) dados.naoTrabalhados = [];
 
-  try{ renderMetasDetalhadas(); }catch(e){}
+  const elMeta = document.getElementById("metaTotal");
+if(elMeta && document.activeElement !== elMeta){
+  elMeta.value = dados.metaTotal || "";
   try{ syncSaldoAtualLockWithFab(); }catch(e){}
+
   try{ lockSaldoAtualByFab(); }catch(e){}
+
+}
   const elData = document.getElementById("dataLimite");
 if(elData && document.activeElement !== elData){
   elData.value = dados.dataLimite || "";
@@ -7749,10 +7271,6 @@ document.getElementById("metaDiariaManual").value = metaSalvaAgora && (dados.met
     : 0.30;
   if(percentualCombustivelEl && document.activeElement !== percentualCombustivelEl){
     percentualCombustivelEl.value = percentualSalvo.toFixed(2);
-  }
-  const percentualManutencaoEl = document.getElementById("percentualManutencao");
-  if(percentualManutencaoEl && document.activeElement !== percentualManutencaoEl){
-    percentualManutencaoEl.value = Number(dados.manutencaoPercentual || 0) > 0 ? formatPercentInputValue(dados.manutencaoPercentual || 0) : "";
   }
 
   updateFuelModeUI();
@@ -7806,7 +7324,7 @@ const fuelCfg = getCombustivelConfig(bruto);
   // líquido = bruto * 0,70 - gastosExtras
   // então o bruto necessário para atingir a meta e repor gastos é:
   // (meta líquida desejada + gastos extras) / 0,70
-  const divisorMeta = Math.max(0.05, 1 - Number(fuelCfg.taxaMeta || fuelCfg.taxaCombustivel || 0));
+  const divisorMeta = Math.max(0.05, 1 - Number(fuelCfg.taxaCombustivel || 0));
   const metaBrutaComGastos = ((dados.metaTotal || 0) + gastosExtras) > 0
     ? (((dados.metaTotal || 0) + gastosExtras) / divisorMeta)
     : 0;
@@ -7821,8 +7339,7 @@ const fuelCfg = getCombustivelConfig(bruto);
 
   const brutoSemHoje = Math.max(0, bruto - ganhosHoje);
   const combustivelSemHoje = brutoSemHoje * Number(fuelCfg.taxaCombustivel || 0);
-  const manutencaoSemHoje = brutoSemHoje * Number(fuelCfg.manutencaoPercentual || 0);
-  const liquidoSemHoje = brutoSemHoje - combustivelSemHoje - manutencaoSemHoje - gastosExtras;
+  const liquidoSemHoje = brutoSemHoje - combustivelSemHoje - gastosExtras;
   const faltanteLiquidoSemHoje = Math.max(0, (dados.metaTotal || 0) - liquidoSemHoje);
   const metaRestanteSemHoje = (faltanteLiquidoSemHoje > 0) ? (faltanteLiquidoSemHoje / divisorMeta) : 0;
   const metaDiariaAuto = (diasRestantes > 0) ? (metaRestanteSemHoje / diasRestantes) : 0;
@@ -7979,15 +7496,10 @@ document.getElementById("listaGastos").innerHTML =
 
 function syncMetaAutoFromInputs(){
   try{
+    const metaInput = document.getElementById("metaTotal");
     const dataInput = document.getElementById("dataLimite");
+    dados.metaTotal = parseFloat(String(metaInput?.value || "").replace(",", ".")) || 0;
     dados.dataLimite = dataInput?.value || "";
-    const manutInput = document.getElementById("percentualManutencao");
-    if(manutInput) dados.manutencaoPercentual = parsePercentInputValue(manutInput.value || "0");
-    if(!updateMetaDetalhadaValorFromInput(metaTotalTargetId)){
-      const metaInput = document.getElementById("metaTotal");
-      dados.metaTotal = parseFloat(String(metaInput?.value || "").replace(",", ".")) || 0;
-    }
-    calcularTotalMetasDetalhadas();
     dados.metaSalva = !!(Number(dados.metaTotal || 0) > 0 || String(dados.dataLimite || '').trim());
     try{ atualizar(); }catch(e){}
     try{ salvar(); }catch(e){}
@@ -7999,10 +7511,7 @@ let metaTotalTargetId = "metaTotal";
 let metaTotalTargetMode = "default";
 
 function formatMetaTotalDisplay(valueStr){
-  const n = parseFloat(String(valueStr || "").replace("%", "").replace(",", ".")) || 0;
-  if(getMetaTotalTargetMode && getMetaTotalTargetMode() === "percent"){
-    return String(Number(n.toFixed(2))).replace(".", ",") + "%";
-  }
+  const n = parseFloat(String(valueStr || "").replace(",", ".")) || 0;
   return "R$ " + n.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
@@ -8028,12 +7537,7 @@ function applyMetaTotalValue(){
   const hidden = document.getElementById("metaTotalHiddenInput");
   const visible = getMetaTotalTarget();
   if(!hidden || !visible) return;
-  if(getMetaTotalTargetMode() === "percent"){
-    const raw = String(hidden.value || "").replace("%", "").replace(",", ".");
-    visible.value = raw ? (String(Number(raw)).replace(".", ",") + "%") : "";
-  }else{
-    visible.value = String(hidden.value || "");
-  }
+  visible.value = String(hidden.value || "");
   syncMetaAutoFromInputs();
 }
 
@@ -8142,7 +7646,7 @@ function toggleMetaTotalKeypad(forceOpen, targetId){
   panel.classList.toggle("show", abrir);
   overlay.classList.toggle("show", abrir);
   if(abrir){
-    hidden.value = String(visible.value || "").replace("%", "").replace(",", ".");
+    hidden.value = String(visible.value || "");
     metaTotalReplaceOnNextInput = true;
     refreshMetaTotalDisplay();
     positionMetaTotalKeypad();
@@ -8228,8 +7732,6 @@ window.__qbState = window.__qbState || {
   uber: "",
   n99: ""
 };
-/* v42: edição da calculadora é rascunho. Só o botão Salvar grava; Home/fechar descarta. */
-window.__qbDraft = null;
 let quickBalanceReplaceOnNextInput = false;
 
 function qbLoadState(){
@@ -8256,34 +7758,6 @@ function qbLoadState(){
   s.initialized = true;
   return s;
 }
-function qbBeginDraft(){
-  const real = qbLoadState();
-  window.__qbDraft = {
-    initialized: true,
-    selected: (real.selected === "n99") ? "n99" : "uber",
-    uber: String(real.uber || ""),
-    n99: String(real.n99 || "")
-  };
-  return window.__qbDraft;
-}
-function qbActiveState(){
-  return window.__qbDraft || qbLoadState();
-}
-function qbCommitDraft(){
-  if(window.__qbDraft){
-    const real = qbLoadState();
-    real.selected = (window.__qbDraft.selected === "n99") ? "n99" : "uber";
-    real.uber = String(window.__qbDraft.uber || "");
-    real.n99 = String(window.__qbDraft.n99 || "");
-    window.__qbDraft = null;
-    qbPersistState();
-  }else{
-    qbPersistState();
-  }
-}
-function qbDiscardDraft(){
-  window.__qbDraft = null;
-}
 function qbPersistState(){
   const s = qbLoadState();
   try{ mdQBWrite(QUICK_BALANCE_SELECTED_KEY, s.selected); }catch(e){}
@@ -8297,7 +7771,7 @@ function qbPersistState(){
   }catch(e){}
 }
 function qbParts(){
-  const s = qbActiveState();
+  const s = qbLoadState();
   const uber = parseFloat(String(s.uber || "").replace(",", ".")) || 0;
   const n99 = parseFloat(String(s.n99 || "").replace(",", ".")) || 0;
   return { uber, n99, total: uber + n99 };
@@ -8307,14 +7781,14 @@ function formatQuickBalanceDisplay(valueStr){
   return "R$ " + n.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 function renderQuickBalanceSelection(){
-  const s = qbActiveState();
+  const s = qbLoadState();
   const uberCard = document.getElementById("quickBalanceUberCard");
   const n99Card = document.getElementById("quickBalance99Card");
   if(uberCard) uberCard.classList.toggle("active", s.selected === "uber");
   if(n99Card) n99Card.classList.toggle("active", s.selected === "n99");
 }
 function refreshQuickBalanceDisplay(){
-  const s = qbActiveState();
+  const s = qbLoadState();
   const input = document.getElementById("quickSaldoAtual");
   const view = document.getElementById("quickBalanceValue");
   const uberView = document.getElementById("quickBalanceUberValue");
@@ -8336,26 +7810,16 @@ function refreshQuickBalanceFabMiniDisplay(){
   try{ n = (typeof window.mdGetQuickBalancePartsV19 === 'function') ? window.mdGetQuickBalancePartsV19().total : qbParts().total; }
   catch(e){ n = Number((window.dados && dados.saldoAtualFora) || 0); }
   mini.textContent = "R$ " + n.toLocaleString("pt-BR", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
-  try{ fitQuickBalanceFabValue(mini); }catch(e){}
 }
-function fitQuickBalanceFabValue(el){
-  if(!el) return;
-  const txt = String(el.textContent || "");
-  let size = 17;
-  if(txt.length >= 12) size = 14;
-  else if(txt.length >= 10) size = 15;
-  else if(txt.length >= 8) size = 16;
-  el.style.fontSize = size + "px";
-}
-
 function selectQuickBalanceTarget(v){
-  const s = qbActiveState();
+  const s = qbLoadState();
   s.selected = (v === "n99") ? "n99" : "uber";
+  qbPersistState();
   quickBalanceReplaceOnNextInput = true;
   refreshQuickBalanceDisplay();
 }
 function appendQuickBalanceKey(key){
-  const s = qbActiveState();
+  const s = qbLoadState();
   const input = document.getElementById("quickSaldoAtual");
   if(!input) return;
   let current = (s.selected === "uber") ? String(s.uber || "") : String(s.n99 || "");
@@ -8370,10 +7834,11 @@ function appendQuickBalanceKey(key){
   current += key;
   if(s.selected === "uber") s.uber = current;
   else s.n99 = current;
+  qbPersistState();
   refreshQuickBalanceDisplay();
 }
 function backspaceQuickBalance(){
-  const s = qbActiveState();
+  const s = qbLoadState();
   let current = (s.selected === "uber") ? String(s.uber || "") : String(s.n99 || "");
   if(quickBalanceReplaceOnNextInput){
     current = "";
@@ -8383,13 +7848,15 @@ function backspaceQuickBalance(){
   }
   if(s.selected === "uber") s.uber = current;
   else s.n99 = current;
+  qbPersistState();
   refreshQuickBalanceDisplay();
 }
 function clearQuickBalance(){
-  const s = qbActiveState();
+  const s = qbLoadState();
   if(s.selected === "uber") s.uber = "";
   else s.n99 = "";
   quickBalanceReplaceOnNextInput = false;
+  qbPersistState();
   refreshQuickBalanceDisplay();
 }
 function toggleQuickBalancePanel(forceOpen){
@@ -8399,14 +7866,13 @@ function toggleQuickBalancePanel(forceOpen){
   const abrir = (typeof forceOpen === "boolean") ? forceOpen : !panel.classList.contains("show");
   panel.classList.toggle("show", abrir);
   overlay.classList.toggle("show", abrir);
+  qbLoadState();
   if(abrir){
-    qbBeginDraft();
     quickBalanceReplaceOnNextInput = true;
     refreshQuickBalanceDisplay();
   }else{
-    qbDiscardDraft();
+    qbPersistState();
     quickBalanceReplaceOnNextInput = false;
-    refreshQuickBalanceDisplay();
   }
   try{ syncSaldoAtualLockWithFab(); }catch(e){}
   try{ lockSaldoAtualByFab(); }catch(e){}
@@ -8415,7 +7881,7 @@ function toggleQuickBalancePanel(forceOpen){
 function salvarSaldoAtualRapido(){
   const saldoInput = document.getElementById("saldoAtualFora");
   if(!saldoInput) return;
-  qbCommitDraft();
+  qbPersistState();
   try{ if(typeof window.mdForceSaldoSync === 'function') window.mdForceSaldoSync(); }catch(e){}
   const parts = qbParts();
   const novoSaldo = parts.total;
@@ -8800,115 +8266,6 @@ function bindSectionHeaders(){
   }catch(e){}
 }
 
-
-
-
-// ===== v36 - Relatório Diário: sessão por modal compacto e botões coerentes =====
-(function(){
-  function getHiddenHorario(){ return document.getElementById('horarioInicioFora'); }
-  function isSessaoAtivaReal(){
-    try{
-      var hDom = String((getHiddenHorario() && getHiddenHorario().value) || '').trim();
-      var hDados = String(((typeof dados === 'object' && dados) && dados.horarioInicioFora) || '').trim();
-      return !!(hDom || hDados || ((typeof dados === 'object' && dados) && dados.ganhoHoraSessaoAtiva));
-    }catch(e){ return false; }
-  }
-  function setBtnState(btn, enabled){
-    if(!btn) return;
-    btn.disabled = !enabled;
-    btn.setAttribute('aria-disabled', enabled ? 'false' : 'true');
-    btn.classList.toggle('md-session-disabled', !enabled);
-    btn.classList.toggle('md-session-enabled', !!enabled);
-  }
-  window.mdUpdateSessionButtons = function(forceActive){
-    try{
-      var ativa = (typeof forceActive === 'boolean') ? forceActive : isSessaoAtivaReal();
-      setBtnState(document.getElementById('btnIniciarSessaoGH'), !ativa);
-      setBtnState(document.getElementById('btnFinalizarSessaoGH'), ativa);
-      var wrap=document.getElementById('saldoAtualForaWrap'); if(wrap) wrap.style.display='none';
-      var mirror=document.getElementById('saldoAtualFabMirrorWrap'); if(mirror) mirror.style.display='none';
-      var hora=document.getElementById('horarioInicioFora'); if(hora) hora.type='hidden';
-    }catch(e){}
-  };
-  window.openInicioSessaoModal = function(){
-    try{
-      if(isSessaoAtivaReal()){ try{ toast('Já existe sessão em andamento.'); }catch(e){}; mdUpdateSessionButtons(true); return false; }
-      var ov=document.getElementById('inicioSessaoOverlay');
-      var input=document.getElementById('inicioSessaoHoraModal');
-      var hidden=getHiddenHorario();
-      var now=new Date();
-      var atual=String((hidden && hidden.value) || (((typeof dados === 'object' && dados) && dados.horarioInicioFora) || '')).trim();
-      if(!atual) atual=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
-      if(input) input.value=atual;
-      if(ov){ ov.classList.add('md-show'); ov.style.display='flex'; }
-      setTimeout(function(){ try{ input && input.focus(); }catch(e){} },50);
-      return true;
-    }catch(e){ try{ console.error(e); toast('Erro ao abrir início de sessão.'); }catch(_e){} return false; }
-  };
-  window.closeInicioSessaoModal = function(){
-    try{ var ov=document.getElementById('inicioSessaoOverlay'); if(ov){ ov.classList.remove('md-show'); ov.style.display='none'; } }catch(e){}
-  };
-  window.confirmInicioSessaoModal = function(){
-    try{
-      var input=document.getElementById('inicioSessaoHoraModal');
-      var valor=String((input && input.value) || '').trim();
-      if(!/^([01]?\d|2[0-3]):[0-5]\d$/.test(valor)){ try{ toast('Informe um horário válido.'); }catch(e){} return false; }
-      var hidden=getHiddenHorario();
-      if(hidden) hidden.value=valor;
-      if(typeof dados === 'object' && dados){
-        dados.horarioInicioFora=valor;
-        dados.ganhoHoraSessaoAtiva=true;
-        dados.ganhoHoraSessaoDiaRef=String(dados.ganhoHoraDiaRef || (typeof dataUberISO==='function' ? dataUberISO() : ''));
-      }
-      try{ if(typeof iniciarTimerGanhoHoraTempoReal === 'function') iniciarTimerGanhoHoraTempoReal(); }catch(e){}
-      try{ if(typeof salvarGanhosForaTempoReal === 'function') salvarGanhosForaTempoReal(); else if(typeof salvar === 'function') salvar(); }catch(e){ try{ console.error('Erro ao salvar início de sessão', e); }catch(_e){} }
-      closeInicioSessaoModal();
-      mdUpdateSessionButtons(true);
-      try{ if(typeof atualizar === 'function') atualizar(); }catch(e){}
-      setTimeout(function(){ try{ mdUpdateSessionButtons(true); }catch(e){} },0);
-      return true;
-    }catch(e){ try{ console.error(e); toast('Erro ao iniciar sessão.'); }catch(_e){} return false; }
-  };
-  function finalizarSessaoProxy(){
-    try{
-      if(!isSessaoAtivaReal()){ try{ toast('Nenhuma sessão em andamento para finalizar.'); }catch(e){} mdUpdateSessionButtons(false); return false; }
-      var ok = true;
-      if(typeof window.__mdOriginalFinalizarSessaoGanhoHora === 'function'){
-        var r = window.__mdOriginalFinalizarSessaoGanhoHora.apply(this, arguments);
-        if(r === false) ok = false;
-      }else if(typeof finalizarSessaoGanhoHoraInterno === 'function'){
-        var r2 = finalizarSessaoGanhoHoraInterno({ naoIniciarProxima:true });
-        if(r2 === false) ok = false;
-      }
-      if(ok){
-        var hidden=getHiddenHorario(); if(hidden) hidden.value='';
-        if(window.dados){ dados.horarioInicioFora=''; dados.ganhoHoraSessaoAtiva=false; dados.ganhoHoraSessaoDiaRef=''; }
-        try{ if(typeof pararTimerGanhoHoraTempoReal === 'function') pararTimerGanhoHoraTempoReal(); }catch(e){}
-        try{ if(typeof salvar === 'function') salvar(); }catch(e){}
-        mdUpdateSessionButtons(false);
-        try{ if(typeof atualizar === 'function') atualizar(); }catch(e){}
-        setTimeout(function(){ try{ mdUpdateSessionButtons(false); }catch(e){} },0);
-      }
-      return ok;
-    }catch(e){ try{ console.error(e); toast('Erro ao finalizar sessão.'); }catch(_e){} return false; }
-  }
-  try{
-    if(typeof window.finalizarSessaoGanhoHora === 'function' && !window.__mdOriginalFinalizarSessaoGanhoHora){
-      window.__mdOriginalFinalizarSessaoGanhoHora = window.finalizarSessaoGanhoHora;
-    }
-    window.finalizarSessaoGanhoHora = finalizarSessaoProxy;
-  }catch(e){}
-  try{
-    var _atualizar = window.atualizar;
-    if(typeof _atualizar === 'function' && !_atualizar.__mdV36Wrapped){
-      window.atualizar = function(){ var r=_atualizar.apply(this, arguments); try{ mdUpdateSessionButtons(); }catch(e){} return r; };
-      window.atualizar.__mdV36Wrapped = true;
-    }
-  }catch(e){}
-  document.addEventListener('DOMContentLoaded', function(){ setTimeout(function(){ try{ mdUpdateSessionButtons(); }catch(e){} },0); });
-  window.addEventListener('pageshow', function(){ setTimeout(function(){ try{ mdUpdateSessionButtons(); }catch(e){} },0); });
-  setTimeout(function(){ try{ mdUpdateSessionButtons(); }catch(e){} },0);
-})();
 
 try{ ensureGanhoHoraDiaAtual(); }catch(e){}
 mdInitialHydrateAndRender();
@@ -9884,47 +9241,12 @@ function closeZerar(){
   if(ov) ov.classList.remove("show");
 }
 
-
-// ===== v36 - zeragem forte do botão flutuante no Zerar MetaDriver =====
-function mdZerarSaldoBotaoFlutuanteV36(){
-  try{
-    ["md_quick_balance_uber","md_quick_balance_99","quick_balance_uber","quick_balance_99","saldoUber","saldo99","saldoBotaoFlutuante","md_saldo_sync_v13"].forEach(function(k){
-      try{ localStorage.removeItem(k); }catch(e){}
-      try{ localStorage.setItem(k, ""); }catch(e){}
-    });
-  }catch(e){}
-  try{ if(typeof mdQBWrite === "function"){ mdQBWrite("md_quick_balance_uber",""); mdQBWrite("md_quick_balance_99",""); } }catch(e){}
-  try{ if(typeof mdSetQuickBalancePart === "function"){ mdSetQuickBalancePart("uber",0); mdSetQuickBalancePart("99",0); } }catch(e){}
-  try{
-    window.__qbState = window.__qbState || {};
-    window.__qbState.initialized = true;
-    window.__qbState.uber = "";
-    window.__qbState.n99 = "";
-  }catch(e){}
-  try{
-    if(typeof dados === "object" && dados){
-      dados.saldoUber = "";
-      dados.saldo99 = "";
-      dados.saldoBotaoFlutuante = 0;
-      dados.quickBalance = {uber:0,n99:0,total:0};
-      dados.saldoAtualFora = 0;
-      dados.ganhoDiarioAtual = 0;
-    }
-  }catch(e){}
-  try{ if(typeof refreshQuickBalanceDisplay === "function") refreshQuickBalanceDisplay(); }catch(e){}
-  try{ if(typeof refreshQuickBalanceFabMiniDisplay === "function") refreshQuickBalanceFabMiniDisplay(); }catch(e){}
-  try{ if(typeof syncSaldoAtualLockWithFab === "function") syncSaldoAtualLockWithFab(); }catch(e){}
-  try{ if(typeof atualizar === "function") atualizar(); }catch(e){}
-}
-
 function zerarControleUber(){
-  try{ mdZerarSaldoBotaoFlutuanteV36(); }catch(e){}
   dados.ganhos = [];
   dados.gastos = [];
   dados.abastecimentos = [];
   dados.naoTrabalhados = [];
   dados.metaTotal = 0;
-  dados.metasDetalhadas = [];
   dados.dataLimite = "";
   dados.metaDiariaManual = 0;
   dados.ganhoDiarioAtual = 0;
@@ -9941,7 +9263,6 @@ function zerarControleUber(){
   dados.ganhoHoraSessaoDiaRef = "";
   dados.combustivelModo = "fixo";
   dados.combustivelPercentual = 0.30;
-  dados.manutencaoPercentual = 0;
   dados.combustivelReal = { kmRodados: 0, consumoMedio: 0, precoLitro: 0 };
   try{ pararTimerGanhoHoraTempoReal(); }catch(e){}
   try{
@@ -10139,7 +9460,7 @@ document.addEventListener("visibilitychange", function(){
   function horaValida(v){ return /^([01]?\d|2[0-3]):[0-5]\d$/.test(String(v||'').trim()); }
   function sessaoAbertaReal(){
     try{
-      return !!(typeof dados === 'object' && dados && dados.ganhoHoraSessaoAtiva === true && String(dados.horarioInicioFora || '').trim());
+      return !!(window.dados && dados.ganhoHoraSessaoAtiva === true && String(dados.horarioInicioFora || '').trim());
     }catch(e){ return false; }
   }
   function setBtn(btn, ativo){
@@ -10197,7 +9518,7 @@ document.addEventListener("visibilitychange", function(){
         mdUpdateSessionButtons();
         return true;
       }
-      if(typeof dados !== 'object' || !dados) { try{ dados = loadDados && loadDados(); }catch(_e){} } if(typeof dados !== 'object' || !dados) throw new Error('dados indisponível');
+      if(!window.dados || typeof dados !== 'object') throw new Error('dados indisponível');
       if(!Array.isArray(dados.ganhoHoraSessoes)) dados.ganhoHoraSessoes=[];
       if(!dados.ganhoHoraDiaRef && typeof dataUberISO==='function') dados.ganhoHoraDiaRef=dataUberISO();
       dados.horarioInicioFora=valor;
@@ -10215,7 +9536,7 @@ document.addEventListener("visibilitychange", function(){
       setTimeout(function(){ try{ mdUpdateSessionButtons(); }catch(e){} },150);
       try{ toast('✅ Sessão iniciada.'); }catch(e){}
       return true;
-    }catch(e){ try{ console.error('Erro real ao iniciar sessão', e); toast('Erro ao iniciar sessão: ' + (e && e.message ? e.message : e)); try{ mdUpdateSessionButtons(); }catch(_b){} }catch(_e){} return false; }
+    }catch(e){ try{ console.error('Erro real ao iniciar sessão', e); toast('Erro ao iniciar sessão: ' + (e && e.message ? e.message : e)); }catch(_e){} return false; }
   };
   window.finalizarSessaoGanhoHora = function(){
     try{
