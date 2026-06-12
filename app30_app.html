@@ -43,7 +43,7 @@ try{
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver v37</title>
+<title>MetaDriver v38</title>
 <style id="md-hydration-lock">
 body.preload > *:not(#mdBootOverlay){visibility:hidden!important;}
 #mdBootOverlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#0f172a;color:#fff;z-index:2147483647;font-family:Inter,system-ui,sans-serif;font-weight:800;letter-spacing:.2px;}
@@ -2866,6 +2866,48 @@ body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff9d0; }
   margin:0 24px 12px 0 !important;
   display:block !important;
 }
+
+.meta-goals-box{
+  margin:4px 0 12px 0;
+}
+.meta-goal-row{
+  display:grid;
+  grid-template-columns: 1fr minmax(110px, 34%) 38px;
+  gap:8px;
+  align-items:center;
+  margin:8px 0;
+}
+.meta-goal-row input{
+  width:100% !important;
+  box-sizing:border-box !important;
+  margin:0 !important;
+}
+.meta-goal-remove, .meta-goal-add{
+  border:0;
+  border-radius:10px;
+  min-height:38px;
+  font-weight:800;
+  cursor:pointer;
+}
+.meta-goal-remove{
+  background:rgba(239,68,68,.16);
+  color:#fecaca;
+}
+.meta-goal-add{
+  width:100%;
+  margin:6px 0 10px 0;
+  background:rgba(34,197,94,.18);
+  color:#bbf7d0;
+}
+.meta-goal-total{
+  margin:6px 0 12px 0;
+  padding:10px 12px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  font-weight:800;
+  text-align:center;
+}
+
 #fuelPercentFields.config-meta-field{
   margin-top:0 !important;
   margin-bottom:0 !important;
@@ -3264,7 +3306,7 @@ body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff9d0; }
   <div class="menu-item"><button class="secondary" onclick="abrirSaldoAtualButtonMenu(); closeMenu();">Botão de saldo atual</button></div>
   <div class="menu-item"><button class="secondary" onclick="abrirTemas(); closeMenu();">Temas</button></div>
   <div class="menu-item"><button class="danger" onclick="forceLogout(); return false;">Sair</button></div>
-  <div class="menu-note" style="text-align:center;">v37</div>
+  <div class="menu-note" style="text-align:center;">v38</div>
 </div>
 
 <div id="temasOverlay" class="temas-overlay" onclick="fecharTemas()"></div>
@@ -3357,8 +3399,11 @@ body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff9d0; }
         <span class="collapse-arrow">▼</span>
       </div>
   <div class="card-body">
-    <label class="config-meta-label">Meta líquida desejada (R$)</label>
-    <input class="config-meta-input" type="text" id="metaTotal" inputmode="none" autocomplete="off" readonly onclick="openMetaTotalKeypad()" onfocus="this.blur(); openMetaTotalKeypad();">
+    <label class="config-meta-label">Metas líquidas desejadas</label>
+    <div id="metasDetalhadasLista" class="meta-goals-box"></div>
+    <button type="button" class="meta-goal-add" onclick="addMetaDetalhada()">+ Adicionar meta</button>
+    <div class="meta-goal-total">Total das metas: <span id="metaTotalResumo">R$ 0,00</span></div>
+    <input type="hidden" id="metaTotal" value="0">
     <label class="config-meta-label">Meta de ganho por hora</label>
     <input class="config-meta-input" type="text" id="ganhoHoraManual" inputmode="none" autocomplete="off" readonly onclick="openMetaTotalKeypadFor('ganhoHoraManual')" onfocus="this.blur(); openMetaTotalKeypadFor('ganhoHoraManual');" placeholder="Ex: 40">
 
@@ -3959,6 +4004,7 @@ let dados = loadDados() || {
   abastecimentos: [],
   naoTrabalhados: [],
   metaTotal: 0,
+  metasDetalhadas: [],
   dataLimite: "",
   metaDiariaManual: 0,
   ganhoDiarioAtual: 0,
@@ -4463,7 +4509,7 @@ function mdBuildDiagnosticsObject(){
     const durableObj = mdSafeJsonParse(durableRaw);
     const diag = {
       generated_at: mdNowIso(),
-      app_version: 'MetaDriver v37',
+      app_version: 'MetaDriver v38',
       cloud_table: CLOUD_TABLE,
       device_id: mdEnsureDeviceId(),
       visibility_state: document.visibilityState,
@@ -5343,8 +5389,101 @@ function toggleForm(id){
   }
 }
 
+
+function normalizarMetasDetalhadas(){
+  try{
+    if(!Array.isArray(dados.metasDetalhadas)) dados.metasDetalhadas = [];
+    dados.metasDetalhadas = dados.metasDetalhadas.map(function(m){
+      return {
+        descricao: String((m && m.descricao) || ""),
+        valor: Math.max(0, Number((m && m.valor) || 0) || 0)
+      };
+    });
+    if(dados.metasDetalhadas.length === 0 && Number(dados.metaTotal || 0) > 0){
+      dados.metasDetalhadas.push({ descricao: "Meta", valor: Number(dados.metaTotal || 0) });
+    }
+  }catch(e){ dados.metasDetalhadas = []; }
+}
+
+function calcularTotalMetasDetalhadas(){
+  normalizarMetasDetalhadas();
+  const total = dados.metasDetalhadas.reduce(function(s,m){ return s + (Number(m.valor || 0) || 0); }, 0);
+  dados.metaTotal = Math.max(0, total);
+  const hidden = document.getElementById("metaTotal");
+  if(hidden) hidden.value = String(dados.metaTotal || 0);
+  const resumo = document.getElementById("metaTotalResumo");
+  if(resumo) resumo.textContent = (typeof fmtMoney === "function") ? fmtMoney(dados.metaTotal || 0) : ("R$ " + Number(dados.metaTotal || 0).toFixed(2));
+  return dados.metaTotal;
+}
+
+function renderMetasDetalhadas(){
+  normalizarMetasDetalhadas();
+  if(dados.metasDetalhadas.length === 0){
+    dados.metasDetalhadas.push({ descricao: "", valor: 0 });
+  }
+  const lista = document.getElementById("metasDetalhadasLista");
+  if(!lista) return;
+  const panel = document.getElementById("metaTotalPanel");
+  const editingGoal = panel && panel.classList.contains("show") && String(metaTotalTargetId || "").indexOf("metaGoalValor_") === 0;
+  if(!editingGoal){
+    lista.innerHTML = dados.metasDetalhadas.map(function(m, idx){
+      const valor = Number(m.valor || 0) > 0 ? String(Number(m.valor || 0)).replace(".", ",") : "";
+      const desc = String(m.descricao || "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+      return '<div class="meta-goal-row">'
+        + '<input class="config-meta-input" type="text" id="metaGoalDesc_'+idx+'" placeholder="Descrição" value="'+desc+'" oninput="updateMetaDetalhadaDescricao('+idx+', this.value)">'
+        + '<input class="config-meta-input meta-goal-valor" type="text" id="metaGoalValor_'+idx+'" inputmode="none" autocomplete="off" readonly placeholder="Valor" value="'+valor+'" onclick="openMetaTotalKeypadFor(\'metaGoalValor_'+idx+'\')" onfocus="this.blur(); openMetaTotalKeypadFor(\'metaGoalValor_'+idx+'\');">'
+        + '<button type="button" class="meta-goal-remove" onclick="removeMetaDetalhada('+idx+')">×</button>'
+        + '</div>';
+    }).join("");
+  }
+  calcularTotalMetasDetalhadas();
+}
+
+function addMetaDetalhada(){
+  normalizarMetasDetalhadas();
+  dados.metasDetalhadas.push({ descricao: "", valor: 0 });
+  calcularTotalMetasDetalhadas();
+  salvar();
+  atualizar();
+  setTimeout(function(){
+    try{ const el = document.getElementById("metaGoalDesc_" + (dados.metasDetalhadas.length - 1)); if(el) el.focus(); }catch(e){}
+  }, 50);
+}
+
+function removeMetaDetalhada(idx){
+  normalizarMetasDetalhadas();
+  dados.metasDetalhadas.splice(idx, 1);
+  if(dados.metasDetalhadas.length === 0) dados.metasDetalhadas.push({ descricao: "", valor: 0 });
+  calcularTotalMetasDetalhadas();
+  dados.metaSalva = !!(Number(dados.metaTotal || 0) > 0 || String(dados.dataLimite || '').trim());
+  salvar();
+  atualizar();
+}
+
+function updateMetaDetalhadaDescricao(idx, value){
+  normalizarMetasDetalhadas();
+  if(!dados.metasDetalhadas[idx]) dados.metasDetalhadas[idx] = { descricao:"", valor:0 };
+  dados.metasDetalhadas[idx].descricao = String(value || "");
+  calcularTotalMetasDetalhadas();
+  dados.metaSalva = !!(Number(dados.metaTotal || 0) > 0 || String(dados.dataLimite || '').trim());
+  salvar();
+}
+
+function updateMetaDetalhadaValorFromInput(inputId){
+  const m = String(inputId || "").match(/^metaGoalValor_(\d+)$/);
+  if(!m) return false;
+  const idx = Number(m[1]);
+  normalizarMetasDetalhadas();
+  if(!dados.metasDetalhadas[idx]) dados.metasDetalhadas[idx] = { descricao:"", valor:0 };
+  const el = document.getElementById(inputId);
+  dados.metasDetalhadas[idx].valor = Math.max(0, parseFloat(String(el && el.value || "").replace(",", ".")) || 0);
+  calcularTotalMetasDetalhadas();
+  dados.metaSalva = !!(Number(dados.metaTotal || 0) > 0 || String(dados.dataLimite || '').trim());
+  return true;
+}
+
 function salvarMeta(){
-  dados.metaTotal = parseFloat(document.getElementById("metaTotal").value) || 0;
+  calcularTotalMetasDetalhadas();
   dados.dataLimite = document.getElementById("dataLimite").value || "";
   dados.manutencaoPercentual = parsePercentInputValue(document.getElementById("percentualManutencao")?.value || "0");
   dados.metaSalva = !!(Number(dados.metaTotal || 0) > 0 || String(dados.dataLimite || '').trim());
@@ -5421,7 +5560,7 @@ function addGanho(){
 
 
 
-/* ===== MetaDriver v37: virada 4h blindada, saldo por usuário e fonte única ===== */
+/* ===== MetaDriver v38: virada 4h blindada, saldo por usuário e fonte única ===== */
 function mdIsoDateLocal4h(d){
   const x = d instanceof Date ? new Date(d.getTime()) : new Date();
   const yyyy = x.getFullYear();
@@ -5669,7 +5808,7 @@ function addNaoTrabalhado(){
   if(!data) return;
 
   // preserva campos já digitados em Meta antes de salvar dias não trabalhados
-  dados.metaTotal = parseFloat(document.getElementById("metaTotal")?.value) || 0;
+  calcularTotalMetasDetalhadas();
   dados.dataLimite = document.getElementById("dataLimite")?.value || "";
 
   dados.naoTrabalhados.push({data, motivo: motivo || "Dia não trabalhado"});
@@ -5734,7 +5873,7 @@ function mdCommitLancamentoMutation(reason){
   try{ atualizar(); }catch(e){}
   try{ if(typeof refreshQuickBalanceFabMiniDisplay === "function") refreshQuickBalanceFabMiniDisplay(); }catch(e){}
   try{ if(typeof updateQuickBalanceFabUI === "function") updateQuickBalanceFabUI(); }catch(e){}
-  try{ if(typeof toast === "function" && reason) console.info("MetaDriver v37 mutation:", reason); }catch(e){}
+  try{ if(typeof toast === "function" && reason) console.info("MetaDriver v38 mutation:", reason); }catch(e){}
 }
 
 function editarValor(tipo, index){
@@ -6035,6 +6174,7 @@ function importarBackup(ev){
         abastecimentos: Array.isArray(novoDados.abastecimentos) ? novoDados.abastecimentos : [],
         naoTrabalhados: Array.isArray(novoDados.naoTrabalhados) ? novoDados.naoTrabalhados : [],
         metaTotal: Number(novoDados.metaTotal) || 0,
+        metasDetalhadas: Array.isArray(novoDados.metasDetalhadas) ? novoDados.metasDetalhadas : [],
         dataLimite: (novoDados.dataLimite && String(novoDados.dataLimite)) || "",
         metaDiariaManual: Number(novoDados.metaDiariaManual) || 0,
         ganhoDiarioAtual: Number(novoDados.ganhoDiarioAtual) || 0,
@@ -6139,6 +6279,7 @@ function zerarTudo(){
     abastecimentos: [],
     naoTrabalhados: [],
     metaTotal: 0,
+    metasDetalhadas: [],
     dataLimite: "",
     metaDiariaManual: 0,
     ganhoDiarioAtual: 0,
@@ -7355,7 +7496,7 @@ function exportarRelatorioPDF(){
       <script>
         setTimeout(()=>window.print(), 250);
       <\/script>
-    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v37 · app</div>
+    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v38 · app</div>
 
 
 <script>
@@ -7509,14 +7650,9 @@ function atualizar(){
 
   if(!Array.isArray(dados.naoTrabalhados)) dados.naoTrabalhados = [];
 
-  const elMeta = document.getElementById("metaTotal");
-if(elMeta && document.activeElement !== elMeta){
-  elMeta.value = dados.metaTotal || "";
+  try{ renderMetasDetalhadas(); }catch(e){}
   try{ syncSaldoAtualLockWithFab(); }catch(e){}
-
   try{ lockSaldoAtualByFab(); }catch(e){}
-
-}
   const elData = document.getElementById("dataLimite");
 if(elData && document.activeElement !== elData){
   elData.value = dados.dataLimite || "";
@@ -7767,12 +7903,15 @@ document.getElementById("listaGastos").innerHTML =
 
 function syncMetaAutoFromInputs(){
   try{
-    const metaInput = document.getElementById("metaTotal");
     const dataInput = document.getElementById("dataLimite");
-    dados.metaTotal = parseFloat(String(metaInput?.value || "").replace(",", ".")) || 0;
     dados.dataLimite = dataInput?.value || "";
     const manutInput = document.getElementById("percentualManutencao");
     if(manutInput) dados.manutencaoPercentual = parsePercentInputValue(manutInput.value || "0");
+    if(!updateMetaDetalhadaValorFromInput(metaTotalTargetId)){
+      const metaInput = document.getElementById("metaTotal");
+      dados.metaTotal = parseFloat(String(metaInput?.value || "").replace(",", ".")) || 0;
+    }
+    calcularTotalMetasDetalhadas();
     dados.metaSalva = !!(Number(dados.metaTotal || 0) > 0 || String(dados.dataLimite || '').trim());
     try{ atualizar(); }catch(e){}
     try{ salvar(); }catch(e){}
@@ -9671,6 +9810,7 @@ function zerarControleUber(){
   dados.abastecimentos = [];
   dados.naoTrabalhados = [];
   dados.metaTotal = 0;
+  dados.metasDetalhadas = [];
   dados.dataLimite = "";
   dados.metaDiariaManual = 0;
   dados.ganhoDiarioAtual = 0;
