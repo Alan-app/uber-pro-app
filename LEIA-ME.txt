@@ -1,4 +1,4 @@
-MetaDriver v41
+MetaDriver v42
 
-Base: v39.
-Alteração: compactação real do espaçamento vertical entre metas detalhadas em Configurar Metas.
+Base: v41.
+Alterações focadas no botão flutuante e na calculadora do saldo atual.

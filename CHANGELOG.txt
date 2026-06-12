@@ -1,5 +1,7 @@
-MetaDriver v41 - Metas detalhadas compactas corrigidas
+MetaDriver v42 - SALDO MAIOR E CALCULADORA COM DESCARTE
 
-- Corrigido o espaçamento real entre metas detalhadas.
-- Mantida a descrição e o valor na mesma linha.
-- Mantidos cálculo, persistência, combustível e manutenção sem alteração.
+- Botão flutuante voltou a exibir somente o saldo.
+- Fonte do saldo no botão flutuante aumentada.
+- Calculadora do saldo atual agora usa rascunho: digitar não salva automaticamente.
+- Botão Salvar confirma as alterações.
+- Botão Home/fechar descarta valores digitados sem salvar.
