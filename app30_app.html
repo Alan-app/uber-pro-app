@@ -43,7 +43,7 @@ try{
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver v36</title>
+<title>MetaDriver v37</title>
 <style id="md-hydration-lock">
 body.preload > *:not(#mdBootOverlay){visibility:hidden!important;}
 #mdBootOverlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#0f172a;color:#fff;z-index:2147483647;font-family:Inter,system-ui,sans-serif;font-weight:800;letter-spacing:.2px;}
@@ -3264,7 +3264,7 @@ body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff9d0; }
   <div class="menu-item"><button class="secondary" onclick="abrirSaldoAtualButtonMenu(); closeMenu();">Botão de saldo atual</button></div>
   <div class="menu-item"><button class="secondary" onclick="abrirTemas(); closeMenu();">Temas</button></div>
   <div class="menu-item"><button class="danger" onclick="forceLogout(); return false;">Sair</button></div>
-  <div class="menu-note" style="text-align:center;">v36</div>
+  <div class="menu-note" style="text-align:center;">v37</div>
 </div>
 
 <div id="temasOverlay" class="temas-overlay" onclick="fecharTemas()"></div>
@@ -3371,6 +3371,11 @@ body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff9d0; }
         <option value="0.45">45%</option>
         <option value="0.50">50%</option>
       </select>
+    </div>
+
+    <div id="maintenancePercentFields" class="config-meta-field">
+      <label class="config-meta-label">Manutenção (%)</label>
+      <input class="config-meta-input" type="text" id="percentualManutencao" inputmode="none" autocomplete="off" readonly data-keypad-mode="percent" onclick="openMetaTotalKeypadFor('percentualManutencao')" onfocus="this.blur(); openMetaTotalKeypadFor('percentualManutencao');" placeholder="Ex: 10%">
     </div>
 
     <label class="config-meta-label">Data limite para atingir a Meta</label>
@@ -3971,6 +3976,7 @@ let dados = loadDados() || {
   ganhoHoraSessaoDiaRef: "",
   combustivelModo: "fixo",
   combustivelPercentual: 0.30,
+  manutencaoPercentual: 0,
   combustivelReal: {
     kmRodados: 0,
     consumoMedio: 0,
@@ -4457,7 +4463,7 @@ function mdBuildDiagnosticsObject(){
     const durableObj = mdSafeJsonParse(durableRaw);
     const diag = {
       generated_at: mdNowIso(),
-      app_version: 'MetaDriver v36',
+      app_version: 'MetaDriver v37',
       cloud_table: CLOUD_TABLE,
       device_id: mdEnsureDeviceId(),
       visibility_state: document.visibilityState,
@@ -5340,6 +5346,7 @@ function toggleForm(id){
 function salvarMeta(){
   dados.metaTotal = parseFloat(document.getElementById("metaTotal").value) || 0;
   dados.dataLimite = document.getElementById("dataLimite").value || "";
+  dados.manutencaoPercentual = parsePercentInputValue(document.getElementById("percentualManutencao")?.value || "0");
   dados.metaSalva = !!(Number(dados.metaTotal || 0) > 0 || String(dados.dataLimite || '').trim());
   salvar();
   atualizar();
@@ -5414,7 +5421,7 @@ function addGanho(){
 
 
 
-/* ===== MetaDriver v36: virada 4h blindada, saldo por usuário e fonte única ===== */
+/* ===== MetaDriver v37: virada 4h blindada, saldo por usuário e fonte única ===== */
 function mdIsoDateLocal4h(d){
   const x = d instanceof Date ? new Date(d.getTime()) : new Date();
   const yyyy = x.getFullYear();
@@ -5727,7 +5734,7 @@ function mdCommitLancamentoMutation(reason){
   try{ atualizar(); }catch(e){}
   try{ if(typeof refreshQuickBalanceFabMiniDisplay === "function") refreshQuickBalanceFabMiniDisplay(); }catch(e){}
   try{ if(typeof updateQuickBalanceFabUI === "function") updateQuickBalanceFabUI(); }catch(e){}
-  try{ if(typeof toast === "function" && reason) console.info("MetaDriver v36 mutation:", reason); }catch(e){}
+  try{ if(typeof toast === "function" && reason) console.info("MetaDriver v37 mutation:", reason); }catch(e){}
 }
 
 function editarValor(tipo, index){
@@ -6044,6 +6051,7 @@ function importarBackup(ev){
         ganhoHoraSessaoDiaRef: (novoDados.ganhoHoraSessaoDiaRef && String(novoDados.ganhoHoraSessaoDiaRef)) || "",
         combustivelModo: (String(novoDados.combustivelModo || "fixo") === "real" ? "real" : "fixo"),
         combustivelPercentual: [0.30,0.35,0.40,0.45,0.50].includes(Number(novoDados.combustivelPercentual)) ? Number(novoDados.combustivelPercentual) : 0.30,
+        manutencaoPercentual: Math.max(0, Math.min(0.95, Number(novoDados.manutencaoPercentual || 0) || 0)),
         combustivelReal: {
           kmRodados: Number(novoDados?.combustivelReal?.kmRodados || 0) || 0,
           consumoMedio: Number(novoDados?.combustivelReal?.consumoMedio || 0) || 0,
@@ -6147,6 +6155,7 @@ function zerarTudo(){
     ganhoHoraSessaoDiaRef: "",
     combustivelModo: "fixo",
     combustivelPercentual: 0.30,
+    manutencaoPercentual: 0,
     combustivelReal: { kmRodados: 0, consumoMedio: 0, precoLitro: 0 }
   };
   salvar();
@@ -7043,6 +7052,26 @@ function iniciarTimerGanhoHoraTempoReal(){
 }
 
 
+function getManutencaoPercentual(){
+  try{
+    const n = Number(dados && dados.manutencaoPercentual || 0);
+    return Math.max(0, Math.min(0.95, isFinite(n) ? n : 0));
+  }catch(e){
+    return 0;
+  }
+}
+
+function formatPercentInputValue(decimalValue){
+  const pct = Math.max(0, (Number(decimalValue || 0) || 0) * 100);
+  if(Math.abs(pct - Math.round(pct)) < 0.0001) return String(Math.round(pct)) + "%";
+  return String(Number(pct.toFixed(2))).replace(".", ",") + "%";
+}
+
+function parsePercentInputValue(value){
+  const n = Number(String(value == null ? "" : value).replace("%", "").replace(",", "."));
+  return Math.max(0, Math.min(0.95, (isFinite(n) ? n : 0) / 100));
+}
+
 function getCombustivelConfig(brutoBase){
   const modo = "fixo";
   const percentualSelecionado = [0.30,0.35,0.40,0.45,0.50].includes(Number(dados.combustivelPercentual))
@@ -7054,8 +7083,9 @@ function getCombustivelConfig(brutoBase){
 
   let combustivelEstimado = brutoBase * percentualSelecionado;
   let taxaCombustivel = percentualSelecionado;
+  const manutencaoPercentual = getManutencaoPercentual();
   let tituloResumo = "Combustível disponível (" + Math.round(percentualSelecionado * 100) + "% do bruto)";
-  let detalheResumo = "Modo % do bruto ativo em " + Math.round(percentualSelecionado * 100) + "%.";
+  let detalheResumo = "Modo % do bruto ativo em " + Math.round(percentualSelecionado * 100) + "%. Manutenção na meta: " + Math.round(manutencaoPercentual * 100) + "%.";
 
   if(modo === "real"){
     const litrosEstimados = (kmRodados > 0 && consumoMedio > 0) ? (kmRodados / consumoMedio) : 0;
@@ -7065,8 +7095,8 @@ function getCombustivelConfig(brutoBase){
     taxaCombustivel = Math.max(0, Math.min(0.95, taxaCombustivel));
     tituloResumo = "Combustível previsto real";
     detalheResumo = (kmRodados > 0 && consumoMedio > 0 && precoLitro > 0)
-      ? ("Modo real ativo: " + kmRodados.toFixed(2) + " km ÷ " + consumoMedio.toFixed(2) + " km/l × R$ " + precoLitro.toFixed(2) + "/l")
-      : "Modo real ativo, mas faltam preencher KM rodados, consumo médio e preço do litro.";
+      ? ("Modo real ativo: " + kmRodados.toFixed(2) + " km ÷ " + consumoMedio.toFixed(2) + " km/l × R$ " + precoLitro.toFixed(2) + "/l. Manutenção na meta: " + Math.round(manutencaoPercentual * 100) + "%.")
+      : "Modo real ativo, mas faltam preencher KM rodados, consumo médio e preço do litro. Manutenção na meta: " + Math.round(manutencaoPercentual * 100) + "%.";
   }
 
   return {
@@ -7077,6 +7107,8 @@ function getCombustivelConfig(brutoBase){
     precoLitro,
     combustivelEstimado,
     taxaCombustivel,
+    manutencaoPercentual,
+    taxaMeta: Math.max(0, Math.min(0.95, Number(taxaCombustivel || 0) + Number(manutencaoPercentual || 0))),
     tituloResumo,
     detalheResumo
   };
@@ -7109,6 +7141,7 @@ function salvarConfigCombustivel(showToast){
   const percentualEl = document.getElementById("percentualCombustivel");
   const percentualSelecionado = percentualEl ? Number(percentualEl.value || 0.30) : 0.30;
   dados.combustivelPercentual = [0.30,0.35,0.40,0.45,0.50].includes(percentualSelecionado) ? percentualSelecionado : 0.30;
+  dados.manutencaoPercentual = parsePercentInputValue(document.getElementById("percentualManutencao")?.value || "0");
   dados.combustivelReal = {
     kmRodados: parseFloat(document.getElementById("fuelKmRodados")?.value) || 0,
     consumoMedio: parseFloat(document.getElementById("fuelConsumoMedio")?.value) || 0,
@@ -7167,7 +7200,7 @@ function exportarRelatorioPDF(){
   }
   const diasRestantes = Math.max(0, diasCalendario - diasNaoTrabalhadosNoPeriodo);
   const faltanteLiquido = Math.max(0, (dados.metaTotal || 0) - liquido);
-  const divisorMeta = Math.max(0.05, 1 - Number(fuelCfg.taxaCombustivel || 0));
+  const divisorMeta = Math.max(0.05, 1 - Number(fuelCfg.taxaMeta || fuelCfg.taxaCombustivel || 0));
   const metaRestante = (faltanteLiquido > 0) ? (faltanteLiquido / divisorMeta) : 0;
   const metaDiariaAuto = (diasRestantes > 0) ? (metaRestante / diasRestantes) : 0;
 
@@ -7322,7 +7355,7 @@ function exportarRelatorioPDF(){
       <script>
         setTimeout(()=>window.print(), 250);
       <\/script>
-    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v36 · app</div>
+    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v37 · app</div>
 
 
 <script>
@@ -7505,6 +7538,10 @@ document.getElementById("metaDiariaManual").value = metaSalvaAgora && (dados.met
   if(percentualCombustivelEl && document.activeElement !== percentualCombustivelEl){
     percentualCombustivelEl.value = percentualSalvo.toFixed(2);
   }
+  const percentualManutencaoEl = document.getElementById("percentualManutencao");
+  if(percentualManutencaoEl && document.activeElement !== percentualManutencaoEl){
+    percentualManutencaoEl.value = Number(dados.manutencaoPercentual || 0) > 0 ? formatPercentInputValue(dados.manutencaoPercentual || 0) : "";
+  }
 
   updateFuelModeUI();
   try{ applyQuickBalanceFabStateHard(); }catch(e){}
@@ -7557,7 +7594,7 @@ const fuelCfg = getCombustivelConfig(bruto);
   // líquido = bruto * 0,70 - gastosExtras
   // então o bruto necessário para atingir a meta e repor gastos é:
   // (meta líquida desejada + gastos extras) / 0,70
-  const divisorMeta = Math.max(0.05, 1 - Number(fuelCfg.taxaCombustivel || 0));
+  const divisorMeta = Math.max(0.05, 1 - Number(fuelCfg.taxaMeta || fuelCfg.taxaCombustivel || 0));
   const metaBrutaComGastos = ((dados.metaTotal || 0) + gastosExtras) > 0
     ? (((dados.metaTotal || 0) + gastosExtras) / divisorMeta)
     : 0;
@@ -7572,7 +7609,8 @@ const fuelCfg = getCombustivelConfig(bruto);
 
   const brutoSemHoje = Math.max(0, bruto - ganhosHoje);
   const combustivelSemHoje = brutoSemHoje * Number(fuelCfg.taxaCombustivel || 0);
-  const liquidoSemHoje = brutoSemHoje - combustivelSemHoje - gastosExtras;
+  const manutencaoSemHoje = brutoSemHoje * Number(fuelCfg.manutencaoPercentual || 0);
+  const liquidoSemHoje = brutoSemHoje - combustivelSemHoje - manutencaoSemHoje - gastosExtras;
   const faltanteLiquidoSemHoje = Math.max(0, (dados.metaTotal || 0) - liquidoSemHoje);
   const metaRestanteSemHoje = (faltanteLiquidoSemHoje > 0) ? (faltanteLiquidoSemHoje / divisorMeta) : 0;
   const metaDiariaAuto = (diasRestantes > 0) ? (metaRestanteSemHoje / diasRestantes) : 0;
@@ -7733,6 +7771,8 @@ function syncMetaAutoFromInputs(){
     const dataInput = document.getElementById("dataLimite");
     dados.metaTotal = parseFloat(String(metaInput?.value || "").replace(",", ".")) || 0;
     dados.dataLimite = dataInput?.value || "";
+    const manutInput = document.getElementById("percentualManutencao");
+    if(manutInput) dados.manutencaoPercentual = parsePercentInputValue(manutInput.value || "0");
     dados.metaSalva = !!(Number(dados.metaTotal || 0) > 0 || String(dados.dataLimite || '').trim());
     try{ atualizar(); }catch(e){}
     try{ salvar(); }catch(e){}
@@ -7744,7 +7784,10 @@ let metaTotalTargetId = "metaTotal";
 let metaTotalTargetMode = "default";
 
 function formatMetaTotalDisplay(valueStr){
-  const n = parseFloat(String(valueStr || "").replace(",", ".")) || 0;
+  const n = parseFloat(String(valueStr || "").replace("%", "").replace(",", ".")) || 0;
+  if(getMetaTotalTargetMode && getMetaTotalTargetMode() === "percent"){
+    return String(Number(n.toFixed(2))).replace(".", ",") + "%";
+  }
   return "R$ " + n.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
@@ -7770,7 +7813,12 @@ function applyMetaTotalValue(){
   const hidden = document.getElementById("metaTotalHiddenInput");
   const visible = getMetaTotalTarget();
   if(!hidden || !visible) return;
-  visible.value = String(hidden.value || "");
+  if(getMetaTotalTargetMode() === "percent"){
+    const raw = String(hidden.value || "").replace("%", "").replace(",", ".");
+    visible.value = raw ? (String(Number(raw)).replace(".", ",") + "%") : "";
+  }else{
+    visible.value = String(hidden.value || "");
+  }
   syncMetaAutoFromInputs();
 }
 
@@ -7879,7 +7927,7 @@ function toggleMetaTotalKeypad(forceOpen, targetId){
   panel.classList.toggle("show", abrir);
   overlay.classList.toggle("show", abrir);
   if(abrir){
-    hidden.value = String(visible.value || "");
+    hidden.value = String(visible.value || "").replace("%", "").replace(",", ".");
     metaTotalReplaceOnNextInput = true;
     refreshMetaTotalDisplay();
     positionMetaTotalKeypad();
@@ -9639,6 +9687,7 @@ function zerarControleUber(){
   dados.ganhoHoraSessaoDiaRef = "";
   dados.combustivelModo = "fixo";
   dados.combustivelPercentual = 0.30;
+  dados.manutencaoPercentual = 0;
   dados.combustivelReal = { kmRodados: 0, consumoMedio: 0, precoLitro: 0 };
   try{ pararTimerGanhoHoraTempoReal(); }catch(e){}
   try{
