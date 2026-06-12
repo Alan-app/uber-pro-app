@@ -1,10 +1,4 @@
-MetaDriver v39
-Correção de flash visual, saldo unificado e virada 4h sem duplicidade.
+MetaDriver v40
 
-Versão v39: Saldo Atual do Relatório Diário sincronizado obrigatoriamente com o botão flutuante.
-
-
-Atualização v39: Configurar Meta agora possui metas detalhadas com descrição/valor, totalizador automático e uso do total na lógica da meta diária.
-Atualização v37: Configurar Meta agora possui o campo Manutenção (%), salvo como percentual e somado ao combustível no cálculo da meta diária.
-
-Atualização v39: lista de metas detalhadas mais compacta, sem alteração de lógica.
+Base: v39.
+Alteração: compactação real do espaçamento vertical entre metas detalhadas em Configurar Metas.

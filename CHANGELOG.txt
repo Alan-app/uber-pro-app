@@ -1,22 +1,5 @@
-v39 - Reduz espaçamento vertical entre metas detalhadas, mantendo descrição e valor na mesma linha e sem alterar cálculos.
-v39 - Substitui Meta líquida desejada por metas detalhadas com descrição, valor, botão + e totalizador usado no cálculo da meta diária.
-v39 - Adiciona campo Manutenção (%) em Configurar Meta e inclui esse percentual somado ao combustível no cálculo da meta diária.
+MetaDriver v40 - Metas detalhadas compactas corrigidas
 
-v36 - Corrige virada das 4h com saldo congelado antes da limpeza, impede duplicidade no dia atual, preserva histórico/sessões finalizadas e isola saldo rápido por usuário.
-
-v36 - correção real de hidratação inicial, flash visual e duplicidade da virada 4h
-
-
-v36 - Corrige Saldo Atual do Relatório Diário para usar a fonte real do botão flutuante/teclado virtual (md_quick_balance_uber + md_quick_balance_99 / saldoUber + saldo99), sem limpar ao fechar e abrir.
-
-
-## MetaDriver v39
-- Corrigida a lógica real da virada das 4h.
-- Removido bloqueio indevido causado por comparação com o dia anterior.
-- Modal volta a abrir quando existe sessão em aberto após 4h.
-- Ganhos da virada são lançados separadamente Uber/99 usando a fonte do botão flutuante.
-- Sessão aberta é finalizada às 04:00, resumo do dia é salvo no histórico e sessões do dia são limpas.
-- Proteção idempotente por turnKey e syncKey para evitar duplicidade.
-
-
-v36 - Correção real do modal de início de sessão: OK cria sessão real, botões dependem do estado real e campo de horário centralizado.
+- Corrigido o espaçamento real entre metas detalhadas.
+- Mantida a descrição e o valor na mesma linha.
+- Mantidos cálculo, persistência, combustível e manutenção sem alteração.
