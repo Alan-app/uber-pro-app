@@ -1,5 +1,6 @@
-v38 - Substitui Meta líquida desejada por metas detalhadas com descrição, valor, botão + e totalizador usado no cálculo da meta diária.
-v38 - Adiciona campo Manutenção (%) em Configurar Meta e inclui esse percentual somado ao combustível no cálculo da meta diária.
+v39 - Reduz espaçamento vertical entre metas detalhadas, mantendo descrição e valor na mesma linha e sem alterar cálculos.
+v39 - Substitui Meta líquida desejada por metas detalhadas com descrição, valor, botão + e totalizador usado no cálculo da meta diária.
+v39 - Adiciona campo Manutenção (%) em Configurar Meta e inclui esse percentual somado ao combustível no cálculo da meta diária.
 
 v36 - Corrige virada das 4h com saldo congelado antes da limpeza, impede duplicidade no dia atual, preserva histórico/sessões finalizadas e isola saldo rápido por usuário.
 
@@ -9,7 +10,7 @@ v36 - correção real de hidratação inicial, flash visual e duplicidade da vir
 v36 - Corrige Saldo Atual do Relatório Diário para usar a fonte real do botão flutuante/teclado virtual (md_quick_balance_uber + md_quick_balance_99 / saldoUber + saldo99), sem limpar ao fechar e abrir.
 
 
-## MetaDriver v38
+## MetaDriver v39
 - Corrigida a lógica real da virada das 4h.
 - Removido bloqueio indevido causado por comparação com o dia anterior.
 - Modal volta a abrir quando existe sessão em aberto após 4h.
