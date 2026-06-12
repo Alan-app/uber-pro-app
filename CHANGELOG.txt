@@ -1,7 +1,5 @@
-MetaDriver v42 - SALDO MAIOR E CALCULADORA COM DESCARTE
+MetaDriver v43 - SALDO DO BOTÃO FLUTUANTE AJUSTADO
 
-- Botão flutuante voltou a exibir somente o saldo.
-- Fonte do saldo no botão flutuante aumentada.
-- Calculadora do saldo atual agora usa rascunho: digitar não salva automaticamente.
-- Botão Salvar confirma as alterações.
-- Botão Home/fechar descarta valores digitados sem salvar.
+- Reverte o rótulo do botão flutuante, mantendo somente o saldo.
+- Ajusta o tamanho do texto para ficar maior, porém sem corte visual.
+- Mantém a lógica da calculadora da v42: valores só são aplicados ao salvar; Home descarta alterações não salvas.

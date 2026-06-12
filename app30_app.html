@@ -43,7 +43,7 @@ try{
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver v42</title>
+<title>MetaDriver v43</title>
 <style id="md-hydration-lock">
 body.preload > *:not(#mdBootOverlay){visibility:hidden!important;}
 #mdBootOverlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#0f172a;color:#fff;z-index:2147483647;font-family:Inter,system-ui,sans-serif;font-weight:800;letter-spacing:.2px;}
@@ -3017,21 +3017,25 @@ body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff9d0; }
 }
 
 
-/* v42 - botão flutuante volta a mostrar somente o saldo, com fonte maior */
+/* v43 - botão flutuante somente saldo, maior possível sem corte */
 .quick-balance-fab-label{
   display:none !important;
 }
 .quick-balance-fab-inner{
   justify-content:center !important;
   gap:0 !important;
+  padding:0 5px !important;
+  box-sizing:border-box !important;
 }
 .quick-balance-fab-value{
-  font-size:20px !important;
+  font-size:17px !important;
   line-height:1 !important;
-  max-width:70px !important;
+  max-width:62px !important;
   margin:0 !important;
   text-align:center !important;
   white-space:nowrap !important;
+  overflow:visible !important;
+  text-overflow:clip !important;
 }
 
 
@@ -4581,7 +4585,7 @@ function mdBuildDiagnosticsObject(){
     const durableObj = mdSafeJsonParse(durableRaw);
     const diag = {
       generated_at: mdNowIso(),
-      app_version: 'MetaDriver v42',
+      app_version: 'MetaDriver v43',
       cloud_table: CLOUD_TABLE,
       device_id: mdEnsureDeviceId(),
       visibility_state: document.visibilityState,
@@ -7568,7 +7572,7 @@ function exportarRelatorioPDF(){
       <script>
         setTimeout(()=>window.print(), 250);
       <\/script>
-    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v42 · app</div>
+    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v43 · app</div>
 
 
 <script>
@@ -8332,7 +8336,18 @@ function refreshQuickBalanceFabMiniDisplay(){
   try{ n = (typeof window.mdGetQuickBalancePartsV19 === 'function') ? window.mdGetQuickBalancePartsV19().total : qbParts().total; }
   catch(e){ n = Number((window.dados && dados.saldoAtualFora) || 0); }
   mini.textContent = "R$ " + n.toLocaleString("pt-BR", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+  try{ fitQuickBalanceFabValue(mini); }catch(e){}
 }
+function fitQuickBalanceFabValue(el){
+  if(!el) return;
+  const txt = String(el.textContent || "");
+  let size = 17;
+  if(txt.length >= 12) size = 14;
+  else if(txt.length >= 10) size = 15;
+  else if(txt.length >= 8) size = 16;
+  el.style.fontSize = size + "px";
+}
+
 function selectQuickBalanceTarget(v){
   const s = qbActiveState();
   s.selected = (v === "n99") ? "n99" : "uber";

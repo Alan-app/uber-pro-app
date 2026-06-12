@@ -1,4 +1,3 @@
-MetaDriver v42
+MetaDriver v43
 
-Base: v41.
-Alterações focadas no botão flutuante e na calculadora do saldo atual.
+Versão baseada na v42, com ajuste visual no tamanho do saldo do botão flutuante para evitar corte.
