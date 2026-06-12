@@ -1,4 +1,4 @@
-MetaDriver v40 - Metas detalhadas compactas corrigidas
+MetaDriver v41 - Metas detalhadas compactas corrigidas
 
 - Corrigido o espaçamento real entre metas detalhadas.
 - Mantida a descrição e o valor na mesma linha.

@@ -1,4 +1,4 @@
-MetaDriver v40
+MetaDriver v41
 
 Base: v39.
 Alteração: compactação real do espaçamento vertical entre metas detalhadas em Configurar Metas.

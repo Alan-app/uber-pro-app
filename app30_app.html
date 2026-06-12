@@ -43,7 +43,7 @@ try{
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver v40</title>
+<title>MetaDriver v41</title>
 <style id="md-hydration-lock">
 body.preload > *:not(#mdBootOverlay){visibility:hidden!important;}
 #mdBootOverlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#0f172a;color:#fff;z-index:2147483647;font-family:Inter,system-ui,sans-serif;font-weight:800;letter-spacing:.2px;}
@@ -998,6 +998,14 @@ input.negative-value, input.negative-value::placeholder{
   align-items:center;
   justify-content:center;
   line-height:1;
+}
+.quick-balance-fab-label{
+  font-size:8px;
+  font-weight:900;
+  line-height:1;
+  text-align:center;
+  white-space:nowrap;
+  margin-bottom:3px;
 }
 .quick-balance-fab-icon{
   font-size:16px;
@@ -2986,13 +2994,24 @@ body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff9d0; }
 }
 
 
-/* v57 safe patch - botão flutuante sem $ e com valor maior */
+/* v41 - botão flutuante com rótulo Saldo Atual acima do valor */
 .quick-balance-fab-inner{
   justify-content:center !important;
+  gap:2px !important;
+}
+.quick-balance-fab-label{
+  display:block !important;
+  font-size:8px !important;
+  max-width:64px !important;
+  font-weight:900 !important;
+  line-height:1 !important;
+  text-align:center !important;
+  white-space:nowrap !important;
+  color:#111827 !important;
 }
 .quick-balance-fab-value{
-  font-size:14px !important;
-  max-width:62px !important;
+  font-size:13px !important;
+  max-width:64px !important;
   font-weight:900 !important;
   line-height:1.05 !important;
 }
@@ -4544,7 +4563,7 @@ function mdBuildDiagnosticsObject(){
     const durableObj = mdSafeJsonParse(durableRaw);
     const diag = {
       generated_at: mdNowIso(),
-      app_version: 'MetaDriver v40',
+      app_version: 'MetaDriver v41',
       cloud_table: CLOUD_TABLE,
       device_id: mdEnsureDeviceId(),
       visibility_state: document.visibilityState,
@@ -5595,7 +5614,7 @@ function addGanho(){
 
 
 
-/* ===== MetaDriver v40: virada 4h blindada, saldo por usuário e fonte única ===== */
+/* ===== MetaDriver v41: virada 4h blindada, saldo por usuário e fonte única ===== */
 function mdIsoDateLocal4h(d){
   const x = d instanceof Date ? new Date(d.getTime()) : new Date();
   const yyyy = x.getFullYear();
@@ -5908,7 +5927,7 @@ function mdCommitLancamentoMutation(reason){
   try{ atualizar(); }catch(e){}
   try{ if(typeof refreshQuickBalanceFabMiniDisplay === "function") refreshQuickBalanceFabMiniDisplay(); }catch(e){}
   try{ if(typeof updateQuickBalanceFabUI === "function") updateQuickBalanceFabUI(); }catch(e){}
-  try{ if(typeof toast === "function" && reason) console.info("MetaDriver v40 mutation:", reason); }catch(e){}
+  try{ if(typeof toast === "function" && reason) console.info("MetaDriver v41 mutation:", reason); }catch(e){}
 }
 
 function editarValor(tipo, index){
@@ -7531,7 +7550,7 @@ function exportarRelatorioPDF(){
       <script>
         setTimeout(()=>window.print(), 250);
       <\/script>
-    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v40 · app</div>
+    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v41 · app</div>
 
 
 <script>
@@ -10173,7 +10192,7 @@ document.addEventListener("visibilitychange", function(){
 
 </script>
 
-<button type="button" id="quickBalanceFab" class="quick-balance-fab" onclick="toggleQuickBalancePanel(true)" aria-label="Atualizar saldo atual rápido"><span class="quick-balance-fab-inner"><span id="quickBalanceFabValue" class="quickBalanceFabValue quick-balance-fab-value">R$ 0</span></span></button>
+<button type="button" id="quickBalanceFab" class="quick-balance-fab" onclick="toggleQuickBalancePanel(true)" aria-label="Atualizar saldo atual rápido"><span class="quick-balance-fab-inner"><span class="quick-balance-fab-label">Saldo Atual</span><span id="quickBalanceFabValue" class="quickBalanceFabValue quick-balance-fab-value">R$ 0</span></span></button>
 
 
 <div id="dayTurn4hOverlay" class="dayturn-overlay" onclick="if(event.target.id==='dayTurn4hOverlay')cancelVirada4hModal()"></div>
