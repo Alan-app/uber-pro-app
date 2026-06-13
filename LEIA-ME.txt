@@ -1,3 +1,4 @@
-MetaDriver v49 - Ganho por hora retoma ao reabrir
+MetaDriver v50 - Teclado de Lançamentos e versão corrigida
 
-Base v48 com correção de timer da sessão em andamento e versão visual/interna atualizada para v49.
+Base v49 com ajuste nos campos de Lançamentos: descrições usam teclado normal e valores usam teclado numérico nativo.
+A versão exibida no app foi atualizada para v50 também no menu e arquivos auxiliares.

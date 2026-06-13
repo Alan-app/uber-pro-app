@@ -1,5 +1,6 @@
-MetaDriver v49
+MetaDriver v50
 
-- Corrigida retomada do ganho por hora ao fechar e reabrir o app com sessão em andamento.
-- A sessão ativa agora religa o timer automaticamente após load, pageshow, focus, visibilitychange e hidratação/cloud.
-- Versão exibida atualizada para MetaDriver v49.
+- Lançamentos: valores voltam a usar teclado nativo numérico, sem teclado MetaDriver personalizado.
+- Lançamentos: descrições permanecem com teclado normal de letras.
+- Campos de valor em Lançamentos aceitam somente números e ponto decimal.
+- Versão visual/interna atualizada para v50, incluindo menu, telas auxiliares, manifest e cache-buster.

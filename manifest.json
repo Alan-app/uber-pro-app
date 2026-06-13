@@ -1,7 +1,7 @@
 {
-  "name": "MetaDriver v49",
-  "short_name": "MetaDriver v49",
-  "start_url": "./index.html",
+  "name": "MetaDriver v50",
+  "short_name": "MetaDriver v50",
+  "start_url": "./index.html?v=50",
   "scope": "./",
   "display": "standalone",
   "background_color": "#0f172a",
@@ -19,5 +19,5 @@
       "type": "image/png"
     }
   ],
-  "version": "v39"
+  "version": "v50"
 }

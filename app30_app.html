@@ -43,7 +43,7 @@ try{
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver v49</title>
+<title>MetaDriver v50</title>
 <style id="md-hydration-lock">
 body.preload > *:not(#mdBootOverlay){visibility:hidden!important;}
 #mdBootOverlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#0f172a;color:#fff;z-index:2147483647;font-family:Inter,system-ui,sans-serif;font-weight:800;letter-spacing:.2px;}
@@ -3341,7 +3341,7 @@ body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff9d0; }
   <div class="menu-item"><button class="secondary" onclick="abrirSaldoAtualButtonMenu(); closeMenu();">Botão de saldo atual</button></div>
   <div class="menu-item"><button class="secondary" onclick="abrirTemas(); closeMenu();">Temas</button></div>
   <div class="menu-item"><button class="danger" onclick="forceLogout(); return false;">Sair</button></div>
-  <div class="menu-note" style="text-align:center;">v40</div>
+  <div class="menu-note" style="text-align:center;">v50</div>
 </div>
 
 <div id="temasOverlay" class="temas-overlay" onclick="fecharTemas()"></div>
@@ -3549,7 +3549,7 @@ body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff9d0; }
     <div id="formGanho" class="collapsible">
       <input type="date" id="dataGanho">
       <input type="text" id="descricaoGanho" placeholder="Descrição (ex: Uber, 99, Particular...)" />
-      <input type="text" id="valorGanho" placeholder="Valor ganho" inputmode="none" autocomplete="off" readonly onclick="openMetaTotalKeypadFor('valorGanho')" onfocus="this.blur(); openMetaTotalKeypadFor('valorGanho');" data-keypad-mode="lancamentos">
+      <input type="text" id="valorGanho" placeholder="Valor ganho" inputmode="decimal" pattern="[0-9.]*" enterkeyhint="done" autocomplete="off" oninput="sanitizeLancamentoValorInput(this)">
       <button onclick="addGanho()">Salvar ganho</button>
     </div>
     <div id="wrapGanhos"><div id="listaGanhos"></div></div>
@@ -3562,7 +3562,7 @@ body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff9d0; }
     <div id="formGasto" class="collapsible">
       <input type="date" id="dataGasto">
       <input type="text" id="descGasto" placeholder="Descrição (ex: lavagem, manutenção)">
-      <input type="text" id="valorGasto" placeholder="Valor gasto" inputmode="none" autocomplete="off" readonly onclick="openMetaTotalKeypadFor('valorGasto')" onfocus="this.blur(); openMetaTotalKeypadFor('valorGasto');" data-keypad-mode="lancamentos">
+      <input type="text" id="valorGasto" placeholder="Valor gasto" inputmode="decimal" pattern="[0-9.]*" enterkeyhint="done" autocomplete="off" oninput="sanitizeLancamentoValorInput(this)">
       <button onclick="addGasto()">Salvar gasto</button>
     </div>
     <div id="wrapGastos"><div id="listaGastos"></div></div>
@@ -3572,7 +3572,7 @@ body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff9d0; }
     <div id="formRetirada" class="collapsible">
       <input type="date" id="dataRetirada">
       <input type="text" id="descRetirada" placeholder="Descrição (ex: saque, aluguel, meta paga)">
-      <input type="text" id="valorRetirada" placeholder="Valor retirado" inputmode="none" autocomplete="off" readonly onclick="openMetaTotalKeypadFor('valorRetirada')" onfocus="this.blur(); openMetaTotalKeypadFor('valorRetirada');" data-keypad-mode="lancamentos">
+      <input type="text" id="valorRetirada" placeholder="Valor retirado" inputmode="decimal" pattern="[0-9.]*" enterkeyhint="done" autocomplete="off" oninput="sanitizeLancamentoValorInput(this)">
       <button onclick="addRetirada()">Salvar retirada</button>
     </div>
     <div id="wrapRetiradas"><div id="listaRetiradas"></div></div>
@@ -3581,7 +3581,7 @@ body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff9d0; }
     <button class="secondary" onclick="toggleForm('formAbastecimento')">Adicionar abastecimento</button>
     <div id="formAbastecimento" class="collapsible">
       <input type="date" id="dataAbastecimento">
-      <input type="text" id="valorAbastecimento" placeholder="Valor abastecimento" inputmode="none" autocomplete="off" readonly onclick="openMetaTotalKeypadFor('valorAbastecimento')" onfocus="this.blur(); openMetaTotalKeypadFor('valorAbastecimento');" data-keypad-mode="lancamentos">
+      <input type="text" id="valorAbastecimento" placeholder="Valor abastecimento" inputmode="decimal" pattern="[0-9.]*" enterkeyhint="done" autocomplete="off" oninput="sanitizeLancamentoValorInput(this)">
       <button onclick="addAbastecimento()">Salvar abastecimento</button>
     </div>
     <div id="listaAbastecimentos"></div>
@@ -4558,7 +4558,7 @@ function mdBuildDiagnosticsObject(){
     const durableObj = mdSafeJsonParse(durableRaw);
     const diag = {
       generated_at: mdNowIso(),
-      app_version: 'MetaDriver v49',
+      app_version: 'MetaDriver v50',
       cloud_table: CLOUD_TABLE,
       device_id: mdEnsureDeviceId(),
       visibility_state: document.visibilityState,
@@ -5551,6 +5551,18 @@ function salvarHoras(){
 
 
 
+function sanitizeLancamentoValorInput(input){
+  try{
+    if(!input) return;
+    let v = String(input.value || "").replace(/,/g, ".").replace(/[^0-9.]/g, "");
+    const firstDot = v.indexOf(".");
+    if(firstDot >= 0){
+      v = v.slice(0, firstDot + 1) + v.slice(firstDot + 1).replace(/\./g, "");
+    }
+    input.value = v;
+  }catch(e){}
+}
+
 function horaAtualLancamento(){
   try{
     const now = new Date();
@@ -5943,7 +5955,7 @@ function mdCommitLancamentoMutation(reason){
   try{ atualizar(); }catch(e){}
   try{ if(typeof refreshQuickBalanceFabMiniDisplay === "function") refreshQuickBalanceFabMiniDisplay(); }catch(e){}
   try{ if(typeof updateQuickBalanceFabUI === "function") updateQuickBalanceFabUI(); }catch(e){}
-  try{ if(typeof toast === "function" && reason) console.info("MetaDriver v40 mutation:", reason); }catch(e){}
+  try{ if(typeof toast === "function" && reason) console.info("MetaDriver v50 mutation:", reason); }catch(e){}
 }
 
 function editarValor(tipo, index){
@@ -6161,7 +6173,7 @@ function mdRestaurarSaldoBotaoDoBackupV36(safe){
 function getExportBackupBlob(){
   const payload = {
     app: "MetaDriver",
-    version: "8",
+    version: "50",
     exported_at: new Date().toISOString(),
     storage_key: STORAGE_KEY,
     dados: mdPrepararBackupSaldoV36(dados)
@@ -7575,7 +7587,7 @@ function exportarRelatorioPDF(){
       <script>
         setTimeout(()=>window.print(), 250);
       <\/script>
-    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v49 · app</div>
+    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v50 · app</div>
 
 
 <script>
