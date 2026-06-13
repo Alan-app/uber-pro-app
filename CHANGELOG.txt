@@ -1,5 +1,5 @@
-MetaDriver v48
-- Base: v47.
-- Corrigida a lógica de Retiradas: agora sai do Livro Líquido, sem alterar saldo atual do botão flutuante, sessão ou ganho por hora.
-- Retiradas entram no cálculo do bruto que falta para meta, sem serem tratadas como gastos.
-- Versão exibida atualizada para MetaDriver v48.
+MetaDriver v49
+
+- Corrigida retomada do ganho por hora ao fechar e reabrir o app com sessão em andamento.
+- A sessão ativa agora religa o timer automaticamente após load, pageshow, focus, visibilitychange e hidratação/cloud.
+- Versão exibida atualizada para MetaDriver v49.

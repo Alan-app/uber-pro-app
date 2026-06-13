@@ -1,3 +1,3 @@
-MetaDriver v48 - Retiradas no Livro Líquido
-Instale substituindo a versão anterior.
-Retiradas representam dinheiro já conquistado e usado: reduzem o Livro Líquido/metas, mas não reduzem o saldo atual da sessão.
+MetaDriver v49 - Ganho por hora retoma ao reabrir
+
+Base v48 com correção de timer da sessão em andamento e versão visual/interna atualizada para v49.

@@ -43,7 +43,7 @@ try{
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver v48</title>
+<title>MetaDriver v49</title>
 <style id="md-hydration-lock">
 body.preload > *:not(#mdBootOverlay){visibility:hidden!important;}
 #mdBootOverlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#0f172a;color:#fff;z-index:2147483647;font-family:Inter,system-ui,sans-serif;font-weight:800;letter-spacing:.2px;}
@@ -4541,6 +4541,7 @@ function mdApplyExternalSnapshot(snapshot, reason, pushNow){
     mdLockStateWrites(120000, appliedOrder);
     try{ atualizar(); }catch(e){}
     try{ atualizarCarro(); }catch(e){}
+    try{ if(typeof window.mdResumeOpenSessionV49 === 'function') window.mdResumeOpenSessionV49(); else if(typeof resumeGanhoHoraTempoRealSafely === 'function') resumeGanhoHoraTempoRealSafely(); }catch(e){}
     return true;
   }catch(e){
     try{ console.warn("mdApplyExternalSnapshot", e); }catch(_e){}
@@ -4557,7 +4558,7 @@ function mdBuildDiagnosticsObject(){
     const durableObj = mdSafeJsonParse(durableRaw);
     const diag = {
       generated_at: mdNowIso(),
-      app_version: 'MetaDriver v48',
+      app_version: 'MetaDriver v49',
       cloud_table: CLOUD_TABLE,
       device_id: mdEnsureDeviceId(),
       visibility_state: document.visibilityState,
@@ -7149,6 +7150,7 @@ if(!Array.isArray(dados.ganhoHoraSessoes)) dados.ganhoHoraSessoes = [];
   dados.saldoAtualFora = saldoAtual;
   dados.ganhoDiarioAtual = saldoAtual;
   dados.horarioInicioFora = horario;
+  dados.ganhoHoraSessaoAtiva = true;
   dados.ganhoHoraSessaoDiaRef = horario ? String(dados.ganhoHoraDiaRef || dataUberISO()) : "";
   dados.ganhoHoraSessaoAtiva = !!horario;
 
@@ -7196,8 +7198,9 @@ let ganhoHoraTempoRealTimer = null;
 
 function resumeGanhoHoraTempoRealSafely(){
   try{
-    const sessaoAtiva = !!dados.ganhoHoraSessaoAtiva && !!String(dados.horarioInicioFora || "").trim();
+    const sessaoAtiva = !!String(dados.horarioInicioFora || "").trim();
     if(sessaoAtiva){
+      dados.ganhoHoraSessaoAtiva = true;
       recalcularGanhoHoraSessaoEmTempoReal(true);
       iniciarTimerGanhoHoraTempoReal();
     }else{
@@ -7232,6 +7235,7 @@ function recalcularGanhoHoraSessaoEmTempoReal(renderizar){
   dados.saldoAtualFora = saldoAtualLido;
   dados.ganhoDiarioAtual = saldoAtualLido;
   dados.horarioInicioFora = horario;
+  dados.ganhoHoraSessaoAtiva = true;
   dados.ganhoHoraSessaoDiaRef = String(dados.ganhoHoraDiaRef || dataUberISO());
 
   const saldoAnterior = syncSaldoAnteriorSessaoAtual();
@@ -7571,7 +7575,7 @@ function exportarRelatorioPDF(){
       <script>
         setTimeout(()=>window.print(), 250);
       <\/script>
-    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v48 · app</div>
+    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v49 · app</div>
 
 
 <script>
@@ -10185,6 +10189,36 @@ document.addEventListener("visibilitychange", function(){
   }catch(e){}
 });
 
+
+
+// ===== v49 - retomada robusta do ganho/hora após reabrir app =====
+(function(){
+  function hasOpenSession(){
+    try{
+      return !!String((typeof dados === 'object' && dados && dados.horarioInicioFora) || '').trim();
+    }catch(e){ return false; }
+  }
+  function resumeOpenSession(){
+    try{
+      if(hasOpenSession()){
+        dados.ganhoHoraSessaoAtiva = true;
+        var h = document.getElementById('horarioInicioFora');
+        if(h && !String(h.value || '').trim()) h.value = String(dados.horarioInicioFora || '').trim();
+        if(typeof recalcularGanhoHoraSessaoEmTempoReal === 'function') recalcularGanhoHoraSessaoEmTempoReal(true);
+        if(typeof iniciarTimerGanhoHoraTempoReal === 'function') iniciarTimerGanhoHoraTempoReal();
+      }else{
+        if(typeof pararTimerGanhoHoraTempoReal === 'function') pararTimerGanhoHoraTempoReal();
+      }
+      if(typeof mdUpdateSessionButtons === 'function') mdUpdateSessionButtons();
+    }catch(e){}
+  }
+  window.mdResumeOpenSessionV49 = resumeOpenSession;
+  ['load','pageshow','focus','md-hydrated'].forEach(function(ev){
+    try{ window.addEventListener(ev, function(){ setTimeout(resumeOpenSession, 0); setTimeout(resumeOpenSession, 300); setTimeout(resumeOpenSession, 1200); }); }catch(e){}
+  });
+  try{ document.addEventListener('visibilitychange', function(){ if(!document.hidden){ setTimeout(resumeOpenSession, 0); setTimeout(resumeOpenSession, 500); } }); }catch(e){}
+  try{ setInterval(function(){ if(hasOpenSession()) resumeOpenSession(); }, 5000); }catch(e){}
+})();
 
 // ===== v36 - correção REAL da sessão por modal =====
 (function(){
