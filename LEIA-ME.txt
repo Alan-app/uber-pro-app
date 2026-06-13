@@ -1,1 +1,2 @@
-MetaDriver v45 - base v44. Calculadora do botão flutuante com confirmação apenas ao salvar e descarte pelo Home.
+MetaDriver v46 - Retiradas e Excedente
+Base v45 mantida. Instale substituindo a versão anterior.

@@ -1,4 +1,7 @@
-MetaDriver v45
-- Ajuste no teclado/calculadora do botão flutuante: valores digitados em Uber/99 ficam em rascunho até Salvar.
-- Botão Home/fechar descarta alterações não salvas.
-- Mantém correção v44 do ganho por hora ao reabrir app com sessão ativa.
+MetaDriver v46
+- Base: v45.
+- Adicionada categoria Retiradas em Lançamentos.
+- Retiradas ficam separadas de Gastos e não entram como gasto extra a repor.
+- Valor restante da meta diária não fica negativo; quando a meta é batida, mostra excedente.
+- Retiradas do dia consomem primeiro o excedente da meta diária; só o que passar do excedente reduz o saldo normal do dia.
+- Versão exibida atualizada para MetaDriver v46.

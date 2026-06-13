@@ -43,7 +43,7 @@ try{
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver v40</title>
+<title>MetaDriver v46</title>
 <style id="md-hydration-lock">
 body.preload > *:not(#mdBootOverlay){visibility:hidden!important;}
 #mdBootOverlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#0f172a;color:#fff;z-index:2147483647;font-family:Inter,system-ui,sans-serif;font-weight:800;letter-spacing:.2px;}
@@ -3540,6 +3540,7 @@ body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff9d0; }
 <div class="subtabs">
   <button type="button" id="btnSubGanhos" class="subtab-btn" onclick="openLancSection('ganhos')">Ganhos</button>
   <button type="button" id="btnSubGastos" class="subtab-btn" onclick="openLancSection('gastos')">Gastos</button>
+  <button type="button" id="btnSubRetiradas" class="subtab-btn" onclick="openLancSection('retiradas')">Retiradas</button>
   <button type="button" id="btnSubCombustivel" class="subtab-btn" onclick="openLancSection('combustivel')">Combustível</button>
 </div>
 
@@ -3565,6 +3566,16 @@ body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff9d0; }
       <button onclick="addGasto()">Salvar gasto</button>
     </div>
     <div id="wrapGastos"><div id="listaGastos"></div></div>
+  </div>
+<div id="secRetiradas" class="subcard-hidden"><div class="section-title gastos-title">Retiradas</div>
+    <button class="secondary" onclick="toggleForm('formRetirada')">Adicionar retirada</button>
+    <div id="formRetirada" class="collapsible">
+      <input type="date" id="dataRetirada">
+      <input type="text" id="descRetirada" placeholder="Descrição (ex: saque, aluguel, meta paga)">
+      <input type="text" id="valorRetirada" placeholder="Valor retirado" inputmode="none" autocomplete="off" readonly onclick="openMetaTotalKeypadFor('valorRetirada')" onfocus="this.blur(); openMetaTotalKeypadFor('valorRetirada');" data-keypad-mode="lancamentos">
+      <button onclick="addRetirada()">Salvar retirada</button>
+    </div>
+    <div id="wrapRetiradas"><div id="listaRetiradas"></div></div>
   </div>
 <div id="secCombustivel" class="subcard-hidden"><div class="section-title gastos-title">Combustível</div>
     <button class="secondary" onclick="toggleForm('formAbastecimento')">Adicionar abastecimento</button>
@@ -4036,6 +4047,7 @@ function loadDados(){
 let dados = loadDados() || {
   ganhos: [],
   gastos: [],
+  retiradas: [],
   abastecimentos: [],
   naoTrabalhados: [],
   metaTotal: 0,
@@ -4202,6 +4214,7 @@ if(typeof dados.saldoAtualButtonAtivo !== "boolean"){ dados.saldoAtualButtonAtiv
 if(!dados.saldoAtualButtonPos || typeof dados.saldoAtualButtonPos !== "object"){
   dados.saldoAtualButtonPos = null;
 }
+if(!Array.isArray(dados.retiradas)) dados.retiradas = [];
 if(!Array.isArray(dados.ganhoHoraSessoes)) dados.ganhoHoraSessoes = [];
 if(!Array.isArray(dados.ganhoHoraHistorico)) dados.ganhoHoraHistorico = [];
 if(typeof dados.ganhoHoraHistoricoAberto !== "boolean") dados.ganhoHoraHistoricoAberto = false;
@@ -4243,7 +4256,7 @@ function mdUsefulScore(obj){
   try{
     if(!obj || typeof obj !== "object") return 0;
     let score = 0;
-    ["ganhos","gastos","abastecimentos","naoTrabalhados","ganhoHoraSessoes","ganhoHoraHistorico"].forEach(function(k){
+    ["ganhos","gastos","retiradas","abastecimentos","naoTrabalhados","ganhoHoraSessoes","ganhoHoraHistorico"].forEach(function(k){
       if(Array.isArray(obj[k])) score += obj[k].length * 10;
     });
     ["metaTotal","metaDiariaManual","ganhoDiarioAtual","saldoAtualFora","saldoAnteriorFora","horasDecorridasFora","ganhoHoraAtualFora"].forEach(function(k){
@@ -4544,7 +4557,7 @@ function mdBuildDiagnosticsObject(){
     const durableObj = mdSafeJsonParse(durableRaw);
     const diag = {
       generated_at: mdNowIso(),
-      app_version: 'MetaDriver v45',
+      app_version: 'MetaDriver v46',
       cloud_table: CLOUD_TABLE,
       device_id: mdEnsureDeviceId(),
       visibility_state: document.visibilityState,
@@ -4563,6 +4576,7 @@ function mdBuildDiagnosticsObject(){
         counts: {
           ganhos: Array.isArray(dados && dados.ganhos) ? dados.ganhos.length : 0,
           gastos: Array.isArray(dados && dados.gastos) ? dados.gastos.length : 0,
+          retiradas: Array.isArray(dados && dados.retiradas) ? dados.retiradas.length : 0,
           abastecimentos: Array.isArray(dados && dados.abastecimentos) ? dados.abastecimentos.length : 0,
           naoTrabalhados: Array.isArray(dados && dados.naoTrabalhados) ? dados.naoTrabalhados.length : 0,
           sessoes: Array.isArray(dados && dados.ganhoHoraSessoes) ? dados.ganhoHoraSessoes.length : 0,
@@ -4852,7 +4866,7 @@ function mdDedupArrayExact(arr){
 function mdSanitizeDuplicatedData(){
   try{
     if(!dados || typeof dados !== "object") return;
-    ["ganhos","gastos","abastecimentos","naoTrabalhados","ganhoHoraSessoes","ganhoHoraHistorico"].forEach(function(field){
+    ["ganhos","gastos","retiradas","abastecimentos","naoTrabalhados","ganhoHoraSessoes","ganhoHoraHistorico"].forEach(function(field){
       if(Array.isArray(dados[field])) dados[field] = mdDedupArrayExact(dados[field]);
     });
   }catch(e){}
@@ -5824,6 +5838,26 @@ function addGasto(){
 }
 
 
+function addRetirada(){
+  const valor = parseFloat(document.getElementById("valorRetirada").value);
+  const desc = (document.getElementById("descRetirada").value || "").trim();
+  let data = document.getElementById("dataRetirada").value;
+
+  if(data === hojeISO()){
+    data = dataUberISO();
+  }
+
+  if(!isNaN(valor) && data){
+    if(!Array.isArray(dados.retiradas)) dados.retiradas = [];
+    dados.retiradas.push({data, hora: horaAtualLancamento(), desc: desc || "Retirada", valor});
+    mdCommitLancamentoMutation("add-retirada");
+    document.getElementById("valorRetirada").value="";
+    document.getElementById("descRetirada").value="";
+    document.getElementById("formRetirada").classList.remove("open");
+  }
+}
+
+
 function addAbastecimento(){
   const valor = parseFloat(document.getElementById("valorAbastecimento").value);
   const data = document.getElementById("dataAbastecimento").value;
@@ -5890,7 +5924,7 @@ function mdNormalizarLancamentoItem(item, tipo){
 }
 function mdRecalcularLancamentosQualquerData(){
   try{
-    ["ganhos","gastos","abastecimentos"].forEach(function(tipo){
+    ["ganhos","gastos","retiradas","abastecimentos"].forEach(function(tipo){
       if(!Array.isArray(dados[tipo])) dados[tipo] = [];
       dados[tipo] = dados[tipo].filter(function(item){ return item && typeof item === "object"; }).map(function(item){ return mdNormalizarLancamentoItem(item, tipo); });
     });
@@ -6659,7 +6693,8 @@ function recalcularSessaoGanhoHora(sessao, indice){
 }
 
 function reprocessarSessoesGanhoHora(){
-  if(!Array.isArray(dados.ganhoHoraSessoes)) dados.ganhoHoraSessoes = [];
+  if(!Array.isArray(dados.retiradas)) dados.retiradas = [];
+if(!Array.isArray(dados.ganhoHoraSessoes)) dados.ganhoHoraSessoes = [];
   for(let i = 0; i < dados.ganhoHoraSessoes.length; i++){
     recalcularSessaoGanhoHora(dados.ganhoHoraSessoes[i], i);
   }
@@ -6729,7 +6764,8 @@ function fecharMenuSessaoFinalizada(indice){
 
 function finalizarSessaoGanhoHoraInterno(opcoes){
   const opts = opcoes || {};
-  if(!Array.isArray(dados.ganhoHoraSessoes)) dados.ganhoHoraSessoes = [];
+  if(!Array.isArray(dados.retiradas)) dados.retiradas = [];
+if(!Array.isArray(dados.ganhoHoraSessoes)) dados.ganhoHoraSessoes = [];
 
   const saldoAtualDom = parseFloat(document.getElementById("saldoAtualFora")?.value || 0) || 0;
   const horarioDom = String(document.getElementById("horarioInicioFora")?.value || "").trim();
@@ -6915,7 +6951,8 @@ function clearDayTurn4hValue(){
 // ===== v36 - histórico seguro da virada 4h antes de limpar sessões =====
 function mdSalvarHistoricoVirada4hSeguro(diaRef){
   const dia = String(diaRef || dataUberISO()).slice(0,10);
-  if(!Array.isArray(dados.ganhoHoraSessoes)) dados.ganhoHoraSessoes = [];
+  if(!Array.isArray(dados.retiradas)) dados.retiradas = [];
+if(!Array.isArray(dados.ganhoHoraSessoes)) dados.ganhoHoraSessoes = [];
   if(!Array.isArray(dados.ganhoHoraHistorico)) dados.ganhoHoraHistorico = [];
 
   const sessoesOriginais = dados.ganhoHoraSessoes.slice();
@@ -7046,7 +7083,8 @@ function ensureGanhoHoraDiaAtual(){
   try{
     if(!window.__mdHydrated) return false;
     if(!!dados.__skip_operational_day_turn) return false;
-    if(!Array.isArray(dados.ganhoHoraSessoes)) dados.ganhoHoraSessoes = [];
+    if(!Array.isArray(dados.retiradas)) dados.retiradas = [];
+if(!Array.isArray(dados.ganhoHoraSessoes)) dados.ganhoHoraSessoes = [];
     if(!dados.ganhoHoraDiaRef) dados.ganhoHoraDiaRef = dataUberISO();
 
     const d4 = mdTurn4hDates();
@@ -7098,7 +7136,8 @@ function ensureGanhoHoraDiaAtual(){
 function salvarGanhosForaTempoReal(){
   try{ delete dados.__skip_operational_day_turn; }catch(e){}
   ensureGanhoHoraDiaAtual();
-  if(!Array.isArray(dados.ganhoHoraSessoes)) dados.ganhoHoraSessoes = [];
+  if(!Array.isArray(dados.retiradas)) dados.retiradas = [];
+if(!Array.isArray(dados.ganhoHoraSessoes)) dados.ganhoHoraSessoes = [];
   if(!dados.ganhoHoraDiaRef) dados.ganhoHoraDiaRef = dataUberISO();
 
   const saldoAtualEl = document.getElementById("saldoAtualFora");
@@ -7348,6 +7387,7 @@ function exportarRelatorioPDF(){
 
   const bruto = dados.ganhos.reduce((s,g)=>s+g.valor,0);
   const gastosExtras = dados.gastos.reduce((s,g)=>s+g.valor,0);
+  const totalRetiradas = (dados.retiradas || []).reduce((s,r)=>s+Number(r.valor || 0),0);
   const fuelCfg = getCombustivelConfig(bruto);
   const combustivelDisponivel = fuelCfg.combustivelEstimado;
   const totalAbastecido = dados.abastecimentos.reduce((s,a)=>s+a.valor,0);
@@ -7531,7 +7571,7 @@ function exportarRelatorioPDF(){
       <script>
         setTimeout(()=>window.print(), 250);
       <\/script>
-    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v45 · app</div>
+    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v46 · app</div>
 
 
 <script>
@@ -7731,6 +7771,7 @@ document.getElementById("metaDiariaManual").value = metaSalvaAgora && (dados.met
 
   const bruto = dados.ganhos.reduce((s,g)=>s+g.valor,0);
   const gastosExtras = dados.gastos.reduce((s,g)=>s+g.valor,0);
+  const totalRetiradas = (dados.retiradas || []).reduce((s,r)=>s+Number(r.valor || 0),0);
 
   
   // Dias restantes: de hoje até data limite (inclui hoje), menos dias não trabalhados no período
@@ -7777,6 +7818,9 @@ const fuelCfg = getCombustivelConfig(bruto);
   const ganhosHoje = (dados.ganhos || [])
     .filter(g => isHojeRegistro(g && g.data))
     .reduce((s, g) => s + Number(g.valor || 0), 0);
+  const retiradasHoje = (dados.retiradas || [])
+    .filter(r => isHojeRegistro(r && r.data))
+    .reduce((s, r) => s + Number(r.valor || 0), 0);
 
   const brutoSemHoje = Math.max(0, bruto - ganhosHoje);
   const combustivelSemHoje = brutoSemHoje * Number(fuelCfg.taxaCombustivel || 0);
@@ -7795,7 +7839,11 @@ const fuelCfg = getCombustivelConfig(bruto);
   }catch(e){}
 
   const metaDia = metaSalvaAgora ? Math.max(0, metaDiariaAuto || 0) : 0;
-  const ganhoDia = Math.max(0, dados.ganhoDiarioAtual || 0);
+  const ganhoDiaBruto = Math.max(0, dados.ganhoDiarioAtual || 0);
+  const excedenteDiaAntesRetirada = Math.max(0, ganhoDiaBruto - metaDia);
+  const retiradaQueAfetaSaldoNormal = Math.max(0, retiradasHoje - excedenteDiaAntesRetirada);
+  const ganhoDia = Math.max(0, ganhoDiaBruto - retiradaQueAfetaSaldoNormal);
+  const excedenteDia = Math.max(0, ganhoDia - metaDia);
   const ganhoHoraRef = Math.max(0, Number(dados.ganhoHoraManual || 40));
   const horasNecessarias = (ganhoHoraRef > 0) ? (metaDia / ganhoHoraRef) : 0;
   const horasRestantes = (ganhoHoraRef > 0) ? (Math.max(0, metaDia - ganhoDia) / ganhoHoraRef) : 0;
@@ -7816,11 +7864,12 @@ const fuelCfg = getCombustivelConfig(bruto);
       "Meta diária (automática): —<br>" +
       "Tempo para meta diária: —";
   }
-  const valorRestanteHoras = (metaDia - ganhoDia);
+  const valorRestanteHoras = Math.max(0, metaDia - ganhoDia);
+  const excedenteLinha = (excedenteDia > 0) ? ("<br>Meta batida: <span class='highlight'>Excedente R$ " + excedenteDia.toFixed(2) + "</span>") : "";
   if(metaSalvaAgora){
     document.getElementById("horasResumo").innerHTML =
       "Meta diária (automática): <span class='" + (metaDia < 0 ? "dangerText" : "warning") + "'>R$ " + metaDia.toFixed(2) + "</span><br>" +
-      "Valor restante: <span class='" + (valorRestanteHoras < 0 ? "dangerText" : "warning") + "'>R$ " + valorRestanteHoras.toFixed(2) + "</span><br>" +
+      "Valor restante: <span class='warning'>R$ " + valorRestanteHoras.toFixed(2) + "</span>" + excedenteLinha + "<br>" +
       "Tempo para meta diária: <span class='" + (horasNecessarias < 0 ? "dangerText" : "warning") + "'>" + formatHorasMinutos(horasNecessarias) + "</span><br>" +
       "Tempo restante: <span class='" + (horasRestantes < 0 ? "dangerText" : "warning") + "'>" + formatHorasMinutos(horasRestantes) + "</span>";
   }else{
@@ -7840,6 +7889,7 @@ const fuelCfg = getCombustivelConfig(bruto);
   document.getElementById("resumo").innerHTML =
     "Bruto total: <span class='" + (bruto < 0 ? "dangerText" : "warning") + "'>R$ " + bruto.toFixed(2) + "</span><br>" +
     "Gastos extras: <span class='" + (gastosExtras < 0 ? "dangerText" : "warning") + "'>R$ " + gastosExtras.toFixed(2) + "</span><br>" +
+    "Retiradas: <span class='warning'>R$ " + totalRetiradas.toFixed(2) + "</span><br>" +
     
     "<span class='" + (liquido < 0 ? "dangerText" : "highlight") + "'>Lucro líquido: R$ " + liquido.toFixed(2) + "</span><br>" +
     "Saldo disponível p/ abastecer: <span class='" + (saldoCombustivel < 0 ? "dangerText" : "highlight") + "'>R$ " + saldoCombustivel.toFixed(2) + "</span><br>" +
@@ -7885,6 +7935,30 @@ document.getElementById("listaGastos").innerHTML =
           </div>
         </div>`;
     }).join("");
+
+  const listaRetiradasEl = document.getElementById("listaRetiradas");
+  if(listaRetiradasEl){
+    listaRetiradasEl.innerHTML =
+      (dados.retiradas || []).slice().sort((a,b)=> itemOrderTs(b) - itemOrderTs(a)).map(item=>{
+        const idx = dados.retiradas.indexOf(item);
+        return `
+          <div class="list-item">
+            <div class="list-left">
+              <span class="li-date-wrap"><span class="li-date">${item.data}</span><span class="li-time">${item.hora || item.horario || "--:--"}</span></span>
+              <span class="li-desc">• ${item.desc || "Retirada"}</span>
+              <span class="li-value">• R$ ${Number(item.valor).toFixed(2)}</span>
+            </div>
+            <div class="action-menu">
+              <button class="kebab-btn" onclick="event.stopPropagation(); toggleItemMenu('menu_retiradas_${idx}', this)">≡</button>
+              <div class="menu-pop" id="menu_retiradas_${idx}">
+                <button onclick="editarData('retiradas', ${idx})">Editar data</button>
+                <button onclick="editarValor('retiradas', ${idx})">Editar valor</button>
+                <button class="danger" onclick="excluirItem('retiradas', ${idx})">Excluir</button>
+              </div>
+            </div>
+          </div>`;
+      }).join("");
+  }
 
   document.getElementById("listaAbastecimentos").innerHTML =
     dados.abastecimentos.slice().sort((a,b)=> itemOrderTs(b) - itemOrderTs(a)).map(item=>{
@@ -9790,21 +9864,26 @@ function openLancSection(tipo){
   const secGanhos = document.getElementById("secGanhos");
   const secGastos = document.getElementById("secGastos");
   const secCombustivel = document.getElementById("secCombustivel");
+  const secRetiradas = document.getElementById("secRetiradas");
   const btnG = document.getElementById("btnSubGanhos");
   const btnS = document.getElementById("btnSubGastos");
+  const btnR = document.getElementById("btnSubRetiradas");
   const btnC = document.getElementById("btnSubCombustivel");
-  if(!secGanhos || !secGastos || !secCombustivel || !btnG || !btnS || !btnC) return;
+  if(!secGanhos || !secGastos || !secRetiradas || !secCombustivel || !btnG || !btnS || !btnR || !btnC) return;
 
   const ganhosOpen = !secGanhos.classList.contains("subcard-hidden");
   const gastosOpen = !secGastos.classList.contains("subcard-hidden");
   const combustivelOpen = !secCombustivel.classList.contains("subcard-hidden");
+  const retiradasOpen = !secRetiradas.classList.contains("subcard-hidden");
 
-  if((tipo === "ganhos" && ganhosOpen) || (tipo === "gastos" && gastosOpen) || (tipo === "combustivel" && combustivelOpen)){
+  if((tipo === "ganhos" && ganhosOpen) || (tipo === "gastos" && gastosOpen) || (tipo === "retiradas" && retiradasOpen) || (tipo === "combustivel" && combustivelOpen)){
     secGanhos.classList.add("subcard-hidden");
     secGastos.classList.add("subcard-hidden");
     secCombustivel.classList.add("subcard-hidden");
+    secRetiradas.classList.add("subcard-hidden");
     btnG.classList.remove("active");
     btnS.classList.remove("active");
+    btnR.classList.remove("active");
     btnC.classList.remove("active");
     return;
   }
@@ -9812,8 +9891,10 @@ function openLancSection(tipo){
   secGanhos.classList.add("subcard-hidden");
   secGastos.classList.add("subcard-hidden");
   secCombustivel.classList.add("subcard-hidden");
+  secRetiradas.classList.add("subcard-hidden");
   btnG.classList.remove("active");
   btnS.classList.remove("active");
+  btnR.classList.remove("active");
   btnC.classList.remove("active");
 
   if(tipo === "ganhos"){
@@ -9822,6 +9903,9 @@ function openLancSection(tipo){
   }else if(tipo === "gastos"){
     secGastos.classList.remove("subcard-hidden");
     btnS.classList.add("active");
+  }else if(tipo === "retiradas"){
+    secRetiradas.classList.remove("subcard-hidden");
+    btnR.classList.add("active");
   }else{
     secCombustivel.classList.remove("subcard-hidden");
     btnC.classList.add("active");
@@ -9833,12 +9917,14 @@ window.addEventListener("load", ()=>{
   try{
     const secGanhos = document.getElementById("secGanhos");
     const secGastos = document.getElementById("secGastos");
+    const secRetiradas = document.getElementById("secRetiradas");
     const secCombustivel = document.getElementById("secCombustivel");
     const btnG = document.getElementById("btnSubGanhos");
     const btnS = document.getElementById("btnSubGastos");
     const btnC = document.getElementById("btnSubCombustivel");
     if(secGanhos) secGanhos.classList.add("subcard-hidden");
     if(secGastos) secGastos.classList.add("subcard-hidden");
+    if(secRetiradas) secRetiradas.classList.add("subcard-hidden");
     if(secCombustivel) secCombustivel.classList.add("subcard-hidden");
     if(btnG) btnG.classList.remove("active");
     if(btnS) btnS.classList.remove("active");
@@ -9894,6 +9980,7 @@ function zerarControleUber(){
   try{ mdZerarSaldoBotaoFlutuanteV36(); }catch(e){}
   dados.ganhos = [];
   dados.gastos = [];
+  dados.retiradas = [];
   dados.abastecimentos = [];
   dados.naoTrabalhados = [];
   dados.metaTotal = 0;
