@@ -43,7 +43,7 @@ try{
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver v46</title>
+<title>MetaDriver v48</title>
 <style id="md-hydration-lock">
 body.preload > *:not(#mdBootOverlay){visibility:hidden!important;}
 #mdBootOverlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#0f172a;color:#fff;z-index:2147483647;font-family:Inter,system-ui,sans-serif;font-weight:800;letter-spacing:.2px;}
@@ -4557,7 +4557,7 @@ function mdBuildDiagnosticsObject(){
     const durableObj = mdSafeJsonParse(durableRaw);
     const diag = {
       generated_at: mdNowIso(),
-      app_version: 'MetaDriver v46',
+      app_version: 'MetaDriver v48',
       cloud_table: CLOUD_TABLE,
       device_id: mdEnsureDeviceId(),
       visibility_state: document.visibilityState,
@@ -7392,7 +7392,7 @@ function exportarRelatorioPDF(){
   const combustivelDisponivel = fuelCfg.combustivelEstimado;
   const totalAbastecido = dados.abastecimentos.reduce((s,a)=>s+a.valor,0);
   const saldoCombustivel = combustivelDisponivel - totalAbastecido;
-  const liquido = bruto - combustivelDisponivel - gastosExtras;
+  const liquido = bruto - combustivelDisponivel - gastosExtras - totalRetiradas;
   const saldoTotal = liquido + saldoCombustivel;
 
   const ganhosOrdenados = dados.ganhos.slice().sort((a,b)=> (a.data < b.data ? 1 : a.data > b.data ? -1 : 0));
@@ -7571,7 +7571,7 @@ function exportarRelatorioPDF(){
       <script>
         setTimeout(()=>window.print(), 250);
       <\/script>
-    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v46 · app</div>
+    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v48 · app</div>
 
 
 <script>
@@ -7800,15 +7800,15 @@ const fuelCfg = getCombustivelConfig(bruto);
   const totalAbastecido = dados.abastecimentos.reduce((s,a)=>s+a.valor,0);
   const saldoCombustivel = combustivelDisponivel - totalAbastecido;
 
-  const liquido = bruto - combustivelDisponivel - gastosExtras;
+  const liquido = bruto - combustivelDisponivel - gastosExtras - totalRetiradas;
 
   // Regra correta:
   // líquido = bruto * 0,70 - gastosExtras
   // então o bruto necessário para atingir a meta e repor gastos é:
   // (meta líquida desejada + gastos extras) / 0,70
   const divisorMeta = Math.max(0.05, 1 - Number(fuelCfg.taxaMeta || fuelCfg.taxaCombustivel || 0));
-  const metaBrutaComGastos = ((dados.metaTotal || 0) + gastosExtras) > 0
-    ? (((dados.metaTotal || 0) + gastosExtras) / divisorMeta)
+  const metaBrutaComGastos = ((dados.metaTotal || 0) + gastosExtras + totalRetiradas) > 0
+    ? (((dados.metaTotal || 0) + gastosExtras + totalRetiradas) / divisorMeta)
     : 0;
 
   // Meta bruta restante:
@@ -7818,14 +7818,10 @@ const fuelCfg = getCombustivelConfig(bruto);
   const ganhosHoje = (dados.ganhos || [])
     .filter(g => isHojeRegistro(g && g.data))
     .reduce((s, g) => s + Number(g.valor || 0), 0);
-  const retiradasHoje = (dados.retiradas || [])
-    .filter(r => isHojeRegistro(r && r.data))
-    .reduce((s, r) => s + Number(r.valor || 0), 0);
-
   const brutoSemHoje = Math.max(0, bruto - ganhosHoje);
   const combustivelSemHoje = brutoSemHoje * Number(fuelCfg.taxaCombustivel || 0);
   const manutencaoSemHoje = brutoSemHoje * Number(fuelCfg.manutencaoPercentual || 0);
-  const liquidoSemHoje = brutoSemHoje - combustivelSemHoje - manutencaoSemHoje - gastosExtras;
+  const liquidoSemHoje = brutoSemHoje - combustivelSemHoje - manutencaoSemHoje - gastosExtras - totalRetiradas;
   const faltanteLiquidoSemHoje = Math.max(0, (dados.metaTotal || 0) - liquidoSemHoje);
   const metaRestanteSemHoje = (faltanteLiquidoSemHoje > 0) ? (faltanteLiquidoSemHoje / divisorMeta) : 0;
   const metaDiariaAuto = (diasRestantes > 0) ? (metaRestanteSemHoje / diasRestantes) : 0;
@@ -7839,10 +7835,7 @@ const fuelCfg = getCombustivelConfig(bruto);
   }catch(e){}
 
   const metaDia = metaSalvaAgora ? Math.max(0, metaDiariaAuto || 0) : 0;
-  const ganhoDiaBruto = Math.max(0, dados.ganhoDiarioAtual || 0);
-  const excedenteDiaAntesRetirada = Math.max(0, ganhoDiaBruto - metaDia);
-  const retiradaQueAfetaSaldoNormal = Math.max(0, retiradasHoje - excedenteDiaAntesRetirada);
-  const ganhoDia = Math.max(0, ganhoDiaBruto - retiradaQueAfetaSaldoNormal);
+  const ganhoDia = Math.max(0, dados.ganhoDiarioAtual || 0);
   const excedenteDia = Math.max(0, ganhoDia - metaDia);
   const ganhoHoraRef = Math.max(0, Number(dados.ganhoHoraManual || 40));
   const horasNecessarias = (ganhoHoraRef > 0) ? (metaDia / ganhoHoraRef) : 0;

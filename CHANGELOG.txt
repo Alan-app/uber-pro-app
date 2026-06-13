@@ -1,7 +1,5 @@
-MetaDriver v46
-- Base: v45.
-- Adicionada categoria Retiradas em Lançamentos.
-- Retiradas ficam separadas de Gastos e não entram como gasto extra a repor.
-- Valor restante da meta diária não fica negativo; quando a meta é batida, mostra excedente.
-- Retiradas do dia consomem primeiro o excedente da meta diária; só o que passar do excedente reduz o saldo normal do dia.
-- Versão exibida atualizada para MetaDriver v46.
+MetaDriver v48
+- Base: v47.
+- Corrigida a lógica de Retiradas: agora sai do Livro Líquido, sem alterar saldo atual do botão flutuante, sessão ou ganho por hora.
+- Retiradas entram no cálculo do bruto que falta para meta, sem serem tratadas como gastos.
+- Versão exibida atualizada para MetaDriver v48.

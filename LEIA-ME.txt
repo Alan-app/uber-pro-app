@@ -1,2 +1,3 @@
-MetaDriver v46 - Retiradas e Excedente
-Base v45 mantida. Instale substituindo a versão anterior.
+MetaDriver v48 - Retiradas no Livro Líquido
+Instale substituindo a versão anterior.
+Retiradas representam dinheiro já conquistado e usado: reduzem o Livro Líquido/metas, mas não reduzem o saldo atual da sessão.
