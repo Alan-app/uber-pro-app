@@ -43,7 +43,7 @@ try{
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver v50</title>
+<title>MetaDriver v52</title>
 <style id="md-hydration-lock">
 body.preload > *:not(#mdBootOverlay){visibility:hidden!important;}
 #mdBootOverlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#0f172a;color:#fff;z-index:2147483647;font-family:Inter,system-ui,sans-serif;font-weight:800;letter-spacing:.2px;}
@@ -2417,55 +2417,55 @@ body[data-tema="meta-claro"]{
   --warn:#ca8a04;
   --danger:#e11d48;
 }
-/* v57 - preto: identidade Uber (preto total + branco puro) */
+/* v52 - preto: contraste Uber, preto absoluto + branco puro */
 body[data-tema="preto-escuro"]{
   --bg:#000000;
-  --card:#111111;
-  --input:#1a1a1a;
+  --card:#0b0b0b;
+  --input:#000000;
   --accent:#ffffff;
-  --accent2:#999999;
+  --accent2:#ffffff;
   --text:#ffffff;
-  --muted:rgba(255,255,255,0.70);
-  --line:rgba(255,255,255,0.08);
+  --muted:#e5e7eb;
+  --line:rgba(255,255,255,0.22);
   --warn:#ffffff;
   --danger:#ff3b30;
 }
 body[data-tema="preto-claro"]{
-  --bg:#f5f5f5;
+  --bg:#ffffff;
   --card:#ffffff;
-  --input:#ebebeb;
+  --input:#ffffff;
   --accent:#000000;
-  --accent2:#555555;
+  --accent2:#000000;
   --text:#000000;
-  --muted:rgba(0,0,0,0.60);
-  --line:rgba(0,0,0,0.08);
+  --muted:#303030;
+  --line:rgba(0,0,0,0.22);
   --warn:#000000;
+  --danger:#c00000;
+}
+/* v52 - amarelo: contraste 99, amarelo forte + preto absoluto */
+body[data-tema="amarelo-escuro"]{
+  --bg:#000000;
+  --card:#0b0b0b;
+  --input:#000000;
+  --accent:#ffcc00;
+  --accent2:#ffcc00;
+  --text:#ffffff;
+  --muted:#f5f5f5;
+  --line:rgba(255,204,0,0.38);
+  --warn:#ffcc00;
   --danger:#ff3b30;
 }
-/* v57 - amarelo: identidade 99 (preto + amarelo vibrante) */
-body[data-tema="amarelo-escuro"]{
-  --bg:#0d0d0d;
-  --card:#1a1a00;
-  --input:#2a2a00;
-  --accent:#ffcc00;
-  --accent2:#ffdd44;
-  --text:#ffffff;
-  --muted:rgba(255,255,255,0.75);
-  --line:rgba(255,204,0,0.15);
-  --warn:#ffcc00;
-  --danger:#ff453a;
-}
 body[data-tema="amarelo-claro"]{
-  --bg:#fffbe6;
-  --card:#ffffff;
-  --input:#fff3b0;
-  --accent:#ffcc00;
-  --accent2:#e6a800;
-  --text:#1a1400;
-  --muted:rgba(26,20,0,0.65);
-  --line:rgba(26,20,0,0.10);
-  --warn:#c68a00;
-  --danger:#dc2626;
+  --bg:#ffcc00;
+  --card:#fff2a8;
+  --input:#ffffff;
+  --accent:#000000;
+  --accent2:#000000;
+  --text:#000000;
+  --muted:#1f1f1f;
+  --line:rgba(0,0,0,0.32);
+  --warn:#000000;
+  --danger:#b00000;
 }
 /* v57 - color-scheme por modo */
 body[data-tema="meta-claro"],
@@ -2743,6 +2743,137 @@ body[data-tema="amarelo-claro"] .list-item{
   border-color:rgba(0,0,0,0.08);
 }
 body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff9d0; }
+
+
+/* v52 - reforço de contraste visual para temas Uber/99 */
+body[data-tema="preto-escuro"] .topbar,
+body[data-tema="preto-escuro"] .menu-panel{
+  background:#000000 !important;
+  border-color:rgba(255,255,255,.24) !important;
+}
+body[data-tema="preto-escuro"] .card,
+body[data-tema="preto-escuro"] .list-item,
+body[data-tema="preto-escuro"] .quick-balance-panel,
+body[data-tema="preto-escuro"] .quick-balance-display{
+  background:#0b0b0b !important;
+  border-color:rgba(255,255,255,.22) !important;
+  color:#ffffff !important;
+}
+body[data-tema="preto-escuro"] input,
+body[data-tema="preto-escuro"] select,
+body[data-tema="preto-escuro"] textarea{
+  background:#000000 !important;
+  color:#ffffff !important;
+  border-color:rgba(255,255,255,.32) !important;
+}
+body[data-tema="preto-escuro"] button.secondary,
+body[data-tema="preto-escuro"] .tab-btn,
+body[data-tema="preto-escuro"] .subtab-btn{
+  background:#000000 !important;
+  color:#ffffff !important;
+  border-color:rgba(255,255,255,.34) !important;
+}
+body[data-tema="preto-escuro"] .tab-btn.active,
+body[data-tema="preto-escuro"] .subtab-btn.active{
+  background:#ffffff !important;
+  color:#000000 !important;
+  border-color:#ffffff !important;
+}
+body[data-tema="preto-claro"] .topbar,
+body[data-tema="preto-claro"] .menu-panel,
+body[data-tema="preto-claro"] .card,
+body[data-tema="preto-claro"] .list-item,
+body[data-tema="preto-claro"] .quick-balance-panel{
+  background:#ffffff !important;
+  border-color:rgba(0,0,0,.24) !important;
+  color:#000000 !important;
+}
+body[data-tema="preto-claro"] input,
+body[data-tema="preto-claro"] select,
+body[data-tema="preto-claro"] textarea{
+  background:#ffffff !important;
+  color:#000000 !important;
+  border-color:rgba(0,0,0,.35) !important;
+}
+body[data-tema="preto-claro"] button.secondary,
+body[data-tema="preto-claro"] .tab-btn,
+body[data-tema="preto-claro"] .subtab-btn{
+  background:#ffffff !important;
+  color:#000000 !important;
+  border-color:rgba(0,0,0,.35) !important;
+}
+body[data-tema="preto-claro"] .tab-btn.active,
+body[data-tema="preto-claro"] .subtab-btn.active{
+  background:#000000 !important;
+  color:#ffffff !important;
+  border-color:#000000 !important;
+}
+body[data-tema="amarelo-escuro"] .topbar,
+body[data-tema="amarelo-escuro"] .menu-panel,
+body[data-tema="amarelo-escuro"] .card,
+body[data-tema="amarelo-escuro"] .list-item,
+body[data-tema="amarelo-escuro"] .quick-balance-panel,
+body[data-tema="amarelo-escuro"] .quick-balance-display{
+  background:#000000 !important;
+  border-color:rgba(255,204,0,.45) !important;
+  color:#ffffff !important;
+}
+body[data-tema="amarelo-escuro"] input,
+body[data-tema="amarelo-escuro"] select,
+body[data-tema="amarelo-escuro"] textarea{
+  background:#000000 !important;
+  color:#ffffff !important;
+  border-color:rgba(255,204,0,.55) !important;
+}
+body[data-tema="amarelo-escuro"] button,
+body[data-tema="amarelo-escuro"] .tab-btn.active,
+body[data-tema="amarelo-escuro"] .subtab-btn.active{
+  background:#ffcc00 !important;
+  color:#000000 !important;
+  border-color:#ffcc00 !important;
+}
+body[data-tema="amarelo-escuro"] button.secondary,
+body[data-tema="amarelo-escuro"] .tab-btn,
+body[data-tema="amarelo-escuro"] .subtab-btn{
+  background:#000000 !important;
+  color:#ffcc00 !important;
+  border-color:rgba(255,204,0,.55) !important;
+}
+body[data-tema="amarelo-claro"] .topbar,
+body[data-tema="amarelo-claro"] .menu-panel{
+  background:#ffcc00 !important;
+  border-color:rgba(0,0,0,.32) !important;
+  color:#000000 !important;
+}
+body[data-tema="amarelo-claro"] .card,
+body[data-tema="amarelo-claro"] .list-item,
+body[data-tema="amarelo-claro"] .quick-balance-panel,
+body[data-tema="amarelo-claro"] .quick-balance-display{
+  background:#fff2a8 !important;
+  border-color:rgba(0,0,0,.28) !important;
+  color:#000000 !important;
+}
+body[data-tema="amarelo-claro"] input,
+body[data-tema="amarelo-claro"] select,
+body[data-tema="amarelo-claro"] textarea{
+  background:#ffffff !important;
+  color:#000000 !important;
+  border-color:rgba(0,0,0,.42) !important;
+}
+body[data-tema="amarelo-claro"] button,
+body[data-tema="amarelo-claro"] .tab-btn.active,
+body[data-tema="amarelo-claro"] .subtab-btn.active{
+  background:#000000 !important;
+  color:#ffcc00 !important;
+  border-color:#000000 !important;
+}
+body[data-tema="amarelo-claro"] button.secondary,
+body[data-tema="amarelo-claro"] .tab-btn,
+body[data-tema="amarelo-claro"] .subtab-btn{
+  background:#ffcc00 !important;
+  color:#000000 !important;
+  border-color:rgba(0,0,0,.38) !important;
+}
 
 .temas-overlay{
   position:fixed; inset:0; z-index:1500;
@@ -3334,14 +3465,12 @@ body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff9d0; }
   <div class="menu-item"><button class="primary" onclick="abrirExportBackup(); closeMenu();">Exportar / Backup</button></div>
   <div class="menu-item"><button class="secondary" onclick="document.getElementById('importFile').click()">Importar backup</button></div>
   <div class="menu-item"><button class="secondary" onclick="exportarRelatorioPDF(); closeMenu();">Exportar relatório (PDF)</button></div>
-  <div class="menu-item"><button class="secondary" onclick="mdRunRollbackSelfTest(); closeMenu();">Autoteste anti-rollback</button></div>
-  <div class="menu-item"><button class="secondary" onclick="mdExportDiagnostics(); closeMenu();">Exportar diagnóstico</button></div>
   <div class="menu-item"><button class="danger" onclick="openZerar(); closeMenu();">Zerar dados (cuidado)</button></div>
   <div class="menu-item"><button class="secondary" onclick="location.href='painel.html'; closeMenu();">Gerenciar APP</button></div>
   <div class="menu-item"><button class="secondary" onclick="abrirSaldoAtualButtonMenu(); closeMenu();">Botão de saldo atual</button></div>
   <div class="menu-item"><button class="secondary" onclick="abrirTemas(); closeMenu();">Temas</button></div>
   <div class="menu-item"><button class="danger" onclick="forceLogout(); return false;">Sair</button></div>
-  <div class="menu-note" style="text-align:center;">v50</div>
+  <div class="menu-note" style="text-align:center;">v52</div>
 </div>
 
 <div id="temasOverlay" class="temas-overlay" onclick="fecharTemas()"></div>
@@ -4558,7 +4687,7 @@ function mdBuildDiagnosticsObject(){
     const durableObj = mdSafeJsonParse(durableRaw);
     const diag = {
       generated_at: mdNowIso(),
-      app_version: 'MetaDriver v50',
+      app_version: 'MetaDriver v52',
       cloud_table: CLOUD_TABLE,
       device_id: mdEnsureDeviceId(),
       visibility_state: document.visibilityState,
@@ -5955,7 +6084,7 @@ function mdCommitLancamentoMutation(reason){
   try{ atualizar(); }catch(e){}
   try{ if(typeof refreshQuickBalanceFabMiniDisplay === "function") refreshQuickBalanceFabMiniDisplay(); }catch(e){}
   try{ if(typeof updateQuickBalanceFabUI === "function") updateQuickBalanceFabUI(); }catch(e){}
-  try{ if(typeof toast === "function" && reason) console.info("MetaDriver v50 mutation:", reason); }catch(e){}
+  try{ if(typeof toast === "function" && reason) console.info("MetaDriver v52 mutation:", reason); }catch(e){}
 }
 
 function editarValor(tipo, index){
@@ -6173,7 +6302,7 @@ function mdRestaurarSaldoBotaoDoBackupV36(safe){
 function getExportBackupBlob(){
   const payload = {
     app: "MetaDriver",
-    version: "50",
+    version: "51",
     exported_at: new Date().toISOString(),
     storage_key: STORAGE_KEY,
     dados: mdPrepararBackupSaldoV36(dados)
@@ -7587,7 +7716,7 @@ function exportarRelatorioPDF(){
       <script>
         setTimeout(()=>window.print(), 250);
       <\/script>
-    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v50 · app</div>
+    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v52 · app</div>
 
 
 <script>

@@ -1,6 +1,5 @@
-MetaDriver v50
-
-- Lançamentos: valores voltam a usar teclado nativo numérico, sem teclado MetaDriver personalizado.
-- Lançamentos: descrições permanecem com teclado normal de letras.
-- Campos de valor em Lançamentos aceitam somente números e ponto decimal.
-- Versão visual/interna atualizada para v50, incluindo menu, telas auxiliares, manifest e cache-buster.
+MetaDriver v52
+- Criada página Histórico no menu.
+- Histórico mostra botões quadrados apenas para dias com lançamentos.
+- Ao clicar no dia, exibe relatório filtrado com ganhos, gastos, retiradas e combustível.
+- Versão visual/interna atualizada para v52.

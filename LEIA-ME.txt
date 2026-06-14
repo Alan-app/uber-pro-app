@@ -1,4 +1,3 @@
-MetaDriver v50 - Teclado de Lançamentos e versão corrigida
-
-Base v49 com ajuste nos campos de Lançamentos: descrições usam teclado normal e valores usam teclado numérico nativo.
-A versão exibida no app foi atualizada para v50 também no menu e arquivos auxiliares.
+MetaDriver v52
+Base v51 com nova página Histórico por dia.
+Use Menu > Histórico para ver apenas dias com registros e abrir o relatório do dia selecionado.
