@@ -3,3 +3,5 @@ MetaDriver v52
 - Histórico mostra botões quadrados apenas para dias com lançamentos.
 - Ao clicar no dia, exibe relatório filtrado com ganhos, gastos, retiradas e combustível.
 - Versão visual/interna atualizada para v52.
+
+v53 revisão: pacote recomposto com todos os 14 arquivos da estrutura completa, preservando a alteração do Histórico detalhado na tela inicial.

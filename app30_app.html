@@ -43,7 +43,7 @@ try{
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver v52</title>
+<title>MetaDriver v53</title>
 <style id="md-hydration-lock">
 body.preload > *:not(#mdBootOverlay){visibility:hidden!important;}
 #mdBootOverlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#0f172a;color:#fff;z-index:2147483647;font-family:Inter,system-ui,sans-serif;font-weight:800;letter-spacing:.2px;}
@@ -136,52 +136,6 @@ body.md-ready > *{visibility:visible;}
   padding:0 8px !important;
 }
 
-
-
-/* v52 - Página Histórico por dia */
-.historico-page-overlay{
-  position:fixed; inset:0; z-index:2147483000;
-  background:var(--bg); color:var(--text);
-  display:none; flex-direction:column;
-  overflow:hidden;
-}
-.historico-page-overlay.show{ display:flex; }
-.historico-page-header{
-  display:flex; align-items:center; justify-content:space-between; gap:10px;
-  padding:14px 14px 10px; border-bottom:1px solid var(--border);
-  background:var(--card);
-}
-.historico-page-title{font-weight:900;font-size:18px;line-height:1.15;}
-.historico-page-sub{font-size:12px;color:var(--muted);margin-top:2px;}
-.historico-page-actions{display:flex;gap:8px;align-items:center;}
-.historico-page-actions button{width:auto;min-width:42px;padding:9px 11px;border-radius:10px;}
-.historico-page-body{padding:14px;overflow:auto;flex:1;}
-.historico-days-grid{
-  display:grid; grid-template-columns:repeat(auto-fill,minmax(58px,1fr));
-  gap:10px; align-items:start;
-}
-.historico-day-btn{
-  aspect-ratio:1/1; min-height:54px; border-radius:12px;
-  border:1px solid var(--border); background:var(--card2); color:var(--text);
-  font-weight:900; font-size:13px; line-height:1.05;
-  display:flex; align-items:center; justify-content:center; flex-direction:column;
-  box-shadow:0 8px 18px rgba(0,0,0,.12);
-}
-.historico-day-btn small{font-size:10px;color:var(--muted);font-weight:700;margin-top:3px;}
-.historico-report-card{
-  border:1px solid var(--border); background:var(--card); border-radius:14px;
-  padding:12px; margin-bottom:12px;
-}
-.historico-report-card h3{margin:0 0 10px;font-size:15px;}
-.historico-report-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;}
-.historico-kpi{background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:10px;}
-.historico-kpi .k{font-size:11px;color:var(--muted);margin-bottom:4px;}
-.historico-kpi .v{font-size:15px;font-weight:900;}
-.historico-table{width:100%;border-collapse:collapse;font-size:12px;}
-.historico-table th,.historico-table td{padding:7px 4px;border-bottom:1px solid var(--border);vertical-align:top;}
-.historico-table th{text-align:left;color:var(--muted);font-weight:800;}
-.historico-table .right{text-align:right;}
-.historico-empty{padding:18px;border:1px dashed var(--border);border-radius:14px;color:var(--muted);text-align:center;}
 </style>
 
 <script>
@@ -2463,7 +2417,7 @@ body[data-tema="meta-claro"]{
   --warn:#ca8a04;
   --danger:#e11d48;
 }
-/* v52 - preto: contraste Uber, preto absoluto + branco puro */
+/* v53 - preto: contraste Uber, preto absoluto + branco puro */
 body[data-tema="preto-escuro"]{
   --bg:#000000;
   --card:#0b0b0b;
@@ -2488,7 +2442,7 @@ body[data-tema="preto-claro"]{
   --warn:#000000;
   --danger:#c00000;
 }
-/* v52 - amarelo: contraste 99, amarelo forte + preto absoluto */
+/* v53 - amarelo: contraste 99, amarelo forte + preto absoluto */
 body[data-tema="amarelo-escuro"]{
   --bg:#000000;
   --card:#0b0b0b;
@@ -2791,7 +2745,7 @@ body[data-tema="amarelo-claro"] .list-item{
 body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff9d0; }
 
 
-/* v52 - reforço de contraste visual para temas Uber/99 */
+/* v53 - reforço de contraste visual para temas Uber/99 */
 body[data-tema="preto-escuro"] .topbar,
 body[data-tema="preto-escuro"] .menu-panel{
   background:#000000 !important;
@@ -3466,6 +3420,117 @@ body[data-tema="amarelo-claro"] .subtab-btn{
   padding-bottom:14px !important;
 }
 
+
+
+/* ===== v53 - Histórico detalhado na tela inicial ===== */
+.historico-detalhado-open{
+  width:100%;
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:12px 14px;
+  background:linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
+  color:var(--text);
+  font-weight:800;
+  text-align:center;
+}
+.historico-detalhado-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill, minmax(42px,42px));
+  gap:8px;
+  justify-content:center;
+  align-items:center;
+  margin-top:12px;
+}
+.historico-dia-btn{
+  width:42px !important;
+  height:42px !important;
+  min-width:42px !important;
+  min-height:42px !important;
+  max-width:42px !important;
+  max-height:42px !important;
+  padding:0 !important;
+  border-radius:9px !important;
+  border:1.5px solid var(--accent) !important;
+  background:rgba(255,255,255,.08) !important;
+  color:var(--text) !important;
+  box-shadow:0 0 0 1px rgba(255,255,255,.08) inset, 0 4px 10px rgba(0,0,0,.18);
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  text-align:center !important;
+  font-size:10.5px !important;
+  line-height:1.05 !important;
+  font-weight:900 !important;
+  letter-spacing:-.3px;
+}
+.historico-dia-btn:active{ transform:scale(.96); }
+body[data-tema$="claro"] .historico-dia-btn{
+  background:#fff !important;
+  color:#111 !important;
+  border-color:var(--accent) !important;
+  box-shadow:0 0 0 1px rgba(0,0,0,.06) inset, 0 3px 8px rgba(0,0,0,.12);
+}
+body[data-tema="amarelo-escuro"] .historico-dia-btn,
+body[data-tema="amarelo-claro"] .historico-dia-btn{
+  background:#ffcc00 !important;
+  color:#000 !important;
+  border-color:#000 !important;
+}
+body[data-tema="preto-escuro"] .historico-dia-btn,
+body[data-tema="preto-claro"] .historico-dia-btn{
+  background:#000 !important;
+  color:#fff !important;
+  border-color:#fff !important;
+}
+.historico-detalhado-report{
+  margin-top:14px;
+  border-top:1px solid var(--line);
+  padding-top:12px;
+  text-align:left;
+}
+.historico-report-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:10px;
+}
+.historico-report-head h4{ margin:0; font-size:15px; }
+.historico-report-close{
+  width:auto !important;
+  padding:6px 10px !important;
+  border-radius:8px !important;
+  font-size:12px !important;
+}
+.historico-report-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:8px;
+  margin:10px 0 12px;
+}
+.historico-report-box{
+  border:1px solid var(--line);
+  border-radius:10px;
+  padding:9px;
+  background:rgba(255,255,255,.04);
+}
+.historico-report-box .k{font-size:11px;opacity:.72;margin-bottom:4px;}
+.historico-report-box .v{font-size:14px;font-weight:900;}
+.historico-report-list{
+  margin-top:10px;
+  border-top:1px solid var(--line);
+  padding-top:8px;
+}
+.historico-report-line{
+  display:flex;
+  justify-content:space-between;
+  gap:8px;
+  padding:6px 0;
+  border-bottom:1px solid rgba(255,255,255,.06);
+  font-size:12px;
+}
+body[data-tema$="claro"] .historico-report-line{border-bottom-color:rgba(0,0,0,.08)}
+
 </style>
 
 
@@ -3511,27 +3576,12 @@ body[data-tema="amarelo-claro"] .subtab-btn{
   <div class="menu-item"><button class="primary" onclick="abrirExportBackup(); closeMenu();">Exportar / Backup</button></div>
   <div class="menu-item"><button class="secondary" onclick="document.getElementById('importFile').click()">Importar backup</button></div>
   <div class="menu-item"><button class="secondary" onclick="exportarRelatorioPDF(); closeMenu();">Exportar relatório (PDF)</button></div>
-  <div class="menu-item"><button class="secondary" onclick="abrirHistoricoPage(); closeMenu();">Histórico</button></div>
   <div class="menu-item"><button class="danger" onclick="openZerar(); closeMenu();">Zerar dados (cuidado)</button></div>
   <div class="menu-item"><button class="secondary" onclick="location.href='painel.html'; closeMenu();">Gerenciar APP</button></div>
   <div class="menu-item"><button class="secondary" onclick="abrirSaldoAtualButtonMenu(); closeMenu();">Botão de saldo atual</button></div>
   <div class="menu-item"><button class="secondary" onclick="abrirTemas(); closeMenu();">Temas</button></div>
   <div class="menu-item"><button class="danger" onclick="forceLogout(); return false;">Sair</button></div>
-  <div class="menu-note" style="text-align:center;">v52</div>
-</div>
-
-<div id="historicoPage" class="historico-page-overlay" role="dialog" aria-modal="true" aria-labelledby="historicoPageTitle">
-  <div class="historico-page-header">
-    <div>
-      <div id="historicoPageTitle" class="historico-page-title">Histórico</div>
-      <div id="historicoPageSub" class="historico-page-sub">Dias com lançamentos</div>
-    </div>
-    <div class="historico-page-actions">
-      <button id="historicoBackBtn" type="button" class="secondary" style="display:none" onclick="renderHistoricoDias()">Voltar</button>
-      <button type="button" class="secondary" onclick="fecharHistoricoPage()">Fechar</button>
-    </div>
-  </div>
-  <div id="historicoPageBody" class="historico-page-body"></div>
+  <div class="menu-note" style="text-align:center;">v53</div>
 </div>
 
 <div id="temasOverlay" class="temas-overlay" onclick="fecharTemas()"></div>
@@ -3779,6 +3829,19 @@ body[data-tema="amarelo-claro"] .subtab-btn{
   </div>
 </div>
 </div>
+</div>
+
+
+<div class="card" id="cardHistoricoDetalhado">
+  <div class="card-header collapsible-header" onclick="toggleSection(this)">
+        <h3>Histórico detalhado</h3>
+        <span class="collapse-arrow">▼</span>
+      </div>
+  <div class="card-body">
+    <div class="muted" style="font-size:12px;margin-bottom:8px;">Dias com lançamentos salvos.</div>
+    <div id="historicoDetalhadoDias" class="historico-detalhado-grid"></div>
+    <div id="historicoDetalhadoRelatorio" class="historico-detalhado-report" style="display:none;"></div>
+  </div>
 </div>
 
 <div class="card">
@@ -4748,7 +4811,7 @@ function mdBuildDiagnosticsObject(){
     const durableObj = mdSafeJsonParse(durableRaw);
     const diag = {
       generated_at: mdNowIso(),
-      app_version: 'MetaDriver v52',
+      app_version: 'MetaDriver v53',
       cloud_table: CLOUD_TABLE,
       device_id: mdEnsureDeviceId(),
       visibility_state: document.visibilityState,
@@ -6145,7 +6208,7 @@ function mdCommitLancamentoMutation(reason){
   try{ atualizar(); }catch(e){}
   try{ if(typeof refreshQuickBalanceFabMiniDisplay === "function") refreshQuickBalanceFabMiniDisplay(); }catch(e){}
   try{ if(typeof updateQuickBalanceFabUI === "function") updateQuickBalanceFabUI(); }catch(e){}
-  try{ if(typeof toast === "function" && reason) console.info("MetaDriver v52 mutation:", reason); }catch(e){}
+  try{ if(typeof toast === "function" && reason) console.info("MetaDriver v53 mutation:", reason); }catch(e){}
 }
 
 function editarValor(tipo, index){
@@ -7585,138 +7648,6 @@ function salvarConfigCombustivelAutoDebounced(){
 }
 
 
-
-/* v52 - Histórico por dia com relatório filtrado */
-function mdHistoricoEsc(s){
-  return String(s == null ? "" : s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
-}
-function mdHistoricoMoney(n){
-  try{ if(typeof fmtMoney === 'function') return fmtMoney(Number(n||0)); }catch(e){}
-  return 'R$ ' + Number(n || 0).toFixed(2).replace('.', ',');
-}
-function mdHistoricoDataKey(item){
-  return String((item && item.data) || '').slice(0,10);
-}
-function mdHistoricoFormatDia(dia, completo){
-  const s = String(dia || '').slice(0,10);
-  const m = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-  if(!m) return s;
-  return completo ? (m[3] + '/' + m[2] + '/' + m[1]) : (m[3] + '/' + m[2]);
-}
-function mdHistoricoItensDoDia(lista, dia){
-  if(!Array.isArray(lista)) return [];
-  const key = String(dia || '').slice(0,10);
-  return lista.filter(function(item){ return mdHistoricoDataKey(item) === key; });
-}
-function mdHistoricoDiasComLancamentos(){
-  const set = new Set();
-  ['ganhos','gastos','retiradas','abastecimentos'].forEach(function(k){
-    (Array.isArray(dados && dados[k]) ? dados[k] : []).forEach(function(item){
-      const d = mdHistoricoDataKey(item);
-      if(/^\d{4}-\d{2}-\d{2}$/.test(d)) set.add(d);
-    });
-  });
-  return Array.from(set).sort(function(a,b){ return a < b ? 1 : a > b ? -1 : 0; });
-}
-function abrirHistoricoPage(){
-  const page = document.getElementById('historicoPage');
-  if(!page) return;
-  page.classList.add('show');
-  renderHistoricoDias();
-}
-function fecharHistoricoPage(){
-  const page = document.getElementById('historicoPage');
-  if(page) page.classList.remove('show');
-}
-function renderHistoricoDias(){
-  const title = document.getElementById('historicoPageTitle');
-  const sub = document.getElementById('historicoPageSub');
-  const body = document.getElementById('historicoPageBody');
-  const back = document.getElementById('historicoBackBtn');
-  if(title) title.textContent = 'Histórico';
-  if(sub) sub.textContent = 'Dias com ganhos, gastos, retiradas ou abastecimentos';
-  if(back) back.style.display = 'none';
-  if(!body) return;
-  const dias = mdHistoricoDiasComLancamentos();
-  if(!dias.length){
-    body.innerHTML = '<div class="historico-empty">Nenhum dia com lançamentos.</div>';
-    return;
-  }
-  body.innerHTML = '<div class="historico-days-grid">' + dias.map(function(dia){
-    const ganhos = mdHistoricoItensDoDia(dados.ganhos, dia).length;
-    const gastos = mdHistoricoItensDoDia(dados.gastos, dia).length;
-    const retiradas = mdHistoricoItensDoDia(dados.retiradas, dia).length;
-    const abastec = mdHistoricoItensDoDia(dados.abastecimentos, dia).length;
-    const totalRegs = ganhos + gastos + retiradas + abastec;
-    return '<button type="button" class="historico-day-btn" onclick="renderHistoricoRelatorioDia(\''+mdHistoricoEsc(dia)+'\')">'
-      + '<span>'+mdHistoricoFormatDia(dia,false)+'</span><small>'+totalRegs+' reg.</small></button>';
-  }).join('') + '</div>';
-}
-function mdHistoricoRows(lista, tipo){
-  if(!lista || !lista.length) return '<tr><td colspan="3" class="muted">Sem lançamentos</td></tr>';
-  return lista.slice().sort(function(a,b){ return itemOrderTs(b)-itemOrderTs(a); }).map(function(item){
-    const hora = mdHistoricoEsc(String((item && (item.hora || item.horario)) || '').slice(0,5));
-    let desc = '';
-    if(tipo === 'ganho') desc = mdHistoricoEsc((item && (item.app || item.desc || item.descricao)) || 'Ganho');
-    else if(tipo === 'abastecimento') desc = 'Abastecimento';
-    else desc = mdHistoricoEsc((item && (item.desc || item.descricao)) || (tipo === 'retirada' ? 'Retirada' : 'Gasto'));
-    return '<tr><td>'+hora+'</td><td>'+desc+'</td><td class="right">'+mdHistoricoMoney(Number((item && item.valor) || 0))+'</td></tr>';
-  }).join('');
-}
-function renderHistoricoRelatorioDia(dia){
-  const key = String(dia || '').slice(0,10);
-  const title = document.getElementById('historicoPageTitle');
-  const sub = document.getElementById('historicoPageSub');
-  const body = document.getElementById('historicoPageBody');
-  const back = document.getElementById('historicoBackBtn');
-  if(title) title.textContent = 'Relatório do dia';
-  if(sub) sub.textContent = mdHistoricoFormatDia(key,true);
-  if(back) back.style.display = 'inline-block';
-  if(!body) return;
-  const ganhos = mdHistoricoItensDoDia(dados.ganhos, key);
-  const gastos = mdHistoricoItensDoDia(dados.gastos, key);
-  const retiradas = mdHistoricoItensDoDia(dados.retiradas, key);
-  const abastec = mdHistoricoItensDoDia(dados.abastecimentos, key);
-  const bruto = ganhos.reduce(function(s,g){ return s + Number((g && g.valor) || 0); },0);
-  const gastosExtras = gastos.reduce(function(s,g){ return s + Number((g && g.valor) || 0); },0);
-  const totalRetiradas = retiradas.reduce(function(s,r){ return s + Number((r && r.valor) || 0); },0);
-  const totalAbastecido = abastec.reduce(function(s,a){ return s + Number((a && a.valor) || 0); },0);
-  let fuelCfg = { combustivelEstimado:0, detalheResumo:'', tituloResumo:'Combustível estimado' };
-  try{ fuelCfg = getCombustivelConfig(bruto); }catch(e){}
-  const combustivelDisponivel = Number(fuelCfg.combustivelEstimado || 0);
-  const saldoCombustivel = combustivelDisponivel - totalAbastecido;
-  const liquido = bruto - combustivelDisponivel - gastosExtras - totalRetiradas;
-  const saldoTotal = liquido + saldoCombustivel;
-  const uberTotal = ganhos.reduce(function(s,g){
-    const app = String((g && (g.app || g.tipo || g.plataforma)) || '').toLowerCase();
-    return s + ((app.indexOf('uber') >= 0 || Number(g && g.uber || 0) > 0) ? Number((g && g.valor) || 0) : 0);
-  },0);
-  const n99Total = ganhos.reduce(function(s,g){
-    const app = String((g && (g.app || g.tipo || g.plataforma)) || '').toLowerCase();
-    return s + ((app.indexOf('99') >= 0 || Number(g && g.n99 || 0) > 0) ? Number((g && g.valor) || 0) : 0);
-  },0);
-  body.innerHTML = ''
-    + '<div class="historico-report-card"><h3>Resumo</h3><div class="historico-report-grid">'
-    + '<div class="historico-kpi"><div class="k">Bruto do dia</div><div class="v">'+mdHistoricoMoney(bruto)+'</div></div>'
-    + '<div class="historico-kpi"><div class="k">Lucro líquido</div><div class="v">'+mdHistoricoMoney(liquido)+'</div></div>'
-    + '<div class="historico-kpi"><div class="k">Gastos</div><div class="v">'+mdHistoricoMoney(gastosExtras)+'</div></div>'
-    + '<div class="historico-kpi"><div class="k">Retiradas</div><div class="v">'+mdHistoricoMoney(totalRetiradas)+'</div></div>'
-    + '<div class="historico-kpi"><div class="k">Combustível disponível</div><div class="v">'+mdHistoricoMoney(combustivelDisponivel)+'</div></div>'
-    + '<div class="historico-kpi"><div class="k">Saldo total 💰+⛽</div><div class="v">'+mdHistoricoMoney(saldoTotal)+'</div></div>'
-    + '</div></div>'
-    + '<div class="historico-report-card"><h3>Ganhos</h3><div class="historico-report-grid" style="margin-bottom:10px">'
-    + '<div class="historico-kpi"><div class="k">Uber</div><div class="v">'+mdHistoricoMoney(uberTotal)+'</div></div>'
-    + '<div class="historico-kpi"><div class="k">99</div><div class="v">'+mdHistoricoMoney(n99Total)+'</div></div>'
-    + '</div><table class="historico-table"><thead><tr><th>Hora</th><th>Descrição</th><th class="right">Valor</th></tr></thead><tbody>'+mdHistoricoRows(ganhos,'ganho')+'</tbody></table></div>'
-    + '<div class="historico-report-card"><h3>Gastos</h3><table class="historico-table"><thead><tr><th>Hora</th><th>Descrição</th><th class="right">Valor</th></tr></thead><tbody>'+mdHistoricoRows(gastos,'gasto')+'</tbody></table></div>'
-    + '<div class="historico-report-card"><h3>Retiradas</h3><table class="historico-table"><thead><tr><th>Hora</th><th>Descrição</th><th class="right">Valor</th></tr></thead><tbody>'+mdHistoricoRows(retiradas,'retirada')+'</tbody></table></div>'
-    + '<div class="historico-report-card"><h3>Combustível</h3><div class="historico-report-grid" style="margin-bottom:10px">'
-    + '<div class="historico-kpi"><div class="k">Total abastecido</div><div class="v">'+mdHistoricoMoney(totalAbastecido)+'</div></div>'
-    + '<div class="historico-kpi"><div class="k">Saldo para abastecer</div><div class="v">'+mdHistoricoMoney(saldoCombustivel)+'</div></div>'
-    + '</div><div class="muted" style="font-size:12px;margin-bottom:8px">'+mdHistoricoEsc(fuelCfg.detalheResumo || '')+'</div>'
-    + '<table class="historico-table"><thead><tr><th>Hora</th><th>Descrição</th><th class="right">Valor</th></tr></thead><tbody>'+mdHistoricoRows(abastec,'abastecimento')+'</tbody></table></div>';
-}
-
 function exportarRelatorioPDF(){
   const stamp = new Date();
   const y = stamp.getFullYear();
@@ -7909,7 +7840,7 @@ function exportarRelatorioPDF(){
       <script>
         setTimeout(()=>window.print(), 250);
       <\/script>
-    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v52 · app</div>
+    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v53 · app</div>
 
 
 <script>
@@ -7936,6 +7867,126 @@ function exportarRelatorioPDF(){
 
 `);
   w.document.close();
+}
+
+
+/* ===== v53 - Histórico detalhado por dia ===== */
+function mdHistEsc(s){
+  return String(s == null ? "" : s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+function mdHistMoney(n){
+  return "R$ " + Number(n || 0).toLocaleString("pt-BR", {minimumFractionDigits:2, maximumFractionDigits:2});
+}
+function mdHistDataCurta(iso){
+  const v = String(iso || "").slice(0,10);
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(v)) return v || "--/--";
+  return v.slice(8,10) + "/" + v.slice(5,7);
+}
+function mdHistDataLonga(iso){
+  const v = String(iso || "").slice(0,10);
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(v)) return v || "-";
+  return v.slice(8,10) + "/" + v.slice(5,7) + "/" + v.slice(0,4);
+}
+function mdHistoricoDetalhadoDiasComLancamentos(){
+  const set = new Set();
+  function add(arr){
+    (Array.isArray(arr) ? arr : []).forEach(function(item){
+      const d = String((item && item.data) || "").slice(0,10);
+      if(/^\d{4}-\d{2}-\d{2}$/.test(d)) set.add(d);
+    });
+  }
+  try{
+    add(dados.ganhos);
+    add(dados.gastos);
+    add(dados.retiradas);
+    add(dados.abastecimentos);
+  }catch(e){}
+  return Array.from(set).sort(function(a,b){ return a < b ? 1 : a > b ? -1 : 0; });
+}
+function abrirHistoricoDetalhadoDia(dia){
+  window.__historicoDetalhadoDiaSelecionado = String(dia || "").slice(0,10);
+  renderHistoricoDetalhadoDias();
+  try{
+    const rel = document.getElementById("historicoDetalhadoRelatorio");
+    if(rel) rel.scrollIntoView({behavior:"smooth", block:"start"});
+  }catch(e){}
+}
+function fecharHistoricoDetalhadoDia(){
+  window.__historicoDetalhadoDiaSelecionado = "";
+  renderHistoricoDetalhadoDias();
+}
+function renderHistoricoDetalhadoDias(){
+  try{
+    const grid = document.getElementById("historicoDetalhadoDias");
+    const rel = document.getElementById("historicoDetalhadoRelatorio");
+    if(!grid) return;
+    const dias = mdHistoricoDetalhadoDiasComLancamentos();
+    if(!dias.length){
+      grid.innerHTML = "<div class='muted' style='grid-column:1/-1;text-align:center;padding:8px 0;'>Nenhum lançamento salvo.</div>";
+      if(rel){ rel.style.display = "none"; rel.innerHTML = ""; }
+      return;
+    }
+    grid.innerHTML = dias.map(function(dia){
+      return "<button type='button' class='historico-dia-btn' onclick=\"abrirHistoricoDetalhadoDia('" + mdHistEsc(dia) + "')\">" + mdHistDataCurta(dia) + "</button>";
+    }).join("");
+
+    const diaSel = String(window.__historicoDetalhadoDiaSelecionado || "").slice(0,10);
+    if(!rel) return;
+    if(!diaSel || dias.indexOf(diaSel) < 0){
+      rel.style.display = "none";
+      rel.innerHTML = "";
+      return;
+    }
+
+    const ganhos = (dados.ganhos || []).filter(function(g){ return String((g && g.data) || "").slice(0,10) === diaSel; });
+    const gastos = (dados.gastos || []).filter(function(g){ return String((g && g.data) || "").slice(0,10) === diaSel; });
+    const retiradas = (dados.retiradas || []).filter(function(r){ return String((r && r.data) || "").slice(0,10) === diaSel; });
+    const abastecimentos = (dados.abastecimentos || []).filter(function(a){ return String((a && a.data) || "").slice(0,10) === diaSel; });
+
+    const bruto = ganhos.reduce(function(s,g){ return s + Number(g.valor || 0); }, 0);
+    const gastosExtras = gastos.reduce(function(s,g){ return s + Number(g.valor || 0); }, 0);
+    const totalRetiradas = retiradas.reduce(function(s,r){ return s + Number(r.valor || 0); }, 0);
+    const totalAbastecido = abastecimentos.reduce(function(s,a){ return s + Number(a.valor || 0); }, 0);
+    const fuelCfg = (typeof getCombustivelConfig === "function") ? getCombustivelConfig(bruto) : {combustivelEstimado:0, tituloResumo:"Combustível disponível", detalheResumo:""};
+    const combustivelDisponivel = Number(fuelCfg.combustivelEstimado || 0);
+    const saldoCombustivel = combustivelDisponivel - totalAbastecido;
+    const liquido = bruto - combustivelDisponivel - gastosExtras - totalRetiradas;
+    const saldoTotal = liquido + saldoCombustivel;
+
+    function linhas(arr, tipo){
+      if(!arr.length) return "<div class='muted' style='font-size:12px;padding:6px 0;'>Sem lançamentos.</div>";
+      return arr.slice().sort(function(a,b){ return itemOrderTs(b) - itemOrderTs(a); }).map(function(item){
+        let desc = "";
+        if(tipo === "ganhos") desc = item.app || "Ganho";
+        else if(tipo === "gastos") desc = item.desc || "Gasto";
+        else if(tipo === "retiradas") desc = item.desc || "Retirada";
+        else desc = "Abastecimento";
+        const hora = String(item.hora || item.horario || "--:--").slice(0,5);
+        return "<div class='historico-report-line'><span>" + mdHistEsc(hora) + " • " + mdHistEsc(desc) + "</span><b>" + mdHistMoney(item.valor) + "</b></div>";
+      }).join("");
+    }
+
+    rel.style.display = "block";
+    rel.innerHTML = "" +
+      "<div class='historico-report-head'><h4>Relatório de " + mdHistDataLonga(diaSel) + "</h4><button type='button' class='secondary historico-report-close' onclick='fecharHistoricoDetalhadoDia()'>Fechar</button></div>" +
+      "<div class='historico-report-grid'>" +
+        "<div class='historico-report-box'><div class='k'>Bruto do dia</div><div class='v'>" + mdHistMoney(bruto) + "</div></div>" +
+        "<div class='historico-report-box'><div class='k'>Gastos do dia</div><div class='v'>" + mdHistMoney(gastosExtras) + "</div></div>" +
+        "<div class='historico-report-box'><div class='k'>Retiradas</div><div class='v'>" + mdHistMoney(totalRetiradas) + "</div></div>" +
+        "<div class='historico-report-box'><div class='k'>Lucro líquido</div><div class='v'>" + mdHistMoney(liquido) + "</div></div>" +
+        "<div class='historico-report-box'><div class='k'>Combustível disponível</div><div class='v'>" + mdHistMoney(combustivelDisponivel) + "</div></div>" +
+        "<div class='historico-report-box'><div class='k'>Total abastecido</div><div class='v'>" + mdHistMoney(totalAbastecido) + "</div></div>" +
+        "<div class='historico-report-box'><div class='k'>Saldo para abastecer</div><div class='v'>" + mdHistMoney(saldoCombustivel) + "</div></div>" +
+        "<div class='historico-report-box'><div class='k'>Saldo total 💰+⛽</div><div class='v'>" + mdHistMoney(saldoTotal) + "</div></div>" +
+      "</div>" +
+      "<div class='muted' style='font-size:12px;margin:6px 0 10px;'>" + mdHistEsc(fuelCfg.detalheResumo || "") + "</div>" +
+      "<div class='historico-report-list'><b>Ganhos</b>" + linhas(ganhos, "ganhos") + "</div>" +
+      "<div class='historico-report-list'><b>Gastos</b>" + linhas(gastos, "gastos") + "</div>" +
+      "<div class='historico-report-list'><b>Retiradas</b>" + linhas(retiradas, "retiradas") + "</div>" +
+      "<div class='historico-report-list'><b>Combustível</b>" + linhas(abastecimentos, "abastecimentos") + "</div>";
+  }catch(e){
+    try{ console.warn("historico detalhado", e); }catch(_e){}
+  }
 }
 
 function atualizar(){
@@ -8335,6 +8386,7 @@ document.getElementById("listaGastos").innerHTML =
           </div>`;
       }).join("");
 
+  try{ renderHistoricoDetalhadoDias(); }catch(e){}
   refreshNegativeInputs();
 }
 

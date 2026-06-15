@@ -43,7 +43,7 @@ try{
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver v52</title>
+<title>MetaDriver v53</title>
 <style id="md-hydration-lock">
 body.preload > *:not(#mdBootOverlay){visibility:hidden!important;}
 #mdBootOverlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#0f172a;color:#fff;z-index:2147483647;font-family:Inter,system-ui,sans-serif;font-weight:800;letter-spacing:.2px;}
@@ -2417,7 +2417,7 @@ body[data-tema="meta-claro"]{
   --warn:#ca8a04;
   --danger:#e11d48;
 }
-/* v52 - preto: contraste Uber, preto absoluto + branco puro */
+/* v53 - preto: contraste Uber, preto absoluto + branco puro */
 body[data-tema="preto-escuro"]{
   --bg:#000000;
   --card:#0b0b0b;
@@ -2442,7 +2442,7 @@ body[data-tema="preto-claro"]{
   --warn:#000000;
   --danger:#c00000;
 }
-/* v52 - amarelo: contraste 99, amarelo forte + preto absoluto */
+/* v53 - amarelo: contraste 99, amarelo forte + preto absoluto */
 body[data-tema="amarelo-escuro"]{
   --bg:#000000;
   --card:#0b0b0b;
@@ -2745,7 +2745,7 @@ body[data-tema="amarelo-claro"] .list-item{
 body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff9d0; }
 
 
-/* v52 - reforço de contraste visual para temas Uber/99 */
+/* v53 - reforço de contraste visual para temas Uber/99 */
 body[data-tema="preto-escuro"] .topbar,
 body[data-tema="preto-escuro"] .menu-panel{
   background:#000000 !important;
@@ -3420,6 +3420,117 @@ body[data-tema="amarelo-claro"] .subtab-btn{
   padding-bottom:14px !important;
 }
 
+
+
+/* ===== v53 - Histórico detalhado na tela inicial ===== */
+.historico-detalhado-open{
+  width:100%;
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:12px 14px;
+  background:linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
+  color:var(--text);
+  font-weight:800;
+  text-align:center;
+}
+.historico-detalhado-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill, minmax(42px,42px));
+  gap:8px;
+  justify-content:center;
+  align-items:center;
+  margin-top:12px;
+}
+.historico-dia-btn{
+  width:42px !important;
+  height:42px !important;
+  min-width:42px !important;
+  min-height:42px !important;
+  max-width:42px !important;
+  max-height:42px !important;
+  padding:0 !important;
+  border-radius:9px !important;
+  border:1.5px solid var(--accent) !important;
+  background:rgba(255,255,255,.08) !important;
+  color:var(--text) !important;
+  box-shadow:0 0 0 1px rgba(255,255,255,.08) inset, 0 4px 10px rgba(0,0,0,.18);
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  text-align:center !important;
+  font-size:10.5px !important;
+  line-height:1.05 !important;
+  font-weight:900 !important;
+  letter-spacing:-.3px;
+}
+.historico-dia-btn:active{ transform:scale(.96); }
+body[data-tema$="claro"] .historico-dia-btn{
+  background:#fff !important;
+  color:#111 !important;
+  border-color:var(--accent) !important;
+  box-shadow:0 0 0 1px rgba(0,0,0,.06) inset, 0 3px 8px rgba(0,0,0,.12);
+}
+body[data-tema="amarelo-escuro"] .historico-dia-btn,
+body[data-tema="amarelo-claro"] .historico-dia-btn{
+  background:#ffcc00 !important;
+  color:#000 !important;
+  border-color:#000 !important;
+}
+body[data-tema="preto-escuro"] .historico-dia-btn,
+body[data-tema="preto-claro"] .historico-dia-btn{
+  background:#000 !important;
+  color:#fff !important;
+  border-color:#fff !important;
+}
+.historico-detalhado-report{
+  margin-top:14px;
+  border-top:1px solid var(--line);
+  padding-top:12px;
+  text-align:left;
+}
+.historico-report-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:10px;
+}
+.historico-report-head h4{ margin:0; font-size:15px; }
+.historico-report-close{
+  width:auto !important;
+  padding:6px 10px !important;
+  border-radius:8px !important;
+  font-size:12px !important;
+}
+.historico-report-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:8px;
+  margin:10px 0 12px;
+}
+.historico-report-box{
+  border:1px solid var(--line);
+  border-radius:10px;
+  padding:9px;
+  background:rgba(255,255,255,.04);
+}
+.historico-report-box .k{font-size:11px;opacity:.72;margin-bottom:4px;}
+.historico-report-box .v{font-size:14px;font-weight:900;}
+.historico-report-list{
+  margin-top:10px;
+  border-top:1px solid var(--line);
+  padding-top:8px;
+}
+.historico-report-line{
+  display:flex;
+  justify-content:space-between;
+  gap:8px;
+  padding:6px 0;
+  border-bottom:1px solid rgba(255,255,255,.06);
+  font-size:12px;
+}
+body[data-tema$="claro"] .historico-report-line{border-bottom-color:rgba(0,0,0,.08)}
+
 </style>
 
 
@@ -3470,7 +3581,7 @@ body[data-tema="amarelo-claro"] .subtab-btn{
   <div class="menu-item"><button class="secondary" onclick="abrirSaldoAtualButtonMenu(); closeMenu();">Botão de saldo atual</button></div>
   <div class="menu-item"><button class="secondary" onclick="abrirTemas(); closeMenu();">Temas</button></div>
   <div class="menu-item"><button class="danger" onclick="forceLogout(); return false;">Sair</button></div>
-  <div class="menu-note" style="text-align:center;">v52</div>
+  <div class="menu-note" style="text-align:center;">v53</div>
 </div>
 
 <div id="temasOverlay" class="temas-overlay" onclick="fecharTemas()"></div>
@@ -3718,6 +3829,19 @@ body[data-tema="amarelo-claro"] .subtab-btn{
   </div>
 </div>
 </div>
+</div>
+
+
+<div class="card" id="cardHistoricoDetalhado">
+  <div class="card-header collapsible-header" onclick="toggleSection(this)">
+        <h3>Histórico detalhado</h3>
+        <span class="collapse-arrow">▼</span>
+      </div>
+  <div class="card-body">
+    <div class="muted" style="font-size:12px;margin-bottom:8px;">Dias com lançamentos salvos.</div>
+    <div id="historicoDetalhadoDias" class="historico-detalhado-grid"></div>
+    <div id="historicoDetalhadoRelatorio" class="historico-detalhado-report" style="display:none;"></div>
+  </div>
 </div>
 
 <div class="card">
@@ -4687,7 +4811,7 @@ function mdBuildDiagnosticsObject(){
     const durableObj = mdSafeJsonParse(durableRaw);
     const diag = {
       generated_at: mdNowIso(),
-      app_version: 'MetaDriver v52',
+      app_version: 'MetaDriver v53',
       cloud_table: CLOUD_TABLE,
       device_id: mdEnsureDeviceId(),
       visibility_state: document.visibilityState,
@@ -6084,7 +6208,7 @@ function mdCommitLancamentoMutation(reason){
   try{ atualizar(); }catch(e){}
   try{ if(typeof refreshQuickBalanceFabMiniDisplay === "function") refreshQuickBalanceFabMiniDisplay(); }catch(e){}
   try{ if(typeof updateQuickBalanceFabUI === "function") updateQuickBalanceFabUI(); }catch(e){}
-  try{ if(typeof toast === "function" && reason) console.info("MetaDriver v52 mutation:", reason); }catch(e){}
+  try{ if(typeof toast === "function" && reason) console.info("MetaDriver v53 mutation:", reason); }catch(e){}
 }
 
 function editarValor(tipo, index){
@@ -7716,7 +7840,7 @@ function exportarRelatorioPDF(){
       <script>
         setTimeout(()=>window.print(), 250);
       <\/script>
-    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v52 · app</div>
+    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v53 · app</div>
 
 
 <script>
@@ -7743,6 +7867,126 @@ function exportarRelatorioPDF(){
 
 `);
   w.document.close();
+}
+
+
+/* ===== v53 - Histórico detalhado por dia ===== */
+function mdHistEsc(s){
+  return String(s == null ? "" : s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+function mdHistMoney(n){
+  return "R$ " + Number(n || 0).toLocaleString("pt-BR", {minimumFractionDigits:2, maximumFractionDigits:2});
+}
+function mdHistDataCurta(iso){
+  const v = String(iso || "").slice(0,10);
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(v)) return v || "--/--";
+  return v.slice(8,10) + "/" + v.slice(5,7);
+}
+function mdHistDataLonga(iso){
+  const v = String(iso || "").slice(0,10);
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(v)) return v || "-";
+  return v.slice(8,10) + "/" + v.slice(5,7) + "/" + v.slice(0,4);
+}
+function mdHistoricoDetalhadoDiasComLancamentos(){
+  const set = new Set();
+  function add(arr){
+    (Array.isArray(arr) ? arr : []).forEach(function(item){
+      const d = String((item && item.data) || "").slice(0,10);
+      if(/^\d{4}-\d{2}-\d{2}$/.test(d)) set.add(d);
+    });
+  }
+  try{
+    add(dados.ganhos);
+    add(dados.gastos);
+    add(dados.retiradas);
+    add(dados.abastecimentos);
+  }catch(e){}
+  return Array.from(set).sort(function(a,b){ return a < b ? 1 : a > b ? -1 : 0; });
+}
+function abrirHistoricoDetalhadoDia(dia){
+  window.__historicoDetalhadoDiaSelecionado = String(dia || "").slice(0,10);
+  renderHistoricoDetalhadoDias();
+  try{
+    const rel = document.getElementById("historicoDetalhadoRelatorio");
+    if(rel) rel.scrollIntoView({behavior:"smooth", block:"start"});
+  }catch(e){}
+}
+function fecharHistoricoDetalhadoDia(){
+  window.__historicoDetalhadoDiaSelecionado = "";
+  renderHistoricoDetalhadoDias();
+}
+function renderHistoricoDetalhadoDias(){
+  try{
+    const grid = document.getElementById("historicoDetalhadoDias");
+    const rel = document.getElementById("historicoDetalhadoRelatorio");
+    if(!grid) return;
+    const dias = mdHistoricoDetalhadoDiasComLancamentos();
+    if(!dias.length){
+      grid.innerHTML = "<div class='muted' style='grid-column:1/-1;text-align:center;padding:8px 0;'>Nenhum lançamento salvo.</div>";
+      if(rel){ rel.style.display = "none"; rel.innerHTML = ""; }
+      return;
+    }
+    grid.innerHTML = dias.map(function(dia){
+      return "<button type='button' class='historico-dia-btn' onclick=\"abrirHistoricoDetalhadoDia('" + mdHistEsc(dia) + "')\">" + mdHistDataCurta(dia) + "</button>";
+    }).join("");
+
+    const diaSel = String(window.__historicoDetalhadoDiaSelecionado || "").slice(0,10);
+    if(!rel) return;
+    if(!diaSel || dias.indexOf(diaSel) < 0){
+      rel.style.display = "none";
+      rel.innerHTML = "";
+      return;
+    }
+
+    const ganhos = (dados.ganhos || []).filter(function(g){ return String((g && g.data) || "").slice(0,10) === diaSel; });
+    const gastos = (dados.gastos || []).filter(function(g){ return String((g && g.data) || "").slice(0,10) === diaSel; });
+    const retiradas = (dados.retiradas || []).filter(function(r){ return String((r && r.data) || "").slice(0,10) === diaSel; });
+    const abastecimentos = (dados.abastecimentos || []).filter(function(a){ return String((a && a.data) || "").slice(0,10) === diaSel; });
+
+    const bruto = ganhos.reduce(function(s,g){ return s + Number(g.valor || 0); }, 0);
+    const gastosExtras = gastos.reduce(function(s,g){ return s + Number(g.valor || 0); }, 0);
+    const totalRetiradas = retiradas.reduce(function(s,r){ return s + Number(r.valor || 0); }, 0);
+    const totalAbastecido = abastecimentos.reduce(function(s,a){ return s + Number(a.valor || 0); }, 0);
+    const fuelCfg = (typeof getCombustivelConfig === "function") ? getCombustivelConfig(bruto) : {combustivelEstimado:0, tituloResumo:"Combustível disponível", detalheResumo:""};
+    const combustivelDisponivel = Number(fuelCfg.combustivelEstimado || 0);
+    const saldoCombustivel = combustivelDisponivel - totalAbastecido;
+    const liquido = bruto - combustivelDisponivel - gastosExtras - totalRetiradas;
+    const saldoTotal = liquido + saldoCombustivel;
+
+    function linhas(arr, tipo){
+      if(!arr.length) return "<div class='muted' style='font-size:12px;padding:6px 0;'>Sem lançamentos.</div>";
+      return arr.slice().sort(function(a,b){ return itemOrderTs(b) - itemOrderTs(a); }).map(function(item){
+        let desc = "";
+        if(tipo === "ganhos") desc = item.app || "Ganho";
+        else if(tipo === "gastos") desc = item.desc || "Gasto";
+        else if(tipo === "retiradas") desc = item.desc || "Retirada";
+        else desc = "Abastecimento";
+        const hora = String(item.hora || item.horario || "--:--").slice(0,5);
+        return "<div class='historico-report-line'><span>" + mdHistEsc(hora) + " • " + mdHistEsc(desc) + "</span><b>" + mdHistMoney(item.valor) + "</b></div>";
+      }).join("");
+    }
+
+    rel.style.display = "block";
+    rel.innerHTML = "" +
+      "<div class='historico-report-head'><h4>Relatório de " + mdHistDataLonga(diaSel) + "</h4><button type='button' class='secondary historico-report-close' onclick='fecharHistoricoDetalhadoDia()'>Fechar</button></div>" +
+      "<div class='historico-report-grid'>" +
+        "<div class='historico-report-box'><div class='k'>Bruto do dia</div><div class='v'>" + mdHistMoney(bruto) + "</div></div>" +
+        "<div class='historico-report-box'><div class='k'>Gastos do dia</div><div class='v'>" + mdHistMoney(gastosExtras) + "</div></div>" +
+        "<div class='historico-report-box'><div class='k'>Retiradas</div><div class='v'>" + mdHistMoney(totalRetiradas) + "</div></div>" +
+        "<div class='historico-report-box'><div class='k'>Lucro líquido</div><div class='v'>" + mdHistMoney(liquido) + "</div></div>" +
+        "<div class='historico-report-box'><div class='k'>Combustível disponível</div><div class='v'>" + mdHistMoney(combustivelDisponivel) + "</div></div>" +
+        "<div class='historico-report-box'><div class='k'>Total abastecido</div><div class='v'>" + mdHistMoney(totalAbastecido) + "</div></div>" +
+        "<div class='historico-report-box'><div class='k'>Saldo para abastecer</div><div class='v'>" + mdHistMoney(saldoCombustivel) + "</div></div>" +
+        "<div class='historico-report-box'><div class='k'>Saldo total 💰+⛽</div><div class='v'>" + mdHistMoney(saldoTotal) + "</div></div>" +
+      "</div>" +
+      "<div class='muted' style='font-size:12px;margin:6px 0 10px;'>" + mdHistEsc(fuelCfg.detalheResumo || "") + "</div>" +
+      "<div class='historico-report-list'><b>Ganhos</b>" + linhas(ganhos, "ganhos") + "</div>" +
+      "<div class='historico-report-list'><b>Gastos</b>" + linhas(gastos, "gastos") + "</div>" +
+      "<div class='historico-report-list'><b>Retiradas</b>" + linhas(retiradas, "retiradas") + "</div>" +
+      "<div class='historico-report-list'><b>Combustível</b>" + linhas(abastecimentos, "abastecimentos") + "</div>";
+  }catch(e){
+    try{ console.warn("historico detalhado", e); }catch(_e){}
+  }
 }
 
 function atualizar(){
@@ -8142,6 +8386,7 @@ document.getElementById("listaGastos").innerHTML =
           </div>`;
       }).join("");
 
+  try{ renderHistoricoDetalhadoDias(); }catch(e){}
   refreshNegativeInputs();
 }
 
