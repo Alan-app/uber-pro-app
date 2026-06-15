@@ -11,3 +11,6 @@ v54 - Corrige recálculo do tempo restante da meta diária após lançamento man
 
 
 v55 - Histórico Detalhado: saldo para abastecer passa a ser acumulado até a data selecionada, preservando combustível disponível do dia.
+
+
+v56 - Ajuste visual em Lançamentos: centraliza botões Ganhos/Gastos/Retiradas/Combustível e campos dos modais de edição.

@@ -43,7 +43,7 @@ try{
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver v55</title>
+<title>MetaDriver v56</title>
 <style id="md-hydration-lock">
 body.preload > *:not(#mdBootOverlay){visibility:hidden!important;}
 #mdBootOverlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#0f172a;color:#fff;z-index:2147483647;font-family:Inter,system-ui,sans-serif;font-weight:800;letter-spacing:.2px;}
@@ -134,6 +134,60 @@ body.md-ready > *{visibility:visible;}
   height:34px !important;
   margin:0 !important;
   padding:0 8px !important;
+}
+
+
+/* ===== v56: centralização visual em Lançamentos =====
+   Ajuste exclusivamente visual:
+   - centraliza botões Ganhos/Gastos/Retiradas/Combustível no card;
+   - evita estouro lateral em telas estreitas;
+   - centraliza/limita campos dos modais de edição de valor/data. */
+.subtabs{
+  justify-content:center !important;
+  align-items:center !important;
+  flex-wrap:wrap !important;
+  gap:8px !important;
+  width:100% !important;
+  box-sizing:border-box !important;
+}
+.subtabs .subtab-btn,
+#btnSubGanhos,
+#btnSubGastos,
+#btnSubRetiradas,
+#btnSubCombustivel{
+  flex:0 1 calc(50% - 6px) !important;
+  max-width:150px !important;
+  min-width:118px !important;
+  margin:0 !important;
+  box-sizing:border-box !important;
+  text-align:center !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+}
+.editvalor-overlay.show,
+.edit-data-overlay.show{
+  align-items:center !important;
+  justify-content:center !important;
+}
+.editvalor-modal,
+.edit-data-modal{
+  width:min(360px, calc(100vw - 32px)) !important;
+  max-width:360px !important;
+  margin:0 auto !important;
+  box-sizing:border-box !important;
+}
+.editvalor-modal input,
+.edit-data-modal input,
+#editValorInput,
+#editDataInput{
+  display:block !important;
+  width:100% !important;
+  max-width:100% !important;
+  box-sizing:border-box !important;
+  margin-left:auto !important;
+  margin-right:auto !important;
+  text-align:center !important;
 }
 
 </style>
@@ -2417,7 +2471,7 @@ body[data-tema="meta-claro"]{
   --warn:#ca8a04;
   --danger:#e11d48;
 }
-/* v55 - preto: contraste Uber, preto absoluto + branco puro */
+/* v56 - preto: contraste Uber, preto absoluto + branco puro */
 body[data-tema="preto-escuro"]{
   --bg:#000000;
   --card:#0b0b0b;
@@ -2442,7 +2496,7 @@ body[data-tema="preto-claro"]{
   --warn:#000000;
   --danger:#c00000;
 }
-/* v55 - amarelo: contraste 99, amarelo forte + preto absoluto */
+/* v56 - amarelo: contraste 99, amarelo forte + preto absoluto */
 body[data-tema="amarelo-escuro"]{
   --bg:#000000;
   --card:#0b0b0b;
@@ -2745,7 +2799,7 @@ body[data-tema="amarelo-claro"] .list-item{
 body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff9d0; }
 
 
-/* v55 - reforço de contraste visual para temas Uber/99 */
+/* v56 - reforço de contraste visual para temas Uber/99 */
 body[data-tema="preto-escuro"] .topbar,
 body[data-tema="preto-escuro"] .menu-panel{
   background:#000000 !important;
@@ -3422,7 +3476,7 @@ body[data-tema="amarelo-claro"] .subtab-btn{
 
 
 
-/* ===== v55 - Histórico detalhado na tela inicial ===== */
+/* ===== v56 - Histórico detalhado na tela inicial ===== */
 .historico-detalhado-open{
   width:100%;
   border:1px solid var(--line);
@@ -3581,7 +3635,7 @@ body[data-tema$="claro"] .historico-report-line{border-bottom-color:rgba(0,0,0,.
   <div class="menu-item"><button class="secondary" onclick="abrirSaldoAtualButtonMenu(); closeMenu();">Botão de saldo atual</button></div>
   <div class="menu-item"><button class="secondary" onclick="abrirTemas(); closeMenu();">Temas</button></div>
   <div class="menu-item"><button class="danger" onclick="forceLogout(); return false;">Sair</button></div>
-  <div class="menu-note" style="text-align:center;">v55</div>
+  <div class="menu-note" style="text-align:center;">v56</div>
 </div>
 
 <div id="temasOverlay" class="temas-overlay" onclick="fecharTemas()"></div>
@@ -4811,7 +4865,7 @@ function mdBuildDiagnosticsObject(){
     const durableObj = mdSafeJsonParse(durableRaw);
     const diag = {
       generated_at: mdNowIso(),
-      app_version: 'MetaDriver v55',
+      app_version: 'MetaDriver v56',
       cloud_table: CLOUD_TABLE,
       device_id: mdEnsureDeviceId(),
       visibility_state: document.visibilityState,
@@ -6208,7 +6262,7 @@ function mdCommitLancamentoMutation(reason){
   try{ atualizar(); }catch(e){}
   try{ if(typeof refreshQuickBalanceFabMiniDisplay === "function") refreshQuickBalanceFabMiniDisplay(); }catch(e){}
   try{ if(typeof updateQuickBalanceFabUI === "function") updateQuickBalanceFabUI(); }catch(e){}
-  try{ if(typeof toast === "function" && reason) console.info("MetaDriver v55 mutation:", reason); }catch(e){}
+  try{ if(typeof toast === "function" && reason) console.info("MetaDriver v56 mutation:", reason); }catch(e){}
 }
 
 function editarValor(tipo, index){
@@ -7840,7 +7894,7 @@ function exportarRelatorioPDF(){
       <script>
         setTimeout(()=>window.print(), 250);
       <\/script>
-    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v55 · app</div>
+    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v56 · app</div>
 
 
 <script>
@@ -7870,7 +7924,7 @@ function exportarRelatorioPDF(){
 }
 
 
-/* ===== v55 - Histórico detalhado por dia ===== */
+/* ===== v56 - Histórico detalhado por dia ===== */
 function mdHistEsc(s){
   return String(s == null ? "" : s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
 }
@@ -7950,7 +8004,7 @@ function renderHistoricoDetalhadoDias(){
     const fuelCfg = (typeof getCombustivelConfig === "function") ? getCombustivelConfig(bruto) : {combustivelEstimado:0, tituloResumo:"Combustível disponível", detalheResumo:""};
     const combustivelDisponivel = Number(fuelCfg.combustivelEstimado || 0);
 
-    // v55: no Histórico Detalhado, o "Saldo para abastecer" deve seguir a continuidade do Resumo Geral.
+    // v56: no Histórico Detalhado, o "Saldo para abastecer" deve seguir a continuidade do Resumo Geral.
     // Mantém o combustível disponível do dia normalmente, mas calcula o saldo de abastecimento acumulado até o dia selecionado:
     // combustível reservado acumulado até a data - abastecimentos acumulados até a data.
     const ganhosAteDia = (dados.ganhos || []).filter(function(g){
@@ -8007,7 +8061,7 @@ function renderHistoricoDetalhadoDias(){
 }
 
 
-/* ===== v55: ganho efetivo do dia para cálculo de tempo da meta =====
+/* ===== v56: ganho efetivo do dia para cálculo de tempo da meta =====
    Regra: ganhos manuais lançados hoje devem reduzir o tempo restante,
    sem alterar saldo atual, botão flutuante, sessão, ganho/hora ou Livro Líquido. */
 function mdTotalGanhosManuaisHojeParaTempoMeta(){
