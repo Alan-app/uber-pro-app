@@ -33,3 +33,6 @@ v59 - HISTÓRICO DETALHADO COM VIRADA ÀS 4H
 - Cálculos do relatório diário e saldo acumulado para abastecer usam a mesma referência operacional.
 - Abastecimentos lançados de madrugada passam a respeitar a data operacional igual aos demais lançamentos.
 - LDS permanece fora do escopo do MetaDriver.
+
+
+v60 - Removido texto 'Modo % do bruto ativo... Manutenção na meta...' do Histórico Detalhado.

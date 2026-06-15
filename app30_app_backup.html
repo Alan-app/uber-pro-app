@@ -7667,7 +7667,7 @@ function getCombustivelConfig(brutoBase){
   let taxaCombustivel = percentualSelecionado;
   const manutencaoPercentual = getManutencaoPercentual();
   let tituloResumo = "Combustível disponível (" + Math.round(percentualSelecionado * 100) + "% do bruto)";
-  let detalheResumo = "Modo % do bruto ativo em " + Math.round(percentualSelecionado * 100) + "%. Manutenção na meta: " + Math.round(manutencaoPercentual * 100) + "%.";
+  let detalheResumo = "";
 
   if(modo === "real"){
     const litrosEstimados = (kmRodados > 0 && consumoMedio > 0) ? (kmRodados / consumoMedio) : 0;
