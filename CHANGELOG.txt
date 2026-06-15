@@ -27,3 +27,9 @@ v57 - Ajuste visual em Lançamentos
 - Removido comportamento visual que quebrava os botões em duas linhas.
 - Placeholder do campo de descrição no modal de alteração de data/motivo alterado para "Descrição".
 - Sem alteração nas regras de cálculo, lançamentos, retiradas, excedente, metas ou Livro Líquido.
+
+v59 - HISTÓRICO DETALHADO COM VIRADA ÀS 4H
+- Histórico Detalhado passa a agrupar e calcular os registros seguindo o padrão operacional do app: o dia começa às 04:00.
+- Cálculos do relatório diário e saldo acumulado para abastecer usam a mesma referência operacional.
+- Abastecimentos lançados de madrugada passam a respeitar a data operacional igual aos demais lançamentos.
+- LDS permanece fora do escopo do MetaDriver.

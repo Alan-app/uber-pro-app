@@ -6219,7 +6219,12 @@ function addRetirada(){
 
 function addAbastecimento(){
   const valor = parseFloat(document.getElementById("valorAbastecimento").value);
-  const data = document.getElementById("dataAbastecimento").value;
+  let data = document.getElementById("dataAbastecimento").value;
+
+  if(data === hojeISO()){
+    data = dataUberISO();
+  }
+
   if(!isNaN(valor) && data){
     dados.abastecimentos.push({data, hora: horaAtualLancamento(), valor});
     mdCommitLancamentoMutation("add-abastecimento");
@@ -7980,19 +7985,54 @@ function mdHistDataLonga(iso){
   if(!/^\d{4}-\d{2}-\d{2}$/.test(v)) return v || "-";
   return v.slice(8,10) + "/" + v.slice(5,7) + "/" + v.slice(0,4);
 }
+function mdHistDateAddDays(iso, days){
+  try{
+    const v = String(iso || "").slice(0,10);
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(v)) return v || "";
+    const d = new Date(v + "T00:00:00");
+    d.setDate(d.getDate() + Number(days || 0));
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth()+1).padStart(2,"0");
+    const dd = String(d.getDate()).padStart(2,"0");
+    return yyyy + "-" + mm + "-" + dd;
+  }catch(e){ return String(iso || "").slice(0,10); }
+}
+function mdHistHoraMinutos(item){
+  try{
+    const h = String((item && (item.hora || item.horario)) || "").slice(0,5);
+    const m = h.match(/^(\d{1,2}):(\d{2})$/);
+    if(!m) return null;
+    const hh = Math.max(0, Math.min(23, Number(m[1] || 0)));
+    const mm = Math.max(0, Math.min(59, Number(m[2] || 0)));
+    return hh * 60 + mm;
+  }catch(e){ return null; }
+}
+function mdHistDiaOperacional(item, tipo){
+  try{
+    const data = String((item && item.data) || "").slice(0,10);
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(data)) return "";
+    // O app salva ganhos/gastos/retiradas já usando a data operacional (dia começa às 4h).
+    // Abastecimento antigo podia ter sido salvo com a data do calendário; por isso aplica o ajuste 4h nele.
+    const min = mdHistHoraMinutos(item);
+    if(String(tipo || "").toLowerCase() === "abastecimentos" && min !== null && min < 240){
+      return mdHistDateAddDays(data, -1);
+    }
+    return data;
+  }catch(e){ return String((item && item.data) || "").slice(0,10); }
+}
 function mdHistoricoDetalhadoDiasComLancamentos(){
   const set = new Set();
-  function add(arr){
+  function add(arr, tipo){
     (Array.isArray(arr) ? arr : []).forEach(function(item){
-      const d = String((item && item.data) || "").slice(0,10);
+      const d = mdHistDiaOperacional(item, tipo);
       if(/^\d{4}-\d{2}-\d{2}$/.test(d)) set.add(d);
     });
   }
   try{
-    add(dados.ganhos);
-    add(dados.gastos);
-    add(dados.retiradas);
-    add(dados.abastecimentos);
+    add(dados.ganhos, "ganhos");
+    add(dados.gastos, "gastos");
+    add(dados.retiradas, "retiradas");
+    add(dados.abastecimentos, "abastecimentos");
   }catch(e){}
   return Array.from(set).sort(function(a,b){ return a < b ? 1 : a > b ? -1 : 0; });
 }
@@ -8031,10 +8071,10 @@ function renderHistoricoDetalhadoDias(){
       return;
     }
 
-    const ganhos = (dados.ganhos || []).filter(function(g){ return String((g && g.data) || "").slice(0,10) === diaSel; });
-    const gastos = (dados.gastos || []).filter(function(g){ return String((g && g.data) || "").slice(0,10) === diaSel; });
-    const retiradas = (dados.retiradas || []).filter(function(r){ return String((r && r.data) || "").slice(0,10) === diaSel; });
-    const abastecimentos = (dados.abastecimentos || []).filter(function(a){ return String((a && a.data) || "").slice(0,10) === diaSel; });
+    const ganhos = (dados.ganhos || []).filter(function(g){ return mdHistDiaOperacional(g, "ganhos") === diaSel; });
+    const gastos = (dados.gastos || []).filter(function(g){ return mdHistDiaOperacional(g, "gastos") === diaSel; });
+    const retiradas = (dados.retiradas || []).filter(function(r){ return mdHistDiaOperacional(r, "retiradas") === diaSel; });
+    const abastecimentos = (dados.abastecimentos || []).filter(function(a){ return mdHistDiaOperacional(a, "abastecimentos") === diaSel; });
 
     const bruto = ganhos.reduce(function(s,g){ return s + Number(g.valor || 0); }, 0);
     const gastosExtras = gastos.reduce(function(s,g){ return s + Number(g.valor || 0); }, 0);
@@ -8047,11 +8087,11 @@ function renderHistoricoDetalhadoDias(){
     // Mantém o combustível disponível do dia normalmente, mas calcula o saldo de abastecimento acumulado até o dia selecionado:
     // combustível reservado acumulado até a data - abastecimentos acumulados até a data.
     const ganhosAteDia = (dados.ganhos || []).filter(function(g){
-      const d = String((g && g.data) || "").slice(0,10);
+      const d = mdHistDiaOperacional(g, "ganhos");
       return /^\d{4}-\d{2}-\d{2}$/.test(d) && d <= diaSel;
     });
     const abastecimentosAteDia = (dados.abastecimentos || []).filter(function(a){
-      const d = String((a && a.data) || "").slice(0,10);
+      const d = mdHistDiaOperacional(a, "abastecimentos");
       return /^\d{4}-\d{2}-\d{2}$/.test(d) && d <= diaSel;
     });
     const brutoAteDia = ganhosAteDia.reduce(function(s,g){ return s + Number(g.valor || 0); }, 0);
