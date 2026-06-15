@@ -14,3 +14,9 @@ v55 - Histórico Detalhado: saldo para abastecer passa a ser acumulado até a da
 
 
 v56 - Ajuste visual em Lançamentos: centraliza botões Ganhos/Gastos/Retiradas/Combustível e campos dos modais de edição.
+
+v57 - Ajuste visual em Lançamentos
+- Botões Ganhos/Gastos/Retiradas/Combustível mantidos lado a lado em uma única linha e centralizados dentro do card.
+- Removido comportamento visual que quebrava os botões em duas linhas.
+- Placeholder do campo de descrição no modal de alteração de data/motivo alterado para "Descrição".
+- Sem alteração nas regras de cálculo, lançamentos, retiradas, excedente, metas ou Livro Líquido.

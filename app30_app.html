@@ -137,17 +137,20 @@ body.md-ready > *{visibility:visible;}
 }
 
 
-/* ===== v56: centralização visual em Lançamentos =====
+/* ===== v57: Lançamentos - botões em linha e centralizados =====
    Ajuste exclusivamente visual:
-   - centraliza botões Ganhos/Gastos/Retiradas/Combustível no card;
-   - evita estouro lateral em telas estreitas;
-   - centraliza/limita campos dos modais de edição de valor/data. */
+   - mantém Ganhos/Gastos/Retiradas/Combustível lado a lado em uma linha, como antes;
+   - centraliza o conjunto dentro do card, sem puxar para a direita;
+   - preserva a centralização/limite dos campos dos modais de edição de valor/data. */
 .subtabs{
   justify-content:center !important;
   align-items:center !important;
-  flex-wrap:wrap !important;
+  flex-wrap:nowrap !important;
   gap:8px !important;
   width:100% !important;
+  max-width:100% !important;
+  margin-left:auto !important;
+  margin-right:auto !important;
   box-sizing:border-box !important;
 }
 .subtabs .subtab-btn,
@@ -155,15 +158,19 @@ body.md-ready > *{visibility:visible;}
 #btnSubGastos,
 #btnSubRetiradas,
 #btnSubCombustivel{
-  flex:0 1 calc(50% - 6px) !important;
-  max-width:150px !important;
-  min-width:118px !important;
+  flex:1 1 0 !important;
+  min-width:0 !important;
+  max-width:none !important;
   margin:0 !important;
   box-sizing:border-box !important;
   text-align:center !important;
   display:flex !important;
   align-items:center !important;
   justify-content:center !important;
+  padding-left:4px !important;
+  padding-right:4px !important;
+  white-space:nowrap !important;
+  font-size:clamp(11px, 3.1vw, 14px) !important;
 }
 .editvalor-overlay.show,
 .edit-data-overlay.show{
@@ -3931,7 +3938,7 @@ body[data-tema$="claro"] .historico-report-line{border-bottom-color:rgba(0,0,0,.
   <div class="edit-data-modal" onclick="event.stopPropagation()">
     <div class="edit-data-title" id="editDataTitle">Editar data</div>
     <input type="date" id="editDataInput" />
-    <input type="text" id="editMotivoInput" placeholder="Motivo (ex: folga, manutenção...)" style="display:none;" />
+    <input type="text" id="editMotivoInput" placeholder="Descrição" style="display:none;" />
     <div class="edit-data-actions">
       <button class="btn-cancelar" onclick="fecharEditData()">Cancelar</button>
       <button onclick="confirmarEditData()">Salvar</button>
