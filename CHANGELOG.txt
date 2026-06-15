@@ -1,3 +1,15 @@
+v62 - Correção de versão no menu e restauração da logo original
+- Menu interno do app atualizado para exibir v62.
+- Ícones icon-192.png e icon-512.png restaurados com base na logo original enviada.
+- Corrigida a imagem quebrada no splash sem alterar a identidade visual do MetaDriver.
+
+v61 - Correção de versionamento e logo de abertura
+- Corrigida versão visível no menu/app para v61.
+- Atualizados title, badges de versão, manifest e service worker/cache.
+- Recriados icon-192.png e icon-512.png como PNG válidos para corrigir o piscar inicial com imagem quebrada.
+- Mantida correção da v60 no Histórico Detalhado.
+- LDS permanece fora do escopo do MetaDriver.
+
 v58 - Correção de salvamento local
 - Corrigido erro "Falha ao salvar localmente" ao alterar qualquer dado.
 - Compactados caches auxiliares quando o localStorage do PWA fica cheio/corrompido.

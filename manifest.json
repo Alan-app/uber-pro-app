@@ -1,7 +1,7 @@
 {
-  "name": "MetaDriver v52",
-  "short_name": "MetaDriver v52",
-  "start_url": "./index.html?v=50",
+  "name": "MetaDriver v62",
+  "short_name": "MetaDriver v62",
+  "start_url": "./index.html?v=61",
   "scope": "./",
   "display": "standalone",
   "background_color": "#0f172a",
@@ -19,5 +19,5 @@
       "type": "image/png"
     }
   ],
-  "version": "v52"
+  "version": "v62"
 }

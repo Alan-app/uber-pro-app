@@ -1,4 +1,10 @@
-MetaDriver v52
+MetaDriver v62
+
+- Versão visível no menu corrigida para v62.
+- Logo/ícones restaurados a partir da referência original enviada, sem trocar a identidade visual.
+- Mantidas as correções da v60/v61.
+
+MetaDriver v61
 Base v51 com nova página Histórico por dia.
 Use Menu > Histórico para ver apenas dias com registros e abrir o relatório do dia selecionado.
 
@@ -6,3 +12,8 @@ v53 revisão: pacote recomposto com todos os 14 arquivos da estrutura completa, 
 
 
 v60 - Removido texto 'Modo % do bruto ativo... Manutenção na meta...' do Histórico Detalhado.
+
+v61 - Correção de versionamento e logo de abertura
+- Versão visível do app/menu atualizada para v61.
+- Manifest, cache/service worker e telas auxiliares atualizados para v61.
+- Ícones PNG recriados para corrigir falha visual da logo na abertura.
