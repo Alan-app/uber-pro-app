@@ -1,3 +1,10 @@
+v58 - Correção de salvamento local
+- Corrigido erro "Falha ao salvar localmente" ao alterar qualquer dado.
+- Compactados caches auxiliares quando o localStorage do PWA fica cheio/corrompido.
+- Journal local deixou de duplicar snapshots completos a cada salvamento.
+- Mantidas as correções da v57: botões de Lançamentos em linha centralizados e placeholder "Descrição".
+- LDS ignorado por pertencer a outro projeto.
+
 MetaDriver v52
 - Criada página Histórico no menu.
 - Histórico mostra botões quadrados apenas para dias com lançamentos.

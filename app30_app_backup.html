@@ -3511,8 +3511,8 @@ body[data-tema="amarelo-claro"] .subtab-btn{
   max-height:42px !important;
   padding:0 !important;
   border-radius:9px !important;
-  border:1.5px solid var(--accent) !important;
-  background:rgba(255,255,255,.08) !important;
+  border:none !important;
+  background:rgba(80,140,255,.28) !important;
   color:var(--text) !important;
   box-shadow:0 0 0 1px rgba(255,255,255,.08) inset, 0 4px 10px rgba(0,0,0,.18);
   display:flex !important;
@@ -4084,6 +4084,31 @@ function mdWriteLS(baseKey, value){
 function mdRemoveLS(baseKey){
   try{ localStorage.removeItem(mdCurrentDataKey(baseKey)); }catch(e){}
 }
+
+// v58 - proteção contra estouro do localStorage em PWA móvel.
+// Mantém o snapshot principal, mas compacta caches auxiliares quando o navegador
+// nega gravação local (QuotaExceeded/corrupção parcial).
+function mdPruneAuxLocalStorageForSave(){
+  try{ mdRemoveLS(JOURNAL_KEY); }catch(e){}
+  try{ mdRemoveLS(LOCAL_BACKUP_KEY); }catch(e){}
+  try{ mdRemoveLS(CLOUD_BACKUP_KEY); }catch(e){}
+  try{ mdRemoveLS(OFFLINE_SAFE_SNAPSHOT_KEY); }catch(e){}
+}
+
+function mdWriteVerifiedPrimarySnapshot(payload){
+  try{
+    if(mdWriteLS(STORAGE_KEY, payload) && mdReadLS(STORAGE_KEY) === payload){
+      return true;
+    }
+  }catch(e){}
+  try{
+    mdPruneAuxLocalStorageForSave();
+    if(mdWriteLS(STORAGE_KEY, payload) && mdReadLS(STORAGE_KEY) === payload){
+      return true;
+    }
+  }catch(e){}
+  return false;
+}
 function mdReadLSForUser(baseKey, userId){
   try{ return localStorage.getItem(mdScopedDataKey(baseKey, userId)); }catch(e){ return null; }
 }
@@ -4243,7 +4268,7 @@ function mdReadJournal(){
 
 function mdWriteJournal(entries){
   try{
-    const arr = Array.isArray(entries) ? entries.slice(-300) : [];
+    const arr = Array.isArray(entries) ? entries.slice(-80) : [];
     mdWriteLS(JOURNAL_KEY, JSON.stringify(arr));
     idbSet(mdCurrentDataKey(JOURNAL_IDB_KEY), JSON.stringify(arr));
   }catch(e){}
@@ -4258,8 +4283,7 @@ function mdAppendJournal(snapshot, reason){
       rev: Number(snapshot.__rev || 0),
       ts: snapshot.__last_local_write_at || snapshot.__updated_at || mdNowIso(),
       reason: reason || "save",
-      fp: mdSnapshotFingerprint(snapshot),
-      snapshot: JSON.parse(JSON.stringify(snapshot))
+      fp: mdSnapshotFingerprint(snapshot)
     });
     mdWriteJournal(journal);
   }catch(e){}
@@ -4620,7 +4644,7 @@ function mdReadBackupRing(key){
 
 function mdWriteBackupRing(key, ring){
   try{
-    mdWriteLS(key, JSON.stringify(Array.isArray(ring) ? ring.slice(0, 12) : []));
+    mdWriteLS(key, JSON.stringify(Array.isArray(ring) ? ring.slice(0, 3) : []));
   }catch(e){}
 }
 
@@ -4693,12 +4717,13 @@ function salvar(){
       console.warn("MetaDriver: payload muito menor que anterior, salvando backup e verificando");
       mdPushBackup(LOCAL_BACKUP_KEY, dados, "small-payload-warning");
     }
-    mdWriteLS(STORAGE_KEY, payload);
-    mdWriteLS(DURABLE_STATE_KEY, payload);
-    const verificacao = mdReadLS(STORAGE_KEY);
-    if(verificacao !== payload){
-      throw new Error("Verificação de escrita falhou");
+
+    const primaryOk = mdWriteVerifiedPrimarySnapshot(payload);
+    if(!primaryOk){
+      throw new Error("Falha ao gravar snapshot principal no localStorage");
     }
+
+    mdWriteLS(DURABLE_STATE_KEY, payload);
     idbSet(mdCurrentDataKey(IDB_KEY), payload);
     idbSet(mdCurrentDataKey(DURABLE_STATE_KEY), payload);
     mdPushBackup(LOCAL_BACKUP_KEY, dados, "save");
@@ -4709,10 +4734,17 @@ function salvar(){
       const payload = JSON.stringify(dados);
       idbSet(mdCurrentDataKey(IDB_KEY), payload);
       idbSet(mdCurrentDataKey(DURABLE_STATE_KEY), payload);
-      mdPushBackup(LOCAL_BACKUP_KEY, dados, "fallback-idb");
+      mdPruneAuxLocalStorageForSave();
+      if(mdWriteVerifiedPrimarySnapshot(payload)){
+        try{ mdWriteLS(DURABLE_STATE_KEY, payload); }catch(__){}
+        toast("✅ Salvamento local recuperado.");
+      }else{
+        toast("⚠️ Salvamento protegido no IndexedDB. Feche e abra o app novamente.");
+      }
       mdAppendJournal(dados, "fallback-idb");
+    }catch(_){
       toast("⚠️ Falha ao salvar localmente. Abra no Chrome normal (não anônimo).");
-    }catch(_){ }
+    }
   }
 }
 window.__salvarLocalOriginal = salvar;
