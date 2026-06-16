@@ -1,6 +1,6 @@
-MetaDriver v62
+MetaDriver v63
 
-- Versão visível no menu corrigida para v62.
+- Versão visível no menu corrigida para v63.
 - Logo/ícones restaurados a partir da referência original enviada, sem trocar a identidade visual.
 - Mantidas as correções da v60/v61.
 
@@ -17,3 +17,8 @@ v61 - Correção de versionamento e logo de abertura
 - Versão visível do app/menu atualizada para v61.
 - Manifest, cache/service worker e telas auxiliares atualizados para v61.
 - Ícones PNG recriados para corrigir falha visual da logo na abertura.
+
+
+Atualização v63:
+- Retiradas são apenas saques: afetam somente o Livro Líquido.
+- Retiradas não interferem em horas restantes, metas diárias nem relatório diário.

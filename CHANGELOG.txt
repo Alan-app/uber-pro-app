@@ -1,3 +1,9 @@
+MetaDriver v63 - Retiradas isoladas do relatório diário e metas
+- Retiradas passam a ser tratadas exclusivamente como saques do Livro Líquido.
+- Retiradas não alteram horas restantes, metas diárias, meta bruta restante ou redistribuição de meta.
+- No Histórico Detalhado/relatório diário, Retiradas continuam listadas, mas não reduzem Lucro líquido nem Saldo total do dia.
+- Versão visível do menu/app atualizada para v63.
+
 v62 - Correção de versão no menu e restauração da logo original
 - Menu interno do app atualizado para exibir v62.
 - Ícones icon-192.png e icon-512.png restaurados com base na logo original enviada.
