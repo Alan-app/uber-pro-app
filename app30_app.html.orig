@@ -43,7 +43,7 @@ try{
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver v69</title>
+<title>MetaDriver v68</title>
 <style id="md-hydration-lock">
 body.preload > *:not(#mdBootOverlay){visibility:hidden!important;}
 #mdBootOverlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#0f172a;color:#fff;z-index:2147483647;font-family:Inter,system-ui,sans-serif;font-weight:800;letter-spacing:.2px;}
@@ -102,56 +102,41 @@ body.md-ready > *{visibility:visible;}
 }
 
 
-/* v69 - seletor rápido de horário em duas etapas: horas -> minutos */
+/* v68 - seletor rápido de horário em grade MetaDriver (sem roldana, sem teclado nativo) */
 .md-time-wheel{
   display:block;
   margin:10px auto 0;
   width:100%;
 }
 .md-quick-time-current{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap:8px;
-  margin:8px auto 12px;
-}
-.md-quick-time-current button{
-  min-width:78px;
-  border-radius:16px;
-  padding:10px 12px;
-  font-size:30px;
-  line-height:1;
+  text-align:center;
+  font-size:28px;
   font-weight:900;
-  background:rgba(0,255,136,.08);
   color:var(--success);
+  background:rgba(0,255,136,.08);
   border:1px solid rgba(0,255,136,.35);
-  box-shadow:none;
+  border-radius:16px;
+  padding:8px 10px;
+  margin:8px auto 10px;
+  max-width:160px;
 }
-.md-quick-time-current button.active{
-  border-color:rgba(0,255,136,.85);
-  box-shadow:0 0 0 2px rgba(0,255,136,.18) inset, 0 0 16px rgba(0,255,136,.16);
-  color:#fff;
-}
-.md-quick-time-current span{font-size:30px;font-weight:900;color:var(--success);opacity:.92;}
-.md-quick-section{margin-top:8px;}
-.md-wheel-label{font-size:13px; opacity:.86; font-weight:900; letter-spacing:.5px; text-transform:uppercase; margin:0 0 8px; text-align:center;}
+.md-quick-section{margin-top:10px;}
+.md-wheel-label{font-size:12px; opacity:.78; font-weight:900; letter-spacing:.5px; text-transform:uppercase; margin:0 0 6px;}
 .md-quick-grid{
   display:grid;
-  grid-template-columns:repeat(6,1fr);
-  gap:7px;
+  gap:6px;
   width:100%;
-  max-width:330px;
-  margin:0 auto;
 }
-.md-quick-grid.hidden{display:none !important;}
+.md-quick-grid.hours{grid-template-columns:repeat(6,1fr);}
+.md-quick-grid.minutes{grid-template-columns:repeat(6,1fr);}
 .md-quick-btn{
   border:1px solid var(--line);
   background:var(--input);
   color:var(--text);
-  border-radius:11px;
-  min-height:42px;
+  border-radius:10px;
+  min-height:34px;
   padding:0;
-  font-size:16px;
+  font-size:15px;
   font-weight:900;
   touch-action:manipulation;
 }
@@ -163,10 +148,11 @@ body.md-ready > *{visibility:visible;}
 }
 #inicioSessaoOverlay .editvalor-modal,
 #mdTimeWheelOverlay .editvalor-modal.md-time-modal{
-  width:min(94vw,390px) !important;
+  width:min(96vw,390px) !important;
   max-width:390px !important;
-  max-height:calc(100vh - 34px) !important;
-  overflow:visible !important;
+  max-height:calc(100vh - 26px) !important;
+  overflow-y:auto !important;
+  overflow-x:hidden !important;
   padding:14px !important;
 }
 #inicioSessaoOverlay .editvalor-actions,
@@ -177,15 +163,19 @@ body.md-ready > *{visibility:visible;}
   gap:10px !important;
   margin-top:14px !important;
   flex-wrap:nowrap !important;
+  position:sticky;
+  bottom:0;
+  background:linear-gradient(180deg, rgba(0,0,0,0), var(--card) 28%);
+  padding-top:12px;
 }
 #inicioSessaoOverlay .editvalor-actions button,
 #mdTimeWheelOverlay .md-time-actions button{min-width:112px;}
 @media (max-width:380px){
-  .md-quick-grid{grid-template-columns:repeat(6,1fr); gap:6px;}
-  .md-quick-btn{min-height:39px; font-size:15px; border-radius:10px;}
-  .md-quick-time-current button{min-width:70px;font-size:27px;padding:9px 10px;}
+  .md-quick-grid.hours,.md-quick-grid.minutes{grid-template-columns:repeat(6,1fr); gap:5px;}
+  .md-quick-btn{min-height:31px; font-size:14px; border-radius:9px;}
   #inicioSessaoOverlay .editvalor-modal,#mdTimeWheelOverlay .editvalor-modal.md-time-modal{padding:12px !important;}
 }
+
 
 /* PATCH V40 - Metas detalhadas realmente compactas
    Mantém Descrição e Valor na mesma linha; reduz só o espaço vertical entre metas. */
@@ -832,7 +822,7 @@ button:active{transform:scale(0.99);}
 .highlight{color:var(--accent);font-weight:bold;}
 .warning{color:var(--warn);font-weight:bold;}
 
-/* v69 - Opção 4: brilho verde suave para sessão em andamento */
+/* v68 - Opção 4: brilho verde suave para sessão em andamento */
 .md-sessao-andamento-glow{
   margin-top:0;
   padding:12px 14px;
@@ -3745,7 +3735,7 @@ body[data-tema$="claro"] .historico-report-line{border-bottom-color:rgba(0,0,0,.
   <div class="menu-item"><button class="secondary" onclick="abrirSaldoAtualButtonMenu(); closeMenu();">Botão de saldo atual</button></div>
   <div class="menu-item"><button class="secondary" onclick="abrirTemas(); closeMenu();">Temas</button></div>
   <div class="menu-item"><button class="danger" onclick="forceLogout(); return false;">Sair</button></div>
-  <div class="menu-note" style="text-align:center;">v69</div>
+  <div class="menu-note" style="text-align:center;">v68</div>
 </div>
 
 <div id="temasOverlay" class="temas-overlay" onclick="fecharTemas()"></div>
@@ -3825,12 +3815,9 @@ body[data-tema$="claro"] .historico-report-line{border-bottom-color:rgba(0,0,0,.
     <label style="display:block;margin-top:8px;text-align:left;">Horário de início</label>
     <input type="hidden" id="inicioSessaoHoraModal">
     <div class="md-time-wheel" id="inicioSessaoWheel">
-      <div class="md-quick-time-current" aria-label="Horário selecionado">
-        <button type="button" id="inicioSessaoTimeHourBtn" onclick="mdQuickSetStep('inicio','hour')">00</button>
-        <span>:</span>
-        <button type="button" id="inicioSessaoTimeMinuteBtn" onclick="mdQuickSetStep('inicio','minute')">00</button>
-      </div>
-      <div class="md-quick-section"><div class="md-wheel-label" id="inicioSessaoTimeStepLabel">Selecione a hora</div><div class="md-quick-grid hours" id="inicioSessaoHoraGrid"></div><div class="md-quick-grid minutes hidden" id="inicioSessaoMinutoGrid"></div></div>
+      <div class="md-quick-time-current" id="inicioSessaoTimePreview">00:00</div>
+      <div class="md-quick-section"><div class="md-wheel-label">Hora</div><div class="md-quick-grid hours" id="inicioSessaoHoraGrid"></div></div>
+      <div class="md-quick-section"><div class="md-wheel-label">Minuto</div><div class="md-quick-grid minutes" id="inicioSessaoMinutoGrid"></div></div>
     </div>
     <div class="editvalor-actions" style="margin-top:12px;">
       <button type="button" onclick="confirmInicioSessaoModal()">OK</button>
@@ -3844,12 +3831,9 @@ body[data-tema$="claro"] .historico-report-line{border-bottom-color:rgba(0,0,0,.
     <div class="editvalor-title" id="mdTimeWheelTitle">Selecionar horário</div>
     <input type="hidden" id="mdTimeWheelValue">
     <div class="md-time-wheel">
-      <div class="md-quick-time-current" aria-label="Horário selecionado">
-        <button type="button" id="mdTimeWheelHourBtn" onclick="mdQuickSetStep('generic','hour')">00</button>
-        <span>:</span>
-        <button type="button" id="mdTimeWheelMinuteBtn" onclick="mdQuickSetStep('generic','minute')">00</button>
-      </div>
-      <div class="md-quick-section"><div class="md-wheel-label" id="mdTimeWheelStepLabel">Selecione a hora</div><div class="md-quick-grid hours" id="mdTimeWheelHoraGrid"></div><div class="md-quick-grid minutes hidden" id="mdTimeWheelMinutoGrid"></div></div>
+      <div class="md-quick-time-current" id="mdTimeWheelPreview">00:00</div>
+      <div class="md-quick-section"><div class="md-wheel-label">Hora</div><div class="md-quick-grid hours" id="mdTimeWheelHoraGrid"></div></div>
+      <div class="md-quick-section"><div class="md-wheel-label">Minuto</div><div class="md-quick-grid minutes" id="mdTimeWheelMinutoGrid"></div></div>
     </div>
     <div class="editvalor-actions md-time-actions">
       <button type="button" onclick="mdConfirmTimeWheel()">Definir</button>
@@ -4493,8 +4477,8 @@ function loadDados(){
       return offlineSafe;
     }
     const legacyKeys = [
-      "dadosControleProV691","dadosControleProV63","dadosControleProV631","dadosControleProV632",
-      "dadosControleProV633","dadosControleProV69","dadosControleProV690","dadosControleProV691",
+      "dadosControleProV681","dadosControleProV63","dadosControleProV631","dadosControleProV632",
+      "dadosControleProV633","dadosControleProV68","dadosControleProV680","dadosControleProV681",
       "dadosControleProV70","dadosControleProV71","dadosControleProV72"
     ];
     for(const k of legacyKeys){
@@ -5034,7 +5018,7 @@ function mdBuildDiagnosticsObject(){
     const durableObj = mdSafeJsonParse(durableRaw);
     const diag = {
       generated_at: mdNowIso(),
-      app_version: 'MetaDriver v69',
+      app_version: 'MetaDriver v68',
       cloud_table: CLOUD_TABLE,
       device_id: mdEnsureDeviceId(),
       visibility_state: document.visibilityState,
@@ -6436,68 +6420,50 @@ function mdCommitLancamentoMutation(reason){
   try{ atualizar(); }catch(e){}
   try{ if(typeof refreshQuickBalanceFabMiniDisplay === "function") refreshQuickBalanceFabMiniDisplay(); }catch(e){}
   try{ if(typeof updateQuickBalanceFabUI === "function") updateQuickBalanceFabUI(); }catch(e){}
-  try{ if(typeof toast === "function" && reason) console.info("MetaDriver v69 mutation:", reason); }catch(e){}
+  try{ if(typeof toast === "function" && reason) console.info("MetaDriver v68 mutation:", reason); }catch(e){}
 }
 
 
 
-/* v69 - seletor rápido de horário MetaDriver em duas etapas */
+/* v68 - seletor rápido de horário MetaDriver em grade */
 window.__mdTimeWheelCtx = null;
-window.__mdQuickTimeState = window.__mdQuickTimeState || { inicio:{h:'00',m:'00',step:'hour'}, generic:{h:'00',m:'00',step:'hour'} };
+window.__mdQuickTimeState = window.__mdQuickTimeState || { inicio:{h:'00',m:'00'}, generic:{h:'00',m:'00'} };
 function mdPad2(n){ return String(Number(n)||0).padStart(2,'0'); }
 function mdHoraValida(valor){ return /^([01]?\d|2[0-3]):[0-5]\d$/.test(String(valor||'').trim()); }
 function mdParseTimeParts(value){
   var v=String(value||'00:00').trim(); if(!mdHoraValida(v)) v='00:00';
-  var p=v.split(':'); return {h:mdPad2(p[0]), m:mdPad2(p[1]), step:'hour'};
+  var p=v.split(':'); return {h:mdPad2(p[0]), m:mdPad2(p[1])};
 }
 function mdQuickScope(scope){ return scope === 'inicio' ? 'inicio' : 'generic'; }
 function mdQuickEls(scope){
   var s=mdQuickScope(scope);
   return s === 'inicio' ? {
     input:document.getElementById('inicioSessaoHoraModal'),
-    hBtn:document.getElementById('inicioSessaoTimeHourBtn'),
-    mBtn:document.getElementById('inicioSessaoTimeMinuteBtn'),
-    label:document.getElementById('inicioSessaoTimeStepLabel'),
+    preview:document.getElementById('inicioSessaoTimePreview'),
     hGrid:document.getElementById('inicioSessaoHoraGrid'),
     mGrid:document.getElementById('inicioSessaoMinutoGrid')
   } : {
     input:document.getElementById('mdTimeWheelValue'),
-    hBtn:document.getElementById('mdTimeWheelHourBtn'),
-    mBtn:document.getElementById('mdTimeWheelMinuteBtn'),
-    label:document.getElementById('mdTimeWheelStepLabel'),
+    preview:document.getElementById('mdTimeWheelPreview'),
     hGrid:document.getElementById('mdTimeWheelHoraGrid'),
     mGrid:document.getElementById('mdTimeWheelMinutoGrid')
   };
 }
 function mdQuickValue(scope){
-  var st=window.__mdQuickTimeState[mdQuickScope(scope)] || {h:'00',m:'00',step:'hour'};
+  var st=window.__mdQuickTimeState[mdQuickScope(scope)] || {h:'00',m:'00'};
   return mdPad2(st.h)+':'+mdPad2(st.m);
 }
-function mdQuickSetStep(scope, step){
-  var s=mdQuickScope(scope);
-  if(!window.__mdQuickTimeState[s]) window.__mdQuickTimeState[s]={h:'00',m:'00',step:'hour'};
-  window.__mdQuickTimeState[s].step = step === 'minute' ? 'minute' : 'hour';
-  mdQuickRender(s);
-}
 function mdQuickRender(scope){
-  var s=mdQuickScope(scope), els=mdQuickEls(s), st=window.__mdQuickTimeState[s] || {h:'00',m:'00',step:'hour'};
+  var s=mdQuickScope(scope), els=mdQuickEls(s), st=window.__mdQuickTimeState[s] || {h:'00',m:'00'};
   var valor=mdPad2(st.h)+':'+mdPad2(st.m);
   if(els.input) els.input.value=valor;
-  if(els.hBtn){ els.hBtn.textContent=mdPad2(st.h); els.hBtn.classList.toggle('active', st.step==='hour'); }
-  if(els.mBtn){ els.mBtn.textContent=mdPad2(st.m); els.mBtn.classList.toggle('active', st.step==='minute'); }
-  if(els.label) els.label.textContent = st.step === 'hour' ? 'Selecione a hora' : 'Selecione os minutos';
-  if(els.hGrid){
-    els.hGrid.classList.toggle('hidden', st.step !== 'hour');
-    Array.prototype.forEach.call(els.hGrid.querySelectorAll('.md-quick-btn'), function(b){ b.classList.toggle('selected', b.dataset.value===mdPad2(st.h)); });
-  }
-  if(els.mGrid){
-    els.mGrid.classList.toggle('hidden', st.step !== 'minute');
-    Array.prototype.forEach.call(els.mGrid.querySelectorAll('.md-quick-btn'), function(b){ b.classList.toggle('selected', b.dataset.value===mdPad2(st.m)); });
-  }
+  if(els.preview) els.preview.textContent=valor;
+  if(els.hGrid){ Array.prototype.forEach.call(els.hGrid.querySelectorAll('.md-quick-btn'), function(b){ b.classList.toggle('selected', b.dataset.value===mdPad2(st.h)); }); }
+  if(els.mGrid){ Array.prototype.forEach.call(els.mGrid.querySelectorAll('.md-quick-btn'), function(b){ b.classList.toggle('selected', b.dataset.value===mdPad2(st.m)); }); }
 }
 function mdBuildQuickGrid(scope, value){
   var s=mdQuickScope(scope), els=mdQuickEls(s), parts=mdParseTimeParts(value);
-  window.__mdQuickTimeState[s] = {h:parts.h, m:parts.m, step:'hour'};
+  window.__mdQuickTimeState[s] = {h:parts.h, m:parts.m};
   function fill(grid, max, key){
     if(!grid) return;
     if(!grid.children.length){
@@ -6507,26 +6473,19 @@ function mdBuildQuickGrid(scope, value){
         btn.type='button'; btn.className='md-quick-btn'; btn.dataset.value=val; btn.textContent=val;
         btn.addEventListener('click', function(ev){
           var v=ev.currentTarget && ev.currentTarget.dataset ? ev.currentTarget.dataset.value : '00';
-          var st=window.__mdQuickTimeState[s];
-          if(!st) st=window.__mdQuickTimeState[s]={h:'00',m:'00',step:'hour'};
-          if(key === 'h'){
-            st.h=v;
-            st.step='minute';
-          }else{
-            st.m=v;
-          }
+          window.__mdQuickTimeState[s][key]=v;
           mdQuickRender(s);
         });
         grid.appendChild(btn);
       }
     }
   }
-  fill(els.hGrid,24,'h');
-  fill(els.mGrid,60,'m');
+  fill(els.hGrid,24,'h'); fill(els.mGrid,60,'m');
   mdQuickRender(s);
 }
 function mdFillWheelSelects(hSel, mSel, value){ mdBuildQuickGrid('generic', value); }
 function mdGetWheelValue(hSel, mSel){
+  // Compatibilidade com chamadas antigas: se vierem selects, usa eles; caso contrário usa a grade rápida ativa.
   try{ if(hSel && mSel && typeof hSel.value !== 'undefined' && typeof mSel.value !== 'undefined') return mdPad2(hSel.value)+':'+mdPad2(mSel.value); }catch(e){}
   var inicioInput=document.getElementById('inicioSessaoHoraModal');
   var genericInput=document.getElementById('mdTimeWheelValue');
@@ -8186,7 +8145,7 @@ function exportarRelatorioPDF(){
       <script>
         setTimeout(()=>window.print(), 250);
       <\/script>
-    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v69 · app</div>
+    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v68 · app</div>
 
 
 <script>
