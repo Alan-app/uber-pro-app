@@ -1,6 +1,15 @@
-MetaDriver v63
+MetaDriver v64
 
-- Versão visível no menu corrigida para v63.
+Atualização v64:
+- Sessão em andamento recebeu brilho verde suave animado no card, conforme opção 4 escolhida.
+- Sessões finalizadas continuam estáticas, sem brilho.
+- Versão do menu/app atualizada para v64.
+- Manifest/cache atualizados para v64.
+- LDS ignorado neste projeto.
+
+MetaDriver v64
+
+- Versão visível no menu corrigida para v64.
 - Logo/ícones restaurados a partir da referência original enviada, sem trocar a identidade visual.
 - Mantidas as correções da v60/v61.
 
@@ -19,6 +28,6 @@ v61 - Correção de versionamento e logo de abertura
 - Ícones PNG recriados para corrigir falha visual da logo na abertura.
 
 
-Atualização v63:
+Atualização v64:
 - Retiradas são apenas saques: afetam somente o Livro Líquido.
 - Retiradas não interferem em horas restantes, metas diárias nem relatório diário.

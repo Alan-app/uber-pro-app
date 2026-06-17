@@ -43,7 +43,7 @@ try{
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver v63</title>
+<title>MetaDriver v64</title>
 <style id="md-hydration-lock">
 body.preload > *:not(#mdBootOverlay){visibility:hidden!important;}
 #mdBootOverlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#0f172a;color:#fff;z-index:2147483647;font-family:Inter,system-ui,sans-serif;font-weight:800;letter-spacing:.2px;}
@@ -747,6 +747,25 @@ button:active{transform:scale(0.99);}
 
 .highlight{color:var(--accent);font-weight:bold;}
 .warning{color:var(--warn);font-weight:bold;}
+
+/* v64 - Opção 4: brilho verde suave para sessão em andamento */
+.md-sessao-andamento-glow{
+  margin-top:0;
+  padding:12px 14px;
+  border:1px solid rgba(30,215,96,.48);
+  border-radius:16px;
+  background:linear-gradient(180deg, rgba(30,215,96,.08), rgba(38,54,72,.72));
+  box-shadow:0 0 18px rgba(30,215,96,.22), inset 0 0 14px rgba(30,215,96,.05);
+  animation:mdSessaoGlowPulse 2s ease-in-out infinite;
+}
+@keyframes mdSessaoGlowPulse{
+  0%,100%{box-shadow:0 0 12px rgba(30,215,96,.14), inset 0 0 8px rgba(30,215,96,.04);}
+  50%{box-shadow:0 0 28px rgba(30,215,96,.34), inset 0 0 18px rgba(30,215,96,.08);}
+}
+@media (prefers-reduced-motion: reduce){
+  .md-sessao-andamento-glow{animation:none;}
+}
+
 .muted{opacity:0.88;}
 
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
@@ -3642,7 +3661,7 @@ body[data-tema$="claro"] .historico-report-line{border-bottom-color:rgba(0,0,0,.
   <div class="menu-item"><button class="secondary" onclick="abrirSaldoAtualButtonMenu(); closeMenu();">Botão de saldo atual</button></div>
   <div class="menu-item"><button class="secondary" onclick="abrirTemas(); closeMenu();">Temas</button></div>
   <div class="menu-item"><button class="danger" onclick="forceLogout(); return false;">Sair</button></div>
-  <div class="menu-note" style="text-align:center;">v63</div>
+  <div class="menu-note" style="text-align:center;">v64</div>
 </div>
 
 <div id="temasOverlay" class="temas-overlay" onclick="fecharTemas()"></div>
@@ -4904,7 +4923,7 @@ function mdBuildDiagnosticsObject(){
     const durableObj = mdSafeJsonParse(durableRaw);
     const diag = {
       generated_at: mdNowIso(),
-      app_version: 'MetaDriver v63',
+      app_version: 'MetaDriver v64',
       cloud_table: CLOUD_TABLE,
       device_id: mdEnsureDeviceId(),
       visibility_state: document.visibilityState,
@@ -6306,7 +6325,7 @@ function mdCommitLancamentoMutation(reason){
   try{ atualizar(); }catch(e){}
   try{ if(typeof refreshQuickBalanceFabMiniDisplay === "function") refreshQuickBalanceFabMiniDisplay(); }catch(e){}
   try{ if(typeof updateQuickBalanceFabUI === "function") updateQuickBalanceFabUI(); }catch(e){}
-  try{ if(typeof toast === "function" && reason) console.info("MetaDriver v63 mutation:", reason); }catch(e){}
+  try{ if(typeof toast === "function" && reason) console.info("MetaDriver v64 mutation:", reason); }catch(e){}
 }
 
 function editarValor(tipo, index){
@@ -7938,7 +7957,7 @@ function exportarRelatorioPDF(){
       <script>
         setTimeout(()=>window.print(), 250);
       <\/script>
-    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v63 · app</div>
+    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v64 · app</div>
 
 
 <script>
@@ -8231,7 +8250,7 @@ function atualizar(){
         const valorClass = valorSessaoAtual < 0 ? "dangerText" : "warning";
         const horaClass = ganhoHora < 0 ? "dangerText" : "warning";
         resumoEl.innerHTML =
-          "<div style='margin-top:0;padding-top:0'><b>" + tituloSessao + " em andamento</b><br>" +
+          "<div class='md-sessao-andamento-glow'><b>" + tituloSessao + " em andamento</b><br>" +
           "Hora de início: " + horario + "<br>" +
           "Hora de término: -<br>" +
           "Valor total: <span class='" + valorClass + "'>R$ " + valorSessaoAtual.toFixed(2) + "</span><br>" +

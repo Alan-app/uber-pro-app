@@ -1,3 +1,12 @@
+MetaDriver v64 - Brilho verde em sessão em andamento
+
+- Aplicada a opção 4 escolhida: brilho verde suave no card da sessão em andamento.
+- Sessões finalizadas permanecem sem animação para diferenciar visualmente da sessão ativa.
+- Versão visível do menu/app atualizada para v64.
+- Manifest/cache atualizados para v64.
+- README/LEIA-ME atualizado.
+- LDS ignorado, por pertencer a outro projeto.
+
 MetaDriver v63 - Retiradas isoladas do relatório diário e metas
 - Retiradas passam a ser tratadas exclusivamente como saques do Livro Líquido.
 - Retiradas não alteram horas restantes, metas diárias, meta bruta restante ou redistribuição de meta.
