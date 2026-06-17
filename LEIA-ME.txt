@@ -1,10 +1,10 @@
-MetaDriver v65
+MetaDriver v66
 
-Atualização v65:
-- Cards de edição de hora das sessões agora seguem o padrão visual MetaDriver.
-- Removido uso de prompt/relógio nativo para editar hora de início e hora de término.
-- Card de iniciar sessão ajustado para seletor próprio compacto, evitando corte do botão Definir.
-- Versão do menu/app, manifest e cache atualizados para v65.
+Atualização v66:
+- Usa a v64 como base para preservar a animação da sessão em andamento.
+- Seleção/edição de horários das sessões em roldana/nativo Android.
+- Modal de início de sessão compacto, com botão Definir visível.
+- Versão do menu/app, manifest e cache atualizados para v66.
 
 MetaDriver v64
 
