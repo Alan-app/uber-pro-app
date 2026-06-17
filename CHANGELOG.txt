@@ -1,3 +1,12 @@
+MetaDriver v68 - Seletor rápido de horários em grade
+- Base utilizada: v67 enviada pelo usuário.
+- Substituída a roldana de horário por seleção rápida em grade.
+- Horas exibidas de 00 a 23 em botões de toque único.
+- Minutos exibidos de 00 a 59 em botões de toque único.
+- Aplicado ao início de sessão e à edição de horário de início/término.
+- Mantida a animação/brilho verde da sessão em andamento.
+- Versão visível do menu/app, manifest e cache atualizados para v68.
+
 MetaDriver v67 - Brilho verde em sessão em andamento
 
 - Aplicada a opção 4 escolhida: brilho verde suave no card da sessão em andamento.

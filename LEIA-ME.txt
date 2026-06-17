@@ -1,3 +1,13 @@
+MetaDriver v68
+
+Atualização v68:
+- Seletor rápido de horários em grade para facilitar uso com poucos toques.
+- Horas 00-23 e minutos 00-59 aparecem como botões diretos.
+- Sem teclado nativo, sem roldana e sem arrastar.
+- Aplicado em iniciar sessão e edição de início/término de sessões.
+- Mantida a animação verde da sessão em andamento.
+- Versão do menu/app atualizada para v68.
+
 MetaDriver v67
 
 Atualização v67:

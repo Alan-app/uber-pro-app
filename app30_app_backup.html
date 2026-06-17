@@ -43,7 +43,7 @@ try{
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver v67</title>
+<title>MetaDriver v68</title>
 <style id="md-hydration-lock">
 body.preload > *:not(#mdBootOverlay){visibility:hidden!important;}
 #mdBootOverlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#0f172a;color:#fff;z-index:2147483647;font-family:Inter,system-ui,sans-serif;font-weight:800;letter-spacing:.2px;}
@@ -102,43 +102,58 @@ body.md-ready > *{visibility:visible;}
 }
 
 
-/* v67 - seletor de horário tipo roldana MetaDriver, sem botão de teclado nativo */
+/* v68 - seletor rápido de horário em grade MetaDriver (sem roldana, sem teclado nativo) */
 .md-time-wheel{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap:10px;
-  margin:12px auto 0;
+  display:block;
+  margin:10px auto 0;
   width:100%;
-  max-width:260px;
 }
-.md-wheel-col{display:flex; flex-direction:column; align-items:center; gap:6px; min-width:86px;}
-.md-wheel-label{font-size:12px; opacity:.72; font-weight:800; letter-spacing:.4px;}
-.md-wheel-sep{font-size:42px; font-weight:900; line-height:1; opacity:.78; padding-top:18px;}
-.md-time-wheel select{
-  width:86px !important;
-  height:154px !important;
-  max-height:154px !important;
-  overflow-y:auto !important;
-  border-radius:18px !important;
-  text-align:center !important;
-  text-align-last:center !important;
-  font-size:28px !important;
-  font-weight:900 !important;
-  background:var(--input) !important;
-  color:var(--text) !important;
-  border:1px solid var(--line) !important;
-  outline:none !important;
-  padding:6px 0 !important;
+.md-quick-time-current{
+  text-align:center;
+  font-size:28px;
+  font-weight:900;
+  color:var(--success);
+  background:rgba(0,255,136,.08);
+  border:1px solid rgba(0,255,136,.35);
+  border-radius:16px;
+  padding:8px 10px;
+  margin:8px auto 10px;
+  max-width:160px;
 }
-.md-time-wheel option{font-size:26px; padding:8px 0; text-align:center;}
+.md-quick-section{margin-top:10px;}
+.md-wheel-label{font-size:12px; opacity:.78; font-weight:900; letter-spacing:.5px; text-transform:uppercase; margin:0 0 6px;}
+.md-quick-grid{
+  display:grid;
+  gap:6px;
+  width:100%;
+}
+.md-quick-grid.hours{grid-template-columns:repeat(6,1fr);}
+.md-quick-grid.minutes{grid-template-columns:repeat(6,1fr);}
+.md-quick-btn{
+  border:1px solid var(--line);
+  background:var(--input);
+  color:var(--text);
+  border-radius:10px;
+  min-height:34px;
+  padding:0;
+  font-size:15px;
+  font-weight:900;
+  touch-action:manipulation;
+}
+.md-quick-btn.selected{
+  background:linear-gradient(135deg, rgba(0,255,136,.34), rgba(47,109,246,.32));
+  border-color:rgba(0,255,136,.78);
+  color:#fff;
+  box-shadow:0 0 0 1px rgba(0,255,136,.22), 0 0 16px rgba(0,255,136,.14);
+}
 #inicioSessaoOverlay .editvalor-modal,
 #mdTimeWheelOverlay .editvalor-modal.md-time-modal{
-  width:min(92vw,360px) !important;
-  max-width:360px !important;
-  max-height:calc(100vh - 90px) !important;
-  overflow:visible !important;
-  padding:16px !important;
+  width:min(96vw,390px) !important;
+  max-width:390px !important;
+  max-height:calc(100vh - 26px) !important;
+  overflow-y:auto !important;
+  overflow-x:hidden !important;
+  padding:14px !important;
 }
 #inicioSessaoOverlay .editvalor-actions,
 #mdTimeWheelOverlay .md-time-actions{
@@ -148,10 +163,18 @@ body.md-ready > *{visibility:visible;}
   gap:10px !important;
   margin-top:14px !important;
   flex-wrap:nowrap !important;
+  position:sticky;
+  bottom:0;
+  background:linear-gradient(180deg, rgba(0,0,0,0), var(--card) 28%);
+  padding-top:12px;
 }
 #inicioSessaoOverlay .editvalor-actions button,
 #mdTimeWheelOverlay .md-time-actions button{min-width:112px;}
-
+@media (max-width:380px){
+  .md-quick-grid.hours,.md-quick-grid.minutes{grid-template-columns:repeat(6,1fr); gap:5px;}
+  .md-quick-btn{min-height:31px; font-size:14px; border-radius:9px;}
+  #inicioSessaoOverlay .editvalor-modal,#mdTimeWheelOverlay .editvalor-modal.md-time-modal{padding:12px !important;}
+}
 
 
 /* PATCH V40 - Metas detalhadas realmente compactas
@@ -799,7 +822,7 @@ button:active{transform:scale(0.99);}
 .highlight{color:var(--accent);font-weight:bold;}
 .warning{color:var(--warn);font-weight:bold;}
 
-/* v67 - Opção 4: brilho verde suave para sessão em andamento */
+/* v68 - Opção 4: brilho verde suave para sessão em andamento */
 .md-sessao-andamento-glow{
   margin-top:0;
   padding:12px 14px;
@@ -3712,7 +3735,7 @@ body[data-tema$="claro"] .historico-report-line{border-bottom-color:rgba(0,0,0,.
   <div class="menu-item"><button class="secondary" onclick="abrirSaldoAtualButtonMenu(); closeMenu();">Botão de saldo atual</button></div>
   <div class="menu-item"><button class="secondary" onclick="abrirTemas(); closeMenu();">Temas</button></div>
   <div class="menu-item"><button class="danger" onclick="forceLogout(); return false;">Sair</button></div>
-  <div class="menu-note" style="text-align:center;">v67</div>
+  <div class="menu-note" style="text-align:center;">v68</div>
 </div>
 
 <div id="temasOverlay" class="temas-overlay" onclick="fecharTemas()"></div>
@@ -3792,9 +3815,9 @@ body[data-tema$="claro"] .historico-report-line{border-bottom-color:rgba(0,0,0,.
     <label style="display:block;margin-top:8px;text-align:left;">Horário de início</label>
     <input type="hidden" id="inicioSessaoHoraModal">
     <div class="md-time-wheel" id="inicioSessaoWheel">
-      <div class="md-wheel-col"><div class="md-wheel-label">Hora</div><select id="inicioSessaoHoraSelect" size="5" aria-label="Hora"></select></div>
-      <div class="md-wheel-sep">:</div>
-      <div class="md-wheel-col"><div class="md-wheel-label">Minuto</div><select id="inicioSessaoMinutoSelect" size="5" aria-label="Minuto"></select></div>
+      <div class="md-quick-time-current" id="inicioSessaoTimePreview">00:00</div>
+      <div class="md-quick-section"><div class="md-wheel-label">Hora</div><div class="md-quick-grid hours" id="inicioSessaoHoraGrid"></div></div>
+      <div class="md-quick-section"><div class="md-wheel-label">Minuto</div><div class="md-quick-grid minutes" id="inicioSessaoMinutoGrid"></div></div>
     </div>
     <div class="editvalor-actions" style="margin-top:12px;">
       <button type="button" onclick="confirmInicioSessaoModal()">OK</button>
@@ -3808,9 +3831,9 @@ body[data-tema$="claro"] .historico-report-line{border-bottom-color:rgba(0,0,0,.
     <div class="editvalor-title" id="mdTimeWheelTitle">Selecionar horário</div>
     <input type="hidden" id="mdTimeWheelValue">
     <div class="md-time-wheel">
-      <div class="md-wheel-col"><div class="md-wheel-label">Hora</div><select id="mdTimeWheelHora" size="5" aria-label="Hora"></select></div>
-      <div class="md-wheel-sep">:</div>
-      <div class="md-wheel-col"><div class="md-wheel-label">Minuto</div><select id="mdTimeWheelMinuto" size="5" aria-label="Minuto"></select></div>
+      <div class="md-quick-time-current" id="mdTimeWheelPreview">00:00</div>
+      <div class="md-quick-section"><div class="md-wheel-label">Hora</div><div class="md-quick-grid hours" id="mdTimeWheelHoraGrid"></div></div>
+      <div class="md-quick-section"><div class="md-wheel-label">Minuto</div><div class="md-quick-grid minutes" id="mdTimeWheelMinutoGrid"></div></div>
     </div>
     <div class="editvalor-actions md-time-actions">
       <button type="button" onclick="mdConfirmTimeWheel()">Definir</button>
@@ -4454,8 +4477,8 @@ function loadDados(){
       return offlineSafe;
     }
     const legacyKeys = [
-      "dadosControleProV671","dadosControleProV63","dadosControleProV631","dadosControleProV632",
-      "dadosControleProV633","dadosControleProV67","dadosControleProV670","dadosControleProV671",
+      "dadosControleProV681","dadosControleProV63","dadosControleProV631","dadosControleProV632",
+      "dadosControleProV633","dadosControleProV68","dadosControleProV680","dadosControleProV681",
       "dadosControleProV70","dadosControleProV71","dadosControleProV72"
     ];
     for(const k of legacyKeys){
@@ -4995,7 +5018,7 @@ function mdBuildDiagnosticsObject(){
     const durableObj = mdSafeJsonParse(durableRaw);
     const diag = {
       generated_at: mdNowIso(),
-      app_version: 'MetaDriver v67',
+      app_version: 'MetaDriver v68',
       cloud_table: CLOUD_TABLE,
       device_id: mdEnsureDeviceId(),
       visibility_state: document.visibilityState,
@@ -6397,54 +6420,94 @@ function mdCommitLancamentoMutation(reason){
   try{ atualizar(); }catch(e){}
   try{ if(typeof refreshQuickBalanceFabMiniDisplay === "function") refreshQuickBalanceFabMiniDisplay(); }catch(e){}
   try{ if(typeof updateQuickBalanceFabUI === "function") updateQuickBalanceFabUI(); }catch(e){}
-  try{ if(typeof toast === "function" && reason) console.info("MetaDriver v67 mutation:", reason); }catch(e){}
+  try{ if(typeof toast === "function" && reason) console.info("MetaDriver v68 mutation:", reason); }catch(e){}
 }
 
 
 
-/* v67 - roldana de horário MetaDriver */
+/* v68 - seletor rápido de horário MetaDriver em grade */
 window.__mdTimeWheelCtx = null;
+window.__mdQuickTimeState = window.__mdQuickTimeState || { inicio:{h:'00',m:'00'}, generic:{h:'00',m:'00'} };
 function mdPad2(n){ return String(Number(n)||0).padStart(2,'0'); }
 function mdHoraValida(valor){ return /^([01]?\d|2[0-3]):[0-5]\d$/.test(String(valor||'').trim()); }
-function mdFillWheelSelects(hSel, mSel, value){
-  if(!hSel || !mSel) return;
-  if(!hSel.options.length){
-    for(var h=0; h<24; h++){ var o=document.createElement('option'); o.value=mdPad2(h); o.textContent=mdPad2(h); hSel.appendChild(o); }
-  }
-  if(!mSel.options.length){
-    for(var m=0; m<60; m++){ var om=document.createElement('option'); om.value=mdPad2(m); om.textContent=mdPad2(m); mSel.appendChild(om); }
-  }
+function mdParseTimeParts(value){
   var v=String(value||'00:00').trim(); if(!mdHoraValida(v)) v='00:00';
-  var parts=v.split(':'); hSel.value=mdPad2(parts[0]); mSel.value=mdPad2(parts[1]);
-  setTimeout(function(){ try{ hSel.selectedOptions[0].scrollIntoView({block:'center'}); mSel.selectedOptions[0].scrollIntoView({block:'center'}); }catch(e){} },40);
+  var p=v.split(':'); return {h:mdPad2(p[0]), m:mdPad2(p[1])};
 }
-function mdGetWheelValue(hSel, mSel){ return mdPad2(hSel && hSel.value) + ':' + mdPad2(mSel && mSel.value); }
+function mdQuickScope(scope){ return scope === 'inicio' ? 'inicio' : 'generic'; }
+function mdQuickEls(scope){
+  var s=mdQuickScope(scope);
+  return s === 'inicio' ? {
+    input:document.getElementById('inicioSessaoHoraModal'),
+    preview:document.getElementById('inicioSessaoTimePreview'),
+    hGrid:document.getElementById('inicioSessaoHoraGrid'),
+    mGrid:document.getElementById('inicioSessaoMinutoGrid')
+  } : {
+    input:document.getElementById('mdTimeWheelValue'),
+    preview:document.getElementById('mdTimeWheelPreview'),
+    hGrid:document.getElementById('mdTimeWheelHoraGrid'),
+    mGrid:document.getElementById('mdTimeWheelMinutoGrid')
+  };
+}
+function mdQuickValue(scope){
+  var st=window.__mdQuickTimeState[mdQuickScope(scope)] || {h:'00',m:'00'};
+  return mdPad2(st.h)+':'+mdPad2(st.m);
+}
+function mdQuickRender(scope){
+  var s=mdQuickScope(scope), els=mdQuickEls(s), st=window.__mdQuickTimeState[s] || {h:'00',m:'00'};
+  var valor=mdPad2(st.h)+':'+mdPad2(st.m);
+  if(els.input) els.input.value=valor;
+  if(els.preview) els.preview.textContent=valor;
+  if(els.hGrid){ Array.prototype.forEach.call(els.hGrid.querySelectorAll('.md-quick-btn'), function(b){ b.classList.toggle('selected', b.dataset.value===mdPad2(st.h)); }); }
+  if(els.mGrid){ Array.prototype.forEach.call(els.mGrid.querySelectorAll('.md-quick-btn'), function(b){ b.classList.toggle('selected', b.dataset.value===mdPad2(st.m)); }); }
+}
+function mdBuildQuickGrid(scope, value){
+  var s=mdQuickScope(scope), els=mdQuickEls(s), parts=mdParseTimeParts(value);
+  window.__mdQuickTimeState[s] = {h:parts.h, m:parts.m};
+  function fill(grid, max, key){
+    if(!grid) return;
+    if(!grid.children.length){
+      for(var i=0;i<max;i++){
+        var val=mdPad2(i);
+        var btn=document.createElement('button');
+        btn.type='button'; btn.className='md-quick-btn'; btn.dataset.value=val; btn.textContent=val;
+        btn.addEventListener('click', function(ev){
+          var v=ev.currentTarget && ev.currentTarget.dataset ? ev.currentTarget.dataset.value : '00';
+          window.__mdQuickTimeState[s][key]=v;
+          mdQuickRender(s);
+        });
+        grid.appendChild(btn);
+      }
+    }
+  }
+  fill(els.hGrid,24,'h'); fill(els.mGrid,60,'m');
+  mdQuickRender(s);
+}
+function mdFillWheelSelects(hSel, mSel, value){ mdBuildQuickGrid('generic', value); }
+function mdGetWheelValue(hSel, mSel){
+  // Compatibilidade com chamadas antigas: se vierem selects, usa eles; caso contrário usa a grade rápida ativa.
+  try{ if(hSel && mSel && typeof hSel.value !== 'undefined' && typeof mSel.value !== 'undefined') return mdPad2(hSel.value)+':'+mdPad2(mSel.value); }catch(e){}
+  var inicioInput=document.getElementById('inicioSessaoHoraModal');
+  var genericInput=document.getElementById('mdTimeWheelValue');
+  var v=(genericInput && genericInput.value) || (inicioInput && inicioInput.value) || mdQuickValue('generic');
+  return mdHoraValida(v) ? v : '00:00';
+}
 function mdSyncInicioSessaoWheel(value){
   var input=document.getElementById('inicioSessaoHoraModal');
-  var hSel=document.getElementById('inicioSessaoHoraSelect');
-  var mSel=document.getElementById('inicioSessaoMinutoSelect');
   var v=String(value || (input && input.value) || '00:00').trim(); if(!mdHoraValida(v)) v='00:00';
-  mdFillWheelSelects(hSel,mSel,v);
+  mdBuildQuickGrid('inicio', v);
   if(input) input.value=v;
-  function sync(){ if(input) input.value=mdGetWheelValue(hSel,mSel); }
-  if(hSel && !hSel.__mdBound){ hSel.addEventListener('change',sync); hSel.__mdBound=true; }
-  if(mSel && !mSel.__mdBound){ mSel.addEventListener('change',sync); mSel.__mdBound=true; }
 }
 function mdOpenTimeWheel(title, value, onConfirm){
   var ov=document.getElementById('mdTimeWheelOverlay');
   var titleEl=document.getElementById('mdTimeWheelTitle');
   var valEl=document.getElementById('mdTimeWheelValue');
-  var hSel=document.getElementById('mdTimeWheelHora');
-  var mSel=document.getElementById('mdTimeWheelMinuto');
-  if(!ov || !hSel || !mSel) return false;
+  if(!ov) return false;
   window.__mdTimeWheelCtx = { onConfirm:onConfirm };
   if(titleEl) titleEl.textContent=title || 'Selecionar horário';
   var v=String(value||'00:00').trim(); if(!mdHoraValida(v)) v='00:00';
   if(valEl) valEl.value=v;
-  mdFillWheelSelects(hSel,mSel,v);
-  function sync(){ if(valEl) valEl.value=mdGetWheelValue(hSel,mSel); }
-  if(!hSel.__mdGenericBound){ hSel.addEventListener('change',sync); hSel.__mdGenericBound=true; }
-  if(!mSel.__mdGenericBound){ mSel.addEventListener('change',sync); mSel.__mdGenericBound=true; }
+  mdBuildQuickGrid('generic', v);
   ov.classList.add('show'); ov.classList.add('md-show'); ov.style.display='flex';
   return true;
 }
@@ -6454,11 +6517,10 @@ function mdCloseTimeWheel(){
   window.__mdTimeWheelCtx=null;
 }
 function mdConfirmTimeWheel(){
-  var hSel=document.getElementById('mdTimeWheelHora');
-  var mSel=document.getElementById('mdTimeWheelMinuto');
-  var valor=mdGetWheelValue(hSel,mSel);
+  var valor=mdQuickValue('generic');
   var ctx=window.__mdTimeWheelCtx;
   if(!mdHoraValida(valor)){ try{ toast('Hora inválida.'); }catch(e){} return false; }
+  var valEl=document.getElementById('mdTimeWheelValue'); if(valEl) valEl.value=valor;
   if(ctx && typeof ctx.onConfirm === 'function') ctx.onConfirm(valor);
   mdCloseTimeWheel();
   return true;
@@ -8083,7 +8145,7 @@ function exportarRelatorioPDF(){
       <script>
         setTimeout(()=>window.print(), 250);
       <\/script>
-    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v67 · app</div>
+    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v68 · app</div>
 
 
 <script>
@@ -9613,7 +9675,7 @@ function bindSectionHeaders(){
       if(input) input.value=atual;
       try{ mdSyncInicioSessaoWheel(atual); }catch(e){}
       if(ov){ ov.classList.add('md-show'); ov.style.display='flex'; }
-      setTimeout(function(){ try{ var hs=document.getElementById('inicioSessaoHoraSelect'); if(hs) hs.focus(); }catch(e){} },50);
+      setTimeout(function(){ try{ var pv=document.getElementById('inicioSessaoTimePreview'); if(pv) pv.scrollIntoView({block:'nearest'}); }catch(e){} },50);
       return true;
     }catch(e){ try{ console.error(e); toast('Erro ao abrir início de sessão.'); }catch(_e){} return false; }
   };
@@ -9623,8 +9685,7 @@ function bindSectionHeaders(){
   window.confirmInicioSessaoModal = function(){
     try{
       var input=document.getElementById('inicioSessaoHoraModal');
-      var hs=document.getElementById('inicioSessaoHoraSelect'), ms=document.getElementById('inicioSessaoMinutoSelect');
-      var valor=(hs && ms) ? mdGetWheelValue(hs,ms) : String((input && input.value) || '').trim();
+      var valor=(typeof mdQuickValue === 'function') ? mdQuickValue('inicio') : String((input && input.value) || '').trim();
       if(input) input.value=valor;
       if(!/^([01]?\d|2[0-3]):[0-5]\d$/.test(valor)){ try{ toast('Informe um horário válido.'); }catch(e){} return false; }
       var hidden=getHiddenHorario();
@@ -10990,7 +11051,7 @@ document.addEventListener("visibilitychange", function(){
       if(input){ input.value=valor; }
       try{ mdSyncInicioSessaoWheel(valor); }catch(e){}
       if(ov){ ov.classList.add('md-show'); ov.style.display='flex'; }
-      setTimeout(function(){ try{ var hs=document.getElementById('inicioSessaoHoraSelect'); if(hs) hs.focus(); }catch(e){} },80);
+      setTimeout(function(){ try{ var pv=document.getElementById('inicioSessaoTimePreview'); if(pv) pv.scrollIntoView({block:'nearest'}); }catch(e){} },80);
       return true;
     }catch(e){ try{ console.error('Erro ao abrir modal de início', e); toast('Erro ao abrir início de sessão.'); }catch(_e){} return false; }
   };
@@ -11000,8 +11061,7 @@ document.addEventListener("visibilitychange", function(){
   window.confirmInicioSessaoModal = function(){
     try{
       var input=el('inicioSessaoHoraModal');
-      var hs=document.getElementById('inicioSessaoHoraSelect'), ms=document.getElementById('inicioSessaoMinutoSelect');
-      var valor=(hs && ms) ? mdGetWheelValue(hs,ms) : String((input && input.value) || '').trim();
+      var valor=(typeof mdQuickValue === 'function') ? mdQuickValue('inicio') : String((input && input.value) || '').trim();
       if(input) input.value=valor;
       if(!horaValida(valor)){ try{ toast('Informe um horário válido.'); }catch(e){} return false; }
       if(sessaoAbertaReal()){
