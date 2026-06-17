@@ -1,3 +1,11 @@
+MetaDriver v65
+
+Atualização v65:
+- Cards de edição de hora das sessões agora seguem o padrão visual MetaDriver.
+- Removido uso de prompt/relógio nativo para editar hora de início e hora de término.
+- Card de iniciar sessão ajustado para seletor próprio compacto, evitando corte do botão Definir.
+- Versão do menu/app, manifest e cache atualizados para v65.
+
 MetaDriver v64
 
 Atualização v64:

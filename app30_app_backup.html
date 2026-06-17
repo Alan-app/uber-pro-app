@@ -43,7 +43,7 @@ try{
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver v64</title>
+<title>MetaDriver v65</title>
 <style id="md-hydration-lock">
 body.preload > *:not(#mdBootOverlay){visibility:hidden!important;}
 #mdBootOverlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#0f172a;color:#fff;z-index:2147483647;font-family:Inter,system-ui,sans-serif;font-weight:800;letter-spacing:.2px;}
@@ -195,6 +195,95 @@ body.md-ready > *{visibility:visible;}
   margin-left:auto !important;
   margin-right:auto !important;
   text-align:center !important;
+}
+
+
+
+/* v65 - seletor de horário próprio MetaDriver */
+.md-time-modal{
+  width:min(360px, 94vw) !important;
+  max-width:360px !important;
+  padding:16px !important;
+  overflow:hidden !important;
+}
+.md-time-label{
+  display:block;
+  margin:8px 0 10px;
+  text-align:left;
+  color:var(--muted);
+  font-size:13px;
+  font-weight:700;
+}
+.md-time-picker{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  margin:6px auto 8px;
+  padding:12px;
+  border-radius:16px;
+  background:rgba(15,23,42,.55);
+  border:1px solid rgba(255,255,255,.10);
+  max-width:270px;
+}
+.md-time-col{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:7px;
+  min-width:78px;
+}
+.md-time-step{
+  width:52px !important;
+  height:34px !important;
+  border-radius:12px !important;
+  padding:0 !important;
+  flex:0 0 auto !important;
+  font-size:21px !important;
+  line-height:1 !important;
+  font-weight:900 !important;
+  background:rgba(30,215,96,.16) !important;
+  color:#8cffb4 !important;
+  border:1px solid rgba(30,215,96,.42) !important;
+}
+.md-time-box{
+  width:76px;
+  height:54px;
+  border-radius:14px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:var(--input);
+  color:var(--text);
+  border:1px solid rgba(255,255,255,.13);
+  font-size:30px;
+  font-weight:900;
+  font-variant-numeric:tabular-nums;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.04);
+}
+.md-time-sep{
+  font-size:32px;
+  font-weight:900;
+  color:var(--accent);
+  margin-top:-10px;
+}
+.md-time-caption{
+  font-size:11px;
+  color:var(--muted);
+  text-transform:uppercase;
+  letter-spacing:.8px;
+}
+.md-time-actions{
+  margin-top:10px !important;
+  flex-direction:row !important;
+}
+#inicioSessaoOverlay .editvalor-modal.md-time-modal{
+  max-height:none !important;
+  height:auto !important;
+}
+#inicioSessaoOverlay .md-time-actions button,
+#editHoraSessaoOverlay .md-time-actions button{
+  min-width:0 !important;
 }
 
 </style>
@@ -747,25 +836,6 @@ button:active{transform:scale(0.99);}
 
 .highlight{color:var(--accent);font-weight:bold;}
 .warning{color:var(--warn);font-weight:bold;}
-
-/* v64 - Opção 4: brilho verde suave para sessão em andamento */
-.md-sessao-andamento-glow{
-  margin-top:0;
-  padding:12px 14px;
-  border:1px solid rgba(30,215,96,.48);
-  border-radius:16px;
-  background:linear-gradient(180deg, rgba(30,215,96,.08), rgba(38,54,72,.72));
-  box-shadow:0 0 18px rgba(30,215,96,.22), inset 0 0 14px rgba(30,215,96,.05);
-  animation:mdSessaoGlowPulse 2s ease-in-out infinite;
-}
-@keyframes mdSessaoGlowPulse{
-  0%,100%{box-shadow:0 0 12px rgba(30,215,96,.14), inset 0 0 8px rgba(30,215,96,.04);}
-  50%{box-shadow:0 0 28px rgba(30,215,96,.34), inset 0 0 18px rgba(30,215,96,.08);}
-}
-@media (prefers-reduced-motion: reduce){
-  .md-sessao-andamento-glow{animation:none;}
-}
-
 .muted{opacity:0.88;}
 
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
@@ -3661,7 +3731,7 @@ body[data-tema$="claro"] .historico-report-line{border-bottom-color:rgba(0,0,0,.
   <div class="menu-item"><button class="secondary" onclick="abrirSaldoAtualButtonMenu(); closeMenu();">Botão de saldo atual</button></div>
   <div class="menu-item"><button class="secondary" onclick="abrirTemas(); closeMenu();">Temas</button></div>
   <div class="menu-item"><button class="danger" onclick="forceLogout(); return false;">Sair</button></div>
-  <div class="menu-note" style="text-align:center;">v64</div>
+  <div class="menu-note" style="text-align:center;">v63</div>
 </div>
 
 <div id="temasOverlay" class="temas-overlay" onclick="fecharTemas()"></div>
@@ -3736,13 +3806,28 @@ body[data-tema$="claro"] .historico-report-line{border-bottom-color:rgba(0,0,0,.
 </div>
 
 <div id="inicioSessaoOverlay" class="editvalor-overlay" role="dialog" aria-modal="true" aria-label="Iniciar sessão">
-  <div class="editvalor-modal">
+  <div class="editvalor-modal md-time-modal">
     <div class="editvalor-title">Iniciar sessão</div>
-    <label style="display:block;margin-top:8px;text-align:left;">Horário de início</label>
-    <input type="time" id="inicioSessaoHoraModal" style="display:block;width:min(220px,76%);max-width:220px;margin:10px auto 0 auto;text-align:center;box-sizing:border-box;">
-    <div class="editvalor-actions" style="margin-top:12px;">
-      <button type="button" onclick="confirmInicioSessaoModal()">OK</button>
+    <label class="md-time-label">Horário de início</label>
+    <input type="hidden" id="inicioSessaoHoraModal">
+    <div class="md-time-picker" data-md-time-prefix="inicio">
+      <div class="md-time-col">
+        <button type="button" class="md-time-step" onclick="mdTimeAdjust('inicio','h',1)">+</button>
+        <div class="md-time-box" id="inicioHoraBox">00</div>
+        <button type="button" class="md-time-step" onclick="mdTimeAdjust('inicio','h',-1)">−</button>
+        <div class="md-time-caption">hora</div>
+      </div>
+      <div class="md-time-sep">:</div>
+      <div class="md-time-col">
+        <button type="button" class="md-time-step" onclick="mdTimeAdjust('inicio','m',5)">+</button>
+        <div class="md-time-box" id="inicioMinBox">00</div>
+        <button type="button" class="md-time-step" onclick="mdTimeAdjust('inicio','m',-5)">−</button>
+        <div class="md-time-caption">min</div>
+      </div>
+    </div>
+    <div class="editvalor-actions md-time-actions">
       <button type="button" class="cancel" onclick="closeInicioSessaoModal()">Cancelar</button>
+      <button type="button" onclick="confirmInicioSessaoModal()">Definir</button>
     </div>
   </div>
 </div>
@@ -3944,6 +4029,34 @@ body[data-tema$="claro"] .historico-report-line{border-bottom-color:rgba(0,0,0,.
     <div class="editvalor-actions">
       <button type="button" class="cancel" onclick="closeEditValor()">Cancelar</button>
       <button type="button" onclick="confirmEditValor()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+
+<div id="editHoraSessaoOverlay" class="editvalor-overlay" role="dialog" aria-modal="true" aria-label="Editar horário da sessão">
+  <div class="editvalor-modal md-time-modal">
+    <div class="editvalor-title" id="editHoraSessaoTitle">Editar horário</div>
+    <label class="md-time-label" id="editHoraSessaoLabel">Horário</label>
+    <input type="hidden" id="editHoraSessaoInput">
+    <div class="md-time-picker" data-md-time-prefix="editHora">
+      <div class="md-time-col">
+        <button type="button" class="md-time-step" onclick="mdTimeAdjust('editHora','h',1)">+</button>
+        <div class="md-time-box" id="editHoraHoraBox">00</div>
+        <button type="button" class="md-time-step" onclick="mdTimeAdjust('editHora','h',-1)">−</button>
+        <div class="md-time-caption">hora</div>
+      </div>
+      <div class="md-time-sep">:</div>
+      <div class="md-time-col">
+        <button type="button" class="md-time-step" onclick="mdTimeAdjust('editHora','m',5)">+</button>
+        <div class="md-time-box" id="editHoraMinBox">00</div>
+        <button type="button" class="md-time-step" onclick="mdTimeAdjust('editHora','m',-5)">−</button>
+        <div class="md-time-caption">min</div>
+      </div>
+    </div>
+    <div class="editvalor-actions md-time-actions">
+      <button type="button" class="cancel" onclick="closeEditHoraSessaoModal()">Cancelar</button>
+      <button type="button" onclick="confirmEditHoraSessaoModal()">Salvar</button>
     </div>
   </div>
 </div>
@@ -4923,7 +5036,7 @@ function mdBuildDiagnosticsObject(){
     const durableObj = mdSafeJsonParse(durableRaw);
     const diag = {
       generated_at: mdNowIso(),
-      app_version: 'MetaDriver v64',
+      app_version: 'MetaDriver v65',
       cloud_table: CLOUD_TABLE,
       device_id: mdEnsureDeviceId(),
       visibility_state: document.visibilityState,
@@ -6325,7 +6438,7 @@ function mdCommitLancamentoMutation(reason){
   try{ atualizar(); }catch(e){}
   try{ if(typeof refreshQuickBalanceFabMiniDisplay === "function") refreshQuickBalanceFabMiniDisplay(); }catch(e){}
   try{ if(typeof updateQuickBalanceFabUI === "function") updateQuickBalanceFabUI(); }catch(e){}
-  try{ if(typeof toast === "function" && reason) console.info("MetaDriver v64 mutation:", reason); }catch(e){}
+  try{ if(typeof toast === "function" && reason) console.info("MetaDriver v63 mutation:", reason); }catch(e){}
 }
 
 function editarValor(tipo, index){
@@ -6543,7 +6656,7 @@ function mdRestaurarSaldoBotaoDoBackupV36(safe){
 function getExportBackupBlob(){
   const payload = {
     app: "MetaDriver",
-    version: "62",
+    version: "65",
     exported_at: new Date().toISOString(),
     storage_key: STORAGE_KEY,
     dados: mdPrepararBackupSaldoV36(dados)
@@ -7957,7 +8070,7 @@ function exportarRelatorioPDF(){
       <script>
         setTimeout(()=>window.print(), 250);
       <\/script>
-    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v64 · app</div>
+    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver v65 · app</div>
 
 
 <script>
@@ -8250,7 +8363,7 @@ function atualizar(){
         const valorClass = valorSessaoAtual < 0 ? "dangerText" : "warning";
         const horaClass = ganhoHora < 0 ? "dangerText" : "warning";
         resumoEl.innerHTML =
-          "<div class='md-sessao-andamento-glow'><b>" + tituloSessao + " em andamento</b><br>" +
+          "<div style='margin-top:0;padding-top:0'><b>" + tituloSessao + " em andamento</b><br>" +
           "Hora de início: " + horario + "<br>" +
           "Hora de término: -<br>" +
           "Valor total: <span class='" + valorClass + "'>R$ " + valorSessaoAtual.toFixed(2) + "</span><br>" +
@@ -11121,6 +11234,130 @@ window.addEventListener('pageshow',()=>setTimeout(window.mdRealtimeSyncV19,0));
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout(window.mdRealtimeSyncV19,0);});
 }catch(e){}
 
+</script>
+
+
+<script>
+// v65 - seletor de horário próprio MetaDriver (sem relógio nativo do Chrome/Android)
+(function(){
+  function $(id){ return document.getElementById(id); }
+  function pad2(n){ n = Number(n||0); return String((n%100+100)%100).padStart(2,'0'); }
+  function normalizarHora(v){
+    var m = String(v||'').trim().match(/^(\d{1,2}):(\d{1,2})$/);
+    if(!m) return '00:00';
+    var h = Math.max(0, Math.min(23, Number(m[1]||0)));
+    var min = Math.max(0, Math.min(59, Number(m[2]||0)));
+    return pad2(h)+':'+pad2(min);
+  }
+  function setPicker(prefix, value){
+    var hm = normalizarHora(value).split(':');
+    var hBox = $(prefix+'HoraBox');
+    var mBox = $(prefix+'MinBox');
+    var input = prefix === 'inicio' ? $('inicioSessaoHoraModal') : $('editHoraSessaoInput');
+    if(hBox) hBox.textContent = hm[0];
+    if(mBox) mBox.textContent = hm[1];
+    if(input) input.value = hm[0]+':'+hm[1];
+  }
+  function getPicker(prefix){
+    var input = prefix === 'inicio' ? $('inicioSessaoHoraModal') : $('editHoraSessaoInput');
+    return normalizarHora(input && input.value);
+  }
+  window.mdTimeAdjust = function(prefix, part, delta){
+    var hm = getPicker(prefix).split(':');
+    var h = Number(hm[0]||0), m = Number(hm[1]||0);
+    if(part === 'h') h = (h + Number(delta||0) + 24) % 24;
+    if(part === 'm'){
+      m += Number(delta||0);
+      while(m < 0){ m += 60; h = (h + 23) % 24; }
+      while(m >= 60){ m -= 60; h = (h + 1) % 24; }
+    }
+    setPicker(prefix, pad2(h)+':'+pad2(m));
+  };
+  window.mdSyncInicioTimePicker = function(){
+    var input = $('inicioSessaoHoraModal');
+    setPicker('inicio', input && input.value ? input.value : '00:00');
+  };
+  window.closeEditHoraSessaoModal = function(){
+    try{ var ov=$('editHoraSessaoOverlay'); if(ov){ ov.classList.remove('show'); ov.style.display='none'; } }catch(e){}
+    window.__mdEditHoraSessaoCtx = null;
+  };
+  function abrirEditorHorario(ctx){
+    window.__mdEditHoraSessaoCtx = ctx || null;
+    var campo = ctx && ctx.campo === 'inicio' ? 'inicio' : 'fim';
+    var titulo = campo === 'inicio' ? 'Editar hora de início' : 'Editar hora de término';
+    var title = $('editHoraSessaoTitle'); if(title) title.textContent = titulo;
+    var label = $('editHoraSessaoLabel'); if(label) label.textContent = campo === 'inicio' ? 'Hora de início' : 'Hora de término';
+    setPicker('editHora', (ctx && ctx.atual) || '00:00');
+    var ov = $('editHoraSessaoOverlay');
+    if(ov){ ov.classList.add('show'); ov.style.display='flex'; }
+    try{ closeAllMenus && closeAllMenus(); }catch(e){}
+  }
+  function recalcularSessaoHistorico(sessao){
+    try{
+      var ini = String(sessao.inicio || '00:00').split(':').map(Number);
+      var fim = String(sessao.fim || sessao.inicio || '00:00').split(':').map(Number);
+      var diffMin = (Number(fim[0]||0)*60+Number(fim[1]||0)) - (Number(ini[0]||0)*60+Number(ini[1]||0));
+      if(diffMin < 0) diffMin += 24*60;
+      sessao.tempoDecorrido = diffMin / 60;
+      if(sessao.tempoDecorrido > 0){
+        var ganhoSessao = Number(sessao.valorTotal||0) - Number(sessao.saldoAnterior||0);
+        sessao.ganhoSessao = ganhoSessao;
+        sessao.ganhoHora = ganhoSessao / sessao.tempoDecorrido;
+      }else{
+        sessao.ganhoHora = 0;
+      }
+    }catch(e){}
+  }
+  window.confirmEditHoraSessaoModal = function(){
+    var ctx = window.__mdEditHoraSessaoCtx;
+    if(!ctx) return closeEditHoraSessaoModal();
+    var valor = getPicker('editHora');
+    if(!/^([01]?\d|2[0-3]):[0-5]\d$/.test(valor)){ try{ toast('Hora inválida. Use HH:MM.'); }catch(e){} return false; }
+    if(ctx.tipo === 'finalizada'){
+      if(!Array.isArray(dados.ganhoHoraSessoes) || !dados.ganhoHoraSessoes[ctx.indice]) return closeEditHoraSessaoModal();
+      dados.ganhoHoraSessoes[ctx.indice][ctx.campo] = valor;
+      try{ reprocessarSessoesGanhoHora(); }catch(e){}
+      try{ salvar(); atualizar(); }catch(e){}
+      try{ toast('✅ Sessão atualizada.'); }catch(e){}
+    }else if(ctx.tipo === 'historico'){
+      var item = (dados.ganhoHoraHistorico || []).find(function(h){ return String((h && h.diaUber) || '').trim() === String(ctx.diaUber || '').trim(); });
+      if(item && Array.isArray(item.sessoes) && item.sessoes[ctx.indice]){
+        item.sessoes[ctx.indice][ctx.campo] = valor;
+        recalcularSessaoHistorico(item.sessoes[ctx.indice]);
+        try{ reprocessarResumoHistoricoGanhoHora(ctx.diaUber); }catch(e){}
+        try{ salvar(); atualizar(); }catch(e){}
+        try{ toast('✅ Sessão do histórico atualizada.'); }catch(e){}
+      }
+    }
+    closeEditHoraSessaoModal();
+    return true;
+  };
+  window.editarHorarioSessaoFinalizada = function(indice, campo){
+    if(!Array.isArray(dados.ganhoHoraSessoes) || !dados.ganhoHoraSessoes[indice]) return;
+    var sessao = dados.ganhoHoraSessoes[indice];
+    abrirEditorHorario({ tipo:'finalizada', indice:Number(indice), campo:campo === 'inicio' ? 'inicio' : 'fim', atual:String(sessao[campo] || '').trim() || '00:00' });
+  };
+  window.editarHorarioSessaoHistorico = function(diaUber, indice, campo){
+    var item = (dados.ganhoHoraHistorico || []).find(function(h){ return String((h && h.diaUber) || '').trim() === String(diaUber || '').trim(); });
+    if(!item || !Array.isArray(item.sessoes) || !item.sessoes[indice]) return;
+    var sessao = item.sessoes[indice];
+    abrirEditorHorario({ tipo:'historico', diaUber:String(diaUber || '').trim(), indice:Number(indice), campo:campo === 'inicio' ? 'inicio' : 'fim', atual:String(sessao[campo] || '').trim() || '00:00' });
+  };
+  function wrapInicioModal(){
+    if(typeof window.openInicioSessaoModal === 'function' && !window.openInicioSessaoModal.__mdV65Wrapped){
+      var originalOpen = window.openInicioSessaoModal;
+      window.openInicioSessaoModal = function(){
+        var r = originalOpen.apply(this, arguments);
+        try{ mdSyncInicioTimePicker(); }catch(e){}
+        return r;
+      };
+      window.openInicioSessaoModal.__mdV65Wrapped = true;
+    }
+  }
+  try{ document.addEventListener('DOMContentLoaded', function(){ setPicker('inicio', '00:00'); setPicker('editHora','00:00'); setTimeout(wrapInicioModal,0); setTimeout(wrapInicioModal,700); }); }catch(e){}
+  try{ window.addEventListener('load', function(){ setTimeout(wrapInicioModal,0); }); }catch(e){}
+  setTimeout(wrapInicioModal,0);
+})();
 </script>
 
 </body>

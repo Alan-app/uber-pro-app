@@ -1,3 +1,9 @@
+MetaDriver v65 - Seletor de horário padrão MetaDriver
+- Substituído o prompt nativo ao editar hora de início e hora de término das sessões por modal/card próprio do MetaDriver.
+- Modal de iniciar sessão trocado para seletor próprio HH/MM com botões + e −, sem relógio nativo do Chrome/Android.
+- Corrigido tamanho do card de seleção de início para evitar corte do botão Definir.
+- Versão visível do menu/app, manifest e cache atualizados para v65.
+
 MetaDriver v64 - Brilho verde em sessão em andamento
 
 - Aplicada a opção 4 escolhida: brilho verde suave no card da sessão em andamento.
