@@ -1,6 +1,6 @@
 {
-  "name": "MetaDriver v69",
-  "short_name": "MetaDriver v69",
+  "name": "MetaDriver v70",
+  "short_name": "MetaDriver v70",
   "start_url": "./index.html?v=64",
   "scope": "./",
   "display": "standalone",
@@ -19,5 +19,5 @@
       "type": "image/png"
     }
   ],
-  "version": "v69"
+  "version": "v70"
 }

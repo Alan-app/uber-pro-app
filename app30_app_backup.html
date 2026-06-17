@@ -143,6 +143,10 @@ body.md-ready > *{visibility:visible;}
   max-width:330px;
   margin:0 auto;
 }
+.md-quick-grid.minutes{
+  grid-template-columns:repeat(4,1fr);
+  max-width:300px;
+}
 .md-quick-grid.hidden{display:none !important;}
 .md-quick-btn{
   border:1px solid var(--line);
@@ -182,6 +186,7 @@ body.md-ready > *{visibility:visible;}
 #mdTimeWheelOverlay .md-time-actions button{min-width:112px;}
 @media (max-width:380px){
   .md-quick-grid{grid-template-columns:repeat(6,1fr); gap:6px;}
+  .md-quick-grid.minutes{grid-template-columns:repeat(4,1fr); max-width:292px;}
   .md-quick-btn{min-height:39px; font-size:15px; border-radius:10px;}
   .md-quick-time-current button{min-width:70px;font-size:27px;padding:9px 10px;}
   #inicioSessaoOverlay .editvalor-modal,#mdTimeWheelOverlay .editvalor-modal.md-time-modal{padding:12px !important;}
@@ -6501,8 +6506,16 @@ function mdBuildQuickGrid(scope, value){
   function fill(grid, max, key){
     if(!grid) return;
     if(!grid.children.length){
-      for(var i=0;i<max;i++){
-        var val=mdPad2(i);
+      var values = [];
+      if(key === 'm'){
+        // v70 - minutos compactos de 5 em 5, organizados em 3 linhas x 4 colunas:
+        // 00 15 30 45 / 05 20 35 50 / 10 25 40 55
+        values = [0,15,30,45,5,20,35,50,10,25,40,55];
+      }else{
+        for(var j=0;j<max;j++) values.push(j);
+      }
+      for(var i=0;i<values.length;i++){
+        var val=mdPad2(values[i]);
         var btn=document.createElement('button');
         btn.type='button'; btn.className='md-quick-btn'; btn.dataset.value=val; btn.textContent=val;
         btn.addEventListener('click', function(ev){

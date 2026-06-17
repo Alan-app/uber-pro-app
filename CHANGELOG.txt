@@ -1,3 +1,9 @@
+v70 - Minutos compactos no seletor de horário
+- Minutos agora aparecem de 5 em 5 no seletor rápido.
+- Layout dos minutos ajustado para 3 linhas x 4 colunas: 00 15 30 45 / 05 20 35 50 / 10 25 40 55.
+- Mantido fluxo em etapas: primeiro horas, depois minutos.
+- Versão do menu/app, manifest e cache atualizados para v70.
+
 v70 - Seletor de horário em duas etapas
 - Modal de horário agora abre mostrando apenas horas (00-23).
 - Ao tocar na hora, troca automaticamente para minutos (00-59).
