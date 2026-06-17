@@ -1,16 +1,9 @@
-MetaDriver v66 - Horários em roldana com base v64
-
-- Base retomada da v64 para preservar a animação/brilho verde da sessão em andamento.
-- Edição de hora de início e hora de término das sessões passou a usar seletor de horário estilo roldana/nativo do Android.
-- Modal de início de sessão compactado e botão Definir corrigido para não ficar cortado.
-- Versão visível do app/menu, manifest e cache atualizados para v66.
-
-MetaDriver v64 - Brilho verde em sessão em andamento
+MetaDriver v67 - Brilho verde em sessão em andamento
 
 - Aplicada a opção 4 escolhida: brilho verde suave no card da sessão em andamento.
 - Sessões finalizadas permanecem sem animação para diferenciar visualmente da sessão ativa.
-- Versão visível do menu/app atualizada para v64.
-- Manifest/cache atualizados para v64.
+- Versão visível do menu/app atualizada para v67.
+- Manifest/cache atualizados para v67.
 - README/LEIA-ME atualizado.
 - LDS ignorado, por pertencer a outro projeto.
 
@@ -70,3 +63,10 @@ v59 - HISTÓRICO DETALHADO COM VIRADA ÀS 4H
 
 
 v60 - Removido texto 'Modo % do bruto ativo... Manutenção na meta...' do Histórico Detalhado.
+
+
+V67 - Horários com roldana MetaDriver a partir da v64
+- Descartada a v66.
+- Preservada a animação verde da sessão em andamento da v64.
+- Substituído o seletor nativo de hora por roldana MetaDriver sem botão de teclado.
+- Corrigido modal de início de sessão para não cortar o botão Definir/OK.
