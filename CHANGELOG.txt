@@ -108,3 +108,10 @@ V67 - Horários com roldana MetaDriver a partir da v64
 vBeta1.3
 - Corrigido Gerenciar conta: após salvar o nome, o campo volta ao modo visualização.
 - Modal de Gerenciar conta não abre teclado automaticamente e o botão Editar reaparece após salvar.
+
+
+vBeta1.4
+- Corrigido comportamento do campo Nome do usuário em Gerenciar conta.
+- Ao clicar em Editar, o texto não é mais selecionado; o cursor fica no final do nome.
+- Após salvar, o campo sai da edição sem permanecer selecionado.
+- Botão Editar alinhado verticalmente com o campo de nome.
