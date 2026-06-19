@@ -57,3 +57,6 @@ Atualização v70:
 - Seletor rápido de horário em etapas: primeiro horas, depois minutos.
 - Relógio superior interativo para alternar entre hora e minuto.
 - Aplicado ao início de sessão e edição de horários de sessões.
+
+
+vBeta1.2 - Gerenciar conta abre sem edição automática.
