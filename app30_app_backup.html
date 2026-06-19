@@ -43,7 +43,7 @@ try{
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver vBeta1.0</title>
+<title>MetaDriver vBeta1.1</title>
 <style id="md-hydration-lock">
 body.preload > *:not(#mdBootOverlay){visibility:hidden!important;}
 #mdBootOverlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#0f172a;color:#fff;z-index:2147483647;font-family:Inter,system-ui,sans-serif;font-weight:800;letter-spacing:.2px;}
@@ -658,7 +658,7 @@ h1{text-align:center;margin:8px 0 14px;letter-spacing:0.2px;}
 }
 .menu-item button.danger:hover{ opacity:1; }
 .menu-note{padding:5px 12px 7px; font-size:10px; opacity:0.5; line-height:1.3;}
-/* vBeta1.0 - Gerenciar conta e nome no menu */
+/* vBeta1.1 - Gerenciar conta e nome no menu */
 .menu-user-row{
   display:flex; align-items:center; justify-content:space-between; gap:10px; padding:8px 12px;
 }
@@ -2019,7 +2019,7 @@ input.negative-value, input.negative-value::placeholder{
 }
 
 
-/* vBeta1.0 - modal MetaDriver para edição de manutenção */
+/* vBeta1.1 - modal MetaDriver para edição de manutenção */
 .manut-edit-modal{
   max-width:420px;
   width:calc(100vw - 28px);
@@ -3809,7 +3809,7 @@ body[data-tema$="claro"] .historico-report-line{border-bottom-color:rgba(0,0,0,.
   <div class="menu-item"><button class="secondary" onclick="abrirSaldoAtualButtonMenu(); closeMenu();">Botão de saldo atual</button></div>
   <div class="menu-item"><button class="secondary" onclick="abrirTemas(); closeMenu();">Temas</button></div>
   <div class="menu-item menu-user-row"><span class="menu-user-name" id="menuUserName">Usuário</span><button class="danger" onclick="forceLogout(); return false;">Sair</button></div>
-  <div class="menu-note" style="text-align:center;">vBeta1.0</div>
+  <div class="menu-note" style="text-align:center;">vBeta1.1</div>
 </div>
 
 
@@ -3967,6 +3967,9 @@ body[data-tema$="claro"] .historico-report-line{border-bottom-color:rgba(0,0,0,.
       <label class="config-meta-label">Manutenção (%)</label>
       <input class="config-meta-input" type="text" id="percentualManutencao" inputmode="none" autocomplete="off" readonly data-keypad-mode="percent" onclick="openMetaTotalKeypadFor('percentualManutencao')" onfocus="this.blur(); openMetaTotalKeypadFor('percentualManutencao');" placeholder="Ex: 10%">
     </div>
+
+    <label class="config-meta-label">Data inicial da meta</label>
+    <input class="config-meta-input" type="date" id="dataInicialMeta">
 
     <label class="config-meta-label">Data limite para atingir a Meta</label>
     <input class="config-meta-input" type="date" id="dataLimite">
@@ -4155,7 +4158,7 @@ body[data-tema$="claro"] .historico-report-line{border-bottom-color:rgba(0,0,0,.
   </div>
 </div>
 
-<!-- vBeta1.0 - modal MetaDriver para editar manutenção -->
+<!-- vBeta1.1 - modal MetaDriver para editar manutenção -->
 <div id="editManutOverlay" class="edit-data-overlay" onclick="if(event.target.id==='editManutOverlay')fecharEditManutModal()">
   <div class="edit-data-modal manut-edit-modal" onclick="event.stopPropagation()">
     <div class="edit-data-title">Editar manutenção</div>
@@ -4626,6 +4629,7 @@ let dados = loadDados() || {
   naoTrabalhados: [],
   metaTotal: 0,
   metasDetalhadas: [],
+  dataInicialMeta: "",
   dataLimite: "",
   metaDiariaManual: 0,
   ganhoDiarioAtual: 0,
@@ -4837,7 +4841,7 @@ function mdUsefulScore(obj){
     ["metaTotal","metaDiariaManual","ganhoDiarioAtual","saldoAtualFora","saldoAnteriorFora","horasDecorridasFora","ganhoHoraAtualFora"].forEach(function(k){
       if(Number(obj[k] || 0) !== 0) score += 3;
     });
-    ["dataLimite","horarioInicioFora","ganhoHoraDiaRef","ganhoHoraSessaoDiaRef","tema"].forEach(function(k){
+    ["dataInicialMeta","dataLimite","horarioInicioFora","ganhoHoraDiaRef","ganhoHoraSessaoDiaRef","tema"].forEach(function(k){
       if(String(obj[k] || "").trim()) score += 2;
     });
     if(obj.combustivelReal && typeof obj.combustivelReal === "object") score += 2;
@@ -5141,7 +5145,7 @@ function mdBuildDiagnosticsObject(){
     const durableObj = mdSafeJsonParse(durableRaw);
     const diag = {
       generated_at: mdNowIso(),
-      app_version: 'MetaDriver vBeta1.0',
+      app_version: 'MetaDriver vBeta1.1',
       cloud_table: CLOUD_TABLE,
       device_id: mdEnsureDeviceId(),
       visibility_state: document.visibilityState,
@@ -5337,6 +5341,7 @@ function cloudHasUsefulData(obj){
       (obj.ganhoHoraSessoes && obj.ganhoHoraSessoes.length) ||
       (obj.ganhoHoraHistorico && obj.ganhoHoraHistorico.length) ||
       Number(obj.metaTotal || 0) > 0 ||
+      String(obj.dataInicialMeta || '').trim() !== '' ||
       String(obj.dataLimite || '').trim() !== '' ||
       Number(obj.metaDiariaManual || 0) > 0 ||
       Number(obj.ganhoDiarioAtual || 0) > 0 ||
@@ -5838,7 +5843,7 @@ document.addEventListener("click", function(e){
 
 
 
-/* vBeta1.0 - Gerenciar conta / nome do usuário */
+/* vBeta1.1 - Gerenciar conta / nome do usuário */
 function getNomeUsuarioConta(){
   try{
     const n1 = (dados && dados.nomeUsuario) ? String(dados.nomeUsuario).trim() : "";
@@ -6195,7 +6200,7 @@ function updateMetaDetalhadaDescricao(idx, value){
   salvar();
 }
 
-// vBeta1.0 - valores das metas usam teclado numérico nativo (sem teclado MetaDriver)
+// vBeta1.1 - valores das metas usam teclado numérico nativo (sem teclado MetaDriver)
 function updateMetaDetalhadaValorNative(idx, value){
   normalizarMetasDetalhadas();
   if(!dados.metasDetalhadas[idx]) dados.metasDetalhadas[idx] = { descricao:"", valor:0 };
@@ -6220,6 +6225,7 @@ function updateMetaDetalhadaValorFromInput(inputId){
 
 function salvarMeta(){
   calcularTotalMetasDetalhadas();
+  dados.dataInicialMeta = document.getElementById("dataInicialMeta")?.value || "";
   dados.dataLimite = document.getElementById("dataLimite").value || "";
   dados.manutencaoPercentual = parsePercentInputValue(document.getElementById("percentualManutencao")?.value || "0");
   dados.metaSalva = !!(Number(dados.metaTotal || 0) > 0 || String(dados.dataLimite || '').trim());
@@ -6582,6 +6588,7 @@ function addNaoTrabalhado(){
 
   // preserva campos já digitados em Meta antes de salvar dias não trabalhados
   calcularTotalMetasDetalhadas();
+  dados.dataInicialMeta = document.getElementById("dataInicialMeta")?.value || "";
   dados.dataLimite = document.getElementById("dataLimite")?.value || "";
 
   dados.naoTrabalhados.push({data, motivo: motivo || "Dia não trabalhado"});
@@ -6646,7 +6653,7 @@ function mdCommitLancamentoMutation(reason){
   try{ atualizar(); }catch(e){}
   try{ if(typeof refreshQuickBalanceFabMiniDisplay === "function") refreshQuickBalanceFabMiniDisplay(); }catch(e){}
   try{ if(typeof updateQuickBalanceFabUI === "function") updateQuickBalanceFabUI(); }catch(e){}
-  try{ if(typeof toast === "function" && reason) console.info("MetaDriver vBeta1.0 mutation:", reason); }catch(e){}
+  try{ if(typeof toast === "function" && reason) console.info("MetaDriver vBeta1.1 mutation:", reason); }catch(e){}
 }
 
 
@@ -7084,6 +7091,7 @@ function importarBackup(ev){
         naoTrabalhados: Array.isArray(novoDados.naoTrabalhados) ? novoDados.naoTrabalhados : [],
         metaTotal: Number(novoDados.metaTotal) || 0,
         metasDetalhadas: Array.isArray(novoDados.metasDetalhadas) ? novoDados.metasDetalhadas : [],
+        dataInicialMeta: (novoDados.dataInicialMeta && String(novoDados.dataInicialMeta)) || "",
         dataLimite: (novoDados.dataLimite && String(novoDados.dataLimite)) || "",
         metaDiariaManual: Number(novoDados.metaDiariaManual) || 0,
         ganhoDiarioAtual: Number(novoDados.ganhoDiarioAtual) || 0,
@@ -7250,8 +7258,10 @@ function limparDadosGanhoHora(manterSaldoAtual){
 
 function diaUberEhAteDataLimite(diaUber){
   const dia = String(diaUber || '').slice(0,10);
+  const inicio = String(dados.dataInicialMeta || hojeISO()).slice(0,10);
   const limite = String(dados.dataLimite || '').slice(0,10);
   if(!dia) return false;
+  if(inicio && dia < inicio) return false;
   if(!limite) return true;
   return dia <= limite;
 }
@@ -8212,6 +8222,27 @@ function salvarConfigCombustivelAutoDebounced(){
 }
 
 
+
+function mdMetaDataInicialEfetivaISO(){
+  try{
+    const raw = String(dados.dataInicialMeta || '').slice(0,10);
+    return raw || hojeISO();
+  }catch(e){ return hojeISO(); }
+}
+
+function mdMetaInicioMidnight(){
+  try{ return new Date(mdMetaDataInicialEfetivaISO() + "T00:00:00"); }catch(e){ return uberHojeMidnight(); }
+}
+
+function mdMetaPeriodoInfo(){
+  const hoje = uberHojeMidnight();
+  const inicio = mdMetaInicioMidnight();
+  const inicioISO = mdMetaDataInicialEfetivaISO();
+  const futura = inicio.getTime() > hoje.getTime();
+  const inicioCalculo = futura ? inicio : hoje;
+  return { hoje, inicio, inicioISO, futura, inicioCalculo };
+}
+
 function exportarRelatorioPDF(){
   const stamp = new Date();
   const y = stamp.getFullYear();
@@ -8232,22 +8263,24 @@ function exportarRelatorioPDF(){
   const gastosOrdenados = dados.gastos.slice().sort((a,b)=> (a.data < b.data ? 1 : a.data > b.data ? -1 : 0));
   const abastecOrdenados = dados.abastecimentos.slice().sort((a,b)=> (a.data < b.data ? 1 : a.data > b.data ? -1 : 0));
 
-  const hoje = uberHojeMidnight();
+  const metaPeriodoExport = mdMetaPeriodoInfo();
+  const hoje = metaPeriodoExport.hoje;
   let diasCalendario = 0;
   let diasNaoTrabalhadosNoPeriodo = 0;
   if(dados.dataLimite){
     const limite = new Date(dados.dataLimite + "T00:00:00");
-    const diffMs = limite.getTime() - hoje.getTime();
+    const baseInicio = metaPeriodoExport.inicioCalculo;
+    const diffMs = limite.getTime() - baseInicio.getTime();
     if(diffMs >= 0){
       diasCalendario = Math.floor(diffMs / (24*60*60*1000)) + 1;
     }
     diasNaoTrabalhadosNoPeriodo = (dados.naoTrabalhados || []).filter(n => {
       if(!n || !n.data) return false;
       const dt = new Date(n.data + "T00:00:00");
-      return dt.getTime() >= hoje.getTime() && dt.getTime() <= limite.getTime();
+      return dt.getTime() >= baseInicio.getTime() && dt.getTime() <= limite.getTime();
     }).length;
   }
-  const diasRestantes = Math.max(0, diasCalendario - diasNaoTrabalhadosNoPeriodo);
+  const diasRestantes = metaPeriodoExport.futura ? 0 : Math.max(0, diasCalendario - diasNaoTrabalhadosNoPeriodo);
   const faltanteLiquido = Math.max(0, (dados.metaTotal || 0) - liquido);
   const divisorMeta = Math.max(0.05, 1 - Number(fuelCfg.taxaMeta || fuelCfg.taxaCombustivel || 0));
   const metaRestante = (faltanteLiquido > 0) ? (faltanteLiquido / divisorMeta) : 0;
@@ -8404,7 +8437,7 @@ function exportarRelatorioPDF(){
       <script>
         setTimeout(()=>window.print(), 250);
       <\/script>
-    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver vBeta1.0 · app</div>
+    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver vBeta1.1 · app</div>
 
 
 <script>
@@ -8776,6 +8809,10 @@ function atualizar(){
   try{ renderMetasDetalhadas(); }catch(e){}
   try{ syncSaldoAtualLockWithFab(); }catch(e){}
   try{ lockSaldoAtualByFab(); }catch(e){}
+  const elDataInicialMeta = document.getElementById("dataInicialMeta");
+if(elDataInicialMeta && document.activeElement !== elDataInicialMeta){
+  elDataInicialMeta.value = dados.dataInicialMeta || "";
+}
   const elData = document.getElementById("dataLimite");
 if(elData && document.activeElement !== elData){
   elData.value = dados.dataLimite || "";
@@ -8822,23 +8859,27 @@ document.getElementById("metaDiariaManual").value = metaSalvaAgora && (dados.met
   const totalRetiradas = (dados.retiradas || []).reduce((s,r)=>s+Number(r.valor || 0),0);
 
   
-  // Dias restantes: de hoje até data limite (inclui hoje), menos dias não trabalhados no período
-  const hoje = uberHojeMidnight();
+  // Dias restantes: da data inicial efetiva até a data limite.
+  // Se Data inicial ficar vazia, usa a data atual.
+  // Se a Data inicial ainda não chegou, a meta fica aguardando início e não entra nos cálculos do dia.
+  const metaPeriodo = mdMetaPeriodoInfo();
+  const hoje = metaPeriodo.hoje;
 let diasCalendario = 0;
   let diasNaoTrabalhadosNoPeriodo = 0;
   if(dados.dataLimite){
     const limite = new Date(dados.dataLimite + "T00:00:00");
-    const diffMs = limite.getTime() - hoje.getTime();
+    const baseInicio = metaPeriodo.inicioCalculo;
+    const diffMs = limite.getTime() - baseInicio.getTime();
     if(diffMs >= 0){
       diasCalendario = Math.floor(diffMs / (24*60*60*1000)) + 1;
     }
     diasNaoTrabalhadosNoPeriodo = (dados.naoTrabalhados || []).filter(n => {
       if(!n || !n.data) return false;
       const dt = new Date(n.data + "T00:00:00");
-      return dt.getTime() >= hoje.getTime() && dt.getTime() <= limite.getTime();
+      return dt.getTime() >= baseInicio.getTime() && dt.getTime() <= limite.getTime();
     }).length;
   }
-  const diasRestantes = Math.max(0, diasCalendario - diasNaoTrabalhadosNoPeriodo);
+  const diasRestantes = metaPeriodo.futura ? 0 : Math.max(0, diasCalendario - diasNaoTrabalhadosNoPeriodo);
   const box = document.getElementById("diasRestantesBox");
   if(box){
     box.textContent = diasNaoTrabalhadosNoPeriodo > 0 ? (diasRestantes + " (−" + diasNaoTrabalhadosNoPeriodo + ")") : String(diasRestantes);
@@ -8875,7 +8916,7 @@ const fuelCfg = getCombustivelConfig(bruto);
   const liquidoSemHoje = brutoSemHoje - combustivelSemHoje - manutencaoSemHoje - gastosExtras;
   const faltanteLiquidoSemHoje = Math.max(0, (dados.metaTotal || 0) - liquidoSemHoje);
   const metaRestanteSemHoje = (faltanteLiquidoSemHoje > 0) ? (faltanteLiquidoSemHoje / divisorMeta) : 0;
-  const metaDiariaAuto = (diasRestantes > 0) ? (metaRestanteSemHoje / diasRestantes) : 0;
+  const metaDiariaAuto = (metaPeriodo && metaPeriodo.futura) ? 0 : ((diasRestantes > 0) ? (metaRestanteSemHoje / diasRestantes) : 0);
 
   try{
     const metaDiaInput = document.getElementById("metaDiariaManual");
@@ -8893,8 +8934,15 @@ const fuelCfg = getCombustivelConfig(bruto);
   const horasRestantes = (ganhoHoraRef > 0) ? (Math.max(0, metaDia - ganhoDia) / ganhoHoraRef) : 0;
 
       
-  if(metaSalvaAgora){
+  if(metaSalvaAgora && metaPeriodo && metaPeriodo.futura){
     document.getElementById("statusMeta").innerHTML =
+      "Data inicial: <span class='warning'>" + metaPeriodo.inicioISO + "</span><br>" +
+      "Status: <span class='warning'>Aguardando início da meta</span><br>" +
+      "Meta diária (automática): —<br>" +
+      "Tempo para meta diária: —";
+  }else if(metaSalvaAgora){
+    document.getElementById("statusMeta").innerHTML =
+      "Data inicial: <span class='warning'>" + (dados.dataInicialMeta || hojeISO()) + "</span><br>" +
       "Dias restantes: <span class='" + (diasRestantes < 0 ? "dangerText" : "warning") + "'>" + diasRestantes + "</span><br>" +
       "Meta bruta total: <span class='" + (metaBrutaComGastos < 0 ? "dangerText" : "warning") + "'>R$ " + metaBrutaComGastos.toFixed(2) + "</span><br>" +
       "Meta bruta restante: <span class='" + (metaRestante < 0 ? "dangerText" : "warning") + "'>R$ " + metaRestante.toFixed(2) + "</span><br>" +
@@ -8910,7 +8958,14 @@ const fuelCfg = getCombustivelConfig(bruto);
   }
   const valorRestanteHoras = Math.max(0, metaDia - ganhoDia);
   const excedenteLinha = (excedenteDia > 0) ? ("<br>Meta batida: <span class='highlight'>Excedente R$ " + excedenteDia.toFixed(2) + "</span>") : "";
-  if(metaSalvaAgora){
+  if(metaSalvaAgora && metaPeriodo && metaPeriodo.futura){
+    document.getElementById("horasResumo").innerHTML =
+      "Meta aguardando início em <span class='warning'>" + metaPeriodo.inicioISO + "</span><br>" +
+      "Meta diária (automática): —<br>" +
+      "Valor restante: —<br>" +
+      "Tempo para meta diária: —<br>" +
+      "Tempo restante: —";
+  }else if(metaSalvaAgora){
     document.getElementById("horasResumo").innerHTML =
       "Meta diária (automática): <span class='" + (metaDia < 0 ? "dangerText" : "warning") + "'>R$ " + metaDia.toFixed(2) + "</span><br>" +
       "Valor restante: <span class='warning'>R$ " + valorRestanteHoras.toFixed(2) + "</span>" + excedenteLinha + "<br>" +
@@ -9057,6 +9112,8 @@ document.getElementById("listaGastos").innerHTML =
 
 function syncMetaAutoFromInputs(){
   try{
+    const dataInicialInput = document.getElementById("dataInicialMeta");
+    dados.dataInicialMeta = dataInicialInput?.value || "";
     const dataInput = document.getElementById("dataLimite");
     dados.dataLimite = dataInput?.value || "";
     const manutInput = document.getElementById("percentualManutencao");
@@ -10008,7 +10065,7 @@ try{ ensureGanhoHoraDiaAtual(); }catch(e){}
 mdInitialHydrateAndRender();
 
 (function(){
-  const metaIds = ["metaTotal", "dataLimite"];
+  const metaIds = ["metaTotal", "dataInicialMeta", "dataLimite"];
   metaIds.forEach(function(id){
     const el = document.getElementById(id);
     if(!el) return;
@@ -11058,6 +11115,7 @@ function zerarControleUber(){
   dados.naoTrabalhados = [];
   dados.metaTotal = 0;
   dados.metasDetalhadas = [];
+  dados.dataInicialMeta = "";
   dados.dataLimite = "";
   dados.metaDiariaManual = 0;
   dados.ganhoDiarioAtual = 0;

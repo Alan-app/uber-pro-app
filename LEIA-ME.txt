@@ -1,4 +1,11 @@
-MetaDriver vBeta1.0
+MetaDriver vBeta1.1
+
+Atualização vBeta1.1:
+- Configurar Meta agora possui Data inicial da meta.
+- Se a data inicial ficar vazia, a data atual é usada automaticamente.
+- A meta diária e os dias restantes consideram o período definido entre Data inicial e Data limite.
+
+MetaDriver vBeta1.1
 
 Atualização v70:
 - Seletor rápido de horários em grade para facilitar uso com poucos toques.
