@@ -103,3 +103,8 @@ V67 - Horários com roldana MetaDriver a partir da v64
 - Preservada a animação verde da sessão em andamento da v64.
 - Substituído o seletor nativo de hora por roldana MetaDriver sem botão de teclado.
 - Corrigido modal de início de sessão para não cortar o botão Definir/OK.
+
+
+vBeta1.3
+- Corrigido Gerenciar conta: após salvar o nome, o campo volta ao modo visualização.
+- Modal de Gerenciar conta não abre teclado automaticamente e o botão Editar reaparece após salvar.

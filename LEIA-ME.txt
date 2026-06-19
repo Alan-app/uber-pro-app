@@ -59,4 +59,9 @@ Atualização v70:
 - Aplicado ao início de sessão e edição de horários de sessões.
 
 
-vBeta1.2 - Gerenciar conta abre sem edição automática.
+vBeta1.3 - Gerenciar conta abre sem edição automática.
+
+
+vBeta1.3
+- Corrigido Gerenciar conta: após salvar o nome, o campo volta ao modo visualização.
+- Modal de Gerenciar conta não abre teclado automaticamente e o botão Editar reaparece após salvar.
