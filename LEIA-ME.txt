@@ -1,4 +1,4 @@
-MetaDriver v70
+MetaDriver vBeta1.0
 
 Atualização v70:
 - Seletor rápido de horários em grade para facilitar uso com poucos toques.
