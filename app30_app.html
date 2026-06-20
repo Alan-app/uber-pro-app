@@ -3694,6 +3694,12 @@ body[data-tema="amarelo-claro"] .subtab-btn{
   font-weight:900 !important;
   letter-spacing:-.3px;
 }
+
+.historico-dia-btn-active{
+  background:#1f6fff !important;
+  color:#fff !important;
+  box-shadow:0 0 0 2px rgba(255,255,255,.18) inset, 0 0 14px rgba(31,111,255,.45) !important;
+}
 .historico-dia-btn:active{ transform:scale(.96); }
 body[data-tema$="claro"] .historico-dia-btn{
   background:#fff !important;
@@ -8596,8 +8602,10 @@ function renderHistoricoDetalhadoDias(){
       if(rel){ rel.style.display = "none"; rel.innerHTML = ""; }
       return;
     }
+    const diaSel = String(window.__historicoDetalhadoDiaSelecionado || "").slice(0,10);
     grid.innerHTML = dias.map(function(dia){
-      return "<button type='button' class='historico-dia-btn' onclick=\"abrirHistoricoDetalhadoDia('" + mdHistEsc(dia) + "')\">" + mdHistDataCurta(dia) + "</button>";
+      const ativo = dia === diaSel ? " historico-dia-btn-active" : "";
+      return "<button type='button' class='historico-dia-btn"+ativo+"' onclick=\"abrirHistoricoDetalhadoDia('" + mdHistEsc(dia) + "')\">" + mdHistDataCurta(dia) + "</button>";
     }).join("");
 
     const diaSel = String(window.__historicoDetalhadoDiaSelecionado || "").slice(0,10);
