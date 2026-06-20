@@ -11708,5 +11708,31 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout
 
 </script>
 
+
+<script>
+(function(){
+  function isMetaField(el){
+    if(!el) return false;
+    const c=(el.className||'').toString().toLowerCase();
+    const p=(el.placeholder||'').toLowerCase();
+    return c.includes('meta') || p.includes('descr') || p.includes('meta');
+  }
+
+  document.addEventListener('keydown',function(e){
+    if(!isMetaField(e.target)) return;
+    if(e.key==='Enter' || e.key==='Tab'){
+      e.preventDefault();
+      e.stopPropagation();
+      try{e.target.blur();}catch(_){}
+    }
+  },true);
+
+  document.addEventListener('focusin',function(e){
+    if(!isMetaField(e.target)) return;
+    e.target.dataset.metaEditing='1';
+  },true);
+})();
+</script>
+
 </body>
     </html>
