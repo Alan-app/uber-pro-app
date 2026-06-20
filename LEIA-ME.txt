@@ -1,11 +1,11 @@
-MetaDriver vBeta1.5
+MetaDriver vBeta1.1
 
-Atualização vBeta1.5:
+Atualização vBeta1.1:
 - Configurar Meta agora possui Data inicial da meta.
 - Se a data inicial ficar vazia, a data atual é usada automaticamente.
 - A meta diária e os dias restantes consideram o período definido entre Data inicial e Data limite.
 
-MetaDriver vBeta1.5
+MetaDriver vBeta1.1
 
 Atualização v70:
 - Seletor rápido de horários em grade para facilitar uso com poucos toques.
@@ -59,12 +59,14 @@ Atualização v70:
 - Aplicado ao início de sessão e edição de horários de sessões.
 
 
-vBeta1.5 - Gerenciar conta abre sem edição automática.
+vBeta1.4 - Gerenciar conta abre sem edição automática.
 
 
-vBeta1.5
+vBeta1.4
 - Corrigido Gerenciar conta: após salvar o nome, o campo volta ao modo visualização.
 - Modal de Gerenciar conta não abre teclado automaticamente e o botão Editar reaparece após salvar.
 
 
-vBeta1.5 - Ajuste em Gerenciar conta: ao editar nome, cursor vai para o fim sem selecionar o texto; botão Editar alinhado ao campo; após salvar, sai da edição sem seleção ativa.
+vBeta1.4 - Ajuste em Gerenciar conta: ao editar nome, cursor vai para o fim sem selecionar o texto; botão Editar alinhado ao campo; após salvar, sai da edição sem seleção ativa.
+
+vBeta1.6 - correção edição metas sessão ativa e Tab/Enter.
