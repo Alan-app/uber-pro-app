@@ -115,5 +115,3 @@ vBeta1.4
 - Ao clicar em Editar, o texto não é mais selecionado; o cursor fica no final do nome.
 - Após salvar, o campo sai da edição sem permanecer selecionado.
 - Botão Editar alinhado verticalmente com o campo de nome.
-
-vBeta1.6 - correção edição metas sessão ativa e Tab/Enter.

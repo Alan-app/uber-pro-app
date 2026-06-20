@@ -68,5 +68,3 @@ vBeta1.4
 
 
 vBeta1.4 - Ajuste em Gerenciar conta: ao editar nome, cursor vai para o fim sem selecionar o texto; botão Editar alinhado ao campo; após salvar, sai da edição sem seleção ativa.
-
-vBeta1.6 - correção edição metas sessão ativa e Tab/Enter.

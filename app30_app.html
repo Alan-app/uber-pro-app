@@ -3771,30 +3771,6 @@ body[data-tema$="claro"] .historico-report-line{border-bottom-color:rgba(0,0,0,.
 </style>
 
 
-
-<script id="vBeta1.6-meta-fix">
-document.addEventListener('focusin',function(e){
- const t=e.target;
- if(!t) return;
- if((t.tagName==='INPUT'||t.tagName==='TEXTAREA') && /meta/i.test((t.className||'')+' '+(t.id||''))){
-   t.setAttribute('data-md-meta-edit','1');
- }
-});
-document.addEventListener('keydown',function(e){
- const t=e.target;
- if(!t) return;
- if((e.key==='Tab'||e.key==='Enter') && (t.tagName==='INPUT'||t.tagName==='TEXTAREA')){
-   e.preventDefault();
-   try{t.blur();}catch(err){}
- }
-},true);
-document.addEventListener('focusout',function(e){
- const t=e.target;
- if(t&&t.getAttribute&&t.getAttribute('data-md-meta-edit')==='1'){
-   setTimeout(()=>{ try{document.activeElement&&document.activeElement.blur&&document.activeElement.blur();}catch(err){} },0);
- }
-},true);
-</script>
 </head>
 <body class="preload"><div id="mdBootOverlay">Carregando dados...</div><script>window.mdFailsafeNoBlueScreen=true;window.addEventListener("error",function(){setTimeout(function(){try{mdReleaseBootOverlay();}catch(e){}},1200);},true);</script>
 
@@ -11720,5 +11696,34 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout
 
 </script>
 
+
+<script>
+(function(){
+function isMetaField(el){
+ if(!el) return false;
+ return !!(el.closest('#cardMeta')||el.closest('[id*="Meta"]')||el.closest('.meta-goal-row'));
+}
+document.addEventListener('focusin',function(e){
+ const el=e.target;
+ if(isMetaField(el)){
+   setTimeout(function(){
+     try{
+       const v=el.value||'';
+       if(typeof el.setSelectionRange==='function'){
+         el.setSelectionRange(v.length,v.length);
+       }
+     }catch(_){}
+   },0);
+ }
+},true);
+document.addEventListener('keydown',function(e){
+ const el=e.target;
+ if(isMetaField(el) && (e.key==='Enter' || e.key==='Tab')){
+   e.preventDefault();
+   try{ el.blur(); }catch(_){}
+ }
+},true);
+})();
+</script>
 </body>
     </html>
