@@ -11698,32 +11698,32 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout
 
 
 <script>
+/* vBeta1.6 metas focus fix */
 (function(){
-function isMetaField(el){
- if(!el) return false;
- return !!(el.closest('#cardMeta')||el.closest('[id*="Meta"]')||el.closest('.meta-goal-row'));
-}
-document.addEventListener('focusin',function(e){
- const el=e.target;
- if(isMetaField(el)){
-   setTimeout(function(){
-     try{
-       const v=el.value||'';
-       if(typeof el.setSelectionRange==='function'){
-         el.setSelectionRange(v.length,v.length);
-       }
-     }catch(_){}
-   },0);
- }
-},true);
-document.addEventListener('keydown',function(e){
- const el=e.target;
- if(isMetaField(el) && (e.key==='Enter' || e.key==='Tab')){
-   e.preventDefault();
-   try{ el.blur(); }catch(_){}
- }
-},true);
+  function isMetaField(el){
+    if(!el) return false;
+    const id=(el.id||'').toLowerCase();
+    const ph=(el.placeholder||'').toLowerCase();
+    return id.includes('meta') || ph.includes('meta') || ph.includes('descr');
+  }
+
+  document.addEventListener('focusin', function(e){
+    const el=e.target;
+    if(isMetaField(el)){
+      el.dataset.mdMetaEditing='1';
+    }
+  }, true);
+
+  document.addEventListener('keydown', function(e){
+    const el=e.target;
+    if(!isMetaField(el)) return;
+    if(e.key==='Tab' || e.key==='Enter'){
+      e.preventDefault();
+      try{ el.blur(); }catch(err){}
+    }
+  }, true);
 })();
 </script>
+
 </body>
     </html>
