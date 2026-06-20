@@ -6212,7 +6212,10 @@ function renderMetasDetalhadas(){
   const lista = document.getElementById("metasDetalhadasLista");
   if(!lista) return;
   const panel = document.getElementById("metaTotalPanel");
-  const editingGoal = panel && panel.classList.contains("show") && String(metaTotalTargetId || "").indexOf("metaGoalValor_") === 0;
+  const activeEl = document.activeElement;
+  const editingGoal =
+    (panel && panel.classList.contains("show") && String(metaTotalTargetId || "").indexOf("metaGoalValor_") === 0)
+    || (activeEl && activeEl.id && (activeEl.id.indexOf("metaGoalDesc_")===0 || activeEl.id.indexOf("metaGoalValor_")===0));
   if(!editingGoal){
     lista.innerHTML = dados.metasDetalhadas.map(function(m, idx){
       const valor = Number(m.valor || 0) > 0 ? String(Number(m.valor || 0)).replace(".", ",") : "";
@@ -11706,32 +11709,6 @@ window.addEventListener('pageshow',()=>setTimeout(window.mdRealtimeSyncV19,0));
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout(window.mdRealtimeSyncV19,0);});
 }catch(e){}
 
-</script>
-
-
-<script>
-(function(){
-  function isMetaField(el){
-    if(!el) return false;
-    const c=(el.className||'').toString().toLowerCase();
-    const p=(el.placeholder||'').toLowerCase();
-    return c.includes('meta') || p.includes('descr') || p.includes('meta');
-  }
-
-  document.addEventListener('keydown',function(e){
-    if(!isMetaField(e.target)) return;
-    if(e.key==='Enter' || e.key==='Tab'){
-      e.preventDefault();
-      e.stopPropagation();
-      try{e.target.blur();}catch(_){}
-    }
-  },true);
-
-  document.addEventListener('focusin',function(e){
-    if(!isMetaField(e.target)) return;
-    e.target.dataset.metaEditing='1';
-  },true);
-})();
 </script>
 
 </body>
