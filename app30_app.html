@@ -43,7 +43,7 @@ try{
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver vBeta1.4</title>
+<title>MetaDriver vBeta1.5</title>
 <style id="md-hydration-lock">
 body.preload > *:not(#mdBootOverlay){visibility:hidden!important;}
 #mdBootOverlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#0f172a;color:#fff;z-index:2147483647;font-family:Inter,system-ui,sans-serif;font-weight:800;letter-spacing:.2px;}
@@ -658,7 +658,7 @@ h1{text-align:center;margin:8px 0 14px;letter-spacing:0.2px;}
 }
 .menu-item button.danger:hover{ opacity:1; }
 .menu-note{padding:5px 12px 7px; font-size:10px; opacity:0.5; line-height:1.3;}
-/* vBeta1.4 - Gerenciar conta e nome no menu */
+/* vBeta1.5 - Gerenciar conta e nome no menu */
 .menu-user-row{
   display:flex; align-items:center; justify-content:space-between; gap:10px; padding:8px 12px;
 }
@@ -2022,7 +2022,7 @@ input.negative-value, input.negative-value::placeholder{
 }
 
 
-/* vBeta1.4 - modal MetaDriver para edição de manutenção */
+/* vBeta1.5 - modal MetaDriver para edição de manutenção */
 .manut-edit-modal{
   max-width:420px;
   width:calc(100vw - 28px);
@@ -3694,12 +3694,6 @@ body[data-tema="amarelo-claro"] .subtab-btn{
   font-weight:900 !important;
   letter-spacing:-.3px;
 }
-
-.historico-dia-btn-active{
-  background:#1f6fff !important;
-  color:#fff !important;
-  box-shadow:0 0 0 2px rgba(255,255,255,.18) inset, 0 0 14px rgba(31,111,255,.45) !important;
-}
 .historico-dia-btn:active{ transform:scale(.96); }
 body[data-tema$="claro"] .historico-dia-btn{
   background:#fff !important;
@@ -3719,6 +3713,25 @@ body[data-tema="preto-claro"] .historico-dia-btn{
   color:#fff !important;
   border-color:#fff !important;
 }
+
+/* vBeta1.5 - destaque do dia selecionado no Histórico Detalhado */
+.historico-dia-btn.historico-dia-btn-selecionado{
+  background:#1f6fff !important;
+  color:#fff !important;
+  box-shadow:0 0 0 2px rgba(255,255,255,.18) inset, 0 0 0 2px rgba(31,111,255,.34), 0 8px 18px rgba(31,111,255,.32) !important;
+  transform:translateY(-1px);
+}
+body[data-tema$="claro"] .historico-dia-btn.historico-dia-btn-selecionado,
+body[data-tema="amarelo-escuro"] .historico-dia-btn.historico-dia-btn-selecionado,
+body[data-tema="amarelo-claro"] .historico-dia-btn.historico-dia-btn-selecionado,
+body[data-tema="preto-escuro"] .historico-dia-btn.historico-dia-btn-selecionado,
+body[data-tema="preto-claro"] .historico-dia-btn.historico-dia-btn-selecionado{
+  background:#1f6fff !important;
+  color:#fff !important;
+  border-color:#7fb0ff !important;
+  box-shadow:0 0 0 2px rgba(255,255,255,.2) inset, 0 0 0 2px rgba(31,111,255,.34), 0 8px 18px rgba(31,111,255,.28) !important;
+}
+
 .historico-detalhado-report{
   margin-top:14px;
   border-top:1px solid var(--line);
@@ -3818,7 +3831,7 @@ body[data-tema$="claro"] .historico-report-line{border-bottom-color:rgba(0,0,0,.
   <div class="menu-item"><button class="secondary" onclick="abrirSaldoAtualButtonMenu(); closeMenu();">Botão de saldo atual</button></div>
   <div class="menu-item"><button class="secondary" onclick="abrirTemas(); closeMenu();">Temas</button></div>
   <div class="menu-item menu-user-row"><span class="menu-user-name" id="menuUserName">Usuário</span><button class="danger" onclick="forceLogout(); return false;">Sair</button></div>
-  <div class="menu-note" style="text-align:center;">vBeta1.4</div>
+  <div class="menu-note" style="text-align:center;">vBeta1.5</div>
 </div>
 
 
@@ -4170,7 +4183,7 @@ body[data-tema$="claro"] .historico-report-line{border-bottom-color:rgba(0,0,0,.
   </div>
 </div>
 
-<!-- vBeta1.4 - modal MetaDriver para editar manutenção -->
+<!-- vBeta1.5 - modal MetaDriver para editar manutenção -->
 <div id="editManutOverlay" class="edit-data-overlay" onclick="if(event.target.id==='editManutOverlay')fecharEditManutModal()">
   <div class="edit-data-modal manut-edit-modal" onclick="event.stopPropagation()">
     <div class="edit-data-title">Editar manutenção</div>
@@ -5157,7 +5170,7 @@ function mdBuildDiagnosticsObject(){
     const durableObj = mdSafeJsonParse(durableRaw);
     const diag = {
       generated_at: mdNowIso(),
-      app_version: 'MetaDriver vBeta1.4',
+      app_version: 'MetaDriver vBeta1.5',
       cloud_table: CLOUD_TABLE,
       device_id: mdEnsureDeviceId(),
       visibility_state: document.visibilityState,
@@ -5855,7 +5868,7 @@ document.addEventListener("click", function(e){
 
 
 
-/* vBeta1.4 - Gerenciar conta / nome do usuário */
+/* vBeta1.5 - Gerenciar conta / nome do usuário */
 function getNomeUsuarioConta(){
   try{
     const n1 = (dados && dados.nomeUsuario) ? String(dados.nomeUsuario).trim() : "";
@@ -6244,7 +6257,7 @@ function updateMetaDetalhadaDescricao(idx, value){
   salvar();
 }
 
-// vBeta1.4 - valores das metas usam teclado numérico nativo (sem teclado MetaDriver)
+// vBeta1.5 - valores das metas usam teclado numérico nativo (sem teclado MetaDriver)
 function updateMetaDetalhadaValorNative(idx, value){
   normalizarMetasDetalhadas();
   if(!dados.metasDetalhadas[idx]) dados.metasDetalhadas[idx] = { descricao:"", valor:0 };
@@ -6697,7 +6710,7 @@ function mdCommitLancamentoMutation(reason){
   try{ atualizar(); }catch(e){}
   try{ if(typeof refreshQuickBalanceFabMiniDisplay === "function") refreshQuickBalanceFabMiniDisplay(); }catch(e){}
   try{ if(typeof updateQuickBalanceFabUI === "function") updateQuickBalanceFabUI(); }catch(e){}
-  try{ if(typeof toast === "function" && reason) console.info("MetaDriver vBeta1.4 mutation:", reason); }catch(e){}
+  try{ if(typeof toast === "function" && reason) console.info("MetaDriver vBeta1.5 mutation:", reason); }catch(e){}
 }
 
 
@@ -8481,7 +8494,7 @@ function exportarRelatorioPDF(){
       <script>
         setTimeout(()=>window.print(), 250);
       <\/script>
-    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver vBeta1.4 · app</div>
+    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver vBeta1.5 · app</div>
 
 
 <script>
@@ -8604,11 +8617,10 @@ function renderHistoricoDetalhadoDias(){
     }
     const diaSel = String(window.__historicoDetalhadoDiaSelecionado || "").slice(0,10);
     grid.innerHTML = dias.map(function(dia){
-      const ativo = dia === diaSel ? " historico-dia-btn-active" : "";
-      return "<button type='button' class='historico-dia-btn"+ativo+"' onclick=\"abrirHistoricoDetalhadoDia('" + mdHistEsc(dia) + "')\">" + mdHistDataCurta(dia) + "</button>";
+      const ativo = String(dia || "").slice(0,10) === diaSel;
+      const cls = ativo ? "historico-dia-btn historico-dia-btn-selecionado" : "historico-dia-btn";
+      return "<button type='button' class='" + cls + "' aria-pressed='" + (ativo ? "true" : "false") + "' onclick=\"abrirHistoricoDetalhadoDia('" + mdHistEsc(dia) + "')\">" + mdHistDataCurta(dia) + "</button>";
     }).join("");
-
-    const diaSel = String(window.__historicoDetalhadoDiaSelecionado || "").slice(0,10);
     if(!rel) return;
     if(!diaSel || dias.indexOf(diaSel) < 0){
       rel.style.display = "none";
@@ -11694,35 +11706,6 @@ window.addEventListener('pageshow',()=>setTimeout(window.mdRealtimeSyncV19,0));
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout(window.mdRealtimeSyncV19,0);});
 }catch(e){}
 
-</script>
-
-
-<script>
-/* vBeta1.6 metas focus fix */
-(function(){
-  function isMetaField(el){
-    if(!el) return false;
-    const id=(el.id||'').toLowerCase();
-    const ph=(el.placeholder||'').toLowerCase();
-    return id.includes('meta') || ph.includes('meta') || ph.includes('descr');
-  }
-
-  document.addEventListener('focusin', function(e){
-    const el=e.target;
-    if(isMetaField(el)){
-      el.dataset.mdMetaEditing='1';
-    }
-  }, true);
-
-  document.addEventListener('keydown', function(e){
-    const el=e.target;
-    if(!isMetaField(el)) return;
-    if(e.key==='Tab' || e.key==='Enter'){
-      e.preventDefault();
-      try{ el.blur(); }catch(err){}
-    }
-  }, true);
-})();
 </script>
 
 </body>

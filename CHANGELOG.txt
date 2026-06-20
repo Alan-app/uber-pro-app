@@ -1,10 +1,15 @@
-vBeta1.1 - Primeira versão beta para testes
-- Versão pública alterada para vBeta1.1.
+vBeta1.5 - Histórico Detalhado: dia selecionado destacado
+- Corrigido destaque visual do botão do dia selecionado no Histórico Detalhado.
+- Apenas o dia com relatório aberto recebe azul destacado.
+- Não altera cálculos, filtros, datas operacionais ou relatórios.
+
+vBeta1.5 - Primeira versão beta para testes
+- Versão pública alterada para vBeta1.5.
 - Menu passa a mostrar o nome do usuário ao lado do botão Sair.
 - Botão Gerenciar APP renomeado para Gerenciar conta.
 - Gerenciar conta permite alterar o nome do usuário e acessar o painel da conta.
 
-vBeta1.1 - Teclado nativo em metas e modal MetaDriver em manutenção
+vBeta1.5 - Teclado nativo em metas e modal MetaDriver em manutenção
 - Campo Valor das metas passa a usar teclado numérico nativo do sistema.
 - Edição de manutenções lançadas substitui prompts/modais nativos por modal padrão MetaDriver.
 - Base oficial: v70.
@@ -22,7 +27,7 @@ v70 - Seletor de horário em duas etapas
 - Mantido visual MetaDriver, sem teclado, sem seletor nativo e sem rolagem excessiva.
 - Preservada a animação verde da sessão em andamento e regras de cálculo existentes.
 
-MetaDriver vBeta1.1 - Seletor rápido de horários em grade
+MetaDriver vBeta1.5 - Seletor rápido de horários em grade
 - Base utilizada: v67 enviada pelo usuário.
 - Substituída a roldana de horário por seleção rápida em grade.
 - Horas exibidas de 00 a 23 em botões de toque único.
@@ -105,12 +110,12 @@ V67 - Horários com roldana MetaDriver a partir da v64
 - Corrigido modal de início de sessão para não cortar o botão Definir/OK.
 
 
-vBeta1.3
+vBeta1.5
 - Corrigido Gerenciar conta: após salvar o nome, o campo volta ao modo visualização.
 - Modal de Gerenciar conta não abre teclado automaticamente e o botão Editar reaparece após salvar.
 
 
-vBeta1.4
+vBeta1.5
 - Corrigido comportamento do campo Nome do usuário em Gerenciar conta.
 - Ao clicar em Editar, o texto não é mais selecionado; o cursor fica no final do nome.
 - Após salvar, o campo sai da edição sem permanecer selecionado.
