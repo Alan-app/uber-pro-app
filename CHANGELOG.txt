@@ -1,3 +1,17 @@
+vBeta1.9 - TAB/Concluído no celular: corrige avanço indevido entre campos das metas
+- Em "Configurar meta", no celular o botão "Avançar" do teclado virtual movia o foco da Descrição para o Valor, e do Valor para a Descrição da meta seguinte (a correção da vBeta1.6, baseada em Tab, não se aplicava a esse botão, pois ele não dispara a tecla Tab no celular).
+- Adicionado enterkeyhint="done" aos campos Descrição e Valor das metas, fazendo o teclado virtual exibir "Concluído" em vez de "Avançar".
+- O botão "Concluído" agora também finaliza a edição do campo atual (salva e sai do campo), sem avançar para outro campo, sem abrir o próximo e sem entrar em outra meta — mesmo comportamento já garantido para a tecla Tab física.
+- Nenhuma outra tela ou fluxo foi alterada.
+- Base oficial: vBeta1.8.
+
+vBeta1.8 - Valor das metas exibido com cifrão e duas casas decimais
+- Na seção "Configurar meta", o campo Valor de cada meta agora exibe o valor formatado como o restante do app (ex.: 150,00 em vez de 150), seguindo o mesmo padrão de "Total das metas: R$ 0,00".
+- Placeholder do campo atualizado para "Valor (R$)", igual aos demais campos de valor do app (ex.: Manutenção).
+- Corrigido também o cálculo do valor digitado para aceitar corretamente números com separador de milhar no formato brasileiro (ex.: 1.234,56), evitando que valores acima de R$ 1.000 fossem truncados.
+- Nenhuma outra tela ou cálculo foi alterado.
+- Base oficial: vBeta1.7.
+
 vBeta1.7 - Correção crítica: vazamento de dados entre usuários no mesmo aparelho
 - Corrigido vazamento de dados ao trocar o login no mesmo celular: dados de um usuário podiam ser herdados por outro.
 - Causa: os dados eram lidos de uma chave local global (não isolada por usuário) antes do escopo do usuário ser ativado, pois essa ativação só ocorria depois, de forma assíncrona.

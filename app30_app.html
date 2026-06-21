@@ -43,7 +43,7 @@ try{
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver vBeta1.7</title>
+<title>MetaDriver vBeta1.9</title>
 <style id="md-hydration-lock">
 body.preload > *:not(#mdBootOverlay){visibility:hidden!important;}
 #mdBootOverlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#0f172a;color:#fff;z-index:2147483647;font-family:Inter,system-ui,sans-serif;font-weight:800;letter-spacing:.2px;}
@@ -3831,7 +3831,7 @@ body[data-tema$="claro"] .historico-report-line{border-bottom-color:rgba(0,0,0,.
   <div class="menu-item"><button class="secondary" onclick="abrirSaldoAtualButtonMenu(); closeMenu();">Botão de saldo atual</button></div>
   <div class="menu-item"><button class="secondary" onclick="abrirTemas(); closeMenu();">Temas</button></div>
   <div class="menu-item menu-user-row"><span class="menu-user-name" id="menuUserName">Usuário</span><button class="danger" onclick="forceLogout(); return false;">Sair</button></div>
-  <div class="menu-note" style="text-align:center;">vBeta1.7</div>
+  <div class="menu-note" style="text-align:center;">vBeta1.9</div>
 </div>
 
 
@@ -5190,7 +5190,7 @@ function mdBuildDiagnosticsObject(){
     const durableObj = mdSafeJsonParse(durableRaw);
     const diag = {
       generated_at: mdNowIso(),
-      app_version: 'MetaDriver vBeta1.7',
+      app_version: 'MetaDriver vBeta1.9',
       cloud_table: CLOUD_TABLE,
       device_id: mdEnsureDeviceId(),
       visibility_state: document.visibilityState,
@@ -6238,11 +6238,11 @@ function renderMetasDetalhadas(){
     || (activeEl && activeEl.id && (activeEl.id.indexOf("metaGoalDesc_")===0 || activeEl.id.indexOf("metaGoalValor_")===0));
   if(!editingGoal){
     lista.innerHTML = dados.metasDetalhadas.map(function(m, idx){
-      const valor = Number(m.valor || 0) > 0 ? String(Number(m.valor || 0)).replace(".", ",") : "";
+      const valor = Number(m.valor || 0) > 0 ? Number(m.valor || 0).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "";
       const desc = String(m.descricao || "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
       return '<div class="meta-goal-row">'
-        + '<input class="config-meta-input" type="text" id="metaGoalDesc_'+idx+'" placeholder="Descrição" value="'+desc+'" oninput="updateMetaDetalhadaDescricao('+idx+', this.value)">'
-        + '<input class="config-meta-input meta-goal-valor" type="text" id="metaGoalValor_'+idx+'" inputmode="decimal" autocomplete="off" placeholder="Valor" value="'+valor+'" oninput="updateMetaDetalhadaValorNative('+idx+', this.value)" onchange="updateMetaDetalhadaValorNative('+idx+', this.value); salvar(); atualizar();">'
+        + '<input class="config-meta-input" type="text" id="metaGoalDesc_'+idx+'" placeholder="Descrição" value="'+desc+'" enterkeyhint="done" oninput="updateMetaDetalhadaDescricao('+idx+', this.value)">'
+        + '<input class="config-meta-input meta-goal-valor" type="text" id="metaGoalValor_'+idx+'" inputmode="decimal" autocomplete="off" placeholder="Valor (R$)" value="'+valor+'" enterkeyhint="done" oninput="updateMetaDetalhadaValorNative('+idx+', this.value)" onchange="updateMetaDetalhadaValorNative('+idx+', this.value); salvar(); atualizar();">'
         + '<button type="button" class="meta-goal-remove" onclick="removeMetaDetalhada('+idx+')">×</button>'
         + '</div>';
     }).join("");
@@ -6284,7 +6284,12 @@ function updateMetaDetalhadaDescricao(idx, value){
 function updateMetaDetalhadaValorNative(idx, value){
   normalizarMetasDetalhadas();
   if(!dados.metasDetalhadas[idx]) dados.metasDetalhadas[idx] = { descricao:"", valor:0 };
-  const raw = String(value || "").replace(/[^0-9,.-]/g, "").replace(",", ".");
+  let raw = String(value || "").replace(/[^0-9,.-]/g, "");
+  // vBeta1.8 - suporta formato pt-BR com separador de milhar (ex.: "1.234,56"):
+  // remove pontos de milhar e usa a vírgula como separador decimal.
+  if(raw.indexOf(",") !== -1){
+    raw = raw.replace(/\./g, "").replace(",", ".");
+  }
   dados.metasDetalhadas[idx].valor = Math.max(0, parseFloat(raw) || 0);
   calcularTotalMetasDetalhadas();
   dados.metaSalva = !!(Number(dados.metaTotal || 0) > 0 || String(dados.dataLimite || '').trim());
@@ -6297,7 +6302,11 @@ function updateMetaDetalhadaValorFromInput(inputId){
   normalizarMetasDetalhadas();
   if(!dados.metasDetalhadas[idx]) dados.metasDetalhadas[idx] = { descricao:"", valor:0 };
   const el = document.getElementById(inputId);
-  dados.metasDetalhadas[idx].valor = Math.max(0, parseFloat(String(el && el.value || "").replace(",", ".")) || 0);
+  let raw = String(el && el.value || "");
+  // vBeta1.8 - mesmo ajuste de updateMetaDetalhadaValorNative: suporta formato
+  // pt-BR com separador de milhar (ex.: "1.234,56").
+  raw = raw.indexOf(",") !== -1 ? raw.replace(/\./g, "").replace(",", ".") : raw;
+  dados.metasDetalhadas[idx].valor = Math.max(0, parseFloat(raw) || 0);
   calcularTotalMetasDetalhadas();
   dados.metaSalva = !!(Number(dados.metaTotal || 0) > 0 || String(dados.dataLimite || '').trim());
   return true;
@@ -6305,8 +6314,10 @@ function updateMetaDetalhadaValorFromInput(inputId){
 
 // vBeta1.6 - TAB funciona como OK/Concluir nos campos de metas (Descrição e Valor)
 // Encerra a edição do campo atual sem navegar para outro campo, meta ou tela.
+// vBeta1.9 - também trata Enter: no celular, o botão "Concluído" do teclado
+// virtual (habilitado por enterkeyhint="done") dispara Enter, não Tab.
 window.addEventListener("keydown", function(e){
-  if(e.key !== "Tab") return;
+  if(e.key !== "Tab" && e.key !== "Enter") return;
   const t = e.target;
   if(!t || !t.id) return;
   const isMetaDesc = t.id.indexOf("metaGoalDesc_") === 0;
@@ -6754,7 +6765,7 @@ function mdCommitLancamentoMutation(reason){
   try{ atualizar(); }catch(e){}
   try{ if(typeof refreshQuickBalanceFabMiniDisplay === "function") refreshQuickBalanceFabMiniDisplay(); }catch(e){}
   try{ if(typeof updateQuickBalanceFabUI === "function") updateQuickBalanceFabUI(); }catch(e){}
-  try{ if(typeof toast === "function" && reason) console.info("MetaDriver vBeta1.7 mutation:", reason); }catch(e){}
+  try{ if(typeof toast === "function" && reason) console.info("MetaDriver vBeta1.9 mutation:", reason); }catch(e){}
 }
 
 
@@ -8538,7 +8549,7 @@ function exportarRelatorioPDF(){
       <script>
         setTimeout(()=>window.print(), 250);
       <\/script>
-    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver vBeta1.7 · app</div>
+    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver vBeta1.9 · app</div>
 
 
 <script>

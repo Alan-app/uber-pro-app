@@ -1,3 +1,33 @@
+MetaDriver vBeta1.9
+
+Solicitado:
+- Em Metas (seção "Configurar meta"), no celular, ao tocar em "Avançar" no teclado virtual após digitar a Descrição, o foco ia para o Valor; após digitar o Valor, ia para a Descrição da meta seguinte. O esperado é que o teclado finalize a edição (como um OK), sem avançar para outro campo.
+
+Causa:
+- A correção da vBeta1.6 tratava a tecla Tab, que funciona em teclado físico. No celular, o botão "Avançar" do teclado virtual não dispara essa tecla, então a correção não tinha efeito nesse cenário.
+
+Feito:
+- Adicionado enterkeyhint="done" aos campos Descrição e Valor das metas, fazendo o teclado virtual exibir "Concluído" em vez de "Avançar".
+- O botão "Concluído" agora finaliza a edição do campo (salva e sai), sem navegar para outro campo, sem abrir o próximo e sem entrar em outra meta — mesmo comportamento já garantido para a tecla Tab física desde a vBeta1.6.
+- Nenhuma outra tela, cálculo ou fluxo foi alterado.
+
+Status atual:
+- Pronto para uso. Recomenda-se testar no celular: tocar em Descrição, digitar, tocar em "Concluído"; tocar em Valor, digitar, tocar em "Concluído". Em nenhum dos dois casos o foco deve mudar para outro campo.
+
+MetaDriver vBeta1.8
+
+Solicitado:
+- Em Metas, na seção Configurar meta, o valor das metas não aparecia com cifrão e casas decimais, diferente do padrão do restante do app.
+
+Feito:
+- O campo Valor de cada meta agora exibe o número formatado com duas casas decimais (ex.: 150,00), igual ao "Total das metas: R$ 0,00" já existente na mesma tela.
+- Placeholder do campo passou a ser "Valor (R$)", no mesmo padrão usado em outros campos de valor do app (ex.: Manutenção).
+- Corrigida a leitura do valor digitado para tratar corretamente o separador de milhar (ex.: 1.234,56), evitando perda de valor em metas acima de R$ 1.000.
+- Nenhuma outra tela, cálculo ou fluxo foi alterado.
+
+Status atual:
+- Pronto para uso.
+
 MetaDriver vBeta1.7
 
 Solicitado:
