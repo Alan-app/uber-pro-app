@@ -1,3 +1,23 @@
+MetaDriver vBeta1.10
+
+Solicitado:
+- Avaliar a experiência de preenchimento de Lançamentos por voz, antes de decidir investir em IA paga (plano Premium com IA).
+
+Feito (PROTÓTIPO DE TESTE, sem custo):
+- Botão de microfone fixo, visível enquanto o card "Lançamentos" estiver aberto na tela.
+- Reconhecimento de voz feito pelo próprio navegador (gratuito, sem rede própria do app).
+- Interpretação por palavras-chave simples (não é IA real): identifica tipo de lançamento (Ganho/Gasto/Retirada/Combustível), valor e descrição a partir da frase falada.
+- Abre a aba certa e preenche os campos, sem salvar automaticamente — usuário revisa e confirma com o botão "Salvar" já existente.
+- Avisos claros de "modo teste" no próprio app, para não confundir com o recurso final.
+
+Limitações conhecidas (esperadas nesta fase):
+- Frases fora do padrão esperado podem não ser interpretadas corretamente (ex.: ambiguidade entre "gastei" e "abasteci").
+- Suporte a reconhecimento de voz é melhor no Chrome/Android; pode não funcionar no Safari/iPhone.
+- Não envolve IA real, não tem custo, e não substitui ainda a decisão de implementar a versão Premium com IA paga (Claude/Anthropic), que requer Edge Function no Supabase, chave de API e coluna de controle de acesso (ia_premium) na tabela user_access — combinado para depois da validação da experiência.
+
+Status atual:
+- Pronto para teste e avaliação de experiência. Não envolve infraestrutura nova nem custo.
+
 MetaDriver vBeta1.9
 
 Solicitado:

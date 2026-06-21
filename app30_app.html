@@ -43,7 +43,7 @@ try{
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver vBeta1.9</title>
+<title>MetaDriver vBeta1.10</title>
 <style id="md-hydration-lock">
 body.preload > *:not(#mdBootOverlay){visibility:hidden!important;}
 #mdBootOverlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#0f172a;color:#fff;z-index:2147483647;font-family:Inter,system-ui,sans-serif;font-weight:800;letter-spacing:.2px;}
@@ -1185,6 +1185,57 @@ input.negative-value, input.negative-value::placeholder{
   justify-content:center;
   line-height:1;
 }
+
+/* vBeta1.10 - botão flutuante de microfone (preenchimento por voz - modo teste) */
+.ia-voice-fab{
+  position:fixed;
+  right:18px;
+  bottom:90px;
+  z-index:1200;
+  width:60px;
+  height:60px;
+  border-radius:50%;
+  border:none;
+  box-shadow:0 12px 28px rgba(0,0,0,.35);
+  background:#1f6feb;
+  color:#fff;
+  font-size:24px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  touch-action:none;
+  user-select:none;
+  -webkit-user-select:none;
+  transition:opacity .22s ease, box-shadow .22s ease, transform .12s ease, background .15s ease;
+  padding:0;
+}
+.ia-voice-fab:active{
+  transform:scale(.96);
+}
+.ia-voice-fab.hidden{
+  display:none !important;
+  pointer-events:none !important;
+  visibility:hidden !important;
+  opacity:0 !important;
+}
+.ia-voice-fab.listening{
+  background:#dc2626;
+  box-shadow:0 0 0 8px rgba(220,38,38,.25), 0 12px 28px rgba(0,0,0,.35);
+}
+.ia-voice-badge{
+  position:fixed;
+  right:14px;
+  bottom:154px;
+  z-index:1200;
+  background:#111827;
+  color:#fbbf24;
+  font-size:10px;
+  font-weight:800;
+  padding:3px 8px;
+  border-radius:10px;
+  white-space:nowrap;
+}
+.ia-voice-badge.hidden{ display:none !important; }
 .quick-balance-fab-icon{
   font-size:16px;
   font-weight:900;
@@ -3831,7 +3882,7 @@ body[data-tema$="claro"] .historico-report-line{border-bottom-color:rgba(0,0,0,.
   <div class="menu-item"><button class="secondary" onclick="abrirSaldoAtualButtonMenu(); closeMenu();">Botão de saldo atual</button></div>
   <div class="menu-item"><button class="secondary" onclick="abrirTemas(); closeMenu();">Temas</button></div>
   <div class="menu-item menu-user-row"><span class="menu-user-name" id="menuUserName">Usuário</span><button class="danger" onclick="forceLogout(); return false;">Sair</button></div>
-  <div class="menu-note" style="text-align:center;">vBeta1.9</div>
+  <div class="menu-note" style="text-align:center;">vBeta1.10</div>
 </div>
 
 
@@ -5190,7 +5241,7 @@ function mdBuildDiagnosticsObject(){
     const durableObj = mdSafeJsonParse(durableRaw);
     const diag = {
       generated_at: mdNowIso(),
-      app_version: 'MetaDriver vBeta1.9',
+      app_version: 'MetaDriver vBeta1.10',
       cloud_table: CLOUD_TABLE,
       device_id: mdEnsureDeviceId(),
       visibility_state: document.visibilityState,
@@ -6167,6 +6218,7 @@ function toggleSection(header){
   if(card.classList.contains("collapsed")) collapsed.add(id);
   else collapsed.delete(id);
   saveCollapsedSet(collapsed);
+  try{ iaVoiceUpdateFabVisibility(); }catch(e){}
 }
 
 function setCardCollapsed(card, collapse, idx){
@@ -6365,6 +6417,139 @@ function sanitizeLancamentoValorInput(input){
     }
     input.value = v;
   }catch(e){}
+}
+
+// vBeta1.10 - PROTÓTIPO/TESTE: preenchimento de Lançamentos por voz.
+// Esta é uma simulação local (sem IA real, sem custo, sem rede) só para avaliar
+// a experiência de uso antes de decidir investir em IA paga (Premium).
+// A interpretação aqui é por palavras-chave simples, não é IA - frases fora
+// do padrão esperado podem não ser reconhecidas corretamente.
+let __iaVoiceRecognition = null;
+let __iaVoiceListening = false;
+
+function iaVoiceUpdateFabVisibility(){
+  try{
+    const fab = document.getElementById("iaVoiceFab");
+    const badge = document.getElementById("iaVoiceBadge");
+    if(!fab || !badge) return;
+    const headers = Array.from(document.querySelectorAll(".card-header h3"));
+    const lancHeader = headers.find(function(h){ return (h.textContent || "").trim() === "Lançamentos"; });
+    const card = lancHeader ? lancHeader.closest(".card") : null;
+    const lancamentosVisivel = !!(card && !card.classList.contains("collapsed") && card.offsetParent !== null);
+    if(lancamentosVisivel){
+      fab.classList.remove("hidden");
+      badge.classList.remove("hidden");
+    }else{
+      fab.classList.add("hidden");
+      badge.classList.add("hidden");
+    }
+  }catch(e){}
+}
+
+function iaVoiceToggle(){
+  try{
+    const SpeechRecognitionImpl = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if(!SpeechRecognitionImpl){
+      toast("Reconhecimento de voz não disponível neste navegador. Tente no Chrome para Android.");
+      return;
+    }
+    if(__iaVoiceListening){
+      try{ __iaVoiceRecognition && __iaVoiceRecognition.stop(); }catch(e){}
+      return;
+    }
+    __iaVoiceRecognition = new SpeechRecognitionImpl();
+    __iaVoiceRecognition.lang = "pt-BR";
+    __iaVoiceRecognition.interimResults = false;
+    __iaVoiceRecognition.maxAlternatives = 1;
+
+    const fab = document.getElementById("iaVoiceFab");
+
+    __iaVoiceRecognition.onstart = function(){
+      __iaVoiceListening = true;
+      if(fab) fab.classList.add("listening");
+      toast("Ouvindo... fale o lançamento.");
+    };
+    __iaVoiceRecognition.onerror = function(){
+      __iaVoiceListening = false;
+      if(fab) fab.classList.remove("listening");
+      toast("Não entendi. Tente novamente.");
+    };
+    __iaVoiceRecognition.onend = function(){
+      __iaVoiceListening = false;
+      if(fab) fab.classList.remove("listening");
+    };
+    __iaVoiceRecognition.onresult = function(event){
+      try{
+        const texto = event.results[0][0].transcript || "";
+        iaVoiceInterpretarMock(texto);
+      }catch(e){}
+    };
+
+    __iaVoiceRecognition.start();
+  }catch(e){
+    toast("Não foi possível iniciar o microfone.");
+  }
+}
+
+// Interpretador simulado (mock): identifica tipo de lançamento, valor e
+// descrição por palavras-chave. Substituível depois por chamada de IA real.
+function iaVoiceInterpretarMock(textoFalado){
+  try{
+    const texto = String(textoFalado || "").toLowerCase().trim();
+    if(!texto){ toast("Não entendi o que foi dito."); return; }
+
+    let tipo = null;
+    if(/\b(gast|paguei|comprei)\w*/.test(texto)) tipo = "gastos";
+    else if(/\b(retir|saqu|sa[ií])\w*/.test(texto)) tipo = "retiradas";
+    else if(/\b(combust[íi]vel|gasolina|etanol|álcool|alcool|abasteci|abastec)\w*/.test(texto)) tipo = "combustivel";
+    else if(/\b(ganh|recebi|fiz|corrida|rodei)\w*/.test(texto)) tipo = "ganhos";
+
+    const valorMatch = texto.match(/(\d+(?:[.,]\d{1,2})?)/);
+    const valor = valorMatch ? valorMatch[1].replace(",", ".") : "";
+
+    if(!tipo){
+      toast('Não identifiquei o tipo de lançamento. Diga, por exemplo: "gastei 50 de gasolina".');
+      return;
+    }
+    if(!valor){
+      toast("Não identifiquei o valor. Tente repetir incluindo o número.");
+      return;
+    }
+
+    const descricaoBruta = texto
+      .replace(valorMatch ? valorMatch[0] : "", "")
+      .replace(/\b(reais|conto|contos|de|no|na|em|hoje|gastei|paguei|comprei|retirei|saquei|sa[ií]|recebi|ganhei|fiz|abasteci|abasteceu|com)\b/g, "")
+      .replace(/\s+/g, " ")
+      .trim();
+    const descricao = descricaoBruta ? (descricaoBruta.charAt(0).toUpperCase() + descricaoBruta.slice(1)) : "";
+
+    openLancSection(tipo);
+    setTimeout(function(){
+      if(tipo === "ganhos"){
+        toggleForm("formGanho");
+        const dEl = document.getElementById("dataGanho"); if(dEl && !dEl.value) dEl.value = dataUberISO();
+        const descEl = document.getElementById("descricaoGanho"); if(descEl) descEl.value = descricao;
+        const valEl = document.getElementById("valorGanho"); if(valEl){ valEl.value = valor; sanitizeLancamentoValorInput(valEl); }
+      }else if(tipo === "gastos"){
+        toggleForm("formGasto");
+        const dEl = document.getElementById("dataGasto"); if(dEl && !dEl.value) dEl.value = dataUberISO();
+        const descEl = document.getElementById("descGasto"); if(descEl) descEl.value = descricao;
+        const valEl = document.getElementById("valorGasto"); if(valEl){ valEl.value = valor; sanitizeLancamentoValorInput(valEl); }
+      }else if(tipo === "retiradas"){
+        toggleForm("formRetirada");
+        const dEl = document.getElementById("dataRetirada"); if(dEl && !dEl.value) dEl.value = dataUberISO();
+        const descEl = document.getElementById("descRetirada"); if(descEl) descEl.value = descricao;
+        const valEl = document.getElementById("valorRetirada"); if(valEl){ valEl.value = valor; sanitizeLancamentoValorInput(valEl); }
+      }else if(tipo === "combustivel"){
+        toggleForm("formAbastecimento");
+        const dEl = document.getElementById("dataAbastecimento"); if(dEl && !dEl.value) dEl.value = hojeISO();
+        const valEl = document.getElementById("valorAbastecimento"); if(valEl){ valEl.value = valor; sanitizeLancamentoValorInput(valEl); }
+      }
+      toast("Preenchido (modo teste). Revise e toque em Salvar.");
+    }, 50);
+  }catch(e){
+    toast("Não consegui interpretar. Tente de novo.");
+  }
 }
 
 function horaAtualLancamento(){
@@ -6765,7 +6950,7 @@ function mdCommitLancamentoMutation(reason){
   try{ atualizar(); }catch(e){}
   try{ if(typeof refreshQuickBalanceFabMiniDisplay === "function") refreshQuickBalanceFabMiniDisplay(); }catch(e){}
   try{ if(typeof updateQuickBalanceFabUI === "function") updateQuickBalanceFabUI(); }catch(e){}
-  try{ if(typeof toast === "function" && reason) console.info("MetaDriver vBeta1.9 mutation:", reason); }catch(e){}
+  try{ if(typeof toast === "function" && reason) console.info("MetaDriver vBeta1.10 mutation:", reason); }catch(e){}
 }
 
 
@@ -8549,7 +8734,7 @@ function exportarRelatorioPDF(){
       <script>
         setTimeout(()=>window.print(), 250);
       <\/script>
-    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver vBeta1.9 · app</div>
+    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver vBeta1.10 · app</div>
 
 
 <script>
@@ -10177,6 +10362,12 @@ function bindSectionHeaders(){
 try{ ensureGanhoHoraDiaAtual(); }catch(e){}
 mdInitialHydrateAndRender();
 
+// vBeta1.10 - garante que o botão de microfone (modo teste) apareça/desapareça
+// corretamente mesmo em navegações que não passam por toggleSection.
+try{ iaVoiceUpdateFabVisibility(); }catch(e){}
+document.addEventListener("DOMContentLoaded", function(){ try{ iaVoiceUpdateFabVisibility(); }catch(e){} });
+setInterval(function(){ try{ iaVoiceUpdateFabVisibility(); }catch(e){} }, 1500);
+
 (function(){
   const metaIds = ["metaTotal", "dataInicialMeta", "dataLimite"];
   metaIds.forEach(function(id){
@@ -11581,6 +11772,10 @@ document.addEventListener("visibilitychange", function(){
 </script>
 
 <button type="button" id="quickBalanceFab" class="quick-balance-fab" onclick="toggleQuickBalancePanel(true)" aria-label="Atualizar saldo atual rápido"><span class="quick-balance-fab-inner"><span id="quickBalanceFabValue" class="quickBalanceFabValue quick-balance-fab-value">R$ 0</span></span></button>
+
+<!-- vBeta1.10 - microfone para preenchimento por voz em Lançamentos (modo teste/simulação) -->
+<div id="iaVoiceBadge" class="ia-voice-badge hidden">Modo teste</div>
+<button type="button" id="iaVoiceFab" class="ia-voice-fab hidden" onclick="iaVoiceToggle()" aria-label="Preencher lançamento por voz (teste)">🎤</button>
 
 
 <div id="dayTurn4hOverlay" class="dayturn-overlay" onclick="if(event.target.id==='dayTurn4hOverlay')cancelVirada4hModal()"></div>

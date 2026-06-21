@@ -1,3 +1,12 @@
+vBeta1.10 - PROTÓTIPO DE TESTE: preenchimento de Lançamentos por voz (sem IA real, sem custo)
+- Adicionado botão de microfone fixo, visível enquanto o card "Lançamentos" estiver aberto na tela.
+- Ao falar um lançamento (ex.: "gastei 50 de gasolina hoje"), o app tenta identificar o tipo (Ganho/Gasto/Retirada/Combustível), o valor e a descrição, abre a aba correspondente e preenche os campos — sem salvar automaticamente, para revisão antes de confirmar.
+- IMPORTANTE: esta versão usa apenas reconhecimento de voz do navegador (gratuito) + um interpretador simples por palavras-chave, SEM IA real e SEM custo de API. O objetivo é validar a experiência de uso antes de decidir investir na versão com IA paga (recurso Premium futuro).
+- Funciona melhor no Chrome para Android; suporte no Safari/iPhone pode ser limitado ou indisponível (mostra aviso nesse caso).
+- Frases fora do padrão esperado podem não ser interpretadas corretamente — isso é esperado nesta fase de teste.
+- Nenhuma outra tela ou fluxo foi alterada.
+- Base oficial: vBeta1.9.
+
 vBeta1.9 - TAB/Concluído no celular: corrige avanço indevido entre campos das metas
 - Em "Configurar meta", no celular o botão "Avançar" do teclado virtual movia o foco da Descrição para o Valor, e do Valor para a Descrição da meta seguinte (a correção da vBeta1.6, baseada em Tab, não se aplicava a esse botão, pois ele não dispara a tecla Tab no celular).
 - Adicionado enterkeyhint="done" aos campos Descrição e Valor das metas, fazendo o teclado virtual exibir "Concluído" em vez de "Avançar".
