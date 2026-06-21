@@ -1,3 +1,39 @@
+MetaDriver vBeta1.12
+
+Solicitado:
+- O cifrão (R$) continuava aparecendo na descrição do lançamento por voz.
+- Tornar o reconhecimento "mais humanizado", sem o motorista precisar decorar comandos mecanizados — detectar descrição e valor pelo que foi falado naturalmente, para Gasto, Ganho, Retirada e Combustível/Abastecimento.
+
+Causa do cifrão:
+- O reconhecimento de voz, em alguns casos, transcreve o som de "reais" ou cifrão como o símbolo literal "R$". A limpeza de texto da versão anterior não removia esse símbolo, então ele sobrava dentro da descrição.
+
+Feito:
+- Removido o símbolo "R$" antes de processar a frase, eliminando o cifrão residual na descrição.
+- Vocabulário bem mais amplo: reconhece itens comuns de gasto mesmo sem um verbo explícito (ex.: "20 reais de estacionamento", "vinte e cinco de água", "30 de farmácia"), além dos verbos já reconhecidos (gastei, paguei, comprei, recebi, ganhei, retirei, saquei, abasteci etc.).
+- Suporte a números falados por extenso (ex.: "cinquenta reais", "cem reais", "duzentos e cinquenta"), não só em dígitos.
+- Limpeza da descrição corrigida para não cortar letras acentuadas no final de palavras (ex.: "manutenção", "almoço") e para não deixar artigos sobrando (ex.: "Aluguel" em vez de "O aluguel").
+
+Limite ainda existente (esperado nesta fase sem IA real):
+- Por ser baseado em regras e palavras-chave, frases muito fora do padrão, com ambiguidade forte ou vocabulário não previsto, ainda podem não ser reconhecidas corretamente. Esse é o limite estrutural de um interpretador por regras; superar isso de forma consistente requer IA real (Premium, decisão já registrada para etapa futura).
+
+Status atual:
+- Pronto para novo teste. Continua sendo protótipo sem IA real e sem custo.
+
+MetaDriver vBeta1.11
+
+Solicitado:
+- Lapidar o botão de voz testado na vBeta1.10: ícone "feio" (emoji de microfone antigo) e posição ruim (flutuante fixo na tela).
+- Também relatado um caso pontual de cifrão aparecendo na descrição do lançamento por voz — em testes posteriores não foi mais reproduzido, então não foi alterado nesta versão (segue em observação).
+
+Feito:
+- Novo ícone moderno em SVG (microfone com ondas sonoras), com gradiente azul/ciano e animação de pulso ao ouvir, substituindo o emoji antigo.
+- Botão reposicionado para dentro do card "Lançamentos", centralizado, acima das abas Ganhos/Gastos/Retiradas/Combustível.
+- Lógica de mostrar/escoder o botão simplificada: como ele agora é parte do próprio card, aparece e desaparece junto com a seção "Lançamentos" automaticamente.
+- Nenhuma outra tela, cálculo ou fluxo foi alterado.
+
+Status atual:
+- Pronto para teste. Continua sendo o protótipo sem IA real e sem custo. Se o cifrão na descrição voltar a aparecer, enviar um print do caso para investigação pontual.
+
 MetaDriver vBeta1.10
 
 Solicitado:

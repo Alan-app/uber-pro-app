@@ -1,3 +1,20 @@
+vBeta1.12 - Lançamento por voz: corrige cifrão na descrição e entende mais formas de falar
+- Corrigido bug que fazia "R$" aparecer dentro da descrição (ex.: "gastei R$ 50 de gasolina" preenchia descrição como "R$ gasolina"). Causa: o reconhecimento de voz às vezes transcreve "reais"/o som do cifrão como o símbolo literal "R$", que não estava sendo removido na limpeza da descrição.
+- Reconhecimento de mais formas de falar, sem precisar de comando mecanizado: mais sinônimos para gasto, ganho, retirada e combustível, incluindo itens comuns sem verbo explícito (ex.: "20 reais de estacionamento", "vinte e cinco de água").
+- Suporte a números falados por extenso, além de dígitos (ex.: "cinquenta reais", "cem reais", "duzentos e cinquenta").
+- Descrição extraída com mais precisão, sem perder letras acentuadas no final de palavras (ex.: "manutenção", "almoço") e sem deixar artigos residuais (ex.: "para o aluguel" agora gera "Aluguel", não "O aluguel").
+- Continua sendo o mesmo protótipo de teste por regras (sem IA real, sem custo) — frases muito fora do padrão ainda podem não ser reconhecidas; esse é o limite natural dessa abordagem, sem IA real.
+- Nenhuma outra tela ou fluxo foi alterada.
+- Base oficial: vBeta1.11.
+
+vBeta1.11 - Botão de voz (Lançamentos): novo visual e posição
+- Substituído o botão flutuante de microfone (emoji antigo) por um botão circular com ícone moderno (SVG) e gradiente azul/ciano, com animação de pulso ao ouvir.
+- Botão movido para dentro do card "Lançamentos", centralizado, acima das abas Ganhos/Gastos/Retiradas/Combustível (antes ficava flutuando fixo no canto da tela).
+- Por estar dentro do próprio card, o botão agora aparece/desaparece naturalmente junto com a seção "Lançamentos" (sem necessidade da lógica de verificação periódica usada antes).
+- Continua sendo o mesmo protótipo de teste (sem IA real, sem custo) já validado na vBeta1.10 — só o visual e a posição foram lapidados.
+- Nenhuma outra tela ou fluxo foi alterada.
+- Base oficial: vBeta1.10.
+
 vBeta1.10 - PROTÓTIPO DE TESTE: preenchimento de Lançamentos por voz (sem IA real, sem custo)
 - Adicionado botão de microfone fixo, visível enquanto o card "Lançamentos" estiver aberto na tela.
 - Ao falar um lançamento (ex.: "gastei 50 de gasolina hoje"), o app tenta identificar o tipo (Ganho/Gasto/Retirada/Combustível), o valor e a descrição, abre a aba correspondente e preenche os campos — sem salvar automaticamente, para revisão antes de confirmar.
