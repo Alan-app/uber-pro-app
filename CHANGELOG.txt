@@ -1,3 +1,18 @@
+vBeta1.14 - Captação de voz (dica + leve melhoria) e limpeza de Lançamentos não salvos
+- Ao tocar no microfone, o aviso de "ouvindo" agora inclui uma dica: se o celular estiver no suporte do carro, falar um pouco mais perto da tela ajuda a captação (a animação de cor/pulso já existente foi mantida sem alteração).
+- O reconhecimento de voz passou a considerar até 3 hipóteses de transcrição do motor de voz do sistema, escolhendo a de maior confiança — ajuda um pouco em ambientes ruidosos, mas não substitui um microfone físico melhor (limite da Web Speech API do navegador, fora do controle do app).
+- Corrigido: ao abrir um lançamento (Ganho, Gasto, Retirada ou Combustível), digitar algo e trocar de aba/opção ou fechar a seção SEM salvar, os campos digitados agora são limpos automaticamente — não ficam mais "esperando" como se estivessem salvos.
+- Essa limpeza ocorre tanto ao clicar em "Adicionar" de outro tipo quanto ao trocar de aba pelos botões Ganhos/Gastos/Retiradas/Combustível, ou ao fechar a aba atual.
+- Corrigido de passagem: "Retirada" não estava na lista de formulários fechados automaticamente ao abrir outro tipo (bug pré-existente, relacionado ao mesmo trecho de código).
+- Nenhuma outra tela ou fluxo foi alterada.
+- Base oficial: vBeta1.13.
+
+vBeta1.13 - Botão de voz: ajuste de tamanho (somente formato)
+- Botão de voz reduzido para um círculo menor e mais discreto (40px, antes 56px), com proteção para nunca ficar oval (largura e altura sempre iguais).
+- Posição mantida exatamente como estava: dentro do card "Lançamentos", centralizado, acima das abas Ganhos/Gastos/Retiradas/Combustível.
+- Ajuste somente visual (CSS) — nenhuma lógica, comportamento ou outra tela foi alterada.
+- Base oficial: vBeta1.12.
+
 vBeta1.12 - Lançamento por voz: corrige cifrão na descrição e entende mais formas de falar
 - Corrigido bug que fazia "R$" aparecer dentro da descrição (ex.: "gastei R$ 50 de gasolina" preenchia descrição como "R$ gasolina"). Causa: o reconhecimento de voz às vezes transcreve "reais"/o som do cifrão como o símbolo literal "R$", que não estava sendo removido na limpeza da descrição.
 - Reconhecimento de mais formas de falar, sem precisar de comando mecanizado: mais sinônimos para gasto, ganho, retirada e combustível, incluindo itens comuns sem verbo explícito (ex.: "20 reais de estacionamento", "vinte e cinco de água").

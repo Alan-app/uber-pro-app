@@ -1,3 +1,37 @@
+MetaDriver vBeta1.14
+
+Solicitado:
+1) Captação do microfone do botão de voz fraca quando o celular está no suporte do carro (perto da saída de ventilação), exigindo falar muito perto da tela.
+2) Ao adicionar um lançamento (Ganho, Gasto, Retirada ou Combustível) e digitar algo sem salvar, ao trocar de aba/opção ou fechar a seção, os campos deveriam ser limpos automaticamente (não podem ficar "esperando" como se estivessem salvos).
+
+Sobre o item 1 (captação de voz):
+- Explicado que o Claude (app de IA) e o reconhecimento de voz do navegador usam mecanismos de áudio diferentes; o navegador usa o motor de voz nativo do sistema, sem ajuste de sensibilidade ou cancelamento de ruído, e isso não pode ser alterado via código do app (limite da Web Speech API).
+- Mantida a animação visual de "ouvindo" já existente (mudança de cor + pulso), conforme solicitado.
+- Adicionada uma dica no aviso de "ouvindo": recomenda falar mais perto da tela quando o celular estiver no suporte do carro.
+- Ajustado o reconhecimento para considerar até 3 hipóteses de transcrição do motor de voz e escolher a de maior confiança — pode ajudar um pouco em ambientes ruidosos, mas o ganho é limitado pela própria tecnologia do navegador.
+
+Sobre o item 2 (limpeza de campos não salvos):
+- Implementada limpeza automática dos campos (data, descrição, valor) de qualquer formulário de Lançamento que estava aberto e não foi salvo, ao: trocar para outro tipo de lançamento, trocar de aba pelos botões Ganhos/Gastos/Retiradas/Combustível, ou fechar a aba atual.
+- Corrigido de passagem um bug relacionado: o formulário de Retirada não estava na lista de formulários fechados automaticamente ao abrir outro tipo (mesmo trecho de código tratado para o item 2).
+- Nenhuma outra tela, cálculo ou fluxo foi alterado.
+
+Status atual:
+- Pronto para teste. Item 1 tem melhoria modesta e real, mas com limite técnico conhecido (sem IA real e sem acesso a hardware de áudio avançado). Item 2 deve estar totalmente resolvido — teste digitando em um lançamento, trocando de aba sem salvar, e confirme que o campo aparece vazio ao voltar.
+
+MetaDriver vBeta1.13
+
+Solicitado:
+- Botão de voz estava muito grande; deixar redondo e do mesmo tamanho que se espera de um botão circular pequeno.
+- Manter a localização atual (dentro do card Lançamentos, centralizado, acima das abas) — só ajustar o formato.
+
+Feito:
+- Botão reduzido de 56px para 40px, com largura e altura sempre iguais (não pode mais ficar oval).
+- Posição inalterada.
+- Mudança restrita a CSS — nenhuma lógica do reconhecimento de voz ou de preenchimento foi tocada.
+
+Status atual:
+- Pronto para teste visual.
+
 MetaDriver vBeta1.12
 
 Solicitado:
