@@ -1,3 +1,18 @@
+MetaDriver vBeta1.7
+
+Solicitado:
+- Corrigir vazamento de dados entre usuários ao trocar o login no mesmo celular.
+
+Feito:
+- Identificada a causa: os dados eram carregados de uma chave local global (não isolada por usuário) antes do escopo do usuário ser ativado, porque essa ativação só acontecia depois, de forma assíncrona, no fluxo de login com a nuvem.
+- O escopo do usuário agora é ativado de forma síncrona, antes de qualquer leitura de dados, sempre que já existe um usuário em cache no aparelho.
+- A chave global é apagada depois de migrada para a chave isolada do usuário, para não ser herdada por outra conta no futuro.
+- Chaves de dados antigas (de antes do sistema multiusuário) deixaram de ser usadas como fallback quando já há um usuário autenticado no aparelho.
+- Nenhuma outra tela, cálculo ou fluxo foi alterado.
+
+Status atual:
+- Pronto para uso. Recomenda-se testar login com duas contas diferentes no mesmo aparelho para validar.
+
 MetaDriver vBeta1.6
 
 Atualização vBeta1.6:

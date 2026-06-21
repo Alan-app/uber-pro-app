@@ -1,3 +1,11 @@
+vBeta1.7 - Correção crítica: vazamento de dados entre usuários no mesmo aparelho
+- Corrigido vazamento de dados ao trocar o login no mesmo celular: dados de um usuário podiam ser herdados por outro.
+- Causa: os dados eram lidos de uma chave local global (não isolada por usuário) antes do escopo do usuário ser ativado, pois essa ativação só ocorria depois, de forma assíncrona.
+- Agora, se já existe um usuário em cache no aparelho, o escopo por usuário é ativado de forma síncrona antes de qualquer leitura de dados.
+- A chave global é removida após a migração para a chave isolada do usuário, evitando que volte a ser herdada por outra conta.
+- Chaves de dados antigas (pré multi-usuário) não são mais usadas como fallback quando já há um usuário autenticado no aparelho.
+- Base oficial: vBeta1.6.
+
 vBeta1.6 - TAB funciona como OK/Concluir nos campos de metas
 - Nos campos Descrição e Valor de cada meta, a tecla TAB agora finaliza a edição do campo atual (como um botão OK/Concluir).
 - A alteração é salva normalmente, o campo perde o foco e o teclado é fechado quando aplicável.
