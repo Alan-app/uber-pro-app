@@ -43,7 +43,7 @@ try{
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver vBeta1.5</title>
+<title>MetaDriver vBeta1.6</title>
 <style id="md-hydration-lock">
 body.preload > *:not(#mdBootOverlay){visibility:hidden!important;}
 #mdBootOverlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#0f172a;color:#fff;z-index:2147483647;font-family:Inter,system-ui,sans-serif;font-weight:800;letter-spacing:.2px;}
@@ -3831,7 +3831,7 @@ body[data-tema$="claro"] .historico-report-line{border-bottom-color:rgba(0,0,0,.
   <div class="menu-item"><button class="secondary" onclick="abrirSaldoAtualButtonMenu(); closeMenu();">Botão de saldo atual</button></div>
   <div class="menu-item"><button class="secondary" onclick="abrirTemas(); closeMenu();">Temas</button></div>
   <div class="menu-item menu-user-row"><span class="menu-user-name" id="menuUserName">Usuário</span><button class="danger" onclick="forceLogout(); return false;">Sair</button></div>
-  <div class="menu-note" style="text-align:center;">vBeta1.5</div>
+  <div class="menu-note" style="text-align:center;">vBeta1.6</div>
 </div>
 
 
@@ -5170,7 +5170,7 @@ function mdBuildDiagnosticsObject(){
     const durableObj = mdSafeJsonParse(durableRaw);
     const diag = {
       generated_at: mdNowIso(),
-      app_version: 'MetaDriver vBeta1.5',
+      app_version: 'MetaDriver vBeta1.6',
       cloud_table: CLOUD_TABLE,
       device_id: mdEnsureDeviceId(),
       visibility_state: document.visibilityState,
@@ -6283,6 +6283,27 @@ function updateMetaDetalhadaValorFromInput(inputId){
   return true;
 }
 
+// vBeta1.6 - TAB funciona como OK/Concluir nos campos de metas (Descrição e Valor)
+// Encerra a edição do campo atual sem navegar para outro campo, meta ou tela.
+window.addEventListener("keydown", function(e){
+  if(e.key !== "Tab") return;
+  const t = e.target;
+  if(!t || !t.id) return;
+  const isMetaDesc = t.id.indexOf("metaGoalDesc_") === 0;
+  const isMetaValor = t.id.indexOf("metaGoalValor_") === 0;
+  if(!isMetaDesc && !isMetaValor) return;
+  e.preventDefault();
+  e.stopPropagation();
+  if(isMetaDesc){
+    updateMetaDetalhadaDescricao(Number(t.id.replace("metaGoalDesc_", "")), t.value);
+  }else if(isMetaValor){
+    updateMetaDetalhadaValorNative(Number(t.id.replace("metaGoalValor_", "")), t.value);
+    salvar();
+    atualizar();
+  }
+  try{ t.blur(); }catch(err){}
+}, true);
+
 function salvarMeta(){
   calcularTotalMetasDetalhadas();
   dados.dataInicialMeta = document.getElementById("dataInicialMeta")?.value || "";
@@ -6713,7 +6734,7 @@ function mdCommitLancamentoMutation(reason){
   try{ atualizar(); }catch(e){}
   try{ if(typeof refreshQuickBalanceFabMiniDisplay === "function") refreshQuickBalanceFabMiniDisplay(); }catch(e){}
   try{ if(typeof updateQuickBalanceFabUI === "function") updateQuickBalanceFabUI(); }catch(e){}
-  try{ if(typeof toast === "function" && reason) console.info("MetaDriver vBeta1.5 mutation:", reason); }catch(e){}
+  try{ if(typeof toast === "function" && reason) console.info("MetaDriver vBeta1.6 mutation:", reason); }catch(e){}
 }
 
 
@@ -8497,7 +8518,7 @@ function exportarRelatorioPDF(){
       <script>
         setTimeout(()=>window.print(), 250);
       <\/script>
-    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver vBeta1.5 · app</div>
+    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver vBeta1.6 · app</div>
 
 
 <script>

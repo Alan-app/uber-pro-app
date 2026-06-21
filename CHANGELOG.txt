@@ -1,3 +1,10 @@
+vBeta1.6 - TAB funciona como OK/Concluir nos campos de metas
+- Nos campos Descrição e Valor de cada meta, a tecla TAB agora finaliza a edição do campo atual (como um botão OK/Concluir).
+- A alteração é salva normalmente, o campo perde o foco e o teclado é fechado quando aplicável.
+- TAB não avança mais para o próximo campo, não abre outro campo e não entra em outra meta.
+- Nenhuma outra tela ou fluxo foi alterado (Sessões, Histórico Detalhado, Dashboard, Relatórios, Manutenções, Retiradas, Sincronização, Login, Gerenciar Conta e navegação geral permanecem como estavam).
+- Base oficial: vBeta1.5.
+
 vBeta1.5 - Histórico Detalhado: dia selecionado destacado
 - Corrigido destaque visual do botão do dia selecionado no Histórico Detalhado.
 - Apenas o dia com relatório aberto recebe azul destacado.

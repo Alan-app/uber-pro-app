@@ -1,3 +1,12 @@
+MetaDriver vBeta1.6
+
+Atualização vBeta1.6:
+- Corrigido o comportamento da tecla TAB durante a edição das metas (Descrição e Valor).
+- TAB agora funciona como um botão "OK"/"Concluir": finaliza a edição do campo atual, salva a alteração, remove o foco e fecha o teclado quando aplicável.
+- TAB não seleciona outro campo, não abre o próximo campo e não entra em outra meta.
+- Nenhuma outra tela foi alterada (Sessões, Histórico Detalhado, Dashboard, Relatórios, Manutenções, Retiradas, Sincronização, Login, Gerenciar Conta, navegação geral).
+- Base oficial utilizada: vBeta1.5 (versão estável atual, sem versões intermediárias).
+
 MetaDriver vBeta1.5
 
 Atualização vBeta1.5:
