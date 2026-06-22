@@ -1,3 +1,15 @@
+vBeta1.16 - Data Inicial da meta: obrigatória e congelada (não muda mais todo dia)
+- Corrigido: o app usava a data atual como valor temporário sempre que a Data Inicial da meta estava vazia, e como esse cálculo era refeito a cada atualização da tela, na prática a data "mudava" todo dia.
+- Nova regra: a Data Inicial é obrigatória. Se estiver vazia no momento de salvar a meta, é preenchida UMA ÚNICA VEZ com a data atual (e o campo na tela também é atualizado para mostrar isso) — depois disso, o valor fica congelado e não é mais recalculado.
+- Corrigido também um caminho onde registrar um "dia não trabalhado" podia sobrescrever a Data Inicial já salva com um valor vazio (se o campo da tela estivesse vazio nesse momento); agora isso nunca apaga o valor já salvo.
+- Nenhuma outra tela, cálculo ou fluxo foi alterado.
+- Base oficial: vBeta1.15 (recebida do usuário com o ajuste do botão de voz já aplicado).
+
+vBeta1.15 - Botão de voz: redondo de verdade (64px)
+- Consolidado e organizado o CSS do botão de voz: 64px, perfeitamente redondo, sem risco de achatamento mesmo com outras regras globais de botão do app.
+- Posição mantida: dentro do card Lançamentos, centralizado, acima das abas.
+- Causa raiz do achatamento anterior: a regra global de botões do app define padding e largura por padrão; o botão de voz precisa de regras explícitas (com prioridade reforçada) para não herdar esse padding/largura.
+
 vBeta1.14 - Captação de voz (dica + leve melhoria) e limpeza de Lançamentos não salvos
 - Ao tocar no microfone, o aviso de "ouvindo" agora inclui uma dica: se o celular estiver no suporte do carro, falar um pouco mais perto da tela ajuda a captação (a animação de cor/pulso já existente foi mantida sem alteração).
 - O reconhecimento de voz passou a considerar até 3 hipóteses de transcrição do motor de voz do sistema, escolhendo a de maior confiança — ajuda um pouco em ambientes ruidosos, mas não substitui um microfone físico melhor (limite da Web Speech API do navegador, fora do controle do app).

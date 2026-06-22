@@ -1,3 +1,21 @@
+MetaDriver vBeta1.16
+
+Base recebida:
+- Arquivo enviado pelo usuário (vBeta1.15) já com o botão de voz redondo e correto (64px), confirmado e aprovado no celular. Esse ajuste foi adotado como base oficial e organizado no código (sem mudar o resultado visual).
+
+Solicitado:
+- A Data Inicial da meta estava "atualizando todo dia" — quando o campo estava vazio, o app usava a data atual como valor temporário a cada vez que recalculava a tela, dando a impressão de que a data mudava sozinha.
+- Nova regra definida pelo usuário: a Data Inicial é obrigatória. Se não for preenchida, usa a data atual — mas só uma vez, no momento de salvar. Depois disso, permanece congelada, não muda mais.
+
+Feito:
+- Em "Salvar Meta": se a Data Inicial estiver vazia, é preenchida com a data atual (uma única vez) e o campo na tela também é atualizado. O valor salvo nunca mais é recalculado automaticamente.
+- Mesma regra aplicada ao teclado numérico de meta (fluxo alternativo de salvamento), para consistência.
+- Corrigido um caminho onde registrar um "dia não trabalhado" podia, em certas condições, sobrescrever a Data Inicial já salva com um valor vazio; isso foi bloqueado.
+- Os pontos que apenas exibem a Data Inicial na tela continuam com um valor de segurança (hoje) só para o caso de a meta nunca ter sido salva ainda — isso é necessário para não gerar erro de data inválida, mas não afeta o comportamento já que, uma vez salva, a data real é sempre usada.
+
+Status atual:
+- Pronto para teste. Configure uma meta sem preencher a Data Inicial, salve, e confirme que o valor preenchido automaticamente permanece o mesmo nos dias seguintes (não muda mais sozinho).
+
 MetaDriver vBeta1.14
 
 Solicitado:
