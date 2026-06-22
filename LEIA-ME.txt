@@ -1,3 +1,19 @@
+MetaDriver vBeta1.22
+
+Solicitado:
+- Em Lançamentos, os 4 botões de aba (Ganhos/Gastos/Retiradas/Combustível) têm a mesma largura entre si; como "Combustível" é a palavra mais longa, o texto fica comprimido e visualmente ruim. Pedido para reajustar o tamanho, aumentando a largura quando necessário para resolver essa compressão.
+
+Feito:
+- Cada botão agora ocupa uma largura proporcional ao tamanho do próprio texto: Combustível recebe mais espaço, Ganhos e Gastos (textos mais curtos) recebem um pouco menos. Retiradas fica no meio.
+- O conjunto dos 4 botões continua centralizado, com o mesmo espaçamento entre eles — só a largura individual de cada botão mudou.
+- Testado em três tamanhos de tela (320px, 360px e 390px de largura) para garantir que o texto "Combustível" aparece completo, sem cortes, mesmo na tela mais estreita testada.
+
+Observação técnica:
+- A correção foi aplicada num bloco de estilo específico do app (identificado como aquele que realmente está ativo durante o uso, apesar do nome técnico sugerir que seria só para a tela de carregamento). Isso garante que o ajuste realmente tenha efeito no app em uso, e não apenas durante os primeiros instantes de carregamento da página.
+
+Status atual:
+- Pronto para teste visual no celular.
+
 MetaDriver vBeta1.21
 
 Solicitado:

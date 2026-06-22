@@ -1,3 +1,10 @@
+vBeta1.22 - Botões de Lançamentos: corrige compressão do botão "Combustível"
+- Corrigido: os 4 botões de aba em Lançamentos (Ganhos/Gastos/Retiradas/Combustível) tinham largura igual entre si; como "Combustível" é a palavra mais longa, o texto ficava comprimido e, em telas mais estreitas, podia até ser cortado.
+- Cada botão agora recebe uma largura proporcional ao tamanho do próprio texto (Combustível ganha mais espaço, Ganhos/Gastos ganham um pouco menos), mantendo os 4 botões centralizados em conjunto e com o mesmo espaçamento entre eles.
+- Testado em três larguras de tela (320px, 360px, 390px) confirmando que o texto de todos os botões, incluindo "Combustível", aparece completo sem cortes.
+- Nenhuma outra tela ou fluxo foi alterada.
+- Base oficial: vBeta1.21.
+
 vBeta1.21 - CORREÇÃO CRÍTICA: token de sessão nunca era renovado, causando perda de horas de dados ao limpar o navegador
 - Corrigida a causa raiz real da perda de dados relatada (perda de HORAS de dados, não segundos): o app chamava uma função de renovação de sessão (mdEnsureActiveSession) que nunca havia sido implementada — ela simplesmente não existia no código.
 - Sem essa renovação, o token de acesso à nuvem (Supabase) expirava após aproximadamente 1 hora de uso (padrão do serviço), e a partir desse momento TODA tentativa de salvar na nuvem falhava silenciosamente (erro de autenticação), sem nenhum aviso. Os dados continuavam sendo salvos no aparelho, mas nunca chegavam à nuvem.
