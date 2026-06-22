@@ -1,3 +1,20 @@
+MetaDriver vBeta1.19
+
+Solicitado (painel da conta / Gerenciar Conta):
+- Remover o botão "Sair" do painel (já existe no menu do app).
+- Remover o texto "Status técnico: OK".
+- Remover o botão "WhatsApp" (já era redundante com "Assinar / Renovar").
+- Renomear "Assinar / Renovar" para algo que deixe claro que leva ao WhatsApp.
+
+Feito:
+- Removidos o botão "Sair", a linha de status técnico e o botão "WhatsApp" do arquivo painel.html.
+- Botão "Assinar / Renovar" renomeado para "Assinatura / Renovação — fale conosco no WhatsApp".
+- Código JavaScript relacionado a esses elementos (funções e listeners que só existiam para eles) também foi removido, para não deixar código morto.
+- Nenhuma outra tela, cálculo ou fluxo foi alterado.
+
+Status atual:
+- Pronto para teste.
+
 MetaDriver vBeta1.18
 
 Solicitado:

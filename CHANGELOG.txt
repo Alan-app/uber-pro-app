@@ -1,3 +1,11 @@
+vBeta1.19 - Painel da conta (Gerenciar Conta): limpeza de botões redundantes
+- Removido o botão "Sair" do painel da conta — já existe um botão Sair no menu do app, este era redundante.
+- Removida a linha "Status técnico: OK".
+- Removido o botão "WhatsApp" — já era redundante com "Assinar / Renovar", que abre o mesmo número de WhatsApp.
+- Botão "Assinar / Renovar" renomeado para "Assinatura / Renovação — fale conosco no WhatsApp", deixando claro para onde o botão leva.
+- Nenhuma outra tela ou fluxo foi alterada.
+- Base oficial: vBeta1.18.
+
 vBeta1.18 - Voz: corrige captura intermitente do microfone e reconhecimento de "abasteci"
 - Corrigido microfone intermitente: cada toque criava uma instância NOVA de reconhecimento de voz, e no Chrome/Android isso podia deixar o microfone temporariamente bloqueado para a tentativa seguinte (padrão "grava, não grava, grava"). Agora a mesma instância é reaproveitada, com uma pequena pausa de segurança caso o navegador ainda considere o microfone em uso.
 - Corrigido reconhecimento de "abasteci" (e variações: abasteceu, abastecendo) para o tipo Combustível — antes funcionava apenas com a palavra "combustível" explícita. A detecção agora usa o radical da palavra em vez de exigir a forma exata, cobrindo naturalmente conjugações verbais.
