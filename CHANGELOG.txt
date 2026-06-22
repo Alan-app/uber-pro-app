@@ -1,3 +1,11 @@
+vBeta1.18 - Voz: corrige captura intermitente do microfone e reconhecimento de "abasteci"
+- Corrigido microfone intermitente: cada toque criava uma instância NOVA de reconhecimento de voz, e no Chrome/Android isso podia deixar o microfone temporariamente bloqueado para a tentativa seguinte (padrão "grava, não grava, grava"). Agora a mesma instância é reaproveitada, com uma pequena pausa de segurança caso o navegador ainda considere o microfone em uso.
+- Corrigido reconhecimento de "abasteci" (e variações: abasteceu, abastecendo) para o tipo Combustível — antes funcionava apenas com a palavra "combustível" explícita. A detecção agora usa o radical da palavra em vez de exigir a forma exata, cobrindo naturalmente conjugações verbais.
+- A mesma técnica de radical foi aplicada às demais categorias (Gasto, Ganho, Retirada), tornando o reconhecimento mais resistente a variações de transcrição.
+- Testado contra todos os casos de uso anteriores para confirmar que nada deixou de funcionar.
+- Nenhuma outra tela ou fluxo foi alterada.
+- Base oficial: vBeta1.17.
+
 vBeta1.17 - Temas Uber e 99: paletas corretas, com contraste validado
 - Pesquisadas as cores oficiais de marca: Uber (preto #000000 / branco #FFFFFF, azul de ação #276EF1) e 99 (amarelo #FFDD00 / preto #121212, conforme 99app.com/imprensa).
 - Refeitas as 4 paletas de tema (Uber escuro/claro, 99 escuro/claro) com essas cores, validando cada combinação de texto/fundo por contraste real (padrão WCAG), não apenas visualmente.

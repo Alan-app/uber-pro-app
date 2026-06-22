@@ -1,3 +1,27 @@
+MetaDriver vBeta1.18
+
+Solicitado:
+1) Microfone de Lançamentos por voz intermitente: grava numa tentativa, na seguinte não grava, depois grava de novo.
+2) Em Combustível, a palavra "abasteci" sozinha não era reconhecida — só funcionava dizendo "combustível [valor]".
+
+Causa do item 1:
+- Cada toque no microfone criava uma instância totalmente NOVA de reconhecimento de voz. No Chrome/Android, isso pode deixar uma instância anterior "presa" segurando o microfone por um instante, fazendo a tentativa seguinte falhar silenciosamente.
+
+Feito (item 1):
+- A mesma instância de reconhecimento agora é reaproveitada entre os toques, em vez de criar uma nova a cada vez.
+- Se o navegador ainda recusar iniciar (mesma causa), o app aguarda uma fração de segundo e tenta novamente automaticamente.
+
+Causa do item 2:
+- A lista de palavras reconhecidas para Combustível tinha apenas as formas exatas "abasteci" e "abasteceu". Qualquer variação (abastecendo, abastecer, ou uma transcrição de voz levemente diferente) não era reconhecida.
+
+Feito (item 2):
+- Trocada a forma de reconhecimento de "palavra exata" para "radical da palavra" (ex.: tudo que começa com "abastec" conta como Combustível). Isso cobre naturalmente todas as conjugações.
+- A mesma melhoria foi aplicada também para Gasto, Ganho e Retirada, tornando o reconhecimento mais flexível em geral.
+- Testado com mais de 20 frases diferentes (incluindo todos os casos já validados nas versões anteriores) para garantir que nada parou de funcionar.
+
+Status atual:
+- Pronto para novo teste no celular, especialmente repetindo o microfone várias vezes em sequência e testando "abasteci" isoladamente.
+
 MetaDriver vBeta1.17
 
 Solicitado:

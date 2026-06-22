@@ -43,7 +43,7 @@ try{
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver vBeta1.17</title>
+<title>MetaDriver vBeta1.18</title>
 <style id="md-hydration-lock">
 body.preload > *:not(#mdBootOverlay){visibility:hidden!important;}
 #mdBootOverlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#0f172a;color:#fff;z-index:2147483647;font-family:Inter,system-ui,sans-serif;font-weight:800;letter-spacing:.2px;}
@@ -3797,7 +3797,7 @@ body[data-tema$="claro"] .historico-report-line{border-bottom-color:rgba(0,0,0,.
   <div class="menu-item"><button class="secondary" onclick="abrirSaldoAtualButtonMenu(); closeMenu();">Botão de saldo atual</button></div>
   <div class="menu-item"><button class="secondary" onclick="abrirTemas(); closeMenu();">Temas</button></div>
   <div class="menu-item menu-user-row"><span class="menu-user-name" id="menuUserName">Usuário</span><button class="danger" onclick="forceLogout(); return false;">Sair</button></div>
-  <div class="menu-note" style="text-align:center;">vBeta1.17</div>
+  <div class="menu-note" style="text-align:center;">vBeta1.18</div>
 </div>
 
 
@@ -5167,7 +5167,7 @@ function mdBuildDiagnosticsObject(){
     const durableObj = mdSafeJsonParse(durableRaw);
     const diag = {
       generated_at: mdNowIso(),
-      app_version: 'MetaDriver vBeta1.17',
+      app_version: 'MetaDriver vBeta1.18',
       cloud_table: CLOUD_TABLE,
       device_id: mdEnsureDeviceId(),
       visibility_state: document.visibilityState,
@@ -6401,54 +6401,88 @@ function sanitizeLancamentoValorInput(input){
 let __iaVoiceRecognition = null;
 let __iaVoiceListening = false;
 
+function iaVoiceGetRecognitionInstance(){
+  if(__iaVoiceRecognition) return __iaVoiceRecognition;
+  const SpeechRecognitionImpl = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SpeechRecognitionImpl) return null;
+
+  const rec = new SpeechRecognitionImpl();
+  rec.lang = "pt-BR";
+  rec.interimResults = false;
+  rec.maxAlternatives = 3;
+
+  rec.onstart = function(){
+    __iaVoiceListening = true;
+    const fab = document.getElementById("iaVoiceFab");
+    if(fab) fab.classList.add("listening");
+    toast("🎙️ Ouvindo... Se o celular estiver no suporte do carro, fale um pouco mais perto da tela para melhorar a captação.");
+  };
+  rec.onerror = function(){
+    __iaVoiceListening = false;
+    const fab = document.getElementById("iaVoiceFab");
+    if(fab) fab.classList.remove("listening");
+    toast("Não entendi. Tente novamente.");
+  };
+  rec.onend = function(){
+    __iaVoiceListening = false;
+    const fab = document.getElementById("iaVoiceFab");
+    if(fab) fab.classList.remove("listening");
+  };
+  rec.onresult = function(event){
+    try{
+      // vBeta1.14 - com maxAlternatives > 1, escolhe a transcrição de maior
+      // confiança entre as hipóteses retornadas pelo motor de voz do sistema,
+      // o que ajuda um pouco em ambientes ruidosos (ex.: carro).
+      const alternativas = event.results[0];
+      let melhor = alternativas[0];
+      for(let i = 1; i < alternativas.length; i++){
+        if((alternativas[i].confidence || 0) > (melhor.confidence || 0)) melhor = alternativas[i];
+      }
+      const texto = (melhor && melhor.transcript) || "";
+      iaVoiceInterpretarMock(texto);
+    }catch(e){}
+  };
+
+  __iaVoiceRecognition = rec;
+  return rec;
+}
+
+// vBeta1.18 - corrige captura intermitente: antes, cada toque criava uma NOVA
+// instância de SpeechRecognition. No Chrome/Android, uma instância anterior
+// que ainda não foi totalmente liberada pelo sistema pode bloquear o
+// microfone para a próxima tentativa, causando o padrão "grava, não grava,
+// grava". Agora a mesma instância é reaproveitada, e há uma pequena pausa de
+// segurança antes de reiniciar a escuta.
+let __iaVoiceRestartTimer = null;
 function iaVoiceToggle(){
   try{
-    const SpeechRecognitionImpl = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if(!SpeechRecognitionImpl){
+    const rec = iaVoiceGetRecognitionInstance();
+    if(!rec){
       toast("Reconhecimento de voz não disponível neste navegador. Tente no Chrome para Android.");
       return;
     }
     if(__iaVoiceListening){
-      try{ __iaVoiceRecognition && __iaVoiceRecognition.stop(); }catch(e){}
+      try{ rec.stop(); }catch(e){}
       return;
     }
-    __iaVoiceRecognition = new SpeechRecognitionImpl();
-    __iaVoiceRecognition.lang = "pt-BR";
-    __iaVoiceRecognition.interimResults = false;
-    __iaVoiceRecognition.maxAlternatives = 3;
-
-    const fab = document.getElementById("iaVoiceFab");
-
-    __iaVoiceRecognition.onstart = function(){
-      __iaVoiceListening = true;
-      if(fab) fab.classList.add("listening");
-      toast("🎙️ Ouvindo... Se o celular estiver no suporte do carro, fale um pouco mais perto da tela para melhorar a captação.");
-    };
-    __iaVoiceRecognition.onerror = function(){
-      __iaVoiceListening = false;
-      if(fab) fab.classList.remove("listening");
-      toast("Não entendi. Tente novamente.");
-    };
-    __iaVoiceRecognition.onend = function(){
-      __iaVoiceListening = false;
-      if(fab) fab.classList.remove("listening");
-    };
-    __iaVoiceRecognition.onresult = function(event){
-      try{
-        // vBeta1.14 - com maxAlternatives > 1, escolhe a transcrição de maior
-        // confiança entre as hipóteses retornadas pelo motor de voz do sistema,
-        // o que ajuda um pouco em ambientes ruidosos (ex.: carro).
-        const alternativas = event.results[0];
-        let melhor = alternativas[0];
-        for(let i = 1; i < alternativas.length; i++){
-          if((alternativas[i].confidence || 0) > (melhor.confidence || 0)) melhor = alternativas[i];
+    if(__iaVoiceRestartTimer){
+      // Ainda dentro da janela de segurança pós-parada: ignora o toque para
+      // não tentar iniciar antes do microfone ser liberado pelo sistema.
+      return;
+    }
+    try{
+      rec.start();
+    }catch(e){
+      // "InvalidStateError" pode ocorrer se o navegador ainda considerar o
+      // reconhecimento anterior como ativo. Aguarda um instante e tenta de novo.
+      clearTimeout(__iaVoiceRestartTimer);
+      __iaVoiceRestartTimer = setTimeout(function(){
+        __iaVoiceRestartTimer = null;
+        try{ rec.start(); }catch(e2){
+          toast("Não foi possível iniciar o microfone. Toque novamente.");
         }
-        const texto = (melhor && melhor.transcript) || "";
-        iaVoiceInterpretarMock(texto);
-      }catch(e){}
-    };
-
-    __iaVoiceRecognition.start();
+      }, 350);
+    }
   }catch(e){
     toast("Não foi possível iniciar o microfone.");
   }
@@ -6467,10 +6501,13 @@ const IA_VOICE_NUMEROS_EXTENSO = {
   "seiscentos":600,"setecentos":700,"oitocentos":800,"novecentos":900,"mil":1000
 };
 const IA_VOICE_ARTIGOS_QUANTIDADE = new Set(["um","uma","dois","duas"]);
-const IA_VOICE_CHAVES_COMBUSTIVEL = new Set(["combustível","combustivel","gasolina","etanol","álcool","alcool","abasteci","abasteceu","abastecimento","tanque"]);
-const IA_VOICE_CHAVES_RETIRADA = new Set(["retirei","retirada","saquei","saiu","sai","saí","tirei","levantei"]);
-const IA_VOICE_CHAVES_GANHO = new Set(["ganhei","ganho","recebi","recebimento","corrida","corridas","rodei","faturei","fatura","faturamento"]);
-const IA_VOICE_CHAVES_GASTO_ACAO = new Set(["gastei","gastando","gasto","paguei","pagamento","comprei","custou","custo"]);
+// vBeta1.18 - troca de palavra exata para RADICAL (prefixo): cobre variações
+// de conjugação verbal (abasteci/abasteceu/abastecer/abastecendo) e reduz o
+// impacto de transcrições parciais/cortadas no início da fala.
+const IA_VOICE_RADICAIS_COMBUSTIVEL = ["combust","gasolin","etanol","alcool","álcool","abastec","tanque"];
+const IA_VOICE_RADICAIS_RETIRADA = ["retir","saqu","levant","tirei"];
+const IA_VOICE_RADICAIS_GANHO = ["ganh","receb","corrid","rod","fatur"];
+const IA_VOICE_RADICAIS_GASTO_ACAO = ["gast","pagu","pag","compr","custo","custou"];
 const IA_VOICE_CHAVES_GASTO_ITEM = new Set(["estacionamento","lavagem","pedágio","pedagio","manutenção","manutencao","seguro","imposto","ipva","multa","pneu","óleo","oleo","lanche","almoço","almoco","comida","refeição","refeicao","café","cafe","água","agua","mercado","farmácia","farmacia","borracharia","guincho"]);
 const IA_VOICE_DESCRICAO_STOP_WORDS = new Set([
   "reais","real","conto","contos","de","do","da","dos","das","no","na","nos","nas","em",
@@ -6482,6 +6519,12 @@ const IA_VOICE_DESCRICAO_STOP_WORDS = new Set([
 
 function iaVoiceTokenizar(texto){
   return texto.split(/\s+/).map(function(w){ return w.replace(/[^\wà-úÀ-Ú]/g, ""); }).filter(Boolean);
+}
+
+function iaVoiceTemRadical(palavrasLower, radicais){
+  return palavrasLower.some(function(p){
+    return radicais.some(function(r){ return p.startsWith(r); });
+  });
 }
 
 function iaVoiceExtensoParaNumero(palavras){
@@ -6518,10 +6561,10 @@ function iaVoiceExtensoParaNumero(palavras){
 }
 
 function iaVoiceDetectarTipo(palavrasLower){
-  for(const p of palavrasLower) if(IA_VOICE_CHAVES_COMBUSTIVEL.has(p)) return "combustivel";
-  for(const p of palavrasLower) if(IA_VOICE_CHAVES_RETIRADA.has(p)) return "retiradas";
-  for(const p of palavrasLower) if(IA_VOICE_CHAVES_GANHO.has(p)) return "ganhos";
-  for(const p of palavrasLower) if(IA_VOICE_CHAVES_GASTO_ACAO.has(p)) return "gastos";
+  if(iaVoiceTemRadical(palavrasLower, IA_VOICE_RADICAIS_COMBUSTIVEL)) return "combustivel";
+  if(iaVoiceTemRadical(palavrasLower, IA_VOICE_RADICAIS_RETIRADA)) return "retiradas";
+  if(iaVoiceTemRadical(palavrasLower, IA_VOICE_RADICAIS_GANHO)) return "ganhos";
+  if(iaVoiceTemRadical(palavrasLower, IA_VOICE_RADICAIS_GASTO_ACAO)) return "gastos";
   for(const p of palavrasLower) if(IA_VOICE_CHAVES_GASTO_ITEM.has(p)) return "gastos";
   return null;
 }
@@ -7006,7 +7049,7 @@ function mdCommitLancamentoMutation(reason){
   try{ atualizar(); }catch(e){}
   try{ if(typeof refreshQuickBalanceFabMiniDisplay === "function") refreshQuickBalanceFabMiniDisplay(); }catch(e){}
   try{ if(typeof updateQuickBalanceFabUI === "function") updateQuickBalanceFabUI(); }catch(e){}
-  try{ if(typeof toast === "function" && reason) console.info("MetaDriver vBeta1.17 mutation:", reason); }catch(e){}
+  try{ if(typeof toast === "function" && reason) console.info("MetaDriver vBeta1.18 mutation:", reason); }catch(e){}
 }
 
 
@@ -8790,7 +8833,7 @@ function exportarRelatorioPDF(){
       <script>
         setTimeout(()=>window.print(), 250);
       <\/script>
-    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver vBeta1.17 · app</div>
+    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver vBeta1.18 · app</div>
 
 
 <script>
