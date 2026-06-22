@@ -43,7 +43,7 @@ try{
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver vBeta1.16</title>
+<title>MetaDriver vBeta1.17</title>
 <style id="md-hydration-lock">
 body.preload > *:not(#mdBootOverlay){visibility:hidden!important;}
 #mdBootOverlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#0f172a;color:#fff;z-index:2147483647;font-family:Inter,system-ui,sans-serif;font-weight:800;letter-spacing:.2px;}
@@ -529,11 +529,11 @@ h1{text-align:center;margin:8px 0 14px;letter-spacing:0.2px;}
 /* Top bar */
 .topbar{
   position:sticky; top:0; z-index:50;
-  background:linear-gradient(to bottom, rgba(15,23,42,0.92), rgba(15,23,42,0.78));
+  background:var(--topbar-bg);
   backdrop-filter: blur(8px);
   padding:14px 12px;
   margin:-15px -15px 0;
-  border-bottom:1px solid rgba(255,255,255,0.08);
+  border-bottom:1px solid var(--line);
 }
 .topbar-inner{
   display:flex;
@@ -599,8 +599,8 @@ h1{text-align:center;margin:8px 0 14px;letter-spacing:0.2px;}
 .menu-panel{
   position:fixed; top:58px; right:10px; z-index:100;
   width:min(250px, calc(100% - 20px));
-  background:rgba(18,28,44,0.98);
-  border:1px solid rgba(255,255,255,0.10);
+  background:var(--card);
+  border:1px solid var(--line);
   border-radius:14px;
   box-shadow:0 10px 30px rgba(0,0,0,0.45);
   overflow:hidden;
@@ -610,7 +610,7 @@ h1{text-align:center;margin:8px 0 14px;letter-spacing:0.2px;}
 .menu-header{
   padding:9px 14px;
   background:rgba(255,255,255,0.04);
-  border-bottom:1px solid rgba(255,255,255,0.07);
+  border-bottom:1px solid var(--line);
   font-weight:600;
   font-size:11px;
   letter-spacing:0.6px;
@@ -723,7 +723,7 @@ input,select,button{
   font-size:15px;
 }
 input,select{background:var(--input);color:var(--text);outline:none;}
-button{background:var(--accent);color:#0b1220;font-weight:bold;}
+button{background:var(--accent);color:var(--on-accent);font-weight:bold;}
 button.secondary{background:var(--accent2);}
 button:active{transform:scale(0.99);}
 .btn-historico-link{
@@ -745,8 +745,8 @@ button:active{transform:scale(0.99);}
 
 
 .list-item{
-  background:rgba(255,255,255,0.06);
-  border:1px solid rgba(255,255,255,0.08);
+  background:var(--tabbtn-bg);
+  border:1px solid var(--line);
   padding:10px;
   border-radius:12px;
   margin-top:8px;
@@ -1059,8 +1059,8 @@ input.negative-value, input.negative-value::placeholder{
 .tabs-bar{ display:flex; gap:10px; margin-top:6px; }
 .tab-btn{
   flex:1;
-  border:1px solid rgba(255,255,255,0.14);
-  background:rgba(255,255,255,0.06);
+  border:1px solid var(--tabbtn-border);
+  background:var(--tabbtn-bg);
   color:inherit;
   padding:12px 10px;
   border-radius:14px;
@@ -1272,7 +1272,7 @@ input.negative-value, input.negative-value::placeholder{
   width:100vw;
   height:100dvh;
   z-index:1201;
-  background:rgba(15,23,42,1);
+  background:var(--bg);
   border:none;
   border-radius:0;
   box-shadow:none;
@@ -1305,9 +1305,9 @@ input.negative-value, input.negative-value::placeholder{
   justify-content:center;
   height:76px;
   border-radius:22px;
-  border:2px solid rgba(255,255,255,.38);
-  background:linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.04));
-  box-shadow:0 0 0 1px rgba(255,255,255,.12), inset 0 0 0 1px rgba(255,255,255,.06);
+  border:2px solid var(--line);
+  background:var(--tabbtn-bg);
+  box-shadow:0 0 0 1px var(--line), inset 0 0 0 1px var(--line);
   margin-bottom:10px;
   overflow:hidden;
 }
@@ -2077,7 +2077,7 @@ input.negative-value, input.negative-value::placeholder{
   border-radius:14px;
   border:none;
   background:var(--accent2);
-  color:#0b1220;
+  color:var(--on-accent);
   font-weight:900;
   font-size:13px;
   white-space:nowrap;
@@ -2205,7 +2205,7 @@ input.negative-value, input.negative-value::placeholder{
 .export-backup-warning.show{ display:block; }
 .export-backup-actions{ display:flex; gap:10px; margin-top:14px; flex-direction:column; }
 .export-backup-actions button{ height:44px; border-radius:12px; font-size:14px; font-weight:700; border:none; cursor:pointer; font-family:inherit; }
-.export-backup-actions .btn-pasta{ background:var(--accent); color:#0b1220; }
+.export-backup-actions .btn-pasta{ background:var(--accent); color:var(--on-accent); }
 .export-backup-actions .btn-downloads{ background:rgba(255,255,255,0.10); color:var(--text); border:1px solid rgba(255,255,255,0.12) !important; }
 .export-backup-actions .btn-cancelar{ background:transparent !important; color:var(--text); opacity:0.55; font-weight:500 !important; font-size:13px !important; height:32px !important; }
 .export-backup-actions .btn-cancelar:hover{ opacity:1; }
@@ -2276,8 +2276,8 @@ input.negative-value, input.negative-value::placeholder{
   flex:1;
   height:44px;
   border-radius:14px;
-  border:1px solid rgba(255,255,255,0.10);
-  background:rgba(255,255,255,0.06);
+  border:1px solid var(--tabbtn-border);
+  background:var(--tabbtn-bg);
   color:var(--text);
   font-weight:900;
   font-size:14px;
@@ -2302,7 +2302,7 @@ input.negative-value, input.negative-value::placeholder{
 
 /* Inativo */
 .subtab-btn{
-  background:rgba(255,255,255,0.06);
+  background:var(--tabbtn-bg);
   color:var(--text);
 }
 
@@ -2697,6 +2697,10 @@ body[data-tema="meta-escuro"]{
   --line:rgba(255,255,255,0.10);
   --warn:#facc15;
   --danger:#fb7185;
+  --topbar-bg:linear-gradient(to bottom, rgba(15,23,42,0.92), rgba(15,23,42,0.78));
+  --tabbtn-bg:rgba(255,255,255,0.06);
+  --tabbtn-border:rgba(255,255,255,0.14);
+  --on-accent:#0b1220;
 }
 body[data-tema="meta-claro"]{
   --bg:#f5f7fb;
@@ -2709,56 +2713,80 @@ body[data-tema="meta-claro"]{
   --line:rgba(15,23,42,0.10);
   --warn:#ca8a04;
   --danger:#e11d48;
+  --topbar-bg:linear-gradient(to bottom, rgba(255,255,255,0.96), rgba(245,247,251,0.92));
+  --tabbtn-bg:rgba(15,23,42,0.06);
+  --tabbtn-border:rgba(15,23,42,0.14);
+  --on-accent:#ffffff;
 }
-/* v56 - preto: contraste Uber, preto absoluto + branco puro */
+/* vBeta1.17 - tema "Uber": preto e branco oficiais da marca (#000000 / #FFFFFF),
+   azul de ação #276EF1, com todas as combinações validadas por contraste WCAG AA.
+   Variáveis próprias (--topbar-bg, --tabbtn-bg) eliminam a necessidade de patches
+   independentes por cima do sistema de temas. */
 body[data-tema="preto-escuro"]{
   --bg:#000000;
-  --card:#0b0b0b;
-  --input:#000000;
-  --accent:#ffffff;
-  --accent2:#ffffff;
+  --card:#0d0d0d;
+  --input:#1a1a1a;
+  --accent:#276ef1;
+  --accent2:#3aa76d;
   --text:#ffffff;
-  --muted:#e5e7eb;
-  --line:rgba(255,255,255,0.22);
-  --warn:#ffffff;
-  --danger:#ff3b30;
+  --muted:#b3b3b3;
+  --line:rgba(255,255,255,0.16);
+  --warn:#ffcc00;
+  --danger:#ff4d4d;
+  --topbar-bg:#000000;
+  --tabbtn-bg:#1a1a1a;
+  --tabbtn-border:rgba(255,255,255,0.14);
+  --on-accent:#ffffff;
 }
 body[data-tema="preto-claro"]{
-  --bg:#ffffff;
+  --bg:#f7f7f7;
   --card:#ffffff;
   --input:#ffffff;
-  --accent:#000000;
-  --accent2:#000000;
+  --accent:#1d5bd6;
+  --accent2:#1f9d55;
   --text:#000000;
-  --muted:#303030;
-  --line:rgba(0,0,0,0.22);
-  --warn:#000000;
+  --muted:#5e5e5e;
+  --line:rgba(0,0,0,0.14);
+  --warn:#8a5d00;
   --danger:#c00000;
+  --topbar-bg:#ffffff;
+  --tabbtn-bg:#f0f0f0;
+  --tabbtn-border:rgba(0,0,0,0.12);
+  --on-accent:#ffffff;
 }
-/* v56 - amarelo: contraste 99, amarelo forte + preto absoluto */
+/* vBeta1.17 - tema "99": amarelo e preto oficiais da marca (#FFDD00 / #121212),
+   conforme identidade visual divulgada pela 99 (99app.com/imprensa). */
 body[data-tema="amarelo-escuro"]{
-  --bg:#000000;
-  --card:#0b0b0b;
-  --input:#000000;
-  --accent:#ffcc00;
-  --accent2:#ffcc00;
-  --text:#ffffff;
-  --muted:#f5f5f5;
-  --line:rgba(255,204,0,0.38);
-  --warn:#ffcc00;
-  --danger:#ff3b30;
+  --bg:#121212;
+  --card:#1c1c1c;
+  --input:#262626;
+  --accent:#ffdd00;
+  --accent2:#ffdd00;
+  --text:#f8f5ec;
+  --muted:#bdbdbd;
+  --line:rgba(255,221,0,0.22);
+  --warn:#ffdd00;
+  --danger:#ff5c5c;
+  --topbar-bg:#121212;
+  --tabbtn-bg:#262626;
+  --tabbtn-border:rgba(255,221,0,0.20);
+  --on-accent:#121212;
 }
 body[data-tema="amarelo-claro"]{
-  --bg:#ffcc00;
-  --card:#fff2a8;
+  --bg:#ffdd00;
+  --card:#fff3b0;
   --input:#ffffff;
-  --accent:#000000;
-  --accent2:#000000;
-  --text:#000000;
-  --muted:#1f1f1f;
-  --line:rgba(0,0,0,0.32);
-  --warn:#000000;
+  --accent:#121212;
+  --accent2:#121212;
+  --text:#121212;
+  --muted:#3a3a3a;
+  --line:rgba(18,18,18,0.18);
+  --warn:#8a5d00;
   --danger:#b00000;
+  --topbar-bg:#ffdd00;
+  --tabbtn-bg:#fff3b0;
+  --tabbtn-border:rgba(18,18,18,0.16);
+  --on-accent:#ffdd00;
 }
 /* v57 - color-scheme por modo */
 body[data-tema="meta-claro"],
@@ -2831,10 +2859,10 @@ body[data-tema="preto-escuro"] .card-header{
   background:rgba(255,255,255,0.05);
   border-bottom:1px solid rgba(255,255,255,0.07);
 }
-/* botões primários: branco com texto preto */
+/* botões primários: usam a cor de destaque (azul Uber) com texto correto */
 body[data-tema="preto-escuro"] button{
-  background:#ffffff;
-  color:#000000;
+  background:var(--accent);
+  color:var(--on-accent);
 }
 body[data-tema="preto-escuro"] button.secondary{
   background:rgba(255,255,255,0.12);
@@ -2893,8 +2921,8 @@ body[data-tema="preto-claro"] .card-header{
   border-bottom:1px solid rgba(0,0,0,0.08);
 }
 body[data-tema="preto-claro"] button{
-  background:#000000;
-  color:#ffffff;
+  background:var(--accent);
+  color:var(--on-accent);
 }
 body[data-tema="preto-claro"] button.secondary{
   background:rgba(0,0,0,0.10);
@@ -2935,39 +2963,39 @@ body[data-tema="preto-claro"] .quick-balance-panel{ background:#ffffff; }
    TEMA: AMARELO ESCURO (identidade 99)
    ════════════════════════════════════════════ */
 body[data-tema="amarelo-escuro"] .card-header{
-  background:rgba(255,204,0,0.10);
-  border-bottom:1px solid rgba(255,204,0,0.12);
+  background:rgba(255,221,0,0.10);
+  border-bottom:1px solid rgba(255,221,0,0.12);
 }
-/* botões primários: amarelo com texto preto */
+/* botões primários: amarelo 99 com texto preto */
 body[data-tema="amarelo-escuro"] button{
-  background:#ffcc00;
-  color:#000000;
+  background:var(--accent);
+  color:var(--on-accent);
 }
 body[data-tema="amarelo-escuro"] button.secondary{
-  background:rgba(255,204,0,0.15);
-  color:#ffcc00;
+  background:rgba(255,221,0,0.15);
+  color:#ffdd00;
 }
 /* abas */
 body[data-tema="amarelo-escuro"] .tab-btn{
   background:rgba(255,255,255,0.05);
-  border-color:rgba(255,204,0,0.15);
-  color:#ffffff;
+  border-color:rgba(255,221,0,0.15);
+  color:#f8f5ec;
 }
 body[data-tema="amarelo-escuro"] .tab-btn.active{
-  background:rgba(255,204,0,0.18);
-  border-color:rgba(255,204,0,0.40);
-  color:#ffcc00;
+  background:rgba(255,221,0,0.18);
+  border-color:rgba(255,221,0,0.40);
+  color:#ffdd00;
 }
 /* sub-abas */
 body[data-tema="amarelo-escuro"] .subtab-btn{
   background:rgba(255,255,255,0.05);
-  border-color:rgba(255,204,0,0.12);
-  color:#ffffff;
+  border-color:rgba(255,221,0,0.12);
+  color:#f8f5ec;
 }
 body[data-tema="amarelo-escuro"] #btnSubGanhos.active{
-  background:rgba(255,204,0,0.22);
-  color:#ffcc00;
-  border-color:rgba(255,204,0,0.35);
+  background:rgba(255,221,0,0.22);
+  color:#ffdd00;
+  border-color:rgba(255,221,0,0.35);
 }
 body[data-tema="amarelo-escuro"] #btnSubGastos.active{
   background:rgba(255,80,80,0.22);
@@ -2976,55 +3004,55 @@ body[data-tema="amarelo-escuro"] #btnSubGastos.active{
 }
 /* list items */
 body[data-tema="amarelo-escuro"] .list-item{
-  background:rgba(255,204,0,0.05);
-  border-color:rgba(255,204,0,0.10);
+  background:rgba(255,221,0,0.05);
+  border-color:rgba(255,221,0,0.10);
 }
 /* quick balance */
 body[data-tema="amarelo-escuro"] .quick-balance-panel{
-  background:#0d0d00;
+  background:#121212;
 }
 /* inputs */
 body[data-tema="amarelo-escuro"] input,
 body[data-tema="amarelo-escuro"] select{
-  background:#222200;
-  color:#ffffff;
-  border:1px solid rgba(255,204,0,0.15);
+  background:#262626;
+  color:#f8f5ec;
+  border:1px solid rgba(255,221,0,0.15);
 }
 
 /* ════════════════════════════════════════════
    TEMA: AMARELO CLARO (identidade 99 Claro)
    ════════════════════════════════════════════ */
 body[data-tema="amarelo-claro"] .card-header{
-  background:rgba(255,204,0,0.20);
-  border-bottom:1px solid rgba(255,204,0,0.20);
+  background:rgba(255,221,0,0.30);
+  border-bottom:1px solid rgba(18,18,18,0.15);
 }
 body[data-tema="amarelo-claro"] button{
-  background:#ffcc00;
-  color:#000000;
+  background:var(--accent);
+  color:var(--on-accent);
 }
 body[data-tema="amarelo-claro"] button.secondary{
   background:rgba(0,0,0,0.08);
-  color:#1a1400;
+  color:#121212;
 }
 body[data-tema="amarelo-claro"] .tab-btn{
-  background:rgba(0,0,0,0.05);
-  border-color:rgba(0,0,0,0.12);
-  color:#1a1400;
+  background:rgba(0,0,0,0.06);
+  border-color:rgba(0,0,0,0.14);
+  color:#121212;
 }
 body[data-tema="amarelo-claro"] .tab-btn.active{
-  background:rgba(255,204,0,0.35);
-  border-color:rgba(200,150,0,0.45);
-  color:#000000;
+  background:rgba(18,18,18,0.85);
+  border-color:#121212;
+  color:#ffdd00;
 }
 body[data-tema="amarelo-claro"] .subtab-btn{
-  background:rgba(0,0,0,0.05);
-  border-color:rgba(0,0,0,0.10);
-  color:#1a1400;
+  background:rgba(0,0,0,0.06);
+  border-color:rgba(0,0,0,0.12);
+  color:#121212;
 }
 body[data-tema="amarelo-claro"] #btnSubGanhos.active{
-  background:rgba(255,204,0,0.40);
-  color:#000000;
-  border-color:rgba(180,130,0,0.35);
+  background:rgba(18,18,18,0.85);
+  color:#ffdd00;
+  border-color:#121212;
 }
 body[data-tema="amarelo-claro"] #btnSubGastos.active{
   background:rgba(200,40,40,0.15);
@@ -3032,141 +3060,17 @@ body[data-tema="amarelo-claro"] #btnSubGastos.active{
   border-color:rgba(200,40,40,0.20);
 }
 body[data-tema="amarelo-claro"] .list-item{
-  background:rgba(0,0,0,0.03);
-  border-color:rgba(0,0,0,0.08);
+  background:rgba(0,0,0,0.04);
+  border-color:rgba(0,0,0,0.10);
 }
-body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff9d0; }
+body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff3b0; }
 
 
-/* v56 - reforço de contraste visual para temas Uber/99 */
-body[data-tema="preto-escuro"] .topbar,
-body[data-tema="preto-escuro"] .menu-panel{
-  background:#000000 !important;
-  border-color:rgba(255,255,255,.24) !important;
-}
-body[data-tema="preto-escuro"] .card,
-body[data-tema="preto-escuro"] .list-item,
-body[data-tema="preto-escuro"] .quick-balance-panel,
-body[data-tema="preto-escuro"] .quick-balance-display{
-  background:#0b0b0b !important;
-  border-color:rgba(255,255,255,.22) !important;
-  color:#ffffff !important;
-}
-body[data-tema="preto-escuro"] input,
-body[data-tema="preto-escuro"] select,
-body[data-tema="preto-escuro"] textarea{
-  background:#000000 !important;
-  color:#ffffff !important;
-  border-color:rgba(255,255,255,.32) !important;
-}
-body[data-tema="preto-escuro"] button.secondary,
-body[data-tema="preto-escuro"] .tab-btn,
-body[data-tema="preto-escuro"] .subtab-btn{
-  background:#000000 !important;
-  color:#ffffff !important;
-  border-color:rgba(255,255,255,.34) !important;
-}
-body[data-tema="preto-escuro"] .tab-btn.active,
-body[data-tema="preto-escuro"] .subtab-btn.active{
-  background:#ffffff !important;
-  color:#000000 !important;
-  border-color:#ffffff !important;
-}
-body[data-tema="preto-claro"] .topbar,
-body[data-tema="preto-claro"] .menu-panel,
-body[data-tema="preto-claro"] .card,
-body[data-tema="preto-claro"] .list-item,
-body[data-tema="preto-claro"] .quick-balance-panel{
-  background:#ffffff !important;
-  border-color:rgba(0,0,0,.24) !important;
-  color:#000000 !important;
-}
-body[data-tema="preto-claro"] input,
-body[data-tema="preto-claro"] select,
-body[data-tema="preto-claro"] textarea{
-  background:#ffffff !important;
-  color:#000000 !important;
-  border-color:rgba(0,0,0,.35) !important;
-}
-body[data-tema="preto-claro"] button.secondary,
-body[data-tema="preto-claro"] .tab-btn,
-body[data-tema="preto-claro"] .subtab-btn{
-  background:#ffffff !important;
-  color:#000000 !important;
-  border-color:rgba(0,0,0,.35) !important;
-}
-body[data-tema="preto-claro"] .tab-btn.active,
-body[data-tema="preto-claro"] .subtab-btn.active{
-  background:#000000 !important;
-  color:#ffffff !important;
-  border-color:#000000 !important;
-}
-body[data-tema="amarelo-escuro"] .topbar,
-body[data-tema="amarelo-escuro"] .menu-panel,
-body[data-tema="amarelo-escuro"] .card,
-body[data-tema="amarelo-escuro"] .list-item,
-body[data-tema="amarelo-escuro"] .quick-balance-panel,
-body[data-tema="amarelo-escuro"] .quick-balance-display{
-  background:#000000 !important;
-  border-color:rgba(255,204,0,.45) !important;
-  color:#ffffff !important;
-}
-body[data-tema="amarelo-escuro"] input,
-body[data-tema="amarelo-escuro"] select,
-body[data-tema="amarelo-escuro"] textarea{
-  background:#000000 !important;
-  color:#ffffff !important;
-  border-color:rgba(255,204,0,.55) !important;
-}
-body[data-tema="amarelo-escuro"] button,
-body[data-tema="amarelo-escuro"] .tab-btn.active,
-body[data-tema="amarelo-escuro"] .subtab-btn.active{
-  background:#ffcc00 !important;
-  color:#000000 !important;
-  border-color:#ffcc00 !important;
-}
-body[data-tema="amarelo-escuro"] button.secondary,
-body[data-tema="amarelo-escuro"] .tab-btn,
-body[data-tema="amarelo-escuro"] .subtab-btn{
-  background:#000000 !important;
-  color:#ffcc00 !important;
-  border-color:rgba(255,204,0,.55) !important;
-}
-body[data-tema="amarelo-claro"] .topbar,
-body[data-tema="amarelo-claro"] .menu-panel{
-  background:#ffcc00 !important;
-  border-color:rgba(0,0,0,.32) !important;
-  color:#000000 !important;
-}
-body[data-tema="amarelo-claro"] .card,
-body[data-tema="amarelo-claro"] .list-item,
-body[data-tema="amarelo-claro"] .quick-balance-panel,
-body[data-tema="amarelo-claro"] .quick-balance-display{
-  background:#fff2a8 !important;
-  border-color:rgba(0,0,0,.28) !important;
-  color:#000000 !important;
-}
-body[data-tema="amarelo-claro"] input,
-body[data-tema="amarelo-claro"] select,
-body[data-tema="amarelo-claro"] textarea{
-  background:#ffffff !important;
-  color:#000000 !important;
-  border-color:rgba(0,0,0,.42) !important;
-}
-body[data-tema="amarelo-claro"] button,
-body[data-tema="amarelo-claro"] .tab-btn.active,
-body[data-tema="amarelo-claro"] .subtab-btn.active{
-  background:#000000 !important;
-  color:#ffcc00 !important;
-  border-color:#000000 !important;
-}
-body[data-tema="amarelo-claro"] button.secondary,
-body[data-tema="amarelo-claro"] .tab-btn,
-body[data-tema="amarelo-claro"] .subtab-btn{
-  background:#ffcc00 !important;
-  color:#000000 !important;
-  border-color:rgba(0,0,0,.38) !important;
-}
+/* vBeta1.17 - o antigo bloco de patch "v56 - reforço de contraste visual para
+   temas Uber/99" foi removido. As variáveis de tema na raiz (--bg, --card,
+   --text, --topbar-bg, --tabbtn-bg, --on-accent etc.) já garantem o contraste
+   correto, com base nas cores oficiais de marca, sem necessidade de !important
+   nem de duplicar regras por tema. */
 
 .temas-overlay{
   position:fixed; inset:0; z-index:1500;
@@ -3893,7 +3797,7 @@ body[data-tema$="claro"] .historico-report-line{border-bottom-color:rgba(0,0,0,.
   <div class="menu-item"><button class="secondary" onclick="abrirSaldoAtualButtonMenu(); closeMenu();">Botão de saldo atual</button></div>
   <div class="menu-item"><button class="secondary" onclick="abrirTemas(); closeMenu();">Temas</button></div>
   <div class="menu-item menu-user-row"><span class="menu-user-name" id="menuUserName">Usuário</span><button class="danger" onclick="forceLogout(); return false;">Sair</button></div>
-  <div class="menu-note" style="text-align:center;">vBeta1.16</div>
+  <div class="menu-note" style="text-align:center;">vBeta1.17</div>
 </div>
 
 
@@ -5263,7 +5167,7 @@ function mdBuildDiagnosticsObject(){
     const durableObj = mdSafeJsonParse(durableRaw);
     const diag = {
       generated_at: mdNowIso(),
-      app_version: 'MetaDriver vBeta1.16',
+      app_version: 'MetaDriver vBeta1.17',
       cloud_table: CLOUD_TABLE,
       device_id: mdEnsureDeviceId(),
       visibility_state: document.visibilityState,
@@ -7102,7 +7006,7 @@ function mdCommitLancamentoMutation(reason){
   try{ atualizar(); }catch(e){}
   try{ if(typeof refreshQuickBalanceFabMiniDisplay === "function") refreshQuickBalanceFabMiniDisplay(); }catch(e){}
   try{ if(typeof updateQuickBalanceFabUI === "function") updateQuickBalanceFabUI(); }catch(e){}
-  try{ if(typeof toast === "function" && reason) console.info("MetaDriver vBeta1.16 mutation:", reason); }catch(e){}
+  try{ if(typeof toast === "function" && reason) console.info("MetaDriver vBeta1.17 mutation:", reason); }catch(e){}
 }
 
 
@@ -8886,7 +8790,7 @@ function exportarRelatorioPDF(){
       <script>
         setTimeout(()=>window.print(), 250);
       <\/script>
-    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver vBeta1.16 · app</div>
+    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver vBeta1.17 · app</div>
 
 
 <script>

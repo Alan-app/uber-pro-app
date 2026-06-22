@@ -1,3 +1,26 @@
+MetaDriver vBeta1.17
+
+Solicitado:
+- Os temas Uber (preto) e 99 (amarelo) ainda não estavam bons: partes do app sem contraste entre fundo e letra, parecendo um ajuste forçado. Pedido para analisar a paleta de cores, fonte e tons reais da Uber e da 99, e aplicar aos temas do app.
+
+Pesquisa realizada:
+- Uber: identidade oficial em preto (#000000) e branco (#FFFFFF), com azul de ação #276EF1.
+- 99: identidade oficial confirmada na página de imprensa (99app.com/imprensa) — amarelo #FFDD00 e preto #121212 (não preto puro), fonte DiDi Sans.
+
+Causa raiz encontrada:
+- Havia DUAS camadas de ajuste de cor competindo entre si: um bloco "v56" com `!important` forçando cores incorretas por cima de outro bloco mais antigo, que também já tinha cores diferentes das oficiais (ex.: amarelo genérico em vez do amarelo 99 real, preto puro em vez do preto 99 oficial). Essa duplicação e as cores erradas eram a causa do efeito "parece forçado".
+- Além disso, vários elementos estruturais (barra superior, menu lateral, itens de lista, painel de saldo rápido) tinham cores fixas (do tema padrão azul) que não respeitavam tema nenhum.
+
+Feito:
+- Removido o bloco de patch `!important` antigo.
+- Corrigido o bloco de cores por tema (mais antigo, mas estruturalmente correto) para usar as cores oficiais de marca.
+- Adicionadas variáveis de tema (--topbar-bg, --tabbtn-bg, --tabbtn-border, --on-accent) para que elementos estruturais sigam o tema ativo corretamente.
+- Cada combinação de cor de texto sobre fundo foi validada matematicamente por contraste (padrão de acessibilidade WCAG), não apenas visualmente.
+- Confirmado visualmente, tema por tema, que botões, abas, campos e itens de lista ficam legíveis nos 4 temas (Uber escuro/claro, 99 escuro/claro).
+
+Status atual:
+- Pronto para teste no celular. Trocar entre os 4 temas (Uber escuro, Uber claro, 99 escuro, 99 claro) e confirmar que todo texto está legível sobre o fundo correspondente, sem partes "apagadas" ou sem contraste.
+
 MetaDriver vBeta1.16
 
 Base recebida:

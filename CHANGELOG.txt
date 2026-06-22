@@ -1,3 +1,12 @@
+vBeta1.17 - Temas Uber e 99: paletas corretas, com contraste validado
+- Pesquisadas as cores oficiais de marca: Uber (preto #000000 / branco #FFFFFF, azul de ação #276EF1) e 99 (amarelo #FFDD00 / preto #121212, conforme 99app.com/imprensa).
+- Refeitas as 4 paletas de tema (Uber escuro/claro, 99 escuro/claro) com essas cores, validando cada combinação de texto/fundo por contraste real (padrão WCAG), não apenas visualmente.
+- Removido o bloco de patch antigo com `!important` que forçava cores incorretas por cima do sistema de temas (causa do efeito "parece forçado" relatado) — esse bloco tinha cores diferentes das oficiais (ex.: amarelo genérico em vez do amarelo 99 real) e competia com outras regras.
+- Corrigidos elementos que usavam cores fixas e não respeitavam tema nenhum: barra superior (topbar), menu lateral, itens de lista, painel de saldo rápido e texto de botões sobre cor de destaque — todos agora usam variáveis de tema (--topbar-bg, --tabbtn-bg, --on-accent), com valores corretos calculados por tema.
+- Validação visual feita tema por tema (Uber escuro, Uber claro, 99 escuro, 99 claro), confirmando texto sempre legível sobre o fundo correspondente.
+- Nenhuma outra tela, cálculo ou fluxo foi alterado.
+- Base oficial: vBeta1.16.
+
 vBeta1.16 - Data Inicial da meta: obrigatória e congelada (não muda mais todo dia)
 - Corrigido: o app usava a data atual como valor temporário sempre que a Data Inicial da meta estava vazia, e como esse cálculo era refeito a cada atualização da tela, na prática a data "mudava" todo dia.
 - Nova regra: a Data Inicial é obrigatória. Se estiver vazia no momento de salvar a meta, é preenchida UMA ÚNICA VEZ com a data atual (e o campo na tela também é atualizado para mostrar isso) — depois disso, o valor fica congelado e não é mais recalculado.
