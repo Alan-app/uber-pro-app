@@ -1,3 +1,13 @@
+vBeta1.21 - CORREÇÃO CRÍTICA: token de sessão nunca era renovado, causando perda de horas de dados ao limpar o navegador
+- Corrigida a causa raiz real da perda de dados relatada (perda de HORAS de dados, não segundos): o app chamava uma função de renovação de sessão (mdEnsureActiveSession) que nunca havia sido implementada — ela simplesmente não existia no código.
+- Sem essa renovação, o token de acesso à nuvem (Supabase) expirava após aproximadamente 1 hora de uso (padrão do serviço), e a partir desse momento TODA tentativa de salvar na nuvem falhava silenciosamente (erro de autenticação), sem nenhum aviso. Os dados continuavam sendo salvos no aparelho, mas nunca chegavam à nuvem.
+- Ao limpar o cache/dados do Chrome horas depois, o app perdia o token e o token de atualização salvos localmente, e ao fazer login de novo recebia da nuvem a última versão que ela realmente tinha recebido — que podia ser de horas atrás, antes do token expirar.
+- Implementada a função de renovação de sessão de verdade, usando o mesmo mecanismo de "refresh token" que login.html já utiliza: quando o token de acesso está perto de expirar, o app renova automaticamente em segundo plano, sem necessidade de novo login.
+- Protegido contra múltiplas renovações simultâneas (ex.: vários salvamentos em sequência não disparam pedidos de renovação duplicados).
+- Testado nos quatro cenários relevantes: token válido (não renova), token expirado com renovação bem-sucedida, token e renovação ambos expirados (login manual necessário, como esperado), e chamadas simultâneas (sem duplicar pedidos à rede).
+- Nenhuma outra tela ou fluxo foi alterada. O indicador visual de sincronização proposto anteriormente (vBeta1.20) foi removido a pedido do usuário — o foco desta versão é a correção da causa raiz, sem mudança visual.
+- Base oficial: vBeta1.19.
+
 vBeta1.19 - Painel da conta (Gerenciar Conta): limpeza de botões redundantes
 - Removido o botão "Sair" do painel da conta — já existe um botão Sair no menu do app, este era redundante.
 - Removida a linha "Status técnico: OK".

@@ -1,3 +1,23 @@
+MetaDriver vBeta1.21
+
+Solicitado:
+- Corrigir a perda de dados ao limpar o cache/dados do Chrome. Esclarecido pelo usuário que a perda era de HORAS de dados (não segundos), descartando a hipótese anterior (vBeta1.20, indicador visual) como insuficiente. Solicitado remover o indicador visual e focar exclusivamente em corrigir a causa raiz.
+
+Investigação (revisada):
+- Com a informação de que a perda era de horas, a hipótese de "atraso de alguns segundos no envio à nuvem" foi descartada.
+- Investigada a função de obtenção de token de acesso à nuvem (cloudGetToken). Encontrado que ela dependia de uma função chamada mdEnsureActiveSession para renovar o token quando necessário — mas essa função NUNCA havia sido implementada no arquivo principal do app (app30_app.html). Ela só existia como uma verificação "se essa função existir, use-a", e como nunca existiu, o token nunca era renovado.
+- Tokens de acesso do Supabase (o serviço de nuvem usado pelo app) expiram em aproximadamente 1 hora. Sem renovação, depois desse tempo toda tentativa de salvar na nuvem passava a falhar silenciosamente (sem aviso nenhum, só um registro técnico interno). Os dados continuavam sendo salvos no aparelho normalmente, mas paravam de chegar à nuvem.
+- Ao limpar o cache do Chrome horas depois (quando o token já estava expirado há muito tempo), o aparelho perdia o token salvo localmente. Ao fazer login de novo, o app buscava os dados na nuvem — que estavam parados na última vez que a sincronização realmente funcionou, ou seja, antes do token expirar. Isso explica exatamente a perda de "horas de dados".
+
+Feito:
+- Implementada a função de renovação de sessão que faltava, usando o mesmo mecanismo que login.html já utiliza (token de atualização / "refresh token"). Agora, quando o token de acesso está perto de expirar, o app renova automaticamente em segundo plano, sem precisar de novo login.
+- Protegido contra múltiplas renovações simultâneas acontecendo ao mesmo tempo (por exemplo, vários lançamentos salvos em sequência rápida).
+- Removido o indicador visual de sincronização (vBeta1.20), a pedido do usuário — esta versão foca exclusivamente na correção da causa raiz, sem mudança visual.
+- Testado em quatro cenários: token ainda válido (não tenta renovar), token expirado com renovação bem-sucedida, token e renovação ambos expirados (nesse caso, é necessário login manual mesmo, o que é esperado), e múltiplas chamadas simultâneas (confirmado que não duplica pedidos à rede).
+
+Status atual:
+- Pronto para teste. Esta é a correção real do problema relatado — o app agora deve permanecer sincronizado com a nuvem indefinidamente, sem depender de o usuário fazer login novamente a cada hora.
+
 MetaDriver vBeta1.19
 
 Solicitado (painel da conta / Gerenciar Conta):
