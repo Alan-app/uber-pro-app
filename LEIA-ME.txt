@@ -1,3 +1,25 @@
+MetaDriver vBeta1.35
+
+Solicitado:
+- Em Manutenção do carro, ao clicar em "Concluir", o app abria um modal nativo do navegador pedindo só a data, e o valor gasto nunca era solicitado nem atualizado. Pedido um modal padrão MetaDriver (igual ao usado para editar lançamentos), pedindo Data e Valor juntos, antes de marcar como concluída.
+
+Confirmado com o usuário antes de implementar:
+- Um único modal mostrando Data e Valor juntos (em vez de dois modais em sequência).
+
+Investigação:
+- Encontrados TRÊS lugares diferentes usando o modal nativo (prompt) do navegador para pedir a data de uma manutenção concluída: o botão "Concluir" da lista, o checkbox "Manutenção concluída", e a criação de uma manutenção nova já marcada como concluída de saída. Nenhum dos três pedia o valor gasto (exceto o terceiro caso, onde o valor já vem do próprio formulário de criação).
+
+Feito:
+- Criado um novo modal MetaDriver dedicado para concluir manutenção, com os campos Data e Valor gasto (R$) exibidos juntos, no mesmo padrão visual dos demais modais do app (mesmo título, mesmos botões Cancelar/Confirmar).
+- Botão "Concluir" da lista e o checkbox "Manutenção concluída" agora abrem esse mesmo modal novo, em vez do prompt nativo.
+- Para a criação de uma manutenção nova já marcada como concluída (o valor já existe no formulário ali), criado um modal MetaDriver menor, pedindo apenas a data — substituindo o prompt nativo nesse terceiro caso também.
+- Eliminados todos os prompt() nativos do navegador relacionados a manutenção do carro.
+- Testado: abertura do modal já com a data preenchida automaticamente, confirmação salvando corretamente Data, Valor e KM, validação bloqueando confirmação com data vazia, e os dois cenários possíveis ao criar uma manutenção nova (já concluída vs. planejada para o futuro).
+- Seguindo a prática já estabelecida: 23 funções relacionadas à virada das 4h, sincronização com a nuvem, lançamento por voz e edição de meta/manutenção foram comparadas byte a byte contra a versão anterior — todas confirmadas idênticas.
+
+Status atual:
+- Pronto para teste. Ao clicar em "Concluir" em qualquer manutenção (ou marcar o checkbox), o novo modal deve aparecer pedindo Data e Valor gasto juntos.
+
 MetaDriver vBeta1.34
 
 Solicitado:

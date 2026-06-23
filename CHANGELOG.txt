@@ -1,3 +1,14 @@
+vBeta1.35 - Manutenção do carro: modal MetaDriver ao concluir (substitui o prompt nativo) + pede o valor gasto
+- Solicitado: ao clicar em "Concluir" em uma manutenção, o app abria um modal nativo do navegador pedindo só a data, e nunca solicitava o valor gasto. Pedido um modal padrão MetaDriver (igual ao de editar lançamento), pedindo Data e Valor juntos.
+- Criado um novo modal MetaDriver dedicado para concluir manutenção, com campos de Data e Valor gasto exibidos ao mesmo tempo, no mesmo padrão visual dos demais modais de edição do app.
+- Corrigido tanto o botão "Concluir" da lista quanto o checkbox "Manutenção concluída" (mesmo destino, ambos agora abrem o mesmo modal novo).
+- Identificado e corrigido um terceiro lugar com o mesmo problema: ao criar uma manutenção nova já marcando a caixa "concluída", o app também usava um prompt nativo pedindo apenas a data. Substituído por um modal MetaDriver dedicado, menor (já que o valor nesse caso já existe no formulário de criação).
+- Eliminados todos os prompt() nativos do navegador relacionados a manutenção do carro.
+- Testado: abertura do modal com a data já preenchida, confirmação salvando Data + Valor + KM corretamente, validação de data vazia bloqueando a confirmação, e os dois cenários de criação de manutenção nova (concluída na hora vs. planejada).
+- Conforme prática estabelecida: 23 funções relacionadas à virada das 4h, sincronização com a nuvem, lançamento por voz e edição de meta/manutenção foram comparadas byte a byte contra a versão anterior — todas confirmadas idênticas.
+- Nenhuma outra tela ou fluxo foi alterada.
+- Base oficial: vBeta1.34.
+
 vBeta1.34 - Meta com data inicial futura: agora calcula e exibe os valores de planejamento
 - Solicitado: ao definir uma data inicial de meta no futuro, o status mostrava corretamente "Aguardando início da meta", mas os campos Meta diária, Tempo para meta diária, Dias restantes e Tempo restante ficavam vazios — mesmo já existindo todos os dados necessários (data inicial, data limite, meta total, dias não trabalhados) para calculá-los, útil para planejar metas futuras com antecedência.
 - Corrigido: os cálculos de dias restantes e meta diária automática não são mais zerados à força quando a meta ainda não começou. O período considerado já usava corretamente a data inicial configurada como base (em vez de "hoje"); só faltava parar de descartar esse cálculo já correto.

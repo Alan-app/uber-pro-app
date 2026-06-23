@@ -43,7 +43,7 @@ try{
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver vBeta1.34</title>
+<title>MetaDriver vBeta1.35</title>
 <style id="md-hydration-lock">
 body.preload > *:not(#mdBootOverlay){visibility:hidden!important;}
 #mdBootOverlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#0f172a;color:#fff;z-index:2147483647;font-family:Inter,system-ui,sans-serif;font-weight:800;letter-spacing:.2px;}
@@ -3895,7 +3895,7 @@ body[data-tema$="claro"] .historico-report-line{border-bottom-color:rgba(0,0,0,.
   <div class="menu-item"><button class="secondary" onclick="abrirSaldoAtualButtonMenu(); closeMenu();">Botão de saldo atual</button></div>
   <div class="menu-item"><button class="secondary" onclick="abrirTemas(); closeMenu();">Temas</button></div>
   <div class="menu-item menu-user-row"><span class="menu-user-name" id="menuUserName">Usuário</span><button class="danger" onclick="forceLogout(); return false;">Sair</button></div>
-  <div class="menu-note" style="text-align:center;">vBeta1.34</div>
+  <div class="menu-note" style="text-align:center;">vBeta1.35</div>
 </div>
 
 
@@ -4254,6 +4254,34 @@ body[data-tema$="claro"] .historico-report-line{border-bottom-color:rgba(0,0,0,.
     <div class="edit-data-actions">
       <button class="btn-cancelar" onclick="fecharEditData()">Cancelar</button>
       <button onclick="confirmarEditData()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- vBeta1.35 - modal MetaDriver para pedir a data ao criar uma manutenção já marcada como concluída (substitui prompt() nativo) -->
+<div id="novaManutDataConcluidaOverlay" class="edit-data-overlay" onclick="if(event.target.id==='novaManutDataConcluidaOverlay')fecharNovaManutDataConcluidaModal()">
+  <div class="edit-data-modal" onclick="event.stopPropagation()">
+    <div class="edit-data-title">Data da manutenção concluída</div>
+    <label class="config-meta-label" for="novaManutDataConcluidaInput">Data</label>
+    <input type="date" id="novaManutDataConcluidaInput" />
+    <div class="edit-data-actions">
+      <button class="btn-cancelar" onclick="fecharNovaManutDataConcluidaModal()">Cancelar</button>
+      <button onclick="confirmarNovaManutDataConcluidaModal()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- vBeta1.35 - modal MetaDriver para concluir manutenção (Data + Valor gasto), substituindo o prompt() nativo do navegador -->
+<div id="concluirManutOverlay" class="edit-data-overlay" onclick="if(event.target.id==='concluirManutOverlay')fecharConcluirManutModal()">
+  <div class="edit-data-modal" onclick="event.stopPropagation()">
+    <div class="edit-data-title">Concluir manutenção</div>
+    <label class="config-meta-label" for="concluirManutData">Data</label>
+    <input type="date" id="concluirManutData" />
+    <label class="config-meta-label" for="concluirManutValor">Valor gasto (R$)</label>
+    <input type="text" id="concluirManutValor" inputmode="decimal" placeholder="0,00" />
+    <div class="edit-data-actions">
+      <button class="btn-cancelar" onclick="fecharConcluirManutModal()">Cancelar</button>
+      <button onclick="confirmarConcluirManutModal()">Concluir</button>
     </div>
   </div>
 </div>
@@ -5353,7 +5381,7 @@ function mdBuildDiagnosticsObject(){
     const durableObj = mdSafeJsonParse(durableRaw);
     const diag = {
       generated_at: mdNowIso(),
-      app_version: 'MetaDriver vBeta1.34',
+      app_version: 'MetaDriver vBeta1.35',
       cloud_table: CLOUD_TABLE,
       device_id: mdEnsureDeviceId(),
       visibility_state: document.visibilityState,
@@ -7353,7 +7381,7 @@ function mdCommitLancamentoMutation(reason){
   try{ atualizar(); }catch(e){}
   try{ if(typeof refreshQuickBalanceFabMiniDisplay === "function") refreshQuickBalanceFabMiniDisplay(); }catch(e){}
   try{ if(typeof updateQuickBalanceFabUI === "function") updateQuickBalanceFabUI(); }catch(e){}
-  try{ if(typeof toast === "function" && reason) console.info("MetaDriver vBeta1.34 mutation:", reason); }catch(e){}
+  try{ if(typeof toast === "function" && reason) console.info("MetaDriver vBeta1.35 mutation:", reason); }catch(e){}
 }
 
 
@@ -9161,7 +9189,7 @@ function exportarRelatorioPDF(){
       <script>
         setTimeout(()=>window.print(), 250);
       <\/script>
-    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver vBeta1.34 · app</div>
+    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver vBeta1.35 · app</div>
 
 
 <script>
@@ -11047,31 +11075,47 @@ function addManutencao(){
     return;
   }
 
-  // Data só interessa quando marcar como concluída
-  let data = "";
+  // Se marcar concluída, não é próxima manutenção (e vice-versa)
   let concluida = concluidaChecked;
   let planejada = planejadaChecked;
-
-  // Se marcar concluída, não é próxima manutenção (e vice-versa)
   if(concluida) planejada = false;
   if(planejada) concluida = false;
 
+  // vBeta1.35 - Data só interessa quando marcar como concluída. Antes usava
+  // prompt() nativo aqui; agora abre o modal padrão MetaDriver e só cria o
+  // item depois que a data for confirmada (ou cancela a criação, se o
+  // usuário fechar o modal sem confirmar).
   if(concluida){
-    const sugestao = todayISO_local();
-    const escolhido = prompt("Data da manutenção concluída (AAAA-MM-DD):", sugestao);
-    if(escolhido === null) return; // cancelou
-    const s = String(escolhido).trim();
-    if(!s){
-      toast("Escolha a data para concluir.");
-      return;
-    }
-    if(!/^\d{4}-\d{2}-\d{2}$/.test(s)){
-      toast("Data inválida. Use AAAA-MM-DD.");
-      return;
-    }
-    data = s;
+    window.__novaManutPendente = { kmNum, desc, tipo, valor, concluida, planejada };
+    const inp = document.getElementById("novaManutDataConcluidaInput");
+    if(inp) inp.value = todayISO_local();
+    const ov = document.getElementById("novaManutDataConcluidaOverlay");
+    if(ov) ov.classList.add("show");
+    return;
   }
 
+  mdCriarItemManutencao(kmNum, desc, "", tipo, valor, concluida, planejada);
+}
+
+function fecharNovaManutDataConcluidaModal(){
+  window.__novaManutPendente = null;
+  const ov = document.getElementById("novaManutDataConcluidaOverlay");
+  if(ov) ov.classList.remove("show");
+}
+
+function confirmarNovaManutDataConcluidaModal(){
+  const pend = window.__novaManutPendente;
+  if(!pend){ fecharNovaManutDataConcluidaModal(); return; }
+  const s = (document.getElementById("novaManutDataConcluidaInput")?.value || "").trim();
+  if(!s || !/^\d{4}-\d{2}-\d{2}$/.test(s)){
+    toast("Escolha a data para concluir.");
+    return;
+  }
+  mdCriarItemManutencao(pend.kmNum, pend.desc, s, pend.tipo, pend.valor, pend.concluida, pend.planejada);
+  fecharNovaManutDataConcluidaModal();
+}
+
+function mdCriarItemManutencao(kmNum, desc, data, tipo, valor, concluida, planejada){
   const item = {
     id: (crypto && crypto.randomUUID) ? crypto.randomUUID() : ("m_"+Date.now()+"_"+Math.random().toString(16).slice(2)),
     km: kmNum,
@@ -11095,6 +11139,58 @@ function addManutencao(){
 
 
 let editManutIdAtual = null;
+// vBeta1.35 - contexto do modal de concluir manutenção (substitui prompt() nativo)
+let concluirManutIdAtual = null;
+
+function abrirConcluirManutModal(id){
+  ensureCarro();
+  const m = dados.carro.manut.find(x=>x.id===id);
+  if(!m) return;
+  concluirManutIdAtual = id;
+  const dataEl = document.getElementById("concluirManutData");
+  const valorEl = document.getElementById("concluirManutValor");
+  if(dataEl) dataEl.value = m.data || todayISO_local();
+  if(valorEl) valorEl.value = m.valor ? String(m.valor) : "";
+  const ov = document.getElementById("concluirManutOverlay");
+  if(ov) ov.classList.add("show");
+  setTimeout(()=>{ try{ dataEl && dataEl.focus(); }catch(e){} }, 50);
+}
+
+function fecharConcluirManutModal(){
+  concluirManutIdAtual = null;
+  const ov = document.getElementById("concluirManutOverlay");
+  if(ov) ov.classList.remove("show");
+}
+
+function confirmarConcluirManutModal(){
+  ensureCarro();
+  const m = dados.carro.manut.find(x=>x.id===concluirManutIdAtual);
+  if(!m){ fecharConcluirManutModal(); return; }
+
+  const dataRaw = (document.getElementById("concluirManutData")?.value || "").trim();
+  const valorRaw = document.getElementById("concluirManutValor")?.value || "0";
+
+  if(!dataRaw || !/^\d{4}-\d{2}-\d{2}$/.test(dataRaw)){
+    toast("Escolha a data para concluir.");
+    return;
+  }
+  const valorNum = (typeof numBR === "function") ? numBR(valorRaw) : (parseFloat(String(valorRaw).replace(",", ".")) || 0);
+
+  const kmAtual = getKmAtual();
+  m.concluida = true;
+  m.planejada = false;
+  m.km = kmAtual || m.km;
+  m.data = dataRaw;
+  m.valor = valorNum;
+  delete dados.carro.snooze[m.id];
+
+  salvar();
+  atualizarCarro();
+  dismissCarPopup();
+  forceMaintenancePopupCheck();
+  fecharConcluirManutModal();
+  toast("✅ Marcado como feito!");
+}
 
 function editManut(id){
   ensureCarro();
@@ -11169,24 +11265,13 @@ function toggleManutConcluida(id, checked){
   if(!m) return;
 
   if(checked){
-    const sugestao = m.data || todayISO_local();
-    const escolhido = prompt("Data da manutenção concluída (AAAA-MM-DD):", sugestao);
-    if(escolhido === null){
-      // usuário cancelou -> volta o checkbox visualmente ao estado anterior
-      atualizarCarro();
-      return;
-    }
-    const s = String(escolhido).trim();
-    if(!s || !/^\d{4}-\d{2}-\d{2}$/.test(s)){
-      toast("Data inválida. Use AAAA-MM-DD.");
-      atualizarCarro();
-      return;
-    }
-    m.data = s;
-    m.concluida = true;
-    // concluída não deve avisar
-    m.planejada = false;
-    delete dados.carro.snooze[id];
+    // vBeta1.35 - substitui o prompt() nativo pelo modal padrão MetaDriver
+    // (Data + Valor gasto). O checkbox é revertido visualmente até o modal
+    // ser confirmado; cancelar o modal também reverte, como já acontecia
+    // ao cancelar o prompt() nativo.
+    abrirConcluirManutModal(id);
+    atualizarCarro();
+    return;
   }else{
     m.concluida = false;
     // mantém a data (você pode editar depois em "Editar")
@@ -11200,30 +11285,10 @@ function toggleManutConcluida(id, checked){
 
 
 function markDone(id){
-  ensureCarro();
-  const m = dados.carro.manut.find(x=>x.id===id);
-  if(!m) return;
-
-  const kmAtual = getKmAtual();
-  const sugestao = m.data || todayISO_local();
-  const escolhido = prompt("Data da manutenção concluída (AAAA-MM-DD):", sugestao);
-  if(escolhido === null) return;
-
-  const s = String(escolhido).trim();
-  if(!s || !/^\d{4}-\d{2}-\d{2}$/.test(s)){
-    toast("Data inválida. Use AAAA-MM-DD.");
-    return;
-  }
-
-  m.concluida = true;
-  m.planejada = false;
-  m.km = kmAtual || m.km;
-  m.data = s;
-  delete dados.carro.snooze[id];
-  salvar(); atualizarCarro();
-  dismissCarPopup();
-  forceMaintenancePopupCheck();
-  toast("✅ Marcado como feito!");
+  // vBeta1.35 - substitui o prompt() nativo pelo modal padrão MetaDriver,
+  // que agora também pede o Valor gasto (antes só a data era solicitada,
+  // e o valor da manutenção nunca era atualizado ao concluir).
+  abrirConcluirManutModal(id);
 }
 
 
