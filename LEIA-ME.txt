@@ -1,3 +1,23 @@
+MetaDriver vBeta1.27
+
+Solicitado:
+- Criar dois botões para abrir diretamente os aplicativos da Uber e da 99 a partir do MetaDriver.
+- Botões quadrados com cantos arredondados, flutuantes e fixos na lateral direita, no meio vertical da tela, permanecendo no lugar mesmo rolando a página.
+- Uma opção no menu chamada "Configurar atalhos Uber e 99" que abre um modal mostrando os dois botões, com caixa de seleção para escolher se aparece só um, o outro, os dois ou nenhum.
+- Botões nas cores e padrão visual oficiais de cada marca (Uber e 99).
+
+Feito:
+- Pesquisados os identificadores corretos dos aplicativos para Android: Uber Driver (com.ubercab.driver) e 99 Motorista (com.app99.driver).
+- Criados os dois botões flutuantes, fixos na lateral direita, com as cores oficiais: preto e branco para Uber, amarelo e preto para 99.
+- Ao tocar em um botão, o app tenta abrir o aplicativo correspondente; se não estiver instalado, é redirecionado automaticamente para a página de instalação na Play Store.
+- Criada a opção "Configurar atalhos Uber e 99" no menu, abrindo um modal com a prévia visual de cada botão e uma caixa de seleção independente para cada um.
+- A escolha de quais botões mostrar é salva e sincronizada com a nuvem, como as demais preferências do app.
+- Identificado e corrigido um problema durante o desenvolvimento: o redirecionamento de respaldo para a Play Store podia disparar mesmo quando o aplicativo abria com sucesso; isso foi corrigido detectando quando o usuário realmente saiu do MetaDriver.
+- Seguindo a prática já estabelecida: todas as funções relacionadas à virada das 4h, sincronização com a nuvem, renovação de sessão e cálculo de saldo foram comparadas byte a byte contra a versão anterior antes da entrega — confirmado que nenhuma delas foi alterada.
+
+Status atual:
+- Pronto para teste. Acesse o menu e toque em "Configurar atalhos Uber e 99" para escolher quais botões exibir.
+
 MetaDriver vBeta1.26
 
 Solicitado:

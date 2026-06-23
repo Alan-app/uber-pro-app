@@ -1,3 +1,13 @@
+vBeta1.27 - Atalhos flutuantes para abrir os apps Uber e 99
+- Adicionados dois botões flutuantes, quadrados com cantos arredondados, fixos na lateral direita da tela (permanecem visíveis mesmo rolando a página), nas cores oficiais de marca: preto/branco para Uber, amarelo/preto para 99.
+- Ao tocar, o botão tenta abrir o aplicativo nativo correspondente (Uber Driver ou 99 Motorista); se o app não estiver instalado, abre automaticamente a página da Play Store para instalação.
+- Nova opção no menu "Configurar atalhos Uber e 99", que abre um modal com a prévia visual de cada botão e uma caixa de seleção para cada um — permitindo mostrar nenhum, um, o outro, ou os dois simultaneamente.
+- A preferência escolhida é salva e sincronizada com a nuvem, assim como as demais configurações do app.
+- Corrigido durante o desenvolvimento: o redirecionamento de respaldo para a Play Store (usado quando o app não abre) poderia disparar mesmo depois do aplicativo abrir corretamente; agora isso é detectado e cancelado automaticamente.
+- Conforme prática já estabelecida, todas as funções relacionadas à virada das 4h, sincronização com a nuvem e cálculo de saldo foram comparadas byte a byte contra a versão anterior (vBeta1.26) antes da entrega, confirmando que nada que já funcionava foi alterado.
+- Nenhuma outra tela ou fluxo foi alterada.
+- Base oficial: vBeta1.26.
+
 vBeta1.26 - CORREÇÃO CRÍTICA REAL: virada das 4h não era verificada ao voltar para o app depois de trocar de tela
 - Investigado novo relato (mais preciso) de que a virada das 4h não funcionava ao mudar a data do celular com o app já aberto. A correção da vBeta1.25 (timeout de rede) não resolveu porque não era essa a causa.
 - Confirmado, com testes automatizados diretos no código real (não apenas comparação de texto), que a lógica de cálculo da virada das 4h está correta e sempre esteve.

@@ -43,7 +43,7 @@ try{
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver vBeta1.26</title>
+<title>MetaDriver vBeta1.27</title>
 <style id="md-hydration-lock">
 body.preload > *:not(#mdBootOverlay){visibility:hidden!important;}
 #mdBootOverlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#0f172a;color:#fff;z-index:2147483647;font-family:Inter,system-ui,sans-serif;font-weight:800;letter-spacing:.2px;}
@@ -1186,6 +1186,48 @@ input.negative-value, input.negative-value::placeholder{
 .quick-balance-fab.idle-faded{
   opacity:.6;
 }
+
+/* vBeta1.27 - atalhos flutuantes para abrir os apps Uber e 99 direto do MetaDriver */
+.app-shortcut-fab{
+  position:fixed;
+  right:10px;
+  z-index:1150;
+  width:54px;
+  height:54px;
+  border-radius:16px;
+  border:none;
+  box-shadow:0 10px 24px rgba(0,0,0,.35);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  touch-action:none;
+  user-select:none;
+  -webkit-user-select:none;
+  transition:opacity .2s ease, transform .12s ease;
+  padding:0;
+  font-weight:900;
+  font-size:13px;
+  letter-spacing:.2px;
+}
+.app-shortcut-fab:active{ transform:scale(.94); }
+.app-shortcut-fab.hidden{
+  display:none !important;
+  pointer-events:none !important;
+  visibility:hidden !important;
+  opacity:0 !important;
+}
+#appShortcutUber{
+  top:42%;
+  background:#000000;
+  color:#ffffff;
+  border:1px solid rgba(255,255,255,0.18);
+}
+#appShortcut99{
+  top:calc(42% + 64px);
+  background:#ffdd00;
+  color:#121212;
+}
+.app-shortcut-fab .asf-icon{ font-size:20px; line-height:1; }
 
 .quick-balance-fab-inner{
   width:100%;
@@ -3838,9 +3880,10 @@ body[data-tema$="claro"] .historico-report-line{border-bottom-color:rgba(0,0,0,.
   <div class="menu-item"><button class="danger" onclick="openZerar(); closeMenu();">Zerar dados (cuidado)</button></div>
   <div class="menu-item"><button class="secondary" onclick="abrirGerenciarConta(); closeMenu();">Gerenciar conta</button></div>
   <div class="menu-item"><button class="secondary" onclick="abrirSaldoAtualButtonMenu(); closeMenu();">Botão de saldo atual</button></div>
+  <div class="menu-item"><button class="secondary" onclick="abrirAtalhosAppsMenu(); closeMenu();">Configurar atalhos Uber e 99</button></div>
   <div class="menu-item"><button class="secondary" onclick="abrirTemas(); closeMenu();">Temas</button></div>
   <div class="menu-item menu-user-row"><span class="menu-user-name" id="menuUserName">Usuário</span><button class="danger" onclick="forceLogout(); return false;">Sair</button></div>
-  <div class="menu-note" style="text-align:center;">vBeta1.26</div>
+  <div class="menu-note" style="text-align:center;">vBeta1.27</div>
 </div>
 
 
@@ -5298,7 +5341,7 @@ function mdBuildDiagnosticsObject(){
     const durableObj = mdSafeJsonParse(durableRaw);
     const diag = {
       generated_at: mdNowIso(),
-      app_version: 'MetaDriver vBeta1.26',
+      app_version: 'MetaDriver vBeta1.27',
       cloud_table: CLOUD_TABLE,
       device_id: mdEnsureDeviceId(),
       visibility_state: document.visibilityState,
@@ -7246,7 +7289,7 @@ function mdCommitLancamentoMutation(reason){
   try{ atualizar(); }catch(e){}
   try{ if(typeof refreshQuickBalanceFabMiniDisplay === "function") refreshQuickBalanceFabMiniDisplay(); }catch(e){}
   try{ if(typeof updateQuickBalanceFabUI === "function") updateQuickBalanceFabUI(); }catch(e){}
-  try{ if(typeof toast === "function" && reason) console.info("MetaDriver vBeta1.26 mutation:", reason); }catch(e){}
+  try{ if(typeof toast === "function" && reason) console.info("MetaDriver vBeta1.27 mutation:", reason); }catch(e){}
 }
 
 
@@ -9030,7 +9073,7 @@ function exportarRelatorioPDF(){
       <script>
         setTimeout(()=>window.print(), 250);
       <\/script>
-    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver vBeta1.26 · app</div>
+    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver vBeta1.27 · app</div>
 
 
 <script>
@@ -10257,6 +10300,116 @@ function persistQuickBalanceFabPref(ativo){
   }
 }
 
+// vBeta1.27 - atalhos para abrir os apps Uber e 99 direto do MetaDriver.
+const ATALHO_UBER_KEY = "metadriver_atalho_uber_ativo";
+const ATALHO_99_KEY = "metadriver_atalho_99_ativo";
+
+function getAtalhoUberPref(){
+  try{
+    const raw = localStorage.getItem(ATALHO_UBER_KEY);
+    if(raw === "0") return false;
+    if(raw === "1") return true;
+  }catch(e){}
+  if(window.dados && typeof dados.atalhoUberAtivo === "boolean") return dados.atalhoUberAtivo;
+  return false;
+}
+function getAtalho99Pref(){
+  try{
+    const raw = localStorage.getItem(ATALHO_99_KEY);
+    if(raw === "0") return false;
+    if(raw === "1") return true;
+  }catch(e){}
+  if(window.dados && typeof dados.atalho99Ativo === "boolean") return dados.atalho99Ativo;
+  return false;
+}
+function persistAtalhoUberPref(ativo){
+  try{ localStorage.setItem(ATALHO_UBER_KEY, ativo ? "1" : "0"); }catch(e){}
+  if(window.dados){ dados.atalhoUberAtivo = !!ativo; try{ salvar(); }catch(e){} }
+}
+function persistAtalho99Pref(ativo){
+  try{ localStorage.setItem(ATALHO_99_KEY, ativo ? "1" : "0"); }catch(e){}
+  if(window.dados){ dados.atalho99Ativo = !!ativo; try{ salvar(); }catch(e){} }
+}
+
+function aplicarVisibilidadeAtalhosApps(){
+  try{
+    const btnUber = document.getElementById("appShortcutUber");
+    const btn99 = document.getElementById("appShortcut99");
+    const uberAtivo = getAtalhoUberPref();
+    const n99Ativo = getAtalho99Pref();
+    if(btnUber) btnUber.classList.toggle("hidden", !uberAtivo);
+    if(btn99) btn99.classList.toggle("hidden", !n99Ativo);
+    // Se só um estiver ativo, ele ocupa a posição central (top:42%); se os
+    // dois estiverem ativos, o segundo fica abaixo do primeiro.
+    if(btn99){
+      btn99.style.top = uberAtivo ? "calc(42% + 64px)" : "42%";
+    }
+  }catch(e){}
+}
+
+function abrirAtalhosAppsMenu(){
+  const overlay = document.getElementById("atalhosAppsMenuOverlay");
+  const panel = document.getElementById("atalhosAppsMenuPanel");
+  const cbUber = document.getElementById("toggleAtalhoUberCheckbox");
+  const cb99 = document.getElementById("toggleAtalho99Checkbox");
+  if(cbUber) cbUber.checked = getAtalhoUberPref();
+  if(cb99) cb99.checked = getAtalho99Pref();
+  if(overlay) overlay.classList.add("show");
+  if(panel) panel.classList.add("show");
+}
+function fecharAtalhosAppsMenu(){
+  const overlay = document.getElementById("atalhosAppsMenuOverlay");
+  const panel = document.getElementById("atalhosAppsMenuPanel");
+  if(overlay) overlay.classList.remove("show");
+  if(panel) panel.classList.remove("show");
+}
+function salvarPreferenciaAtalhosApps(){
+  const cbUber = document.getElementById("toggleAtalhoUberCheckbox");
+  const cb99 = document.getElementById("toggleAtalho99Checkbox");
+  persistAtalhoUberPref(!!(cbUber && cbUber.checked));
+  persistAtalho99Pref(!!(cb99 && cb99.checked));
+  aplicarVisibilidadeAtalhosApps();
+  fecharAtalhosAppsMenu();
+  toast("✅ Atalhos atualizados.");
+}
+
+// vBeta1.27 - tenta abrir o app nativo pelo pacote Android; se não estiver
+// instalado, o próprio sistema cai automaticamente para a Play Store.
+// Em navegadores/sistemas que não suportam o esquema "intent://" (ex.: iOS),
+// usa o link da loja como alternativa direta.
+function mdAbrirAppPorPacote(packageName, playStoreUrl){
+  try{
+    const isAndroid = /android/i.test(navigator.userAgent || "");
+    if(isAndroid){
+      const intentUrl = "intent://#Intent;package=" + packageName + ";end";
+      let jaSaiuDoApp = false;
+      // vBeta1.27 - se a página perder o foco/visibilidade logo após a
+      // tentativa, é sinal de que o app abriu com sucesso; nesse caso,
+      // cancela o redirecionamento de fallback para a Play Store.
+      function marcarSaida(){ jaSaiuDoApp = true; }
+      window.addEventListener("blur", marcarSaida, { once: true });
+      document.addEventListener("visibilitychange", function(){
+        if(document.hidden) marcarSaida();
+      }, { once: true });
+      window.location.href = intentUrl;
+      setTimeout(function(){
+        if(jaSaiuDoApp || document.hidden) return;
+        try{ window.location.href = playStoreUrl; }catch(e){}
+      }, 1200);
+    }else{
+      window.location.href = playStoreUrl;
+    }
+  }catch(e){
+    try{ window.location.href = playStoreUrl; }catch(_e){}
+  }
+}
+function mdAbrirAppUber(){
+  mdAbrirAppPorPacote("com.ubercab.driver", "https://play.google.com/store/apps/details?id=com.ubercab.driver");
+}
+function mdAbrirApp99(){
+  mdAbrirAppPorPacote("com.app99.driver", "https://play.google.com/store/apps/details?id=com.app99.driver");
+}
+
 function applyQuickBalanceFabStateHard(){
   const fab = document.getElementById("quickBalanceFab");
   if(!fab) return;
@@ -10473,9 +10626,9 @@ function initQuickBalanceFab(){
   window.updateQuickBalanceFabUI();
 }
 
-document.addEventListener("DOMContentLoaded", function(){ initQuickBalanceFab(); try{ applyQuickBalanceFabStateHard(); }catch(e){} try{ refreshQuickBalanceFabMiniDisplay(); }catch(e){} });
+document.addEventListener("DOMContentLoaded", function(){ initQuickBalanceFab(); try{ applyQuickBalanceFabStateHard(); }catch(e){} try{ refreshQuickBalanceFabMiniDisplay(); }catch(e){} try{ aplicarVisibilidadeAtalhosApps(); }catch(e){} });
 try{ syncSaldoAtualLockWithFab(); }catch(e){}
-window.addEventListener("pageshow", function(){ try{ applyQuickBalanceFabStateHard(); }catch(e){} try{ refreshQuickBalanceFabMiniDisplay(); }catch(e){} });
+window.addEventListener("pageshow", function(){ try{ applyQuickBalanceFabStateHard(); }catch(e){} try{ refreshQuickBalanceFabMiniDisplay(); }catch(e){} try{ aplicarVisibilidadeAtalhosApps(); }catch(e){} });
 try{ syncSaldoAtualLockWithFab(); }catch(e){}
 setInterval(function(){ try{ applyQuickBalanceFabStateHard(); }catch(e){} try{ refreshQuickBalanceFabMiniDisplay(); }catch(e){} try{ syncSaldoAtualLockWithFab(); }catch(e){} }, 800);
 
@@ -12112,6 +12265,10 @@ window.addEventListener("pageshow", function(){
 
 <button type="button" id="quickBalanceFab" class="quick-balance-fab" onclick="toggleQuickBalancePanel(true)" aria-label="Atualizar saldo atual rápido"><span class="quick-balance-fab-inner"><span id="quickBalanceFabValue" class="quickBalanceFabValue quick-balance-fab-value">R$ 0</span></span></button>
 
+<!-- vBeta1.27 - atalhos para abrir os apps Uber e 99 -->
+<button type="button" id="appShortcutUber" class="app-shortcut-fab hidden" onclick="mdAbrirAppUber()" aria-label="Abrir app Uber"><span class="asf-icon">🚗</span></button>
+<button type="button" id="appShortcut99" class="app-shortcut-fab hidden" onclick="mdAbrirApp99()" aria-label="Abrir app 99"><span class="asf-icon">🚕</span></button>
+
 
 <div id="dayTurn4hOverlay" class="dayturn-overlay" onclick="if(event.target.id==='dayTurn4hOverlay')cancelVirada4hModal()"></div>
 <div id="dayTurn4hPanel" class="dayturn-panel" role="dialog" aria-modal="true" aria-labelledby="dayTurn4hTitle">
@@ -12228,6 +12385,33 @@ window.addEventListener("pageshow", function(){
   <div class="quick-balance-actions" style="margin-top:12px;">
     <button type="button" id="btnSalvarSaldoAtualMenu" onclick="salvarPreferenciaSaldoAtualButton(); return false;">Salvar</button>
     <button type="button" class="secondary" onclick="fecharSaldoAtualButtonMenu()">Fechar</button>
+  </div>
+</div>
+
+<!-- vBeta1.27 - modal de configuração dos atalhos Uber/99 -->
+<div id="atalhosAppsMenuOverlay" class="quick-balance-overlay" onclick="fecharAtalhosAppsMenu()"></div>
+<div id="atalhosAppsMenuPanel" class="quick-balance-panel" role="dialog" aria-modal="true" aria-labelledby="atalhosAppsMenuTitle">
+  <div id="atalhosAppsMenuTitle" class="quick-balance-title">Atalhos Uber e 99</div>
+  <div class="quick-balance-sub">Escolha quais botões flutuantes devem aparecer na tela para abrir os apps Uber e 99 diretamente.</div>
+  <div style="display:flex; gap:18px; align-items:center; justify-content:center; margin:14px 0;">
+    <div style="display:flex; flex-direction:column; align-items:center; gap:6px;">
+      <div class="app-shortcut-fab" style="position:static; background:#000000; color:#ffffff; border:1px solid rgba(255,255,255,0.18);"><span class="asf-icon">🚗</span></div>
+      <label class="fuel-radio" style="display:flex;align-items:center;gap:8px;">
+        <input type="checkbox" id="toggleAtalhoUberCheckbox">
+        <span>Uber</span>
+      </label>
+    </div>
+    <div style="display:flex; flex-direction:column; align-items:center; gap:6px;">
+      <div class="app-shortcut-fab" style="position:static; background:#ffdd00; color:#121212;"><span class="asf-icon">🚕</span></div>
+      <label class="fuel-radio" style="display:flex;align-items:center;gap:8px;">
+        <input type="checkbox" id="toggleAtalho99Checkbox">
+        <span>99</span>
+      </label>
+    </div>
+  </div>
+  <div class="quick-balance-actions" style="margin-top:12px;">
+    <button type="button" id="btnSalvarAtalhosApps" onclick="salvarPreferenciaAtalhosApps(); return false;">Salvar</button>
+    <button type="button" class="secondary" onclick="fecharAtalhosAppsMenu()">Fechar</button>
   </div>
 </div>
 
