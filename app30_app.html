@@ -43,7 +43,7 @@ try{
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver vBeta1.30</title>
+<title>MetaDriver vBeta1.33</title>
 <style id="md-hydration-lock">
 body.preload > *:not(#mdBootOverlay){visibility:hidden!important;}
 #mdBootOverlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#0f172a;color:#fff;z-index:2147483647;font-family:Inter,system-ui,sans-serif;font-weight:800;letter-spacing:.2px;}
@@ -1047,6 +1047,11 @@ button[onclick="salvarMeta()"]{
   color:#ef4444 !important;
   font-weight:800;
 }
+/* vBeta1.33 - cor verde para ganho/hora igual ou acima da meta configurada */
+.successText{
+  color:#22c55e !important;
+  font-weight:800;
+}
 
 .negative-value{
   color:#ef4444 !important;
@@ -1185,145 +1190,6 @@ input.negative-value, input.negative-value::placeholder{
 }
 .quick-balance-fab.idle-faded{
   opacity:.6;
-}
-
-/* vBeta1.27 - atalhos flutuantes para abrir os apps Uber e 99 direto do MetaDriver */
-.app-shortcut-fab{
-  position:fixed;
-  right:10px;
-  z-index:1150;
-  width:54px;
-  height:54px;
-  border-radius:16px;
-  border:none;
-  box-shadow:0 10px 24px rgba(0,0,0,.35);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  touch-action:none;
-  user-select:none;
-  -webkit-user-select:none;
-  transition:opacity .2s ease, transform .12s ease;
-  padding:0;
-  font-weight:900;
-  font-size:13px;
-  letter-spacing:.2px;
-}
-.app-shortcut-fab:active{ transform:scale(.94); }
-.app-shortcut-fab.hidden{
-  display:none !important;
-  pointer-events:none !important;
-  visibility:hidden !important;
-  opacity:0 !important;
-}
-#appShortcutUber{
-  top:42%;
-  background:#000000;
-  color:#ffffff;
-  border:1px solid rgba(255,255,255,0.18);
-}
-#appShortcut99{
-  top:calc(42% + 64px);
-  background:#ffffff;
-  color:#121212;
-  border:1px solid rgba(0,0,0,0.12);
-}
-.app-shortcut-fab .asf-icon{ font-size:20px; line-height:1; }
-.app-shortcut-fab .asf-icon-99{
-  font-size:19px;
-  font-weight:900;
-  font-style:italic;
-  color:#ff7a00;
-  letter-spacing:-1px;
-}
-/* vBeta1.30 - ícone do Uber Driver: nome "Uber" com seta larga embaixo,
-   reproduzindo a composição real do ícone do app (não só a seta isolada). */
-.asf-uber-stack{
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  gap:2px;
-}
-.asf-uber-word{
-  font-size:11px;
-  font-weight:800;
-  letter-spacing:-0.2px;
-  color:#ffffff;
-  line-height:1;
-}
-.asf-uber-arrow{
-  width:24px;
-  height:9px;
-}
-
-/* vBeta1.29 - modal de configuração dos atalhos Uber/99: classe própria e
-   isolada, sem herdar do .quick-balance-panel (que é de tela cheia e tem
-   regras de grid pensadas para o teclado numérico de saldo rápido — usar
-   essa classe causava o layout quebrado visto no print do usuário). */
-.app-shortcut-config-overlay{
-  position:fixed;
-  inset:0;
-  z-index:1300;
-  background:rgba(0,0,0,0.55);
-  display:none;
-}
-.app-shortcut-config-overlay.show{ display:block; }
-.app-shortcut-config-modal{
-  position:fixed;
-  left:50%;
-  top:50%;
-  transform:translate(-50%, -50%);
-  z-index:1301;
-  width:min(340px, calc(100vw - 32px));
-  background:var(--card);
-  border:1px solid var(--line);
-  border-radius:20px;
-  padding:20px;
-  box-shadow:0 20px 50px rgba(0,0,0,0.5);
-  display:none;
-}
-.app-shortcut-config-modal.show{ display:block; }
-.app-shortcut-config-title{
-  font-weight:900;
-  font-size:18px;
-  color:var(--text);
-  margin-bottom:6px;
-}
-.app-shortcut-config-sub{
-  font-size:13px;
-  opacity:0.75;
-  color:var(--text);
-  margin-bottom:16px;
-  line-height:1.35;
-}
-.app-shortcut-config-row{
-  display:flex;
-  gap:20px;
-  align-items:center;
-  justify-content:center;
-  margin:14px 0 18px;
-}
-.app-shortcut-config-item{
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  gap:8px;
-}
-.app-shortcut-config-item label{
-  display:flex;
-  align-items:center;
-  gap:6px;
-  font-size:14px;
-  color:var(--text);
-}
-.app-shortcut-config-actions{
-  display:flex;
-  gap:10px;
-}
-.app-shortcut-config-actions button{
-  flex:1;
-  margin:0;
 }
 
 .quick-balance-fab-inner{
@@ -3077,6 +2943,20 @@ body[data-tema="preto-escuro"] #btnSubGastos.active{
   color:#ff8888;
   border-color:rgba(255,80,80,0.30);
 }
+/* vBeta1.27 - faltava cor de "ativo" para Retiradas e Combustível neste
+   tema: o seletor body[data-tema="preto-escuro"] .subtab-btn (acima) tem
+   mais especificidade que o .subtab-btn.active genérico, então sem estas
+   duas regras os botões ficavam "sem cor" ao serem selecionados. */
+body[data-tema="preto-escuro"] #btnSubRetiradas.active{
+  background:rgba(130,160,255,0.25);
+  color:#aebcff;
+  border-color:rgba(130,160,255,0.35);
+}
+body[data-tema="preto-escuro"] #btnSubCombustivel.active{
+  background:rgba(181,101,29,0.30);
+  color:#e0a468;
+  border-color:rgba(181,101,29,0.40);
+}
 /* list items */
 body[data-tema="preto-escuro"] .list-item{
   background:rgba(255,255,255,0.04);
@@ -3135,6 +3015,18 @@ body[data-tema="preto-claro"] #btnSubGastos.active{
   color:#c00000;
   border-color:rgba(200,40,40,0.25);
 }
+/* vBeta1.27 - mesma correção do tema preto-escuro: Retiradas e Combustível
+   não tinham regra .active própria neste tema. */
+body[data-tema="preto-claro"] #btnSubRetiradas.active{
+  background:rgba(40,70,200,0.14);
+  color:#27328a;
+  border-color:rgba(40,70,200,0.25);
+}
+body[data-tema="preto-claro"] #btnSubCombustivel.active{
+  background:rgba(139,69,19,0.18);
+  color:#7a3c0e;
+  border-color:rgba(139,69,19,0.30);
+}
 body[data-tema="preto-claro"] .list-item{
   background:rgba(0,0,0,0.03);
   border-color:rgba(0,0,0,0.08);
@@ -3183,6 +3075,18 @@ body[data-tema="amarelo-escuro"] #btnSubGastos.active{
   background:rgba(255,80,80,0.22);
   color:#ff8888;
   border-color:rgba(255,80,80,0.30);
+}
+/* vBeta1.27 - mesma correção: Retiradas e Combustível não tinham regra
+   .active própria neste tema. */
+body[data-tema="amarelo-escuro"] #btnSubRetiradas.active{
+  background:rgba(130,160,255,0.22);
+  color:#aebcff;
+  border-color:rgba(130,160,255,0.32);
+}
+body[data-tema="amarelo-escuro"] #btnSubCombustivel.active{
+  background:rgba(181,101,29,0.30);
+  color:#e0a468;
+  border-color:rgba(181,101,29,0.40);
 }
 /* list items */
 body[data-tema="amarelo-escuro"] .list-item{
@@ -3240,6 +3144,18 @@ body[data-tema="amarelo-claro"] #btnSubGastos.active{
   background:rgba(200,40,40,0.15);
   color:#aa0000;
   border-color:rgba(200,40,40,0.20);
+}
+/* vBeta1.27 - mesma correção: Retiradas e Combustível não tinham regra
+   .active própria neste tema. */
+body[data-tema="amarelo-claro"] #btnSubRetiradas.active{
+  background:rgba(40,70,200,0.16);
+  color:#1f2a73;
+  border-color:rgba(40,70,200,0.28);
+}
+body[data-tema="amarelo-claro"] #btnSubCombustivel.active{
+  background:rgba(139,69,19,0.20);
+  color:#6e3a10;
+  border-color:rgba(139,69,19,0.32);
 }
 body[data-tema="amarelo-claro"] .list-item{
   background:rgba(0,0,0,0.04);
@@ -3977,10 +3893,9 @@ body[data-tema$="claro"] .historico-report-line{border-bottom-color:rgba(0,0,0,.
   <div class="menu-item"><button class="danger" onclick="openZerar(); closeMenu();">Zerar dados (cuidado)</button></div>
   <div class="menu-item"><button class="secondary" onclick="abrirGerenciarConta(); closeMenu();">Gerenciar conta</button></div>
   <div class="menu-item"><button class="secondary" onclick="abrirSaldoAtualButtonMenu(); closeMenu();">Botão de saldo atual</button></div>
-  <div class="menu-item"><button class="secondary" onclick="abrirAtalhosAppsMenu(); closeMenu();">Configurar atalhos Uber e 99</button></div>
   <div class="menu-item"><button class="secondary" onclick="abrirTemas(); closeMenu();">Temas</button></div>
   <div class="menu-item menu-user-row"><span class="menu-user-name" id="menuUserName">Usuário</span><button class="danger" onclick="forceLogout(); return false;">Sair</button></div>
-  <div class="menu-note" style="text-align:center;">vBeta1.30</div>
+  <div class="menu-note" style="text-align:center;">vBeta1.33</div>
 </div>
 
 
@@ -5438,7 +5353,7 @@ function mdBuildDiagnosticsObject(){
     const durableObj = mdSafeJsonParse(durableRaw);
     const diag = {
       generated_at: mdNowIso(),
-      app_version: 'MetaDriver vBeta1.30',
+      app_version: 'MetaDriver vBeta1.33',
       cloud_table: CLOUD_TABLE,
       device_id: mdEnsureDeviceId(),
       visibility_state: document.visibilityState,
@@ -7360,10 +7275,35 @@ function addNaoTrabalhado(){
   // não fecha mais o formulário
   document.getElementById("wrapListaNaoTrab").style.display = "block";
 }
+// vBeta1.32 - calcula o saldo acumulado (soma das sessões finalizadas
+// anteriores, mesmo dia) até o índice informado, sem incluir a própria
+// sessão. Usado para editar uma sessão finalizada pelo saldo TOTAL
+// acumulado até ali, em vez de exigir o valor já isolado da sessão.
+function getSaldoAcumuladoAteSessao(index){
+  const sessoes = Array.isArray(dados.ganhoHoraSessoes) ? dados.ganhoHoraSessoes : [];
+  const sessaoRef = sessoes[index];
+  const diaRefSessao = String((sessaoRef && sessaoRef.diaRef) || dados.ganhoHoraDiaRef || dataUberISO()).trim();
+  let anterior = 0;
+  for(let i = 0; i < Number(index || 0); i++){
+    const prev = sessoes[i];
+    if(!prev) continue;
+    const diaPrev = String(prev.diaRef || '').trim();
+    if(diaPrev && diaPrev !== diaRefSessao) continue;
+    anterior += Number(prev.valorTotal || 0);
+  }
+  return anterior;
+}
+
 function editarValorSessaoFinalizada(index){
   window.__editValorCtx = { tipo: 'ganhoHoraSessaoFinalizada', index };
   const item = dados.ganhoHoraSessoes && dados.ganhoHoraSessoes[index];
-  const atual = item ? Number(item.valorTotal || 0) : 0;
+  const valorIsolado = item ? Number(item.valorTotal || 0) : 0;
+  // vBeta1.32 - pré-preenche com o saldo ACUMULADO até esta sessão (igual ao
+  // que aparece como "saldo atual" na tela), não mais o valor isolado da
+  // sessão — assim o usuário edita pelo número que já vê no app, sem
+  // precisar calcular a diferença de cabeça.
+  const saldoAnterior = getSaldoAcumuladoAteSessao(index);
+  const atual = saldoAnterior + valorIsolado;
 
   const ov = document.getElementById("editValorOverlay");
   const inp = document.getElementById("editValorInput");
@@ -7413,7 +7353,7 @@ function mdCommitLancamentoMutation(reason){
   try{ atualizar(); }catch(e){}
   try{ if(typeof refreshQuickBalanceFabMiniDisplay === "function") refreshQuickBalanceFabMiniDisplay(); }catch(e){}
   try{ if(typeof updateQuickBalanceFabUI === "function") updateQuickBalanceFabUI(); }catch(e){}
-  try{ if(typeof toast === "function" && reason) console.info("MetaDriver vBeta1.30 mutation:", reason); }catch(e){}
+  try{ if(typeof toast === "function" && reason) console.info("MetaDriver vBeta1.33 mutation:", reason); }catch(e){}
 }
 
 
@@ -7587,7 +7527,13 @@ function confirmEditValor(){
     if(ctx.tipo === 'ganhoHoraSessaoFinalizada'){
       const item = dados.ganhoHoraSessoes && dados.ganhoHoraSessoes[ctx.index];
       if(item){
-        item.valorTotal = v;
+        // vBeta1.32 - o valor digitado é o saldo ACUMULADO até esta sessão
+        // (igual ao "saldo atual" mostrado na tela). Se não for a primeira
+        // sessão do dia, subtrai o acumulado das sessões anteriores para
+        // obter o valor isolado real desta sessão — mesma regra já usada
+        // para a sessão em andamento (reconfigurarSessaoEmAndamentoAposMudancaDeSessoes).
+        const saldoAnterior = getSaldoAcumuladoAteSessao(ctx.index);
+        item.valorTotal = v - saldoAnterior;
         reprocessarSessoesGanhoHora();
         reconfigurarSessaoEmAndamentoAposMudancaDeSessoes();
         salvar();
@@ -7597,9 +7543,17 @@ function confirmEditValor(){
       const dia = String(ctx.diaUber || '').trim();
       const hist = (dados.ganhoHoraHistorico || []).find(function(h){ return String((h && h.diaUber) || '').trim() === dia; });
       if(hist && Array.isArray(hist.sessoes) && hist.sessoes[ctx.index]){
-        hist.sessoes[ctx.index].valorTotal = v;
+        // vBeta1.32 - mesma regra aplicada ao histórico: o valor digitado é
+        // o saldo acumulado até esta sessão dentro daquele dia.
+        let saldoAnteriorHist = 0;
+        for(let i = 0; i < Number(ctx.index || 0); i++){
+          const prevSess = hist.sessoes[i];
+          if(prevSess) saldoAnteriorHist += Number(prevSess.valorTotal || 0);
+        }
+        const valorIsoladoHist = v - saldoAnteriorHist;
+        hist.sessoes[ctx.index].valorTotal = valorIsoladoHist;
         const horasSessao = Number(hist.sessoes[ctx.index].tempoDecorrido || 0);
-        hist.sessoes[ctx.index].ganhoHora = horasSessao > 0 ? (v / horasSessao) : 0;
+        hist.sessoes[ctx.index].ganhoHora = horasSessao > 0 ? (valorIsoladoHist / horasSessao) : 0;
         reprocessarResumoHistoricoGanhoHora(dia);
         salvar();
         atualizar();
@@ -8161,8 +8115,18 @@ function limparHistoricoGanhoHora(){
 function editarValorSessaoHistorico(diaUber, indice){
   window.__editValorCtx = { tipo: 'ganhoHoraSessaoHistorico', diaUber: String(diaUber || '').trim(), index: Number(indice || 0) };
   const item = (dados.ganhoHoraHistorico || []).find(function(h){ return String((h && h.diaUber) || '').trim() === String(diaUber || '').trim(); });
-  const sessao = item && Array.isArray(item.sessoes) ? item.sessoes[Number(indice || 0)] : null;
-  const atual = sessao ? Number(sessao.valorTotal || 0) : 0;
+  const sessoesHist = item && Array.isArray(item.sessoes) ? item.sessoes : [];
+  const idx = Number(indice || 0);
+  const sessao = sessoesHist[idx] || null;
+  const valorIsolado = sessao ? Number(sessao.valorTotal || 0) : 0;
+  // vBeta1.32 - pré-preenche com o saldo acumulado até esta sessão dentro do
+  // dia do histórico, mesma regra aplicada às sessões finalizadas do dia atual.
+  let saldoAnteriorHist = 0;
+  for(let i = 0; i < idx; i++){
+    const prevSess = sessoesHist[i];
+    if(prevSess) saldoAnteriorHist += Number(prevSess.valorTotal || 0);
+  }
+  const atual = saldoAnteriorHist + valorIsolado;
   const ov = document.getElementById("editValorOverlay");
   const inp = document.getElementById("editValorInput");
   if(!ov || !inp) return;
@@ -9197,7 +9161,7 @@ function exportarRelatorioPDF(){
       <script>
         setTimeout(()=>window.print(), 250);
       <\/script>
-    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver vBeta1.30 · app</div>
+    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver vBeta1.33 · app</div>
 
 
 <script>
@@ -9489,7 +9453,12 @@ function atualizar(){
         const indiceAtual = sessoes.length + 1;
         const tituloSessao = getNomeSessao(indiceAtual) + " sessão";
         const valorClass = valorSessaoAtual < 0 ? "dangerText" : "warning";
-        const horaClass = ganhoHora < 0 ? "dangerText" : "warning";
+        // vBeta1.33 - cor do ganho/hora em relação à meta configurada
+        // (Configurar Meta > Ganho por hora): vermelho se abaixo, verde se
+        // igual ou acima. Atualiza em tempo real, já que esta seção é
+        // recalculada periodicamente enquanto a sessão está em andamento.
+        const ganhoHoraMetaRef = Math.max(0, Number(dados.ganhoHoraManual || 40));
+        const horaClass = ganhoHora < ganhoHoraMetaRef ? "dangerText" : "successText";
         resumoEl.innerHTML =
           "<div class='md-sessao-andamento-glow'><b>" + tituloSessao + " em andamento</b><br>" +
           "Hora de início: " + horario + "<br>" +
@@ -9518,7 +9487,9 @@ function atualizar(){
           sessoesEl.innerHTML = sessoesVisiveis.map((item, idx) => {
             const s = recalcularSessaoGanhoHora(item.s, item.originalIdx);
             const valorClass = Number(s.valorTotal || 0) < 0 ? "dangerText" : "warning";
-            const horaClass = Number(s.ganhoHora || 0) < 0 ? "dangerText" : "warning";
+            // vBeta1.33 - cor do ganho/hora em relação à meta configurada.
+            const ganhoHoraMetaRefSess = Math.max(0, Number(dados.ganhoHoraManual || 40));
+            const horaClass = Number(s.ganhoHora || 0) < ganhoHoraMetaRefSess ? "dangerText" : "successText";
             const tempoDecorrido = Number(s.tempoDecorrido || 0);
             return `<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--line);position:relative;padding-right:40px"><div class="action-menu" style="position:absolute;top:8px;right:0"><button class="kebab-btn" type="button" onclick="event.stopPropagation(); toggleItemMenu('menu_sessao_${item.originalIdx}', this)">≡</button><div class="menu-pop" id="menu_sessao_${item.originalIdx}"><button type="button" onclick="editarHorarioSessaoFinalizada(${item.originalIdx}, 'inicio')">Editar hora de início</button><button type="button" onclick="editarHorarioSessaoFinalizada(${item.originalIdx}, 'fim')">Editar hora de término</button><button type="button" onclick="editarValorSessaoFinalizada(${item.originalIdx})">Editar valor</button><button type="button" onclick="fecharMenuSessaoFinalizada(${item.originalIdx})">Excluir sessão</button></div></div><b>${getNomeSessao(idx + 1)} sessão</b><br>Hora de início: ${s.inicio || "-"}<br>Hora de término: ${s.fim || "-"}<br>Valor total: <span class="${valorClass}">R$ ${Number(s.valorTotal || 0).toFixed(2)}</span><br>Ganho por hora: <span class="${horaClass}">R$ ${Number(s.ganhoHora || 0).toFixed(2)}</span><br>Tempo decorrido: <span class="warning">${formatHorasMinutos(tempoDecorrido)}</span></div>`;
           }).join("");
@@ -9554,7 +9525,9 @@ function atualizar(){
           const sessoesHist = Array.isArray(item.sessoes) ? item.sessoes : [];
           const detalhes = aberto ? (sessoesHist.length ? sessoesHist.map(function(s, idxSess){
             const valorSessClass = Number(s.valorTotal || 0) < 0 ? "dangerText" : "warning";
-            const ghSessClass = Number(s.ganhoHora || 0) < 0 ? "dangerText" : "warning";
+            // vBeta1.33 - cor do ganho/hora em relação à meta configurada.
+            const ganhoHoraMetaRefHist = Math.max(0, Number(dados.ganhoHoraManual || 40));
+            const ghSessClass = Number(s.ganhoHora || 0) < ganhoHoraMetaRefHist ? "dangerText" : "successText";
             const tempoSess = Number(s.tempoDecorrido || 0);
             return `<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--line);position:relative;padding-right:40px"><div class="action-menu" style="position:absolute;top:8px;right:0"><button class="kebab-btn" type="button" onclick="event.stopPropagation(); toggleItemMenu('menu_hist_sessao_${dia}_${idxSess}', this)">≡</button><div class="menu-pop" id="menu_hist_sessao_${dia}_${idxSess}"><!-- v57 - menu completo sessão histórico --><button type="button" onclick="editarHorarioSessaoHistorico('${dia}', ${idxSess}, 'inicio')">Editar hora de início</button><button type="button" onclick="editarHorarioSessaoHistorico('${dia}', ${idxSess}, 'fim')">Editar hora de término</button><button type="button" onclick="editarValorSessaoHistorico('${dia}', ${idxSess})">Editar valor</button><button type="button" class="danger" onclick="excluirSessaoHistorico('${dia}', ${idxSess})">Excluir sessão</button></div></div><b>${getNomeSessao(idxSess + 1)} sessão</b><br>Hora de início: ${s.inicio || '-'}<br>Hora de término: ${s.fim || '-'}<br>Valor total: <span class="${valorSessClass}">R$ ${Number(s.valorTotal || 0).toFixed(2)}</span><br>Ganho por hora: <span class="${ghSessClass}">R$ ${Number(s.ganhoHora || 0).toFixed(2)}</span><br>Tempo decorrido: <span class="warning">${formatHorasMinutos(tempoSess)}</span></div>`;
           }).join('') : "<div style='padding-top:6px'>Sem sessões salvas nesse dia.</div>") : '';
@@ -10424,101 +10397,6 @@ function persistQuickBalanceFabPref(ativo){
   }
 }
 
-// vBeta1.27 - atalhos para abrir os apps Uber e 99 direto do MetaDriver.
-const ATALHO_UBER_KEY = "metadriver_atalho_uber_ativo";
-const ATALHO_99_KEY = "metadriver_atalho_99_ativo";
-
-function getAtalhoUberPref(){
-  try{
-    const raw = localStorage.getItem(ATALHO_UBER_KEY);
-    if(raw === "0") return false;
-    if(raw === "1") return true;
-  }catch(e){}
-  if(window.dados && typeof dados.atalhoUberAtivo === "boolean") return dados.atalhoUberAtivo;
-  return false;
-}
-function getAtalho99Pref(){
-  try{
-    const raw = localStorage.getItem(ATALHO_99_KEY);
-    if(raw === "0") return false;
-    if(raw === "1") return true;
-  }catch(e){}
-  if(window.dados && typeof dados.atalho99Ativo === "boolean") return dados.atalho99Ativo;
-  return false;
-}
-function persistAtalhoUberPref(ativo){
-  try{ localStorage.setItem(ATALHO_UBER_KEY, ativo ? "1" : "0"); }catch(e){}
-  if(window.dados){ dados.atalhoUberAtivo = !!ativo; try{ salvar(); }catch(e){} }
-}
-function persistAtalho99Pref(ativo){
-  try{ localStorage.setItem(ATALHO_99_KEY, ativo ? "1" : "0"); }catch(e){}
-  if(window.dados){ dados.atalho99Ativo = !!ativo; try{ salvar(); }catch(e){} }
-}
-
-function aplicarVisibilidadeAtalhosApps(){
-  try{
-    const btnUber = document.getElementById("appShortcutUber");
-    const btn99 = document.getElementById("appShortcut99");
-    const uberAtivo = getAtalhoUberPref();
-    const n99Ativo = getAtalho99Pref();
-    if(btnUber) btnUber.classList.toggle("hidden", !uberAtivo);
-    if(btn99) btn99.classList.toggle("hidden", !n99Ativo);
-    // Se só um estiver ativo, ele ocupa a posição central (top:42%); se os
-    // dois estiverem ativos, o segundo fica abaixo do primeiro.
-    if(btn99){
-      btn99.style.top = uberAtivo ? "calc(42% + 64px)" : "42%";
-    }
-  }catch(e){}
-}
-
-function abrirAtalhosAppsMenu(){
-  const overlay = document.getElementById("atalhosAppsMenuOverlay");
-  const panel = document.getElementById("atalhosAppsMenuPanel");
-  const cbUber = document.getElementById("toggleAtalhoUberCheckbox");
-  const cb99 = document.getElementById("toggleAtalho99Checkbox");
-  if(cbUber) cbUber.checked = getAtalhoUberPref();
-  if(cb99) cb99.checked = getAtalho99Pref();
-  if(overlay) overlay.classList.add("show");
-  if(panel) panel.classList.add("show");
-}
-function fecharAtalhosAppsMenu(){
-  const overlay = document.getElementById("atalhosAppsMenuOverlay");
-  const panel = document.getElementById("atalhosAppsMenuPanel");
-  if(overlay) overlay.classList.remove("show");
-  if(panel) panel.classList.remove("show");
-}
-function salvarPreferenciaAtalhosApps(){
-  const cbUber = document.getElementById("toggleAtalhoUberCheckbox");
-  const cb99 = document.getElementById("toggleAtalho99Checkbox");
-  persistAtalhoUberPref(!!(cbUber && cbUber.checked));
-  persistAtalho99Pref(!!(cb99 && cb99.checked));
-  aplicarVisibilidadeAtalhosApps();
-  fecharAtalhosAppsMenu();
-  toast("✅ Atalhos atualizados.");
-}
-
-// vBeta1.27 - tenta abrir o app nativo pelo pacote Android; se não estiver
-// instalado, o próprio sistema cai automaticamente para a Play Store.
-// Em navegadores/sistemas que não suportam o esquema "intent://" (ex.: iOS),
-// usa o link da loja como alternativa direta.
-function mdAbrirAppPorPacote(packageName, playStoreUrl){
-  try{
-    const intentUrl=(packageName==='com.ubercab.driver') ? 'intent://open/#Intent;component=com.ubercab.driver/com.ubercab.carbon.core.CarbonActivity;end' : 'intent://open/#Intent;package='+packageName+';end';
-    window.location.href=intentUrl;
-    setTimeout(function(){
-      window.location.href=playStoreUrl;
-    },1500);
-  }catch(e){
-    try{ window.location.href=playStoreUrl; }catch(_){}
-  }
-}
-function mdAbrirAppUber(){
-  mdAbrirAppPorPacote("com.ubercab.driver", "https://play.google.com/store/apps/details?id=com.ubercab.driver");
-}
-function mdAbrirApp99(){
-  mdAbrirAppPorPacote("com.app99.driver", "https://play.google.com/store/apps/details?id=com.app99.driver");
-}
-
 function applyQuickBalanceFabStateHard(){
   const fab = document.getElementById("quickBalanceFab");
   if(!fab) return;
@@ -10735,9 +10613,9 @@ function initQuickBalanceFab(){
   window.updateQuickBalanceFabUI();
 }
 
-document.addEventListener("DOMContentLoaded", function(){ initQuickBalanceFab(); try{ applyQuickBalanceFabStateHard(); }catch(e){} try{ refreshQuickBalanceFabMiniDisplay(); }catch(e){} try{ aplicarVisibilidadeAtalhosApps(); }catch(e){} });
+document.addEventListener("DOMContentLoaded", function(){ initQuickBalanceFab(); try{ applyQuickBalanceFabStateHard(); }catch(e){} try{ refreshQuickBalanceFabMiniDisplay(); }catch(e){} });
 try{ syncSaldoAtualLockWithFab(); }catch(e){}
-window.addEventListener("pageshow", function(){ try{ applyQuickBalanceFabStateHard(); }catch(e){} try{ refreshQuickBalanceFabMiniDisplay(); }catch(e){} try{ aplicarVisibilidadeAtalhosApps(); }catch(e){} });
+window.addEventListener("pageshow", function(){ try{ applyQuickBalanceFabStateHard(); }catch(e){} try{ refreshQuickBalanceFabMiniDisplay(); }catch(e){} });
 try{ syncSaldoAtualLockWithFab(); }catch(e){}
 setInterval(function(){ try{ applyQuickBalanceFabStateHard(); }catch(e){} try{ refreshQuickBalanceFabMiniDisplay(); }catch(e){} try{ syncSaldoAtualLockWithFab(); }catch(e){} }, 800);
 
@@ -10926,6 +10804,26 @@ function bindSectionHeaders(){
 
 try{ ensureGanhoHoraDiaAtual(); }catch(e){}
 mdInitialHydrateAndRender();
+
+// vBeta1.33 - ao focar (tocar) em qualquer campo de texto/número editável do
+// app, seleciona automaticamente todo o conteúdo já digitado. Isso faz com
+// que a primeira tecla digitada substitua o valor anterior por completo, em
+// vez de inserir o cursor no meio/fim do texto — facilita digitar enquanto
+// dirige, sem precisar apagar o conteúdo antigo manualmente antes.
+// Campos "readonly" (que abrem teclados/seletores próprios) e os campos
+// auxiliares ocultos (tabindex="-1"/aria-hidden) são deliberadamente
+// ignorados, já que não são editados diretamente pelo usuário.
+document.addEventListener("focusin", function(e){
+  try{
+    const el = e.target;
+    if(!el || !el.tagName) return;
+    const isTextOrNumberInput = el.tagName === "INPUT" && (el.type === "text" || el.type === "number");
+    if(!isTextOrNumberInput) return;
+    if(el.readOnly || el.disabled) return;
+    if(el.getAttribute("aria-hidden") === "true" || el.tabIndex === -1) return;
+    setTimeout(function(){ try{ el.select(); }catch(err){} }, 0);
+  }catch(err){}
+}, true);
 
 // vBeta1.25 - REDE DE SEGURANÇA ABSOLUTA: garante que window.__mdHydrated
 // nunca fique indefinidamente "false" por causa de qualquer travamento de
@@ -12432,15 +12330,6 @@ window.addEventListener("pageshow", function(){
 
 <button type="button" id="quickBalanceFab" class="quick-balance-fab" onclick="toggleQuickBalancePanel(true)" aria-label="Atualizar saldo atual rápido"><span class="quick-balance-fab-inner"><span id="quickBalanceFabValue" class="quickBalanceFabValue quick-balance-fab-value">R$ 0</span></span></button>
 
-<!-- vBeta1.27 - atalhos para abrir os apps Uber e 99 -->
-<button type="button" id="appShortcutUber" class="app-shortcut-fab hidden" onclick="mdAbrirAppUber()" aria-label="Abrir app Uber">
-  <span class="asf-uber-stack">
-    <span class="asf-uber-word">Uber</span>
-    <svg class="asf-uber-arrow" viewBox="0 0 28 10" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 5h22M17 1l6 4-6 4" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-  </span>
-</button>
-<button type="button" id="appShortcut99" class="app-shortcut-fab hidden" onclick="mdAbrirApp99()" aria-label="Abrir app 99"><span class="asf-icon asf-icon-99">99</span></button>
-
 
 <div id="dayTurn4hOverlay" class="dayturn-overlay" onclick="if(event.target.id==='dayTurn4hOverlay')cancelVirada4hModal()"></div>
 <div id="dayTurn4hPanel" class="dayturn-panel" role="dialog" aria-modal="true" aria-labelledby="dayTurn4hTitle">
@@ -12557,38 +12446,6 @@ window.addEventListener("pageshow", function(){
   <div class="quick-balance-actions" style="margin-top:12px;">
     <button type="button" id="btnSalvarSaldoAtualMenu" onclick="salvarPreferenciaSaldoAtualButton(); return false;">Salvar</button>
     <button type="button" class="secondary" onclick="fecharSaldoAtualButtonMenu()">Fechar</button>
-  </div>
-</div>
-
-<!-- vBeta1.29 - modal de configuração dos atalhos Uber/99 (classes isoladas, sem herdar do painel de saldo rápido) -->
-<div id="atalhosAppsMenuOverlay" class="app-shortcut-config-overlay" onclick="fecharAtalhosAppsMenu()"></div>
-<div id="atalhosAppsMenuPanel" class="app-shortcut-config-modal" role="dialog" aria-modal="true" aria-labelledby="atalhosAppsMenuTitle">
-  <div id="atalhosAppsMenuTitle" class="app-shortcut-config-title">Atalhos Uber e 99</div>
-  <div class="app-shortcut-config-sub">Escolha quais botões flutuantes devem aparecer na tela para abrir os apps Uber e 99 diretamente.</div>
-  <div class="app-shortcut-config-row">
-    <div class="app-shortcut-config-item">
-      <div class="app-shortcut-fab" style="position:static; background:#000000; color:#ffffff; border:1px solid rgba(255,255,255,0.18);">
-        <span class="asf-uber-stack">
-          <span class="asf-uber-word">Uber</span>
-          <svg class="asf-uber-arrow" viewBox="0 0 28 10" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 5h22M17 1l6 4-6 4" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </span>
-      </div>
-      <label>
-        <input type="checkbox" id="toggleAtalhoUberCheckbox">
-        <span>Uber</span>
-      </label>
-    </div>
-    <div class="app-shortcut-config-item">
-      <div class="app-shortcut-fab" style="position:static; background:#ffffff; color:#121212; border:1px solid rgba(0,0,0,0.12);"><span class="asf-icon asf-icon-99">99</span></div>
-      <label>
-        <input type="checkbox" id="toggleAtalho99Checkbox">
-        <span>99</span>
-      </label>
-    </div>
-  </div>
-  <div class="app-shortcut-config-actions">
-    <button type="button" id="btnSalvarAtalhosApps" onclick="salvarPreferenciaAtalhosApps(); return false;">Salvar</button>
-    <button type="button" class="secondary" onclick="fecharAtalhosAppsMenu()">Fechar</button>
   </div>
 </div>
 

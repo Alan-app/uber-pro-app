@@ -1,38 +1,34 @@
-vBeta1.30 - Ícone do Uber corrigido (com o nome "Uber"), e esclarecimento sobre abertura do app
-- Corrigido o ícone do botão Uber: agora mostra o nome "Uber" em texto, com a seta embaixo (composição igual ao ícone real do app), em vez de só a seta isolada. Aplicado de forma idêntica no botão flutuante e na prévia do modal de configuração.
-- Investigada a fundo a questão de continuar abrindo a Play Store em vez do aplicativo diretamente. Confirmado, com pesquisa técnica e documentação oficial do Android/Chrome, que não existe forma pública de abrir o app específico do Uber Driver ou do 99 Motorista direto pelo nome do pacote sem o "esquema" (scheme) customizado que cada app usa internamente — e esses esquemas não são divulgados publicamente pela Uber ou pela 99. Sem esse dado, o navegador nunca consegue confirmar o destino do link, e por isso sempre usa o link de respaldo (Play Store), mesmo com o app instalado.
-- Simplificada a função de abertura para ir direto à página do app na Play Store, que mostra o botão "Abrir" (em vez de "Instalar") quando o app já está instalado — exige um toque extra, mas funciona de forma confiável, sem depender de uma tentativa que nunca daria certo.
-- Alternativas mais avançadas (engenharia reversa do aplicativo para descobrir o esquema interno, ou serviços de terceiros especializados em deep linking) foram discutidas com o usuário, que optou por manter a solução simples e sem custo.
-- Conforme prática estabelecida: funções relacionadas à virada das 4h, sincronização com a nuvem, lançamento por voz e lançamentos manuais foram comparadas byte a byte contra a versão anterior — todas confirmadas idênticas.
+vBeta1.33 - Cor do Ganho/hora baseada na meta + campos sempre selecionados ao focar
+- Ganho por hora (sessão em andamento, sessão finalizada do dia e sessões do histórico) agora aparece em VERMELHO quando está abaixo do valor de "Ganho por hora" configurado em Configurar Meta, e em VERDE quando está igual ou acima. Na sessão em andamento, isso é recalculado em tempo real, junto com a atualização periódica já existente da tela.
+- Em todos os campos de texto e número editáveis do app, ao tocar/focar o campo, o conteúdo já digitado agora é automaticamente selecionado por completo. Isso faz a primeira tecla digitada substituir o valor anterior inteiro, em vez de só posicionar o cursor — facilita digitar enquanto dirige, sem precisar apagar o conteúdo antigo manualmente antes. Campos somente leitura (que abrem teclados/seletores próprios) e campos auxiliares ocultos do app não são afetados.
+- Testado em navegador real: confirmado que tocar e digitar substitui o conteúdo por completo, tanto em campos de texto quanto em campos numéricos, e que campos somente leitura permanecem intocados.
+- Conforme prática estabelecida: 23 funções relacionadas à virada das 4h, sincronização com a nuvem, lançamento por voz e edição de sessões foram comparadas byte a byte contra a versão anterior — todas confirmadas idênticas.
 - Nenhuma outra tela ou fluxo foi alterada.
-- Base oficial: vBeta1.29.
+- Base oficial: vBeta1.32.
 
-vBeta1.29 - Atalhos Uber/99: corrige modal quebrado, ícones reais e abertura direta do app
-- Corrigido o modal de configuração "Atalhos Uber e 99", que aparecia com layout quebrado (botões Salvar/Fechar gigantes ocupando a tela). Causa: o modal reutilizava a mesma classe CSS do painel de saldo rápido (tela cheia, com regras de grid para o teclado numérico), que não é compatível com um modal simples. Criada uma classe própria e isolada, sem essa herança indevida.
-- Substituídos os ícones genéricos (emoji de carro/táxi) pelos ícones reais dos aplicativos: seta branca em fundo preto para o Uber Driver, e "99" em laranja sobre fundo branco para o 99 Motorista — conforme os ícones reais enviados pelo usuário.
-- Corrigida a abertura direta dos aplicativos: a sintaxe usada para o link de abertura ("intent://") estava incompleta (faltavam os parâmetros corretos de ação), fazendo o Android nunca conseguir abrir o app diretamente e sempre cair na Play Store. Corrigida a sintaxe com os parâmetros corretos (equivalente a tocar no ícone do app), com a Play Store agora servindo apenas como respaldo automático caso o app não esteja instalado.
-- Conforme prática estabelecida: funções relacionadas à virada das 4h, sincronização com a nuvem, lançamento por voz e lançamentos manuais foram comparadas byte a byte contra a versão anterior antes da entrega — todas confirmadas idênticas.
+vBeta1.32 - Editar valor de sessão finalizada: agora pelo saldo acumulado, não pelo valor isolado
+- Solicitado: ao editar o valor de uma sessão finalizada que não é a primeira do dia, o usuário precisava calcular manualmente a diferença em relação às sessões anteriores antes de digitar (já que o campo guardava o ganho isolado da sessão, não o saldo total que aparece na tela).
+- Corrigido: o campo de edição agora mostra o saldo ACUMULADO até aquela sessão (soma das sessões anteriores do mesmo dia + a própria sessão) — o mesmo número que já aparece como "saldo atual" na tela. Ao salvar, o app calcula automaticamente a diferença e guarda o valor isolado correto internamente, sem o usuário precisar fazer essa conta.
+- Essa correção aplica a MESMA regra que já existia para a sessão em andamento (que já subtraía o saldo das sessões anteriores automaticamente) — agora sessões finalizadas (do dia atual e do histórico) seguem a mesma lógica.
+- A primeira sessão do dia continua funcionando exatamente como antes (sem nenhuma subtração, já que não há sessão anterior).
+- Testado o cenário completo (3 sessões no dia, editando a segunda pelo saldo acumulado) confirmando que o valor isolado calculado e salvo internamente está correto, e que a primeira sessão não foi afetada.
+- Conforme prática estabelecida: 20 funções relacionadas à virada das 4h, sincronização com a nuvem, lançamento por voz e cálculo de saldo foram comparadas byte a byte contra a versão anterior — todas confirmadas idênticas.
 - Nenhuma outra tela ou fluxo foi alterada.
-- Base oficial: vBeta1.28.
+- Base oficial: vBeta1.31.
 
-vBeta1.28 - CORREÇÃO CRÍTICA: lançamento por voz funcionava uma vez e falhava na seguinte (causa raiz real, identificada por vídeo)
-- Investigado, a partir de um vídeo enviado pelo usuário mostrando o problema na prática, o padrão intermitente "funciona uma vez, falha na próxima" no lançamento por voz.
-- Causa raiz identificada com precisão: ao comandar por voz o mesmo tipo de lançamento (ex.: "Gastos") em sequência, sem nunca clicar em Salvar entre as tentativas, a aba e o formulário já estavam abertos da tentativa anterior. As funções usadas para abrir a aba e o formulário (originalmente pensadas para clique manual do usuário) ALTERNAM entre abrir e fechar quando já estão abertas — então a segunda tentativa de voz fechava a aba e limpava os campos um instante antes do preenchimento ocorrer, mesmo o app reportando "Preenchido" (o preenchimento ocorre em um pequeno atraso interno, sobre uma aba que já tinha sido fechada).
-- Confirmado o padrão estritamente alternado: tentativa 1 funciona (aba estava fechada, abre normalmente), tentativa 2 falha (aba já estava aberta, a chamada fecha em vez de abrir), tentativa 3 funcionaria de novo (aba fechada pela tentativa 2), e assim por diante.
-- Corrigido: criadas versões dedicadas das funções de abertura de aba e de formulário, exclusivas para o lançamento por voz, que SEMPRE garantem abertura — nunca alternam para fechar, independente do estado anterior.
-- As funções originais (usadas no clique manual dos botões Ganhos/Gastos/Retiradas/Combustível e "Adicionar") permanecem completamente intactas e com o mesmo comportamento de sempre.
-- Testado o cenário exato do vídeo: quatro comandos de voz em sequência, sem clicar em Salvar entre eles, incluindo troca de tipo de lançamento — todos preencheram corretamente, sem nenhuma falha alternada.
-- Conforme prática estabelecida: 31 funções relacionadas à virada das 4h, sincronização com a nuvem, atalhos de apps e lançamentos manuais foram comparadas byte a byte contra a vBeta1.27 antes da entrega — todas confirmadas idênticas.
+vBeta1.31 - Mescla: correção de tema (Retiradas/Combustível) + correção do bug de voz
+- Recebida e validada uma correção de tema (vBeta1.27) feita pelo usuário em outra sessão: nos 4 temas visuais, os botões Retiradas e Combustível não recebiam cor de destaque ao serem selecionados. Confirmada por comparação byte a byte que essa correção é exclusivamente CSS, sem alterar nenhuma lógica, e validada visualmente nos 4 temas.
+- Identificado que essa versão foi criada a partir de uma base anterior à correção do bug de lançamento por voz "funciona uma vez, falha na próxima" (vBeta1.28). A pedido do usuário, essa correção de voz foi aplicada por cima das correções de tema, preservando ambas.
+- Confirmado, por comparação byte a byte com a vBeta1.26, que nenhuma função crítica foi alterada além das 5 linhas do lançamento por voz, substituídas pelas versões corrigidas já validadas anteriormente.
+- Testado novamente o cenário do bug de voz (múltiplos comandos em sequência, sem clicar em Salvar entre eles): confirmado funcionando sem falhas alternadas.
 - Nenhuma outra tela ou fluxo foi alterada.
-- Base oficial: vBeta1.27.
+- Base oficial: vBeta1.27 (recebida do usuário) + correção de voz da vBeta1.28.
 
-vBeta1.27 - Atalhos flutuantes para abrir os apps Uber e 99
-- Adicionados dois botões flutuantes, quadrados com cantos arredondados, fixos na lateral direita da tela (permanecem visíveis mesmo rolando a página), nas cores oficiais de marca: preto/branco para Uber, amarelo/preto para 99.
-- Ao tocar, o botão tenta abrir o aplicativo nativo correspondente (Uber Driver ou 99 Motorista); se o app não estiver instalado, abre automaticamente a página da Play Store para instalação.
-- Nova opção no menu "Configurar atalhos Uber e 99", que abre um modal com a prévia visual de cada botão e uma caixa de seleção para cada um — permitindo mostrar nenhum, um, o outro, ou os dois simultaneamente.
-- A preferência escolhida é salva e sincronizada com a nuvem, assim como as demais configurações do app.
-- Corrigido durante o desenvolvimento: o redirecionamento de respaldo para a Play Store (usado quando o app não abre) poderia disparar mesmo depois do aplicativo abrir corretamente; agora isso é detectado e cancelado automaticamente.
-- Conforme prática já estabelecida, todas as funções relacionadas à virada das 4h, sincronização com a nuvem e cálculo de saldo foram comparadas byte a byte contra a versão anterior (vBeta1.26) antes da entrega, confirmando que nada que já funcionava foi alterado.
+vBeta1.27 - CORREÇÃO: botões de Retiradas e Combustível em Lançamentos ficavam "sem cor" ao serem selecionados em 4 dos temas visuais
+- Investigado relato de que, na tela de Lançamentos, os botões Ganho/Gasto/Retirada/Combustível deveriam mudar de cor ao serem clicados (selecionados), mas Combustível era o único que mantinha sua cor de destaque — os demais pareciam "perder a cor" ao ficar ativos.
+- Causa raiz encontrada: nos 4 temas visuais "preto-escuro", "preto-claro", "amarelo-escuro" e "amarelo-claro", cada bloco de tema redefine a cor base dos botões da aba (.subtab-btn) e só tinha regras de cor para o estado selecionado (.active) dos botões Ganhos e Gastos — Retiradas e Combustível nunca receberam essa regra dentro de cada tema. Como o seletor de tema tem mais força (especificidade) que a regra genérica de "selecionado", os dois botões ficavam sem destaque visual ao serem clicados nesses 4 temas. Combustível tinha uma proteção parcial fora dos blocos de tema (por isso parecia funcionar), mas Retiradas não tinha proteção alguma.
+- Corrigido: adicionadas as 8 regras de cor faltantes (Retiradas e Combustível × 4 temas), usando a mesma paleta e convenção visual já estabelecida para Ganhos (verde) e Gastos (vermelho) em cada tema — Retiradas em azul/roxo e Combustível em marrom.
+- Alteração 100% CSS/visual. Nenhuma função de lógica foi tocada — confirmado por comparação byte a byte da função openLancSection (responsável por abrir/fechar e marcar os botões como selecionados) contra a vBeta1.26, e validação de sintaxe (chaves balanceadas e node --check nos scripts) no arquivo completo.
 - Nenhuma outra tela ou fluxo foi alterada.
 - Base oficial: vBeta1.26.
 

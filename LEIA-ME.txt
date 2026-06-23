@@ -1,87 +1,83 @@
-MetaDriver vBeta1.30
+MetaDriver vBeta1.33
 
 Solicitado:
-- O ícone do 99 ficou correto, mas o ícone do Uber estava só com a seta (sem o nome "Uber"), pedido para deixar idêntico ao ícone real do app.
-- Confirmado que os dois botões ainda continuavam abrindo a Play Store em vez do aplicativo diretamente, mesmo depois da correção anterior.
+1) Ganho por hora (sessão em andamento ou finalizada) deveria ficar vermelho quando estiver abaixo do valor definido na meta, e verde quando estiver igual ou acima. No caso da sessão em andamento, isso precisa atualizar em tempo real.
+2) Em todos os campos do app onde se digita texto ou valores, ao clicar/tocar, o campo não deveria mostrar o cursor no meio/fim do conteúdo — em vez disso, o conteúdo deveria já aparecer selecionado, de forma que começar a digitar limpa automaticamente o que estava lá e insere o que está sendo digitado. Isso facilita digitar enquanto dirige.
 
-Sobre o ícone do Uber:
-- Confirmado, em fonte de design da marca, que o ícone real do app Uber Driver tem o nome "Uber" escrito na fonte própria da marca, com uma seta grande embaixo — não é só a seta isolada.
-- Corrigido o ícone: agora mostra "Uber" em texto, com a seta embaixo, igual ao app real. Aplicado de forma idêntica no botão flutuante e na prévia do modal de configuração.
+Confirmado com o usuário antes de implementar:
+- O "valor definido na meta" é o campo "Ganho por hora" dentro de Configurar Meta (ex.: R$40), já usado hoje para calcular o tempo necessário para bater a meta diária.
 
-Sobre a abertura direta do aplicativo (investigação aprofundada):
-- Pesquisada a documentação oficial do Android e do Chrome sobre como abrir aplicativos diretamente de uma página web. Confirmado que esse mecanismo ("intent://") exige conhecer um código interno específico de cada aplicativo (chamado de "esquema" ou "scheme"), que cada app deve registrar e que normalmente não é divulgado publicamente.
-- Pesquisado se a Uber ou a 99 divulgam esse código para o aplicativo de motorista: não foi encontrada nenhuma documentação pública sobre isso. A Uber até documenta esse mecanismo, mas apenas para o aplicativo de passageiro (rider), e exige um cadastro de desenvolvedor que o usuário não possui.
-- Concluído que, sem esse código interno (que as empresas não divulgam), o navegador nunca consegue confirmar com segurança qual aplicativo deve abrir, e por isso sempre usa o link de respaldo (Play Store) — mesmo com o aplicativo já instalado no celular. Essa não é uma falha de implementação, é uma limitação real de quem não tem acesso a esse código interno.
-- Apresentadas três alternativas ao usuário: (1) tentar descobrir o código por engenharia reversa do aplicativo, tecnicamente possível mas não viável no ambiente atual de trabalho (sem acesso à internet para baixar o aplicativo); (2) usar serviços especializados de terceiros (geralmente pagos); (3) manter a solução simples, indo direto para a página do aplicativo na Play Store. O usuário optou por ouvir as alternativas e, com a confirmação de que a Play Store já mostra "Abrir" (não "Instalar") quando o app está instalado, decidiu manter a solução simples.
+Feito (item 1):
+- Identificado que a sessão em andamento já calculava sua cor comparando apenas se o ganho por hora era negativo. Alterada essa comparação para usar o valor configurado em "Ganho por hora" da meta: vermelho se abaixo, verde se igual ou acima.
+- Mesma regra aplicada às sessões finalizadas do dia atual e às sessões dentro do histórico de dias anteriores.
+- Criada uma nova cor verde (classe "successText") consistente com a cor vermelha já usada no app, para representar "dentro ou acima da meta".
+- Como a sessão em andamento já era recalculada periodicamente pela tela, a nova cor também atualiza em tempo real, sem necessidade de nenhum mecanismo adicional.
 
-Feito:
-- Ícone do Uber corrigido com o nome "Uber" + seta, igual ao ícone real do aplicativo.
-- Simplificada a função de abertura para ir direto à página do aplicativo na Play Store — funciona de forma confiável e exige apenas um toque extra ("Abrir") quando o aplicativo já está instalado.
-- Seguindo a prática já estabelecida: funções relacionadas à virada das 4h, sincronização com a nuvem, lançamento por voz e lançamentos manuais foram comparadas byte a byte contra a versão anterior — todas confirmadas idênticas.
+Feito (item 2):
+- Adicionado um comportamento global: ao focar qualquer campo de texto ou número editável do app, todo o conteúdo já digitado é selecionado automaticamente. Isso faz a primeira tecla digitada substituir o conteúdo anterior por completo.
+- Campos somente leitura (que abrem teclados numéricos ou seletores próprios do app) e campos auxiliares ocultos (usados internamente, não editados pelo usuário) foram deliberadamente excluídos dessa regra.
+- Testado em navegador real: confirmado que, tanto em campos de texto quanto em campos numéricos, tocar e digitar substitui o valor anterior por completo; confirmado que campos somente leitura continuam funcionando normalmente, sem a seleção.
 
 Status atual:
-- Pronto para teste. O ícone do Uber agora deve estar igual ao ícone do 99 em fidelidade ao aplicativo real. Ao tocar nos botões, o app vai abrir a página correspondente na Play Store, que mostrará "Abrir" para apps já instalados.
+- Pronto para teste. Observe a cor do "Ganho por hora" em uma sessão em andamento, comparando com o valor configurado em Configurar Meta. Teste também tocar em qualquer campo do app e digitar — o conteúdo anterior deve ser substituído imediatamente.
 
-MetaDriver vBeta1.29
+MetaDriver vBeta1.32
 
 Solicitado:
-- O usuário enviou dois prints: um mostrando o modal de configuração dos atalhos Uber/99 com o layout completamente quebrado (botões "Salvar" e "Fechar" gigantes, ocupando quase a tela toda), e outro mostrando os ícones reais dos aplicativos instalados no celular (Uber Driver e 99 Motorista), pedindo que os botões usassem exatamente esses ícones.
-- Também relatado que, ao tocar nos botões, o app abria a página da Play Store em vez de abrir o aplicativo diretamente, mesmo com os apps já instalados.
+- Ao editar o valor de uma sessão finalizada que não é a primeira do dia, o app deveria seguir a mesma regra já usada na sessão em andamento: subtrair o valor da(s) sessão(ões) anterior(es) automaticamente, em vez de exigir que o usuário calculasse essa diferença manualmente antes de digitar.
+
+Confirmado com o usuário antes de implementar:
+- O número digitado ao editar representa o saldo TOTAL acumulado até aquela sessão (o mesmo valor que aparece como "saldo atual" na tela) — não o ganho isolado da sessão. Hoje o usuário precisa calcular de cabeça a diferença em relação à sessão anterior antes de digitar.
 
 Investigação:
-- Modal quebrado: identificado que o modal reutilizava a mesma classe CSS usada pelo painel de saldo rápido — um painel de tela cheia com layout em grade pensado para o teclado numérico, completamente incompatível com um modal simples de configuração. Essa herança indevida fazia os elementos se redimensionarem de forma errada.
-- Ícones: confirmado, pelo print dos aplicativos instalados, que os ícones reais são uma seta branca em fundo preto (Uber Driver) e "99" em laranja sobre fundo branco (99 Motorista) — diferentes dos emojis genéricos usados anteriormente.
-- Abertura direta do app: pesquisada a sintaxe correta de "intent URLs" do Android. Confirmado que a sintaxe usada anteriormente estava incompleta (faltavam os parâmetros que dizem ao Android qual ação executar), fazendo o sistema nunca conseguir resolver qual app abrir e sempre cair no link de respaldo da Play Store.
+- Confirmado no código que a sessão EM ANDAMENTO já calcula seu valor subtraindo automaticamente o saldo acumulado das sessões anteriores do dia. Sessões FINALIZADAS, porém, ao serem editadas, usavam o número digitado diretamente como valor isolado, sem essa subtração — daí a necessidade de fazer a conta manualmente.
 
 Feito:
-- Criada uma classe de CSS própria e isolada para o modal de configuração, sem nenhuma herança do painel de saldo rápido. Modal agora aparece compacto e centralizado, como esperado.
-- Substituídos os ícones genéricos pelos ícones reais: seta branca em fundo preto (Uber) e "99" em laranja sobre fundo branco (99), tanto nos botões flutuantes quanto na prévia do modal de configuração.
-- Corrigida a sintaxe do link de abertura do aplicativo, incluindo os parâmetros corretos (equivalente a tocar no ícone do app na tela inicial). A Play Store agora só abre automaticamente se o aplicativo realmente não estiver instalado — usando o mecanismo nativo do navegador para isso, mais confiável que a tentativa manual anterior.
-- Validado visualmente o modal corrigido e os botões com os novos ícones antes da entrega.
-- Seguindo a prática já estabelecida: funções relacionadas à virada das 4h, sincronização com a nuvem, lançamento por voz e lançamentos manuais foram comparadas byte a byte contra a versão anterior — todas confirmadas idênticas.
+- Ao abrir a edição de uma sessão finalizada (do dia atual ou do histórico), o campo agora é pré-preenchido com o saldo ACUMULADO até aquela sessão (soma das sessões anteriores do mesmo dia + o valor da própria sessão) — o mesmo número que já aparece na tela como referência.
+- Ao salvar, o app calcula automaticamente a diferença em relação ao acumulado das sessões anteriores, e guarda o valor isolado correto internamente — sem o usuário precisar calcular nada.
+- A primeira sessão do dia continua funcionando exatamente como antes (não há sessão anterior para subtrair).
+- Mesma correção aplicada tanto às sessões finalizadas do dia atual quanto às sessões dentro do histórico de dias anteriores.
+- Testado o cenário completo com 3 sessões no mesmo dia, confirmando o cálculo correto ao editar a sessão do meio, e confirmando que a primeira sessão não foi afetada.
+- Seguindo a prática já estabelecida: 20 funções relacionadas à virada das 4h, sincronização com a nuvem, lançamento por voz e cálculo de saldo foram comparadas byte a byte contra a versão anterior — todas confirmadas idênticas.
 
 Status atual:
-- Pronto para novo teste. Verificar se o modal de configuração aparece corretamente, se os ícones correspondem aos aplicativos reais, e se tocar nos botões agora abre o aplicativo diretamente (e não mais a Play Store) quando ele já está instalado.
+- Pronto para teste. Ao editar o valor de uma sessão finalizada que não é a primeira do dia, o campo deve aparecer já com o saldo acumulado (não mais o valor isolado) — basta digitar o novo saldo total que o app mostraria naquele momento, sem precisar calcular a diferença.
 
-MetaDriver vBeta1.28
+MetaDriver vBeta1.31
 
-Solicitado:
-- O usuário enviou um vídeo mostrando que o lançamento por voz ainda apresentava o problema "funciona uma vez, falha na próxima" mesmo depois das correções anteriores no microfone e no reconhecimento de fala.
+Contexto:
+- O usuário fez, em outro chat, uma correção visual de tema (vBeta1.27): nos 4 temas do app, os botões "Retiradas" e "Combustível" não recebiam a cor de destaque ao serem selecionados (ficavam "sem cor"), por faltar uma regra de cor específica para cada tema. Essa correção foi enviada para análise.
 
-Investigação (a partir do vídeo enviado):
-- Analisados os quadros do vídeo segundo a segundo. Confirmado que o microfone capturava a fala normalmente em todas as tentativas, e o app sempre mostrava a mensagem "Preenchido (modo teste)" — mas em algumas tentativas a aba e os campos não apareciam preenchidos na tela, mesmo com a mensagem de sucesso.
-- Identificada a causa raiz exata: o usuário comandava por voz vários lançamentos do mesmo tipo (ex.: "Gastos") em sequência, sem clicar em "Salvar" entre as tentativas — então a aba e o formulário já estavam abertos da tentativa anterior.
-- As funções que abrem a aba e o formulário foram originalmente feitas para o clique manual do usuário nos botões, e por isso ALTERNAM entre abrir e fechar quando já estão abertas (esse comportamento é correto e esperado para clique manual). Mas isso fazia o comando de voz, ao tentar abrir uma aba/formulário que já estava aberto da tentativa anterior, na verdade FECHAR e limpar os campos um instante antes do preenchimento ocorrer — o app dizia "Preenchido" porque essa parte do código rodava normalmente, só que sobre uma tela que tinha acabado de ser fechada.
-- Esse mecanismo explica exatamente o padrão "funciona uma vez sim, outra não": a cada tentativa, a aba alternava entre aberta e fechada, então o sucesso e a falha se alternavam também.
+Validação da correção de tema:
+- Comparada essa vBeta1.27 com a vBeta1.26 (última versão própria confirmada funcionando): confirmado que a mudança é exclusivamente de CSS, isolada nos 4 blocos de tema, sem nenhuma alteração de lógica.
+- Testada visualmente a correção nos 4 temas (Uber escuro/claro, 99 escuro/claro): confirmado que os botões Retiradas e Combustível agora exibem cor de destaque corretamente ao serem selecionados, com bom contraste em todos os temas.
+
+Identificado durante a validação:
+- Essa vBeta1.27 foi criada a partir de uma base anterior à correção do bug do lançamento por voz ("funciona uma vez, falha na próxima", corrigido na vBeta1.28). O usuário confirmou que queria manter as correções de tema E ter a correção de voz juntas.
 
 Feito:
-- Criadas duas funções novas, dedicadas exclusivamente ao lançamento por voz, que sempre garantem a aba e o formulário abertos — nunca alternam para fechar, independente do estado em que estavam antes.
-- As funções originais, usadas pelo clique manual nos botões Ganhos/Gastos/Retiradas/Combustível e "Adicionar", permanecem exatamente como sempre foram, sem nenhuma alteração.
-- Testado o cenário exato do vídeo de forma automatizada: quatro comandos de voz em sequência, sem clicar em Salvar entre eles (incluindo troca de tipo de lançamento), confirmando que todos preenchem corretamente agora, sem nenhuma falha alternada.
-- Seguindo a prática já estabelecida: 31 funções relacionadas à virada das 4h, sincronização com a nuvem, atalhos de apps e lançamentos manuais foram comparadas byte a byte contra a versão anterior antes da entrega — todas confirmadas idênticas, garantindo que nada que já funcionava foi alterado.
+- Aplicada a correção do bug de voz (mesma lógica e funções já validadas na vBeta1.28) por cima da vBeta1.27 recebida, preservando 100% das correções de tema.
+- Confirmado, por comparação byte a byte com a vBeta1.26, que nenhuma função crítica (virada das 4h, sincronização com a nuvem, lançamentos manuais, etc.) foi alterada — só as 5 linhas relacionadas ao lançamento por voz foram substituídas pelas versões corrigidas.
+- Testado novamente o cenário do bug de voz (3 comandos em sequência, sem clicar em Salvar entre eles): confirmado que todos preenchem corretamente, sem falha alternada.
 
 Status atual:
-- Pronto para novo teste. Repita o mesmo procedimento do vídeo: vários comandos de voz em sequência, sem clicar em Salvar entre eles, e confirme que todos preenchem corretamente.
+- Pronto para uso. Esta versão combina a correção de tema (Retiradas/Combustível com cor de destaque) e a correção do lançamento por voz, ambas confirmadas funcionando.
 
 MetaDriver vBeta1.27
 
 Solicitado:
-- Criar dois botões para abrir diretamente os aplicativos da Uber e da 99 a partir do MetaDriver.
-- Botões quadrados com cantos arredondados, flutuantes e fixos na lateral direita, no meio vertical da tela, permanecendo no lugar mesmo rolando a página.
-- Uma opção no menu chamada "Configurar atalhos Uber e 99" que abre um modal mostrando os dois botões, com caixa de seleção para escolher se aparece só um, o outro, os dois ou nenhum.
-- Botões nas cores e padrão visual oficiais de cada marca (Uber e 99).
+- O usuário relatou um possível bug visual na tela de Lançamentos: ao clicar nos botões Ganho, Gasto, Retirada e Combustível, apenas o de Combustível mantinha a cor de destaque (estado selecionado) — os demais pareciam "perder a cor" ao serem clicados.
+
+Investigação:
+- Verificada a função que controla a abertura/fechamento das seções e a marcação dos botões como selecionados (openLancSection): confirmado que a lógica em JavaScript trata os 4 botões de forma idêntica e simétrica — não é causa do problema.
+- Causa raiz encontrada no CSS: nos 4 temas visuais do app ("preto-escuro", "preto-claro", "amarelo-escuro" e "amarelo-claro"), cada tema redefine a cor de fundo padrão dos botões de aba e só havia regra de cor para o estado "selecionado" dos botões Ganhos e Gastos. Retiradas e Combustível nunca receberam essa regra dentro de cada tema, fazendo a cor padrão (não selecionada) do tema "vencer" a cor de destaque quando esses dois botões estavam ativos. Combustível tinha uma proteção parcial fora dos blocos de tema (por isso só ele parecia funcionar); Retiradas não tinha proteção alguma.
 
 Feito:
-- Pesquisados os identificadores corretos dos aplicativos para Android: Uber Driver (com.ubercab.driver) e 99 Motorista (com.app99.driver).
-- Criados os dois botões flutuantes, fixos na lateral direita, com as cores oficiais: preto e branco para Uber, amarelo e preto para 99.
-- Ao tocar em um botão, o app tenta abrir o aplicativo correspondente; se não estiver instalado, é redirecionado automaticamente para a página de instalação na Play Store.
-- Criada a opção "Configurar atalhos Uber e 99" no menu, abrindo um modal com a prévia visual de cada botão e uma caixa de seleção independente para cada um.
-- A escolha de quais botões mostrar é salva e sincronizada com a nuvem, como as demais preferências do app.
-- Identificado e corrigido um problema durante o desenvolvimento: o redirecionamento de respaldo para a Play Store podia disparar mesmo quando o aplicativo abria com sucesso; isso foi corrigido detectando quando o usuário realmente saiu do MetaDriver.
-- Seguindo a prática já estabelecida: todas as funções relacionadas à virada das 4h, sincronização com a nuvem, renovação de sessão e cálculo de saldo foram comparadas byte a byte contra a versão anterior antes da entrega — confirmado que nenhuma delas foi alterada.
+- Adicionadas as 8 regras de cor que faltavam (Retiradas e Combustível, em cada um dos 4 temas), seguindo a mesma paleta e convenção já usada para Ganhos (verde) e Gastos (vermelho) em cada tema: Retiradas em azul/roxo e Combustível em marrom.
+- Alteração 100% CSS/visual — nenhuma função de lógica foi tocada. Confirmado por comparação byte a byte da função openLancSection contra a vBeta1.26 (idêntica) e por validação de sintaxe de todo o arquivo (chaves balanceadas e node --check em todos os scripts embutidos).
 
 Status atual:
-- Pronto para teste. Acesse o menu e toque em "Configurar atalhos Uber e 99" para escolher quais botões exibir.
+- Pronto para teste. Troque entre os 4 temas ("preto-escuro", "preto-claro", "amarelo-escuro", "amarelo-claro") na tela de Lançamentos e confirme que os 4 botões (Ganho, Gasto, Retirada, Combustível) agora exibem cor de destaque ao serem selecionados, voltando ao normal ao serem desselecionados.
 
 MetaDriver vBeta1.26
 
