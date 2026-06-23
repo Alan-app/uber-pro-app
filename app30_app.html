@@ -43,7 +43,7 @@ try{
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver vBeta1.28</title>
+<title>MetaDriver vBeta1.29</title>
 <style id="md-hydration-lock">
 body.preload > *:not(#mdBootOverlay){visibility:hidden!important;}
 #mdBootOverlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#0f172a;color:#fff;z-index:2147483647;font-family:Inter,system-ui,sans-serif;font-weight:800;letter-spacing:.2px;}
@@ -1224,10 +1224,87 @@ input.negative-value, input.negative-value::placeholder{
 }
 #appShortcut99{
   top:calc(42% + 64px);
-  background:#ffdd00;
+  background:#ffffff;
   color:#121212;
+  border:1px solid rgba(0,0,0,0.12);
 }
 .app-shortcut-fab .asf-icon{ font-size:20px; line-height:1; }
+.app-shortcut-fab .asf-icon-99{
+  font-size:19px;
+  font-weight:900;
+  font-style:italic;
+  color:#ff7a00;
+  letter-spacing:-1px;
+}
+
+/* vBeta1.29 - modal de configuração dos atalhos Uber/99: classe própria e
+   isolada, sem herdar do .quick-balance-panel (que é de tela cheia e tem
+   regras de grid pensadas para o teclado numérico de saldo rápido — usar
+   essa classe causava o layout quebrado visto no print do usuário). */
+.app-shortcut-config-overlay{
+  position:fixed;
+  inset:0;
+  z-index:1300;
+  background:rgba(0,0,0,0.55);
+  display:none;
+}
+.app-shortcut-config-overlay.show{ display:block; }
+.app-shortcut-config-modal{
+  position:fixed;
+  left:50%;
+  top:50%;
+  transform:translate(-50%, -50%);
+  z-index:1301;
+  width:min(340px, calc(100vw - 32px));
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:20px;
+  padding:20px;
+  box-shadow:0 20px 50px rgba(0,0,0,0.5);
+  display:none;
+}
+.app-shortcut-config-modal.show{ display:block; }
+.app-shortcut-config-title{
+  font-weight:900;
+  font-size:18px;
+  color:var(--text);
+  margin-bottom:6px;
+}
+.app-shortcut-config-sub{
+  font-size:13px;
+  opacity:0.75;
+  color:var(--text);
+  margin-bottom:16px;
+  line-height:1.35;
+}
+.app-shortcut-config-row{
+  display:flex;
+  gap:20px;
+  align-items:center;
+  justify-content:center;
+  margin:14px 0 18px;
+}
+.app-shortcut-config-item{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:8px;
+}
+.app-shortcut-config-item label{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  font-size:14px;
+  color:var(--text);
+}
+.app-shortcut-config-actions{
+  display:flex;
+  gap:10px;
+}
+.app-shortcut-config-actions button{
+  flex:1;
+  margin:0;
+}
 
 .quick-balance-fab-inner{
   width:100%;
@@ -3883,7 +3960,7 @@ body[data-tema$="claro"] .historico-report-line{border-bottom-color:rgba(0,0,0,.
   <div class="menu-item"><button class="secondary" onclick="abrirAtalhosAppsMenu(); closeMenu();">Configurar atalhos Uber e 99</button></div>
   <div class="menu-item"><button class="secondary" onclick="abrirTemas(); closeMenu();">Temas</button></div>
   <div class="menu-item menu-user-row"><span class="menu-user-name" id="menuUserName">Usuário</span><button class="danger" onclick="forceLogout(); return false;">Sair</button></div>
-  <div class="menu-note" style="text-align:center;">vBeta1.28</div>
+  <div class="menu-note" style="text-align:center;">vBeta1.29</div>
 </div>
 
 
@@ -5341,7 +5418,7 @@ function mdBuildDiagnosticsObject(){
     const durableObj = mdSafeJsonParse(durableRaw);
     const diag = {
       generated_at: mdNowIso(),
-      app_version: 'MetaDriver vBeta1.28',
+      app_version: 'MetaDriver vBeta1.29',
       cloud_table: CLOUD_TABLE,
       device_id: mdEnsureDeviceId(),
       visibility_state: document.visibilityState,
@@ -7316,7 +7393,7 @@ function mdCommitLancamentoMutation(reason){
   try{ atualizar(); }catch(e){}
   try{ if(typeof refreshQuickBalanceFabMiniDisplay === "function") refreshQuickBalanceFabMiniDisplay(); }catch(e){}
   try{ if(typeof updateQuickBalanceFabUI === "function") updateQuickBalanceFabUI(); }catch(e){}
-  try{ if(typeof toast === "function" && reason) console.info("MetaDriver vBeta1.28 mutation:", reason); }catch(e){}
+  try{ if(typeof toast === "function" && reason) console.info("MetaDriver vBeta1.29 mutation:", reason); }catch(e){}
 }
 
 
@@ -9100,7 +9177,7 @@ function exportarRelatorioPDF(){
       <script>
         setTimeout(()=>window.print(), 250);
       <\/script>
-    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver vBeta1.28 · app</div>
+    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver vBeta1.29 · app</div>
 
 
 <script>
@@ -10408,21 +10485,20 @@ function mdAbrirAppPorPacote(packageName, playStoreUrl){
   try{
     const isAndroid = /android/i.test(navigator.userAgent || "");
     if(isAndroid){
-      const intentUrl = "intent://#Intent;package=" + packageName + ";end";
-      let jaSaiuDoApp = false;
-      // vBeta1.27 - se a página perder o foco/visibilidade logo após a
-      // tentativa, é sinal de que o app abriu com sucesso; nesse caso,
-      // cancela o redirecionamento de fallback para a Play Store.
-      function marcarSaida(){ jaSaiuDoApp = true; }
-      window.addEventListener("blur", marcarSaida, { once: true });
-      document.addEventListener("visibilitychange", function(){
-        if(document.hidden) marcarSaida();
-      }, { once: true });
+      // vBeta1.29 - CORREÇÃO: a sintaxe anterior ("intent://#Intent;package=...;end")
+      // não incluía action/category, então o Android não conseguia resolver
+      // qual tela abrir e o intent falhava silenciosamente, caindo sempre no
+      // fallback para a Play Store. A sintaxe correta usa
+      // action=android.intent.action.MAIN + category=android.intent.category.LAUNCHER,
+      // que equivale exatamente a tocar no ícone do app na tela inicial.
+      // S.browser_fallback_url é o mecanismo nativo do Chrome para abrir a
+      // Play Store automaticamente SOMENTE se o app não estiver instalado -
+      // mais confiável que detectar isso manualmente.
+      const intentUrl = "intent:#Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;package="
+        + packageName
+        + ";S.browser_fallback_url=" + encodeURIComponent(playStoreUrl)
+        + ";end";
       window.location.href = intentUrl;
-      setTimeout(function(){
-        if(jaSaiuDoApp || document.hidden) return;
-        try{ window.location.href = playStoreUrl; }catch(e){}
-      }, 1200);
     }else{
       window.location.href = playStoreUrl;
     }
@@ -12351,8 +12427,8 @@ window.addEventListener("pageshow", function(){
 <button type="button" id="quickBalanceFab" class="quick-balance-fab" onclick="toggleQuickBalancePanel(true)" aria-label="Atualizar saldo atual rápido"><span class="quick-balance-fab-inner"><span id="quickBalanceFabValue" class="quickBalanceFabValue quick-balance-fab-value">R$ 0</span></span></button>
 
 <!-- vBeta1.27 - atalhos para abrir os apps Uber e 99 -->
-<button type="button" id="appShortcutUber" class="app-shortcut-fab hidden" onclick="mdAbrirAppUber()" aria-label="Abrir app Uber"><span class="asf-icon">🚗</span></button>
-<button type="button" id="appShortcut99" class="app-shortcut-fab hidden" onclick="mdAbrirApp99()" aria-label="Abrir app 99"><span class="asf-icon">🚕</span></button>
+<button type="button" id="appShortcutUber" class="app-shortcut-fab hidden" onclick="mdAbrirAppUber()" aria-label="Abrir app Uber"><svg class="asf-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 12h13M13 6l6 6-6 6" stroke="#ffffff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+<button type="button" id="appShortcut99" class="app-shortcut-fab hidden" onclick="mdAbrirApp99()" aria-label="Abrir app 99"><span class="asf-icon asf-icon-99">99</span></button>
 
 
 <div id="dayTurn4hOverlay" class="dayturn-overlay" onclick="if(event.target.id==='dayTurn4hOverlay')cancelVirada4hModal()"></div>
@@ -12473,28 +12549,28 @@ window.addEventListener("pageshow", function(){
   </div>
 </div>
 
-<!-- vBeta1.27 - modal de configuração dos atalhos Uber/99 -->
-<div id="atalhosAppsMenuOverlay" class="quick-balance-overlay" onclick="fecharAtalhosAppsMenu()"></div>
-<div id="atalhosAppsMenuPanel" class="quick-balance-panel" role="dialog" aria-modal="true" aria-labelledby="atalhosAppsMenuTitle">
-  <div id="atalhosAppsMenuTitle" class="quick-balance-title">Atalhos Uber e 99</div>
-  <div class="quick-balance-sub">Escolha quais botões flutuantes devem aparecer na tela para abrir os apps Uber e 99 diretamente.</div>
-  <div style="display:flex; gap:18px; align-items:center; justify-content:center; margin:14px 0;">
-    <div style="display:flex; flex-direction:column; align-items:center; gap:6px;">
-      <div class="app-shortcut-fab" style="position:static; background:#000000; color:#ffffff; border:1px solid rgba(255,255,255,0.18);"><span class="asf-icon">🚗</span></div>
-      <label class="fuel-radio" style="display:flex;align-items:center;gap:8px;">
+<!-- vBeta1.29 - modal de configuração dos atalhos Uber/99 (classes isoladas, sem herdar do painel de saldo rápido) -->
+<div id="atalhosAppsMenuOverlay" class="app-shortcut-config-overlay" onclick="fecharAtalhosAppsMenu()"></div>
+<div id="atalhosAppsMenuPanel" class="app-shortcut-config-modal" role="dialog" aria-modal="true" aria-labelledby="atalhosAppsMenuTitle">
+  <div id="atalhosAppsMenuTitle" class="app-shortcut-config-title">Atalhos Uber e 99</div>
+  <div class="app-shortcut-config-sub">Escolha quais botões flutuantes devem aparecer na tela para abrir os apps Uber e 99 diretamente.</div>
+  <div class="app-shortcut-config-row">
+    <div class="app-shortcut-config-item">
+      <div class="app-shortcut-fab" style="position:static; background:#000000; color:#ffffff; border:1px solid rgba(255,255,255,0.18);"><svg class="asf-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 12h13M13 6l6 6-6 6" stroke="#ffffff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <label>
         <input type="checkbox" id="toggleAtalhoUberCheckbox">
         <span>Uber</span>
       </label>
     </div>
-    <div style="display:flex; flex-direction:column; align-items:center; gap:6px;">
-      <div class="app-shortcut-fab" style="position:static; background:#ffdd00; color:#121212;"><span class="asf-icon">🚕</span></div>
-      <label class="fuel-radio" style="display:flex;align-items:center;gap:8px;">
+    <div class="app-shortcut-config-item">
+      <div class="app-shortcut-fab" style="position:static; background:#ffffff; color:#121212; border:1px solid rgba(0,0,0,0.12);"><span class="asf-icon asf-icon-99">99</span></div>
+      <label>
         <input type="checkbox" id="toggleAtalho99Checkbox">
         <span>99</span>
       </label>
     </div>
   </div>
-  <div class="quick-balance-actions" style="margin-top:12px;">
+  <div class="app-shortcut-config-actions">
     <button type="button" id="btnSalvarAtalhosApps" onclick="salvarPreferenciaAtalhosApps(); return false;">Salvar</button>
     <button type="button" class="secondary" onclick="fecharAtalhosAppsMenu()">Fechar</button>
   </div>

@@ -1,3 +1,24 @@
+MetaDriver vBeta1.29
+
+Solicitado:
+- O usuário enviou dois prints: um mostrando o modal de configuração dos atalhos Uber/99 com o layout completamente quebrado (botões "Salvar" e "Fechar" gigantes, ocupando quase a tela toda), e outro mostrando os ícones reais dos aplicativos instalados no celular (Uber Driver e 99 Motorista), pedindo que os botões usassem exatamente esses ícones.
+- Também relatado que, ao tocar nos botões, o app abria a página da Play Store em vez de abrir o aplicativo diretamente, mesmo com os apps já instalados.
+
+Investigação:
+- Modal quebrado: identificado que o modal reutilizava a mesma classe CSS usada pelo painel de saldo rápido — um painel de tela cheia com layout em grade pensado para o teclado numérico, completamente incompatível com um modal simples de configuração. Essa herança indevida fazia os elementos se redimensionarem de forma errada.
+- Ícones: confirmado, pelo print dos aplicativos instalados, que os ícones reais são uma seta branca em fundo preto (Uber Driver) e "99" em laranja sobre fundo branco (99 Motorista) — diferentes dos emojis genéricos usados anteriormente.
+- Abertura direta do app: pesquisada a sintaxe correta de "intent URLs" do Android. Confirmado que a sintaxe usada anteriormente estava incompleta (faltavam os parâmetros que dizem ao Android qual ação executar), fazendo o sistema nunca conseguir resolver qual app abrir e sempre cair no link de respaldo da Play Store.
+
+Feito:
+- Criada uma classe de CSS própria e isolada para o modal de configuração, sem nenhuma herança do painel de saldo rápido. Modal agora aparece compacto e centralizado, como esperado.
+- Substituídos os ícones genéricos pelos ícones reais: seta branca em fundo preto (Uber) e "99" em laranja sobre fundo branco (99), tanto nos botões flutuantes quanto na prévia do modal de configuração.
+- Corrigida a sintaxe do link de abertura do aplicativo, incluindo os parâmetros corretos (equivalente a tocar no ícone do app na tela inicial). A Play Store agora só abre automaticamente se o aplicativo realmente não estiver instalado — usando o mecanismo nativo do navegador para isso, mais confiável que a tentativa manual anterior.
+- Validado visualmente o modal corrigido e os botões com os novos ícones antes da entrega.
+- Seguindo a prática já estabelecida: funções relacionadas à virada das 4h, sincronização com a nuvem, lançamento por voz e lançamentos manuais foram comparadas byte a byte contra a versão anterior — todas confirmadas idênticas.
+
+Status atual:
+- Pronto para novo teste. Verificar se o modal de configuração aparece corretamente, se os ícones correspondem aos aplicativos reais, e se tocar nos botões agora abre o aplicativo diretamente (e não mais a Play Store) quando ele já está instalado.
+
 MetaDriver vBeta1.28
 
 Solicitado:
