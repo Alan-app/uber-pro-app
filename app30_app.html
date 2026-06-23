@@ -43,7 +43,7 @@ try{
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver vBeta1.33</title>
+<title>MetaDriver vBeta1.34</title>
 <style id="md-hydration-lock">
 body.preload > *:not(#mdBootOverlay){visibility:hidden!important;}
 #mdBootOverlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#0f172a;color:#fff;z-index:2147483647;font-family:Inter,system-ui,sans-serif;font-weight:800;letter-spacing:.2px;}
@@ -3895,7 +3895,7 @@ body[data-tema$="claro"] .historico-report-line{border-bottom-color:rgba(0,0,0,.
   <div class="menu-item"><button class="secondary" onclick="abrirSaldoAtualButtonMenu(); closeMenu();">Botão de saldo atual</button></div>
   <div class="menu-item"><button class="secondary" onclick="abrirTemas(); closeMenu();">Temas</button></div>
   <div class="menu-item menu-user-row"><span class="menu-user-name" id="menuUserName">Usuário</span><button class="danger" onclick="forceLogout(); return false;">Sair</button></div>
-  <div class="menu-note" style="text-align:center;">vBeta1.33</div>
+  <div class="menu-note" style="text-align:center;">vBeta1.34</div>
 </div>
 
 
@@ -5353,7 +5353,7 @@ function mdBuildDiagnosticsObject(){
     const durableObj = mdSafeJsonParse(durableRaw);
     const diag = {
       generated_at: mdNowIso(),
-      app_version: 'MetaDriver vBeta1.33',
+      app_version: 'MetaDriver vBeta1.34',
       cloud_table: CLOUD_TABLE,
       device_id: mdEnsureDeviceId(),
       visibility_state: document.visibilityState,
@@ -7353,7 +7353,7 @@ function mdCommitLancamentoMutation(reason){
   try{ atualizar(); }catch(e){}
   try{ if(typeof refreshQuickBalanceFabMiniDisplay === "function") refreshQuickBalanceFabMiniDisplay(); }catch(e){}
   try{ if(typeof updateQuickBalanceFabUI === "function") updateQuickBalanceFabUI(); }catch(e){}
-  try{ if(typeof toast === "function" && reason) console.info("MetaDriver vBeta1.33 mutation:", reason); }catch(e){}
+  try{ if(typeof toast === "function" && reason) console.info("MetaDriver vBeta1.34 mutation:", reason); }catch(e){}
 }
 
 
@@ -9161,7 +9161,7 @@ function exportarRelatorioPDF(){
       <script>
         setTimeout(()=>window.print(), 250);
       <\/script>
-    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver vBeta1.33 · app</div>
+    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver vBeta1.34 · app</div>
 
 
 <script>
@@ -9613,7 +9613,14 @@ let diasCalendario = 0;
       return dt.getTime() >= baseInicio.getTime() && dt.getTime() <= limite.getTime();
     }).length;
   }
-  const diasRestantes = metaPeriodo.futura ? 0 : Math.max(0, diasCalendario - diasNaoTrabalhadosNoPeriodo);
+  // vBeta1.34 - antes, com a meta "aguardando início" (data inicial no
+  // futuro), os cálculos eram zerados mesmo já existindo todos os dados
+  // necessários (data inicial, data limite, meta total, dias não
+  // trabalhados). Isso impedia o uso do app para planejar metas futuras.
+  // mdMetaPeriodoInfo() já usa a data inicial como base de cálculo quando a
+  // meta é futura (inicioCalculo), então o cálculo abaixo já fica correto
+  // mesmo antes da meta começar — só não deve mais ser zerado à força.
+  const diasRestantes = Math.max(0, diasCalendario - diasNaoTrabalhadosNoPeriodo);
   const box = document.getElementById("diasRestantesBox");
   if(box){
     box.textContent = diasNaoTrabalhadosNoPeriodo > 0 ? (diasRestantes + " (−" + diasNaoTrabalhadosNoPeriodo + ")") : String(diasRestantes);
@@ -9650,7 +9657,10 @@ const fuelCfg = getCombustivelConfig(bruto);
   const liquidoSemHoje = brutoSemHoje - combustivelSemHoje - manutencaoSemHoje - gastosExtras;
   const faltanteLiquidoSemHoje = Math.max(0, (dados.metaTotal || 0) - liquidoSemHoje);
   const metaRestanteSemHoje = (faltanteLiquidoSemHoje > 0) ? (faltanteLiquidoSemHoje / divisorMeta) : 0;
-  const metaDiariaAuto = (metaPeriodo && metaPeriodo.futura) ? 0 : ((diasRestantes > 0) ? (metaRestanteSemHoje / diasRestantes) : 0);
+  // vBeta1.34 - mesma correção: não zera mais à força quando a meta ainda
+  // não começou; o cálculo de dias/meta diária já considera corretamente o
+  // período a partir da data inicial configurada.
+  const metaDiariaAuto = (diasRestantes > 0) ? (metaRestanteSemHoje / diasRestantes) : 0;
 
   try{
     const metaDiaInput = document.getElementById("metaDiariaManual");
@@ -9668,15 +9678,13 @@ const fuelCfg = getCombustivelConfig(bruto);
   const horasRestantes = (ganhoHoraRef > 0) ? (Math.max(0, metaDia - ganhoDia) / ganhoHoraRef) : 0;
 
       
-  if(metaSalvaAgora && metaPeriodo && metaPeriodo.futura){
-    document.getElementById("statusMeta").innerHTML =
-      "Data inicial: <span class='warning'>" + metaPeriodo.inicioISO + "</span><br>" +
-      "Status: <span class='warning'>Aguardando início da meta</span><br>" +
-      "Meta diária (automática): —<br>" +
-      "Tempo para meta diária: —";
-  }else if(metaSalvaAgora){
+  const statusAguardandoLinha = (metaPeriodo && metaPeriodo.futura)
+    ? ("Status: <span class='warning'>Aguardando início da meta</span><br>")
+    : "";
+  if(metaSalvaAgora){
     document.getElementById("statusMeta").innerHTML =
       "Data inicial: <span class='warning'>" + (dados.dataInicialMeta || hojeISO()) + "</span><br>" +
+      statusAguardandoLinha +
       "Dias restantes: <span class='" + (diasRestantes < 0 ? "dangerText" : "warning") + "'>" + diasRestantes + "</span><br>" +
       "Meta bruta total: <span class='" + (metaBrutaComGastos < 0 ? "dangerText" : "warning") + "'>R$ " + metaBrutaComGastos.toFixed(2) + "</span><br>" +
       "Meta bruta restante: <span class='" + (metaRestante < 0 ? "dangerText" : "warning") + "'>R$ " + metaRestante.toFixed(2) + "</span><br>" +
@@ -9692,15 +9700,12 @@ const fuelCfg = getCombustivelConfig(bruto);
   }
   const valorRestanteHoras = Math.max(0, metaDia - ganhoDia);
   const excedenteLinha = (excedenteDia > 0) ? ("<br>Meta batida: <span class='highlight'>Excedente R$ " + excedenteDia.toFixed(2) + "</span>") : "";
-  if(metaSalvaAgora && metaPeriodo && metaPeriodo.futura){
+  const notaAguardandoLinha = (metaPeriodo && metaPeriodo.futura)
+    ? ("Aguardando início em <span class='warning'>" + metaPeriodo.inicioISO + "</span><br>")
+    : "";
+  if(metaSalvaAgora){
     document.getElementById("horasResumo").innerHTML =
-      "Meta aguardando início em <span class='warning'>" + metaPeriodo.inicioISO + "</span><br>" +
-      "Meta diária (automática): —<br>" +
-      "Valor restante: —<br>" +
-      "Tempo para meta diária: —<br>" +
-      "Tempo restante: —";
-  }else if(metaSalvaAgora){
-    document.getElementById("horasResumo").innerHTML =
+      notaAguardandoLinha +
       "Meta diária (automática): <span class='" + (metaDia < 0 ? "dangerText" : "warning") + "'>R$ " + metaDia.toFixed(2) + "</span><br>" +
       "Valor restante: <span class='warning'>R$ " + valorRestanteHoras.toFixed(2) + "</span>" + excedenteLinha + "<br>" +
       "Tempo para meta diária: <span class='" + (horasNecessarias < 0 ? "dangerText" : "warning") + "'>" + formatHorasMinutos(horasNecessarias) + "</span><br>" +

@@ -1,3 +1,23 @@
+MetaDriver vBeta1.34
+
+Solicitado:
+- Ao preencher uma data inicial em Metas diferente de hoje (uma data futura), o status fica corretamente "Aguardando início", mas os campos Meta diária e Tempo para meta diária ficam vazios. Como a Data de início, a Data limite e os dias não trabalhados já estão definidos, esses campos deveriam mostrar o cálculo mesmo assim — útil para planejar metas futuras com antecedência.
+
+Investigação:
+- Confirmado que o período de cálculo (data inicial até data limite) já usava corretamente a data inicial configurada, mesmo quando ela está no futuro. O problema era que, depois desse cálculo já estar certo, duas linhas específicas zeravam o resultado à força sempre que a meta ainda não tinha começado — descartando um cálculo que já estava correto.
+
+Confirmado com o usuário antes de implementar:
+- Os valores devem ser calculados considerando o período completo desde já (como se a meta já estivesse em andamento), mesmo antes da data inicial chegar — incluindo "Tempo para meta diária" e "Tempo restante".
+
+Feito:
+- Removida a regra que zerava os cálculos de "Dias restantes" e "Meta diária (automática)" quando a meta ainda não tinha começado. Esses valores agora são calculados normalmente a partir da data inicial configurada, mesmo que ela seja no futuro.
+- A linha de status "Aguardando início da meta" continua aparecendo normalmente, agora junto com os valores calculados (antes ela substituía os valores por "—").
+- Testado o cenário completo: data inicial em 3 dias, data limite 10 dias depois, meta de R$3.000, e 1 dia não trabalhado dentro do período. Confirmado que "Dias restantes" (9, considerando o dia não trabalhado) e "Meta diária" (R$333,33) aparecem calculados corretamente, mesmo a meta ainda não tendo começado.
+- Seguindo a prática já estabelecida: 22 funções relacionadas à virada das 4h, sincronização com a nuvem, lançamento por voz e cálculo de meta foram comparadas byte a byte contra a versão anterior — todas confirmadas idênticas.
+
+Status atual:
+- Pronto para teste. Configure uma meta com data inicial no futuro e confirme que Meta diária, Dias restantes, Tempo para meta diária e Tempo restante aparecem calculados, junto com o status "Aguardando início da meta".
+
 MetaDriver vBeta1.33
 
 Solicitado:

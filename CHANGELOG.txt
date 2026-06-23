@@ -1,3 +1,13 @@
+vBeta1.34 - Meta com data inicial futura: agora calcula e exibe os valores de planejamento
+- Solicitado: ao definir uma data inicial de meta no futuro, o status mostrava corretamente "Aguardando início da meta", mas os campos Meta diária, Tempo para meta diária, Dias restantes e Tempo restante ficavam vazios — mesmo já existindo todos os dados necessários (data inicial, data limite, meta total, dias não trabalhados) para calculá-los, útil para planejar metas futuras com antecedência.
+- Corrigido: os cálculos de dias restantes e meta diária automática não são mais zerados à força quando a meta ainda não começou. O período considerado já usava corretamente a data inicial configurada como base (em vez de "hoje"); só faltava parar de descartar esse cálculo já correto.
+- Confirmado com o usuário: os valores são calculados considerando o período completo desde já (como se a meta já estivesse em andamento), mesmo antes da data inicial chegar.
+- A linha de status "Aguardando início da meta" continua aparecendo normalmente, agora junto com os valores calculados, em vez de substituí-los por "—".
+- Testado o cenário completo (data inicial em 3 dias, data limite 10 dias depois, meta de R$3000, 1 dia não trabalhado no período): confirmado que "Dias restantes" e "Meta diária" calculam corretamente mesmo a meta ainda não tendo começado.
+- Conforme prática estabelecida: 22 funções relacionadas à virada das 4h, sincronização com a nuvem, lançamento por voz e cálculo de meta foram comparadas byte a byte contra a versão anterior — todas confirmadas idênticas.
+- Nenhuma outra tela ou fluxo foi alterada.
+- Base oficial: vBeta1.33.
+
 vBeta1.33 - Cor do Ganho/hora baseada na meta + campos sempre selecionados ao focar
 - Ganho por hora (sessão em andamento, sessão finalizada do dia e sessões do histórico) agora aparece em VERMELHO quando está abaixo do valor de "Ganho por hora" configurado em Configurar Meta, e em VERDE quando está igual ou acima. Na sessão em andamento, isso é recalculado em tempo real, junto com a atualização periódica já existente da tela.
 - Em todos os campos de texto e número editáveis do app, ao tocar/focar o campo, o conteúdo já digitado agora é automaticamente selecionado por completo. Isso faz a primeira tecla digitada substituir o valor anterior inteiro, em vez de só posicionar o cursor — facilita digitar enquanto dirige, sem precisar apagar o conteúdo antigo manualmente antes. Campos somente leitura (que abrem teclados/seletores próprios) e campos auxiliares ocultos do app não são afetados.
