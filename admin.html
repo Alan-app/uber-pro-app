@@ -6,7 +6,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MetaDriver vBeta1.22 · admin</title>
+<title>MetaDriver vBeta1.25 · admin</title>
 <style>
 :root {
   color-scheme: dark;
@@ -160,6 +160,26 @@ button {
 .badge.trial { color:#fde68a; }
 .badge.active { color:#86efac; }
 .badge.blocked { color:#fca5a5; }
+
+/* vBeta1.23 - destaque visual para assinatura vencendo em até 1 dia */
+.user-card.expiring-soon{
+  border-color:#f59e0b;
+  box-shadow:0 0 0 1px rgba(245,158,11,0.45), 0 0 14px rgba(245,158,11,0.25);
+}
+.expiring-badge{
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+  margin-left:8px;
+  padding:4px 9px;
+  border-radius:999px;
+  font-size:11px;
+  font-weight:800;
+  color:#fbbf24;
+  background:rgba(245,158,11,0.14);
+  border:1px solid rgba(245,158,11,0.45);
+  white-space:nowrap;
+}
 
 .user-details {
   border-top:1px solid var(--line);
@@ -354,7 +374,11 @@ async function getMe() {
 }
 async function liberar(id) {
   const token = getToken();
-  await api("/rest/v1/user_access?user_id=eq." + encodeURIComponent(id), "PATCH", { status:"active" }, token, { "Prefer":"return=minimal" });
+  // vBeta1.23 - toda liberação vale por 30 dias a partir de agora. Isso
+  // permite destacar no admin quem está perto de vencer e avisar o motorista
+  // dentro do app.
+  const until = new Date(Date.now() + 30*24*60*60*1000).toISOString();
+  await api("/rest/v1/user_access?user_id=eq." + encodeURIComponent(id), "PATCH", { status:"active", access_until: until }, token, { "Prefer":"return=minimal" });
   await loadUsers();
 }
 async function bloquear(id) {
@@ -373,6 +397,30 @@ async function resetTrial(id) {
   }, token, { "Prefer":"return=minimal" });
   await loadUsers();
 }
+// vBeta1.24 - adiciona dias extras ao prazo atual do usuário, sem resetar o
+// que já existia. Soma a partir do vencimento atual se ele ainda não passou,
+// ou a partir de agora se já tiver vencido (ou nunca existido). Funciona
+// tanto para teste grátis (trial_end) quanto para assinatura paga
+// (access_until), conforme o status atual do usuário.
+async function adicionarDias(id, dias) {
+  const token = getToken();
+  const user = allUsers.find(function(u){ return u.user_id === id; });
+  if(!user) { await loadUsers(); return; }
+
+  const campo = user.status === "trial" ? "trial_end" : "access_until";
+  const atual = user[campo] ? new Date(user[campo]).getTime() : 0;
+  const base = (atual && atual > Date.now()) ? atual : Date.now();
+  const novoVencimento = new Date(base + dias*24*60*60*1000).toISOString();
+
+  const patch = {};
+  patch[campo] = novoVencimento;
+  // Garante que, ao adicionar dias, o usuário não fique sem status definido
+  // (ex.: se nunca foi liberado nem colocado em trial antes).
+  if(user.status !== "trial" && user.status !== "active") patch.status = "active";
+
+  await api("/rest/v1/user_access?user_id=eq." + encodeURIComponent(id), "PATCH", patch, token, { "Prefer":"return=minimal" });
+  await loadUsers();
+}
 function updateStats(users) {
   $("statTotal").textContent = users.length;
   $("statTrial").textContent = users.filter(u => (u.status || "") === "trial").length;
@@ -388,13 +436,27 @@ function renderUsers(users) {
     const userId = u.user_id || "-";
     const status = (u.status || "-").toLowerCase();
     const detailsId = "details-" + idx + "-" + (u.user_id || "x");
+    // vBeta1.24 - destaca quem está a 1 dia ou menos de vencer: tanto
+    // assinatura paga (active + access_until) quanto teste grátis
+    // (trial + trial_end).
+    let expiringSoon = false;
+    let expiringField = null;
+    if(status === "active" && u.access_until){
+      const venceEm = new Date(u.access_until).getTime();
+      const diffMs = venceEm - Date.now();
+      if(diffMs > 0 && diffMs <= (24*60*60*1000)){ expiringSoon = true; expiringField = u.access_until; }
+    }else if(status === "trial" && u.trial_end){
+      const venceEm = new Date(u.trial_end).getTime();
+      const diffMs = venceEm - Date.now();
+      if(diffMs > 0 && diffMs <= (24*60*60*1000)){ expiringSoon = true; expiringField = u.trial_end; }
+    }
     const card = document.createElement("div");
-    card.className = "user-card";
+    card.className = "user-card" + (expiringSoon ? " expiring-soon" : "");
     card.innerHTML = `
       <div class="user-summary" data-toggle="${detailsId}">
         <div class="chevron" id="icon-${detailsId}">▸</div>
         <div class="user-name" title="${name}">${name}</div>
-        <div><span class="badge ${status}">${u.status || "-"}</span></div>
+        <div><span class="badge ${status}">${u.status || "-"}</span>${expiringSoon ? '<span class="expiring-badge">⚠️ Vence em breve</span>' : ''}</div>
       </div>
       <div class="user-details hidden" id="${detailsId}">
         <div class="details-grid">
@@ -414,11 +476,16 @@ function renderUsers(users) {
             <div class="detail-label">Fim do teste</div>
             <div class="detail-value">${fmtDate(u.trial_end)}</div>
           </div>
+          <div class="detail-box">
+            <div class="detail-label">Assinatura vence em</div>
+            <div class="detail-value">${u.access_until ? fmtDate(u.access_until) : "-"}</div>
+          </div>
         </div>
         <div class="actions">
-          <button class="success" type="button" data-action="liberar" data-id="${u.user_id}">Liberar</button>
+          <button class="success" type="button" data-action="liberar" data-id="${u.user_id}">Liberar 30 dias</button>
+          <button class="secondary" type="button" data-action="trial" data-id="${u.user_id}">Teste grátis 7 dias</button>
+          <button class="secondary" type="button" data-action="adicionar1dia" data-id="${u.user_id}">+1 dia</button>
           <button class="danger" type="button" data-action="bloquear" data-id="${u.user_id}">Bloquear</button>
-          <button class="secondary" type="button" data-action="trial" data-id="${u.user_id}">Resetar trial</button>
         </div>
       </div>
     `;
@@ -484,6 +551,7 @@ document.addEventListener("click", async function(e) {
     if(action === "liberar") await liberar(id);
     if(action === "bloquear") await bloquear(id);
     if(action === "trial") await resetTrial(id);
+    if(action === "adicionar1dia") await adicionarDias(id, 1);
   } catch(err) {
     showMsg(err.message || "Erro ao atualizar usuário.");
   }
@@ -669,6 +737,6 @@ initAdmin();
 })();
 </script>
 
-<div class="version-debug-badge" id="versionDebugBadge">MetaDriver vBeta1.22 · admin</div>
+<div class="version-debug-badge" id="versionDebugBadge">MetaDriver vBeta1.25 · admin</div>
 </body>
 </html>

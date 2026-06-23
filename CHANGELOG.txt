@@ -1,3 +1,31 @@
+vBeta1.25 - CORREÇÃO CRÍTICA: virada operacional das 4h podia ficar travada indefinidamente (introduzida na correção de token da vBeta1.21)
+- Investigado relato de que a virada das 4h parou de funcionar: ao passar das 4h, o saldo não zerava, o ganho do dia não era lançado no histórico, e a sessão em aberto não era encerrada — nada do que normalmente acontece na virada ocorreu.
+- Confirmado que a lógica de cálculo da virada das 4h em si (qual é "hoje", comparação de chaves, etc.) NÃO foi alterada em nenhuma correção anterior — comparação byte a byte confirmou que essas funções permanecem idênticas desde a vBeta1.15.
+- Causa raiz real encontrada: a correção de renovação de token (vBeta1.21) adicionou uma chamada de rede (fetch) sem nenhum limite de tempo (timeout). Em rede lenta ou instável (comum em conexão móvel no trânsito), essa chamada podia nunca terminar — nem com sucesso, nem com erro — travando para sempre o processo de inicialização do app (mdInitialHydrateAndRender). Como a virada das 4h só é liberada para executar depois que esse processo termina, ela ficava bloqueada silenciosamente por toda a sessão, mesmo com o app aberto e funcionando normalmente em outros aspectos.
+- Corrigido: todas as chamadas de rede dentro do processo de inicialização agora têm um limite de tempo (8 segundos) — se a rede não responder dentro desse prazo, o app segue adiante normalmente em vez de travar.
+- Adicionada uma proteção extra (rede de segurança): mesmo que algum problema de rede não previsto ainda trave o processo de inicialização, o app força a liberação da virada das 4h após 12 segundos do início, garantindo que essa lógica nunca fique bloqueada por tempo indefinido.
+- Testado com simulação de rede travada (nunca responde): confirmado que a correção interrompe a espera corretamente após o tempo limite, e que a proteção extra libera a virada das 4h mesmo em cenário de falha total da rede.
+- Nenhuma outra tela ou fluxo foi alterada.
+- Base oficial: vBeta1.24.
+
+vBeta1.24 - Admin: botões diretos para teste grátis, plano de 30 dias e dias extras (sem precisar editar nada no Supabase)
+- Botão "Liberar" renomeado para "Liberar 30 dias" (comportamento já existente desde a vBeta1.23, sem mudança de lógica).
+- Botão "Resetar trial" renomeado para "Teste grátis 7 dias" (comportamento já existente, sem mudança de lógica).
+- NOVO botão "+1 dia": adiciona 1 dia ao prazo atual do usuário (assinatura paga ou teste grátis, conforme o status atual), sem resetar o que já estava valendo. Pode ser clicado várias vezes para somar mais dias (ex.: 3 cliques = +3 dias). Se o prazo já tiver vencido, o novo dia é somado a partir de agora, não do passado.
+- Destaque visual "⚠️ Vence em breve" (borda âmbar) na lista do admin agora também aparece para usuários em teste grátis (trial) com menos de 1 dia restante, além de assinatura paga (active) — antes só cobria assinatura paga.
+- O aviso dentro do app do motorista (banner ao abrir o MetaDriver) também passou a avisar quando o teste grátis está acabando, com texto e botão diferenciados ("Assinar" em vez de "Renovar").
+- Com esta versão, todo o controle de prazos (liberar, dar teste grátis, adicionar dias) é feito inteiramente pelos botões do admin — nenhuma edição manual no Supabase é mais necessária no dia a dia.
+- Nenhuma outra tela ou fluxo foi alterada.
+- Base oficial: vBeta1.23.
+
+vBeta1.23 - Alerta de vencimento de assinatura (admin + app do motorista)
+- AÇÃO MANUAL NECESSÁRIA: execute o arquivo supabase_v22_user_access_until.sql no SQL Editor do Supabase antes de usar esta versão (adiciona a coluna access_until na tabela user_access).
+- No admin: ao clicar em "Liberar", o usuário passa a ter 30 dias de acesso a partir desse momento (access_until = hoje + 30 dias).
+- No admin: usuários com status "active" cuja assinatura vence em até 1 dia agora aparecem destacados (borda âmbar) com o selo "⚠️ Vence em breve" na lista, e a data de vencimento aparece nos detalhes do usuário.
+- No app do motorista: ao abrir o MetaDriver, se a assinatura estiver a até 1 dia de vencer, aparece um aviso no topo da tela com a contagem de horas restantes e um botão "Renovar" que leva direto para a tela de Assinatura/Renovação (WhatsApp). O aviso pode ser fechado e não volta a aparecer na mesma sessão do navegador.
+- Nenhuma outra tela ou fluxo foi alterada.
+- Base oficial: vBeta1.22.
+
 vBeta1.22 - Botões de Lançamentos: corrige compressão do botão "Combustível"
 - Corrigido: os 4 botões de aba em Lançamentos (Ganhos/Gastos/Retiradas/Combustível) tinham largura igual entre si; como "Combustível" é a palavra mais longa, o texto ficava comprimido e, em telas mais estreitas, podia até ser cortado.
 - Cada botão agora recebe uma largura proporcional ao tamanho do próprio texto (Combustível ganha mais espaço, Ganhos/Gastos ganham um pouco menos), mantendo os 4 botões centralizados em conjunto e com o mesmo espaçamento entre eles.

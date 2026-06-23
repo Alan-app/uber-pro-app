@@ -43,7 +43,7 @@ try{
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver vBeta1.22</title>
+<title>MetaDriver vBeta1.25</title>
 <style id="md-hydration-lock">
 body.preload > *:not(#mdBootOverlay){visibility:hidden!important;}
 #mdBootOverlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#0f172a;color:#fff;z-index:2147483647;font-family:Inter,system-ui,sans-serif;font-weight:800;letter-spacing:.2px;}
@@ -2081,6 +2081,38 @@ input.negative-value, input.negative-value::placeholder{
 }
 .fullscreen-bar.show{ display:flex; align-items:center; gap:10px; }
 .fullscreen-bar .txt{ flex:1; font-size:12.5px; opacity:0.92; line-height:1.25; }
+/* vBeta1.23 - aviso de assinatura vencendo em até 1 dia */
+.subscription-warning-bar{
+  position:fixed;
+  left:12px; right:12px;
+  top:12px;
+  z-index:900;
+  background:rgba(38,28,8,0.97);
+  border:1px solid rgba(245,158,11,0.55);
+  border-radius:16px;
+  padding:12px 14px;
+  box-shadow:0 16px 40px rgba(0,0,0,0.45), 0 0 0 1px rgba(245,158,11,0.25);
+  display:none;
+  align-items:center;
+  gap:10px;
+}
+.subscription-warning-bar.show{ display:flex; }
+.subscription-warning-bar .swb-icon{ font-size:22px; flex-shrink:0; }
+.subscription-warning-bar .swb-txt{ flex:1; font-size:13px; line-height:1.3; color:#fde9c8; }
+.subscription-warning-bar .swb-txt strong{ color:#fbbf24; }
+.subscription-warning-bar .swb-actions{ display:flex; flex-direction:column; gap:6px; flex-shrink:0; }
+.subscription-warning-bar button{
+  width:auto;
+  padding:8px 12px;
+  margin:0;
+  border-radius:12px;
+  border:none;
+  font-size:12px;
+  font-weight:800;
+  white-space:nowrap;
+}
+.subscription-warning-bar .swb-renovar{ background:#f59e0b; color:#1a1100; }
+.subscription-warning-bar .swb-fechar{ background:rgba(255,255,255,0.10); color:#fde9c8; }
 .fullscreen-bar button{
   width:auto;
   padding:10px 12px;
@@ -3808,7 +3840,7 @@ body[data-tema$="claro"] .historico-report-line{border-bottom-color:rgba(0,0,0,.
   <div class="menu-item"><button class="secondary" onclick="abrirSaldoAtualButtonMenu(); closeMenu();">Botão de saldo atual</button></div>
   <div class="menu-item"><button class="secondary" onclick="abrirTemas(); closeMenu();">Temas</button></div>
   <div class="menu-item menu-user-row"><span class="menu-user-name" id="menuUserName">Usuário</span><button class="danger" onclick="forceLogout(); return false;">Sair</button></div>
-  <div class="menu-note" style="text-align:center;">vBeta1.22</div>
+  <div class="menu-note" style="text-align:center;">vBeta1.25</div>
 </div>
 
 
@@ -4223,6 +4255,16 @@ body[data-tema$="claro"] .historico-report-line{border-bottom-color:rgba(0,0,0,.
   <button type="button" onclick="enterFullscreen()">Tela cheia</button>
 </div>
 
+<!-- vBeta1.23 - aviso de assinatura vencendo em até 1 dia -->
+<div id="subscriptionWarningBar" class="subscription-warning-bar" role="dialog" aria-live="polite">
+  <div class="swb-icon">⚠️</div>
+  <div class="swb-txt" id="subscriptionWarningText">Sua assinatura vence em breve.</div>
+  <div class="swb-actions">
+    <button type="button" id="subscriptionWarningActionBtn" class="swb-renovar" onclick="mdAbrirRenovacaoAssinatura()">Renovar</button>
+    <button type="button" class="swb-fechar" onclick="mdFecharAvisoAssinatura()">Fechar</button>
+  </div>
+</div>
+
 
 </div><!-- /tabUber -->
 
@@ -4416,6 +4458,22 @@ function mdWriteOfflineSafeSnapshot(snapshot){
 const CLOUD_TABLE = "app_cloud_data";
 const CLOUD_SUPABASE_URL = "https://xoqlgwjpmdkiazwpwhmn.supabase.co";
 const CLOUD_SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhvcWxnd2pwbWRraWF6d3B3aG1uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5NjY1OTksImV4cCI6MjA4NzU0MjU5OX0.txohC3MvvEDaCCVRouVPDrmVaAO1PJxY0LawUttj9PA";
+
+// vBeta1.25 - CORREÇÃO CRÍTICA: helper de fetch com timeout. Sem isso, uma
+// rede lenta/instável podia deixar requisições de rede "penduradas" para
+// sempre (nunca resolvem nem rejeitam), travando mdInitialHydrateAndRender()
+// e, por consequência, bloqueando window.__mdHydrated indefinidamente — o que
+// silenciosamente impedia a virada operacional das 4h de funcionar mesmo com
+// o app aberto e funcionando normalmente em outros aspectos.
+function mdFetchComTimeout(url, options, timeoutMs){
+  const controller = (typeof AbortController !== "undefined") ? new AbortController() : null;
+  const ms = typeof timeoutMs === "number" ? timeoutMs : 8000;
+  const timeoutId = controller ? setTimeout(function(){ try{ controller.abort(); }catch(e){} }, ms) : null;
+  const opts = Object.assign({}, options || {});
+  if(controller) opts.signal = controller.signal;
+  return fetch(url, opts).finally(function(){ if(timeoutId) clearTimeout(timeoutId); });
+}
+
 const FIRST_INSTALL_COLLAPSED_KEY = "metadriver_first_install_collapsed_v2";
 const FAB_PREF_KEY = "metadriver_quick_balance_fab_enabled";
 const CLOUD_PENDING_KEY = STORAGE_KEY + "__cloud_pending_v1";
@@ -5078,7 +5136,10 @@ async function mdEnsureActiveSession(forceCheck){
 
     __mdSessionRefreshPromise = (async function(){
       try{
-        const res = await fetch(CLOUD_SUPABASE_URL + "/auth/v1/token?grant_type=refresh_token", {
+        // vBeta1.25 - usa o helper com timeout (ver mdFetchComTimeout), que
+        // corrige o bug que travava a hidratação inicial indefinidamente em
+        // rede lenta/instável, bloqueando a virada operacional das 4h.
+        const res = await mdFetchComTimeout(CLOUD_SUPABASE_URL + "/auth/v1/token?grant_type=refresh_token", {
           method: "POST",
           headers: { "apikey": CLOUD_SUPABASE_KEY, "Content-Type": "application/json" },
           body: JSON.stringify({ refresh_token: refreshToken })
@@ -5097,6 +5158,7 @@ async function mdEnsureActiveSession(forceCheck){
         // refresh_token inválido/expirado: não há como renovar sem novo login.
         return "";
       }catch(e){
+        // Inclui falha de rede, timeout (AbortError) etc. - nunca trava.
         return "";
       }finally{
         __mdSessionRefreshPromise = null;
@@ -5236,7 +5298,7 @@ function mdBuildDiagnosticsObject(){
     const durableObj = mdSafeJsonParse(durableRaw);
     const diag = {
       generated_at: mdNowIso(),
-      app_version: 'MetaDriver vBeta1.22',
+      app_version: 'MetaDriver vBeta1.25',
       cloud_table: CLOUD_TABLE,
       device_id: mdEnsureDeviceId(),
       visibility_state: document.visibilityState,
@@ -5457,7 +5519,7 @@ function cloudHasUsefulData(obj){
 }
 
 async function cloudFetchRow(token, userId){
-  const res = await fetch(
+  const res = await mdFetchComTimeout(
     CLOUD_SUPABASE_URL + "/rest/v1/" + CLOUD_TABLE + "?select=id,payload,updated_at,commit_seq&user_id=eq." + encodeURIComponent(userId) + "&order=commit_seq.desc.nullslast,updated_at.desc.nullslast,id.desc&limit=1",
     {
       headers: {
@@ -6022,6 +6084,72 @@ async function mdCarregarNomeUsuarioNuvem(){
         atualizarNomeUsuarioMenu();
       }
     }
+  }catch(e){}
+}
+
+// vBeta1.23 - avisa o motorista dentro do app quando a assinatura paga
+// (status active) estiver a 1 dia ou menos de vencer (access_until).
+function mdFecharAvisoAssinatura(){
+  try{
+    const bar = document.getElementById("subscriptionWarningBar");
+    if(bar) bar.classList.remove("show");
+    // Não mostra de novo na mesma sessão do navegador depois de fechado.
+    try{ sessionStorage.setItem("md_subscription_warning_dismissed", "1"); }catch(e){}
+  }catch(e){}
+}
+function mdAbrirRenovacaoAssinatura(){
+  try{
+    mdFecharAvisoAssinatura();
+    if(typeof abrirGerenciarConta === "function") abrirGerenciarConta();
+  }catch(e){}
+}
+async function mdVerificarVencimentoAssinatura(){
+  try{
+    let jaFechouNestaSessao = false;
+    try{ jaFechouNestaSessao = sessionStorage.getItem("md_subscription_warning_dismissed") === "1"; }catch(e){}
+    if(jaFechouNestaSessao) return;
+
+    const token = localStorage.getItem("sb_token") || "";
+    const userId = localStorage.getItem("sb_user_id") || "";
+    if(!token || !userId || typeof CLOUD_SUPABASE_URL === "undefined") return;
+
+    // vBeta1.24 - também avisa quando o teste grátis (trial) está acabando,
+    // além da assinatura paga (active).
+    const resp = await fetch(CLOUD_SUPABASE_URL + "/rest/v1/user_access?select=status,access_until,trial_end&user_id=eq." + encodeURIComponent(userId) + "&limit=1", {
+      headers:{ "apikey": CLOUD_SUPABASE_KEY, "Authorization":"Bearer " + token, "Accept":"application/json" }
+    });
+    if(!resp.ok) return;
+    const rows = await resp.json();
+    const row = Array.isArray(rows) && rows[0] ? rows[0] : null;
+    if(!row) return;
+
+    let venceEm = 0;
+    let ehTrial = false;
+    if(row.status === "active" && row.access_until){
+      venceEm = new Date(row.access_until).getTime();
+    }else if(row.status === "trial" && row.trial_end){
+      venceEm = new Date(row.trial_end).getTime();
+      ehTrial = true;
+    }else{
+      return;
+    }
+
+    const diffMs = venceEm - Date.now();
+    const vencendoEmBreve = diffMs > 0 && diffMs <= (24*60*60*1000);
+    if(!vencendoEmBreve) return;
+
+    const horasRestantes = Math.max(1, Math.round(diffMs / (60*60*1000)));
+    const horaTexto = horasRestantes + (horasRestantes === 1 ? " hora" : " horas");
+    const textoEl = document.getElementById("subscriptionWarningText");
+    const btnEl = document.getElementById("subscriptionWarningActionBtn");
+    if(textoEl){
+      textoEl.innerHTML = ehTrial
+        ? ("Seu teste grátis termina em <strong>" + horaTexto + "</strong>. Assine para continuar usando o MetaDriver.")
+        : ("Sua assinatura vence em <strong>" + horaTexto + "</strong>. Renove para não perder o acesso.");
+    }
+    if(btnEl) btnEl.textContent = ehTrial ? "Assinar" : "Renovar";
+    const bar = document.getElementById("subscriptionWarningBar");
+    if(bar) bar.classList.add("show");
   }catch(e){}
 }
 async function mdSalvarNomeUsuarioNuvem(nome){
@@ -7118,7 +7246,7 @@ function mdCommitLancamentoMutation(reason){
   try{ atualizar(); }catch(e){}
   try{ if(typeof refreshQuickBalanceFabMiniDisplay === "function") refreshQuickBalanceFabMiniDisplay(); }catch(e){}
   try{ if(typeof updateQuickBalanceFabUI === "function") updateQuickBalanceFabUI(); }catch(e){}
-  try{ if(typeof toast === "function" && reason) console.info("MetaDriver vBeta1.22 mutation:", reason); }catch(e){}
+  try{ if(typeof toast === "function" && reason) console.info("MetaDriver vBeta1.25 mutation:", reason); }catch(e){}
 }
 
 
@@ -8902,7 +9030,7 @@ function exportarRelatorioPDF(){
       <script>
         setTimeout(()=>window.print(), 250);
       <\/script>
-    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver vBeta1.22 · app</div>
+    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver vBeta1.25 · app</div>
 
 
 <script>
@@ -10536,6 +10664,29 @@ function bindSectionHeaders(){
 
 try{ ensureGanhoHoraDiaAtual(); }catch(e){}
 mdInitialHydrateAndRender();
+
+// vBeta1.25 - REDE DE SEGURANÇA ABSOLUTA: garante que window.__mdHydrated
+// nunca fique indefinidamente "false" por causa de qualquer travamento de
+// rede não previsto dentro da hidratação inicial. Sem isso, um único ponto
+// de rede sem timeout em todo esse fluxo seria suficiente para bloquear a
+// virada operacional das 4h pelo resto da sessão do app, mesmo o app
+// continuando aberto e em uso normal.
+setTimeout(function(){
+  try{
+    if(!window.__mdHydrated){
+      window.__mdHydrated = true;
+      window.__MD_HYDRATED__ = true;
+      try{ delete dados.__skip_operational_day_turn; }catch(e){}
+      try{ document.body.classList.remove("preload"); }catch(e){}
+      try{ ensureGanhoHoraDiaAtual(); }catch(e){}
+      try{ atualizar(); }catch(e){}
+    }
+  }catch(e){}
+}, 12000);
+
+// vBeta1.23 - verifica vencimento de assinatura pouco depois do boot, dando
+// tempo do login/hidratação inicial terminarem.
+setTimeout(function(){ try{ mdVerificarVencimentoAssinatura(); }catch(e){} }, 2500);
 
 (function(){
   const metaIds = ["metaTotal", "dataInicialMeta", "dataLimite"];

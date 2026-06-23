@@ -1,3 +1,65 @@
+MetaDriver vBeta1.25
+
+Solicitado:
+- Relatado que a virada operacional das 4h parou de funcionar: passou das 4h e nada do que normalmente acontece ocorreu — o saldo atual não zerou, o ganho do dia não foi lançado no histórico, e a sessão em aberto não foi encerrada. O usuário apontou a correção da Data Inicial da meta (vBeta1.16) como possível causa.
+
+Investigação:
+- Comparada byte a byte toda a lógica de cálculo da virada das 4h (qual é o "dia operacional atual", geração e verificação das chaves de controle, etc.) entre a versão anterior à correção da Data Inicial (vBeta1.15) e a versão atual. Confirmado que essa lógica NÃO foi alterada em nenhum momento — a correção da Data Inicial realmente não tem relação com a virada das 4h.
+- Identificada a causa real em outro lugar: a correção do token de sessão (vBeta1.21, que resolveu a perda de horas de dados ao limpar o Chrome) adicionou uma chamada de rede para renovar o token de acesso, mas essa chamada não tinha nenhum limite de tempo (timeout).
+- Em uma rede lenta ou instável — situação comum para um motorista em trânsito usando dados móveis — essa chamada podia ficar "pendurada" para sempre, sem nunca dar certo nem errado. Isso travava todo o processo de inicialização do app, e como a virada das 4h só é autorizada a funcionar depois que esse processo termina, ela ficava bloqueada silenciosamente — sem nenhum erro visível — até o app ser fechado e reaberto.
+
+Feito:
+- Todas as chamadas de rede do processo de inicialização agora têm um limite de tempo de 8 segundos. Se a rede não responder dentro desse prazo, o app segue adiante normalmente (tratando como se a rede tivesse falhado), em vez de ficar esperando para sempre.
+- Adicionada uma proteção extra: mesmo que algum outro problema de rede não previsto trave o processo de inicialização, o app força a liberação da virada das 4h após 12 segundos, garantindo que essa lógica nunca fique bloqueada indefinidamente, independente da causa.
+- Testado com uma simulação de rede que nunca responde, confirmando que a correção interrompe a espera corretamente e que a proteção extra libera a virada das 4h mesmo nesse cenário extremo.
+
+Status atual:
+- Pronto para uso. Esta é uma correção de robustez geral: mesmo que a internet falhe ou demore no momento exato da virada das 4h, o app não vai mais travar essa funcionalidade pelo resto da sessão.
+
+MetaDriver vBeta1.24
+
+Solicitado:
+- Não precisar editar nada no Supabase manualmente depois de implementado. Poder liberar teste grátis de 7 dias através de um botão no admin, liberar plano de 30 dias, e ter um botão para adicionar dias extras de um em um.
+
+Decisão confirmada com o usuário antes de implementar:
+- O destaque visual "vencendo em breve" deve cobrir também o teste grátis de 7 dias terminando, não só a assinatura paga.
+- O aviso dentro do app do motorista também deve avisar quando o teste grátis está terminando, não só a assinatura paga.
+
+Feito:
+- Botões do admin reorganizados e renomeados para ficar claro o que cada um faz: "Liberar 30 dias", "Teste grátis 7 dias", "+1 dia" (novo) e "Bloquear".
+- O botão "+1 dia" soma 1 dia ao prazo que já está valendo (seja teste grátis ou assinatura paga, conforme o status atual do usuário) — pode ser clicado várias vezes para somar mais dias. Se o prazo já tiver vencido, conta a partir de agora, não do passado (evita "perder" dias por já estar vencido).
+- Destaque visual no admin (borda âmbar + selo) estendido para também cobrir teste grátis terminando, além de assinatura paga.
+- Aviso dentro do app do motorista estendido para também avisar sobre teste grátis terminando, com texto e botão diferenciados ("Assinar" em vez de "Renovar" nesse caso).
+- A partir desta versão, todo o controle de prazos do dia a dia é feito pelos botões do admin — sem necessidade de abrir o Supabase para editar nada manualmente.
+- Nenhuma outra tela, cálculo ou fluxo foi alterada.
+
+Status atual:
+- Pronto para teste. Não é necessário rodar nenhum SQL novo nesta versão (a coluna access_until já foi criada na vBeta1.23).
+
+MetaDriver vBeta1.23
+
+⚠️ AÇÃO MANUAL NECESSÁRIA ANTES DE USAR ESTA VERSÃO:
+- Abra o painel do Supabase do projeto > SQL Editor > New query.
+- Cole e execute o conteúdo do arquivo supabase_v22_user_access_until.sql (incluído nesta entrega).
+- Isso adiciona a coluna "access_until" na tabela user_access, necessária para tudo abaixo funcionar.
+
+Solicitado:
+- Destacar visualmente no admin o usuário que esteja a um dia de vencer a assinatura, e enviar um alerta para o app do usuário.
+
+Decisões confirmadas com o usuário antes de implementar:
+- Destaque no admin: apenas visual, visível quando o admin abrir a tela (sem notificação push).
+- Alerta para o motorista: aviso dentro do próprio app (banner ao abrir o MetaDriver), não notificação push.
+- Toda liberação no admin vale por 30 dias fixos a partir do momento da liberação (confirmado pelo usuário).
+
+Feito:
+- Nova coluna access_until na tabela user_access (ver SQL acima), preenchida automaticamente como "agora + 30 dias" sempre que o admin clica em "Liberar".
+- No admin: usuários "active" com access_until a 1 dia ou menos de vencer aparecem com borda âmbar destacada e o selo "⚠️ Vence em breve" na lista. A data de vencimento também aparece nos detalhes do usuário (antes só existia o "fim do teste" do trial).
+- No app do motorista: ao abrir o app, se a assinatura estiver a até 1 dia de vencer, aparece um banner no topo informando quantas horas restam, com botão "Renovar" (leva direto para a tela de Assinatura/Renovação — WhatsApp) e botão "Fechar" (não volta a aparecer na mesma sessão do navegador).
+- Nenhuma outra tela, cálculo ou fluxo foi alterada.
+
+Status atual:
+- Pronto para teste, DEPOIS de rodar o SQL no Supabase. Para testar: libere um usuário de teste, depois edite manualmente o access_until dele no Supabase para "amanhã" e confirme que o destaque aparece no admin e o aviso aparece no app dele.
+
 MetaDriver vBeta1.22
 
 Solicitado:
