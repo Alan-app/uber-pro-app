@@ -1,3 +1,12 @@
+vBeta1.26 - CORREÇÃO CRÍTICA REAL: virada das 4h não era verificada ao voltar para o app depois de trocar de tela
+- Investigado novo relato (mais preciso) de que a virada das 4h não funcionava ao mudar a data do celular com o app já aberto. A correção da vBeta1.25 (timeout de rede) não resolveu porque não era essa a causa.
+- Confirmado, com testes automatizados diretos no código real (não apenas comparação de texto), que a lógica de cálculo da virada das 4h está correta e sempre esteve.
+- Causa raiz real encontrada: ao trocar de tela ou de aplicativo no celular, o navegador suspende ou desacelera o temporizador que verifica a virada das 4h a cada 15 segundos (comportamento padrão de economia de bateria do Android/Chrome, não um bug introduzido pelo MetaDriver). Como nada forçava uma nova verificação ao voltar para o app, a virada só seria detectada quando esse temporizador retomasse sua cadência normal — o que podia demorar bastante ou não ser percebido pelo usuário.
+- Corrigido: ao voltar para o MetaDriver depois de estar em outra tela/app, a verificação da virada das 4h agora é forçada imediatamente, sem depender apenas do temporizador de 15 segundos.
+- Testado com simulação completa do cenário relatado (app aberto → trocar de tela → mudar a data do celular → voltar para o app), confirmando que a virada agora é detectada e executada imediatamente ao retornar.
+- Nenhuma outra tela ou fluxo foi alterada.
+- Base oficial: vBeta1.25.
+
 vBeta1.25 - CORREÇÃO CRÍTICA: virada operacional das 4h podia ficar travada indefinidamente (introduzida na correção de token da vBeta1.21)
 - Investigado relato de que a virada das 4h parou de funcionar: ao passar das 4h, o saldo não zerava, o ganho do dia não era lançado no histórico, e a sessão em aberto não era encerrada — nada do que normalmente acontece na virada ocorreu.
 - Confirmado que a lógica de cálculo da virada das 4h em si (qual é "hoje", comparação de chaves, etc.) NÃO foi alterada em nenhuma correção anterior — comparação byte a byte confirmou que essas funções permanecem idênticas desde a vBeta1.15.

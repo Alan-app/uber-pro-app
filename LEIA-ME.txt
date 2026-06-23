@@ -1,3 +1,24 @@
+MetaDriver vBeta1.26
+
+Solicitado:
+- O usuário testou novamente e relatou que a virada das 4h continuava não funcionando: mudou a data do celular (mantendo a mesma hora do dia) com o app já aberto, e nada aconteceu — confirmando que a correção da vBeta1.25 não havia resolvido o problema relatado.
+
+Esclarecimento importante do usuário durante a investigação:
+- O teste sempre é feito mudando só a DATA do celular, sem mudar a hora — método que o usuário já usava antes e que funcionava em versões anteriores.
+- A internet não tinha relação com o problema.
+- Antes de voltar para o MetaDriver após mudar a data, o usuário trocava de tela/aplicativo por um tempo.
+
+Investigação (com testes diretos no código, não apenas leitura):
+- Construída uma simulação automatizada executando as funções reais de cálculo da virada das 4h extraídas diretamente do arquivo do app, simulando a mudança de data exatamente como o usuário descreveu. Confirmado que essa lógica está correta — calcula corretamente qual é o dia anterior e o dia atual, e identifica corretamente quando uma virada ainda não foi executada.
+- Causa raiz real identificada: ao trocar de tela ou aplicativo no celular, o navegador Android/Chrome suspende ou desacelera o temporizador interno que verifica a virada das 4h a cada 15 segundos. Esse é um comportamento padrão de economia de bateria do sistema, não uma falha introduzida pelo MetaDriver. Como nada no código forçava uma nova verificação especificamente no momento de VOLTAR para o app, a virada só seria detectada quando esse temporizador retomasse sua cadência normal de execução — o que pode demorar de forma imprevisível.
+
+Feito:
+- Ao voltar para o MetaDriver depois de estar em outra tela ou aplicativo, o app agora verifica imediatamente se a virada das 4h precisa ocorrer, em vez de depender apenas do temporizador periódico de 15 segundos (que pode estar suspenso nesse momento).
+- Testada uma simulação completa do cenário exato relatado: app aberto, troca de tela, mudança de data do celular, retorno ao app. Confirmado que a virada agora é detectada e executada corretamente assim que o app volta a ficar visível.
+
+Status atual:
+- Pronto para novo teste. Repita exatamente o mesmo procedimento: app aberto, mude a data do celular, troque de tela por um momento, e volte para o MetaDriver — a virada deve ocorrer imediatamente ao retornar.
+
 MetaDriver vBeta1.25
 
 Solicitado:

@@ -43,7 +43,7 @@ try{
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver vBeta1.25</title>
+<title>MetaDriver vBeta1.26</title>
 <style id="md-hydration-lock">
 body.preload > *:not(#mdBootOverlay){visibility:hidden!important;}
 #mdBootOverlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#0f172a;color:#fff;z-index:2147483647;font-family:Inter,system-ui,sans-serif;font-weight:800;letter-spacing:.2px;}
@@ -3840,7 +3840,7 @@ body[data-tema$="claro"] .historico-report-line{border-bottom-color:rgba(0,0,0,.
   <div class="menu-item"><button class="secondary" onclick="abrirSaldoAtualButtonMenu(); closeMenu();">Botão de saldo atual</button></div>
   <div class="menu-item"><button class="secondary" onclick="abrirTemas(); closeMenu();">Temas</button></div>
   <div class="menu-item menu-user-row"><span class="menu-user-name" id="menuUserName">Usuário</span><button class="danger" onclick="forceLogout(); return false;">Sair</button></div>
-  <div class="menu-note" style="text-align:center;">vBeta1.25</div>
+  <div class="menu-note" style="text-align:center;">vBeta1.26</div>
 </div>
 
 
@@ -5298,7 +5298,7 @@ function mdBuildDiagnosticsObject(){
     const durableObj = mdSafeJsonParse(durableRaw);
     const diag = {
       generated_at: mdNowIso(),
-      app_version: 'MetaDriver vBeta1.25',
+      app_version: 'MetaDriver vBeta1.26',
       cloud_table: CLOUD_TABLE,
       device_id: mdEnsureDeviceId(),
       visibility_state: document.visibilityState,
@@ -7246,7 +7246,7 @@ function mdCommitLancamentoMutation(reason){
   try{ atualizar(); }catch(e){}
   try{ if(typeof refreshQuickBalanceFabMiniDisplay === "function") refreshQuickBalanceFabMiniDisplay(); }catch(e){}
   try{ if(typeof updateQuickBalanceFabUI === "function") updateQuickBalanceFabUI(); }catch(e){}
-  try{ if(typeof toast === "function" && reason) console.info("MetaDriver vBeta1.25 mutation:", reason); }catch(e){}
+  try{ if(typeof toast === "function" && reason) console.info("MetaDriver vBeta1.26 mutation:", reason); }catch(e){}
 }
 
 
@@ -9030,7 +9030,7 @@ function exportarRelatorioPDF(){
       <script>
         setTimeout(()=>window.print(), 250);
       <\/script>
-    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver vBeta1.25 · app</div>
+    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver vBeta1.26 · app</div>
 
 
 <script>
@@ -11951,8 +11951,19 @@ document.addEventListener("visibilitychange", function(){
   try{
     if(document.visibilityState === "visible"){
       resumeGanhoHoraTempoRealSafely();
+      // vBeta1.26 - CORREÇÃO CRÍTICA: enquanto a aba fica em segundo plano
+      // (usuário troca de tela/app), o navegador suspende ou desacelera o
+      // setInterval que verifica a virada das 4h a cada 15s. Sem isso, ao
+      // voltar para o app, a virada só seria detectada quando o interval
+      // retomasse sua cadência normal, o que pode demorar bastante (ou nunca
+      // acontecer de forma perceptível). Agora, ao voltar a ficar visível,
+      // a verificação da virada é forçada imediatamente.
+      try{ ensureGanhoHoraDiaAtual(); }catch(e){}
     }
   }catch(e){}
+});
+window.addEventListener("pageshow", function(){
+  try{ ensureGanhoHoraDiaAtual(); }catch(e){}
 });
 
 
