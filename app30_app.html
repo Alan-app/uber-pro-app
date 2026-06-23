@@ -43,7 +43,7 @@ try{
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver vBeta1.35</title>
+<title>MetaDriver vBeta1.36</title>
 <style id="md-hydration-lock">
 body.preload > *:not(#mdBootOverlay){visibility:hidden!important;}
 #mdBootOverlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#0f172a;color:#fff;z-index:2147483647;font-family:Inter,system-ui,sans-serif;font-weight:800;letter-spacing:.2px;}
@@ -3895,7 +3895,7 @@ body[data-tema$="claro"] .historico-report-line{border-bottom-color:rgba(0,0,0,.
   <div class="menu-item"><button class="secondary" onclick="abrirSaldoAtualButtonMenu(); closeMenu();">Botão de saldo atual</button></div>
   <div class="menu-item"><button class="secondary" onclick="abrirTemas(); closeMenu();">Temas</button></div>
   <div class="menu-item menu-user-row"><span class="menu-user-name" id="menuUserName">Usuário</span><button class="danger" onclick="forceLogout(); return false;">Sair</button></div>
-  <div class="menu-note" style="text-align:center;">vBeta1.35</div>
+  <div class="menu-note" style="text-align:center;">vBeta1.36</div>
 </div>
 
 
@@ -5381,7 +5381,7 @@ function mdBuildDiagnosticsObject(){
     const durableObj = mdSafeJsonParse(durableRaw);
     const diag = {
       generated_at: mdNowIso(),
-      app_version: 'MetaDriver vBeta1.35',
+      app_version: 'MetaDriver vBeta1.36',
       cloud_table: CLOUD_TABLE,
       device_id: mdEnsureDeviceId(),
       visibility_state: document.visibilityState,
@@ -7381,7 +7381,7 @@ function mdCommitLancamentoMutation(reason){
   try{ atualizar(); }catch(e){}
   try{ if(typeof refreshQuickBalanceFabMiniDisplay === "function") refreshQuickBalanceFabMiniDisplay(); }catch(e){}
   try{ if(typeof updateQuickBalanceFabUI === "function") updateQuickBalanceFabUI(); }catch(e){}
-  try{ if(typeof toast === "function" && reason) console.info("MetaDriver vBeta1.35 mutation:", reason); }catch(e){}
+  try{ if(typeof toast === "function" && reason) console.info("MetaDriver vBeta1.36 mutation:", reason); }catch(e){}
 }
 
 
@@ -9189,7 +9189,7 @@ function exportarRelatorioPDF(){
       <script>
         setTimeout(()=>window.print(), 250);
       <\/script>
-    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver vBeta1.35 · app</div>
+    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver vBeta1.36 · app</div>
 
 
 <script>
@@ -11423,20 +11423,16 @@ function showCarPopup(list, kmAtual){
   if(!overlay){
     overlay = document.createElement("div");
     overlay.id = "carOverlay";
-    overlay.style.position="fixed";
-    overlay.style.inset="0";
-    overlay.style.background="rgba(0,0,0,0.55)";
-    overlay.style.zIndex="9999";
-    overlay.style.display="flex";
-    overlay.style.alignItems="center";
-    overlay.style.justifyContent="center";
-    overlay.style.padding="16px";
-    overlay.innerHTML = `<div style="width:100%;max-width:520px;background:rgba(20,20,20,0.95);border:1px solid rgba(255,255,255,0.12);border-radius:16px;padding:14px 14px 12px;">
-      <div style="font-weight:900;font-size:16px;margin-bottom:10px;">⚠️ Manutenção na hora</div>
-      <div id="carPopupList" style="max-height:55vh;overflow:auto;margin-bottom:10px;"></div>
-      <div style="display:flex;gap:10px;">
-        <button type="button" style="flex:1;" onclick="dismissCarPopup()">Fechar</button>
-        <button type="button" style="flex:1;background:rgba(59,130,246,0.25);border:1px solid rgba(59,130,246,0.35);" onclick="snoozeCarPopup()">Lembrar depois</button>
+    overlay.className = "edit-data-overlay";
+    // vBeta1.36 - convertido para o padrão visual MetaDriver (mesmas classes
+    // dos demais modais do app: edit-data-overlay/edit-data-modal), em vez
+    // do estilo inline anterior que destoava do restante do app.
+    overlay.innerHTML = `<div class="edit-data-modal" style="max-height:80vh; display:flex; flex-direction:column;">
+      <div class="edit-data-title">⚠️ Manutenção na hora</div>
+      <div id="carPopupList" style="overflow:auto; margin-bottom:12px; flex:1;"></div>
+      <div class="edit-data-actions">
+        <button type="button" class="btn-cancelar" onclick="dismissCarPopup()">Fechar</button>
+        <button type="button" onclick="snoozeCarPopup()">Lembrar depois</button>
       </div>
     </div>`;
     document.body.appendChild(overlay);
@@ -11451,9 +11447,9 @@ function showCarPopup(list, kmAtual){
         </div>
     </div>
   `).join("");
-  overlay.style.display="flex";
+  overlay.classList.add("show");
 }
-function dismissCarPopup(){ const o=document.getElementById("carOverlay"); if(o) o.style.display="none"; }
+function dismissCarPopup(){ const o=document.getElementById("carOverlay"); if(o) o.classList.remove("show"); }
 
 
 

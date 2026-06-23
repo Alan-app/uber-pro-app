@@ -1,3 +1,19 @@
+MetaDriver vBeta1.36
+
+Solicitado:
+- O modal de aviso que aparece quando o KM atual atinge uma manutenção programada ainda parecia "nativo" do navegador, diferente do padrão visual do resto do app.
+
+Investigação:
+- Confirmado que esse aviso já não era o modal nativo do navegador propriamente (não usava prompt/alert) — era construído com estilo próprio "inline" (cores e bordas diferentes), o que dava a impressão visual de ser nativo por não seguir o mesmo padrão dos outros modais do app.
+
+Feito:
+- Convertido o aviso de manutenção para usar exatamente as mesmas classes visuais já usadas nos demais modais padrão MetaDriver do app (mesmo fundo, borda, título, espaçamento e estilo de botões usados em "Editar lançamento", "Editar manutenção", e no modal de "Concluir manutenção" criado na versão anterior).
+- Testado o fluxo completo: o aviso aparece corretamente no novo padrão visual; o botão "Concluir" dentro dele abre o modal de Data + Valor (vBeta1.35); ao confirmar, tanto esse modal quanto o aviso de manutenção pendente fecham corretamente.
+- Seguindo a prática já estabelecida: 28 funções relacionadas à virada das 4h, sincronização com a nuvem, lançamento por voz e manutenção do carro foram comparadas byte a byte contra a versão anterior — todas confirmadas idênticas.
+
+Status atual:
+- Pronto para teste. Ao atingir o KM de uma manutenção programada, o aviso deve aparecer com a mesma aparência dos demais modais do app.
+
 MetaDriver vBeta1.35
 
 Solicitado:
