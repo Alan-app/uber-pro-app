@@ -10503,7 +10503,7 @@ function salvarPreferenciaAtalhosApps(){
 // usa o link da loja como alternativa direta.
 function mdAbrirAppPorPacote(packageName, playStoreUrl){
   try{
-    const intentUrl=(packageName==='com.ubercab.driver') ? 'intent:#Intent;component=com.ubercab.driver/com.ubercab.carbon.core.CarbonActivity;end' : 'intent://#Intent;package='+packageName+';end';
+    const intentUrl=(packageName==='com.ubercab.driver') ? 'intent://open/#Intent;component=com.ubercab.driver/com.ubercab.carbon.core.CarbonActivity;end' : 'intent://open/#Intent;package='+packageName+';end';
     window.location.href=intentUrl;
     setTimeout(function(){
       window.location.href=playStoreUrl;
