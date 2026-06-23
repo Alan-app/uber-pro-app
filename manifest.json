@@ -1,6 +1,6 @@
 {
-  "name": "MetaDriver vBeta1.27",
-  "short_name": "MetaDriver vBeta1.27",
+  "name": "MetaDriver vBeta1.28",
+  "short_name": "MetaDriver vBeta1.28",
   "start_url": "./index.html?v=Beta1.1",
   "scope": "./",
   "display": "standalone",
@@ -19,5 +19,5 @@
       "type": "image/png"
     }
   ],
-  "version": "vBeta1.27"
+  "version": "vBeta1.28"
 }

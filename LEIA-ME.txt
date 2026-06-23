@@ -1,3 +1,23 @@
+MetaDriver vBeta1.28
+
+Solicitado:
+- O usuário enviou um vídeo mostrando que o lançamento por voz ainda apresentava o problema "funciona uma vez, falha na próxima" mesmo depois das correções anteriores no microfone e no reconhecimento de fala.
+
+Investigação (a partir do vídeo enviado):
+- Analisados os quadros do vídeo segundo a segundo. Confirmado que o microfone capturava a fala normalmente em todas as tentativas, e o app sempre mostrava a mensagem "Preenchido (modo teste)" — mas em algumas tentativas a aba e os campos não apareciam preenchidos na tela, mesmo com a mensagem de sucesso.
+- Identificada a causa raiz exata: o usuário comandava por voz vários lançamentos do mesmo tipo (ex.: "Gastos") em sequência, sem clicar em "Salvar" entre as tentativas — então a aba e o formulário já estavam abertos da tentativa anterior.
+- As funções que abrem a aba e o formulário foram originalmente feitas para o clique manual do usuário nos botões, e por isso ALTERNAM entre abrir e fechar quando já estão abertas (esse comportamento é correto e esperado para clique manual). Mas isso fazia o comando de voz, ao tentar abrir uma aba/formulário que já estava aberto da tentativa anterior, na verdade FECHAR e limpar os campos um instante antes do preenchimento ocorrer — o app dizia "Preenchido" porque essa parte do código rodava normalmente, só que sobre uma tela que tinha acabado de ser fechada.
+- Esse mecanismo explica exatamente o padrão "funciona uma vez sim, outra não": a cada tentativa, a aba alternava entre aberta e fechada, então o sucesso e a falha se alternavam também.
+
+Feito:
+- Criadas duas funções novas, dedicadas exclusivamente ao lançamento por voz, que sempre garantem a aba e o formulário abertos — nunca alternam para fechar, independente do estado em que estavam antes.
+- As funções originais, usadas pelo clique manual nos botões Ganhos/Gastos/Retiradas/Combustível e "Adicionar", permanecem exatamente como sempre foram, sem nenhuma alteração.
+- Testado o cenário exato do vídeo de forma automatizada: quatro comandos de voz em sequência, sem clicar em Salvar entre eles (incluindo troca de tipo de lançamento), confirmando que todos preenchem corretamente agora, sem nenhuma falha alternada.
+- Seguindo a prática já estabelecida: 31 funções relacionadas à virada das 4h, sincronização com a nuvem, atalhos de apps e lançamentos manuais foram comparadas byte a byte contra a versão anterior antes da entrega — todas confirmadas idênticas, garantindo que nada que já funcionava foi alterado.
+
+Status atual:
+- Pronto para novo teste. Repita o mesmo procedimento do vídeo: vários comandos de voz em sequência, sem clicar em Salvar entre eles, e confirme que todos preenchem corretamente.
+
 MetaDriver vBeta1.27
 
 Solicitado:

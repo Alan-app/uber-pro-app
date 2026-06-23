@@ -1,3 +1,14 @@
+vBeta1.28 - CORREÇÃO CRÍTICA: lançamento por voz funcionava uma vez e falhava na seguinte (causa raiz real, identificada por vídeo)
+- Investigado, a partir de um vídeo enviado pelo usuário mostrando o problema na prática, o padrão intermitente "funciona uma vez, falha na próxima" no lançamento por voz.
+- Causa raiz identificada com precisão: ao comandar por voz o mesmo tipo de lançamento (ex.: "Gastos") em sequência, sem nunca clicar em Salvar entre as tentativas, a aba e o formulário já estavam abertos da tentativa anterior. As funções usadas para abrir a aba e o formulário (originalmente pensadas para clique manual do usuário) ALTERNAM entre abrir e fechar quando já estão abertas — então a segunda tentativa de voz fechava a aba e limpava os campos um instante antes do preenchimento ocorrer, mesmo o app reportando "Preenchido" (o preenchimento ocorre em um pequeno atraso interno, sobre uma aba que já tinha sido fechada).
+- Confirmado o padrão estritamente alternado: tentativa 1 funciona (aba estava fechada, abre normalmente), tentativa 2 falha (aba já estava aberta, a chamada fecha em vez de abrir), tentativa 3 funcionaria de novo (aba fechada pela tentativa 2), e assim por diante.
+- Corrigido: criadas versões dedicadas das funções de abertura de aba e de formulário, exclusivas para o lançamento por voz, que SEMPRE garantem abertura — nunca alternam para fechar, independente do estado anterior.
+- As funções originais (usadas no clique manual dos botões Ganhos/Gastos/Retiradas/Combustível e "Adicionar") permanecem completamente intactas e com o mesmo comportamento de sempre.
+- Testado o cenário exato do vídeo: quatro comandos de voz em sequência, sem clicar em Salvar entre eles, incluindo troca de tipo de lançamento — todos preencheram corretamente, sem nenhuma falha alternada.
+- Conforme prática estabelecida: 31 funções relacionadas à virada das 4h, sincronização com a nuvem, atalhos de apps e lançamentos manuais foram comparadas byte a byte contra a vBeta1.27 antes da entrega — todas confirmadas idênticas.
+- Nenhuma outra tela ou fluxo foi alterada.
+- Base oficial: vBeta1.27.
+
 vBeta1.27 - Atalhos flutuantes para abrir os apps Uber e 99
 - Adicionados dois botões flutuantes, quadrados com cantos arredondados, fixos na lateral direita da tela (permanecem visíveis mesmo rolando a página), nas cores oficiais de marca: preto/branco para Uber, amarelo/preto para 99.
 - Ao tocar, o botão tenta abrir o aplicativo nativo correspondente (Uber Driver ou 99 Motorista); se o app não estiver instalado, abre automaticamente a página da Play Store para instalação.

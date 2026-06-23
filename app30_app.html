@@ -43,7 +43,7 @@ try{
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver vBeta1.27</title>
+<title>MetaDriver vBeta1.28</title>
 <style id="md-hydration-lock">
 body.preload > *:not(#mdBootOverlay){visibility:hidden!important;}
 #mdBootOverlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#0f172a;color:#fff;z-index:2147483647;font-family:Inter,system-ui,sans-serif;font-weight:800;letter-spacing:.2px;}
@@ -3883,7 +3883,7 @@ body[data-tema$="claro"] .historico-report-line{border-bottom-color:rgba(0,0,0,.
   <div class="menu-item"><button class="secondary" onclick="abrirAtalhosAppsMenu(); closeMenu();">Configurar atalhos Uber e 99</button></div>
   <div class="menu-item"><button class="secondary" onclick="abrirTemas(); closeMenu();">Temas</button></div>
   <div class="menu-item menu-user-row"><span class="menu-user-name" id="menuUserName">Usuário</span><button class="danger" onclick="forceLogout(); return false;">Sair</button></div>
-  <div class="menu-note" style="text-align:center;">vBeta1.27</div>
+  <div class="menu-note" style="text-align:center;">vBeta1.28</div>
 </div>
 
 
@@ -5341,7 +5341,7 @@ function mdBuildDiagnosticsObject(){
     const durableObj = mdSafeJsonParse(durableRaw);
     const diag = {
       generated_at: mdNowIso(),
-      app_version: 'MetaDriver vBeta1.27',
+      app_version: 'MetaDriver vBeta1.28',
       cloud_table: CLOUD_TABLE,
       device_id: mdEnsureDeviceId(),
       visibility_state: document.visibilityState,
@@ -6454,6 +6454,33 @@ function toggleForm(id){
   }
 }
 
+// vBeta1.28 - CORREÇÃO CRÍTICA: versão exclusiva do lançamento por voz, que
+// SEMPRE garante o formulário aberto, nunca alternando para fechá-lo. Mesmo
+// bug de mdAbrirLancSectionForcado: se o formulário já estivesse aberto de
+// uma tentativa de voz anterior (usuário não salvou nem fechou), chamar
+// toggleForm() de novo o FECHAVA e limpava os campos, mesmo o app reportando
+// sucesso (preenchimento ocorre depois, em setTimeout, sobre campos já
+// fechados/limpos) — esse era o padrão "funciona uma vez, falha na próxima".
+function mdAbrirFormularioForcado(id){
+  const el = document.getElementById(id);
+  if(!el) return;
+  const jaAberto = el.classList.contains("open");
+  ["formGanho","formGasto","formRetirada","formAbastecimento","formNaoTrabalhado"].forEach(fid=>{
+    const x = document.getElementById(fid);
+    if(x && x.classList.contains("open") && fid !== id){
+      iaLancamentosLimparCamposNaoSalvos(fid);
+    }
+    if(x) x.classList.remove("open");
+  });
+  el.classList.add("open");
+  if(!jaAberto){
+    if(id==="formGanho" && !document.getElementById("dataGanho").value) document.getElementById("dataGanho").value = dataUberISO();
+    if(id==="formGasto" && !document.getElementById("dataGasto").value) document.getElementById("dataGasto").value = dataUberISO();
+    if(id==="formAbastecimento" && !document.getElementById("dataAbastecimento").value) document.getElementById("dataAbastecimento").value = hojeISO();
+    if(id==="formNaoTrabalhado" && !document.getElementById("dataNaoTrabalhado").value) document.getElementById("dataNaoTrabalhado").value = hojeISO();
+  }
+}
+
 
 function normalizarMetasDetalhadas(){
   try{
@@ -6859,25 +6886,25 @@ function iaVoiceInterpretarMock(textoFalado){
     const valor = valorInfo.valor;
     const descricao = iaVoiceLimparDescricao(palavras, valorInfo);
 
-    openLancSection(tipo);
+    mdAbrirLancSectionForcado(tipo);
     setTimeout(function(){
       if(tipo === "ganhos"){
-        toggleForm("formGanho");
+        mdAbrirFormularioForcado("formGanho");
         const dEl = document.getElementById("dataGanho"); if(dEl && !dEl.value) dEl.value = dataUberISO();
         const descEl = document.getElementById("descricaoGanho"); if(descEl) descEl.value = descricao;
         const valEl = document.getElementById("valorGanho"); if(valEl){ valEl.value = valor; sanitizeLancamentoValorInput(valEl); }
       }else if(tipo === "gastos"){
-        toggleForm("formGasto");
+        mdAbrirFormularioForcado("formGasto");
         const dEl = document.getElementById("dataGasto"); if(dEl && !dEl.value) dEl.value = dataUberISO();
         const descEl = document.getElementById("descGasto"); if(descEl) descEl.value = descricao;
         const valEl = document.getElementById("valorGasto"); if(valEl){ valEl.value = valor; sanitizeLancamentoValorInput(valEl); }
       }else if(tipo === "retiradas"){
-        toggleForm("formRetirada");
+        mdAbrirFormularioForcado("formRetirada");
         const dEl = document.getElementById("dataRetirada"); if(dEl && !dEl.value) dEl.value = dataUberISO();
         const descEl = document.getElementById("descRetirada"); if(descEl) descEl.value = descricao;
         const valEl = document.getElementById("valorRetirada"); if(valEl){ valEl.value = valor; sanitizeLancamentoValorInput(valEl); }
       }else if(tipo === "combustivel"){
-        toggleForm("formAbastecimento");
+        mdAbrirFormularioForcado("formAbastecimento");
         const dEl = document.getElementById("dataAbastecimento"); if(dEl && !dEl.value) dEl.value = hojeISO();
         const valEl = document.getElementById("valorAbastecimento"); if(valEl){ valEl.value = valor; sanitizeLancamentoValorInput(valEl); }
       }
@@ -7289,7 +7316,7 @@ function mdCommitLancamentoMutation(reason){
   try{ atualizar(); }catch(e){}
   try{ if(typeof refreshQuickBalanceFabMiniDisplay === "function") refreshQuickBalanceFabMiniDisplay(); }catch(e){}
   try{ if(typeof updateQuickBalanceFabUI === "function") updateQuickBalanceFabUI(); }catch(e){}
-  try{ if(typeof toast === "function" && reason) console.info("MetaDriver vBeta1.27 mutation:", reason); }catch(e){}
+  try{ if(typeof toast === "function" && reason) console.info("MetaDriver vBeta1.28 mutation:", reason); }catch(e){}
 }
 
 
@@ -9073,7 +9100,7 @@ function exportarRelatorioPDF(){
       <script>
         setTimeout(()=>window.print(), 250);
       <\/script>
-    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver vBeta1.27 · app</div>
+    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver vBeta1.28 · app</div>
 
 
 <script>
@@ -11767,6 +11794,64 @@ function atualizarTotalManutencaoConcluidas(){
 
 
 /* ===== Mini-abas: Ganhos / Gastos (funcionando) ===== */
+// vBeta1.28 - CORREÇÃO CRÍTICA: usada exclusivamente pelo lançamento por voz.
+// openLancSection() alterna (abre/fecha) a aba ao ser chamada com o mesmo
+// tipo já aberto - correto para clique manual do usuário, mas isso fazia o
+// comando de voz falhar alternadamente: se a aba "Gastos" já estivesse
+// aberta de uma tentativa anterior, a chamada seguinte FECHAVA a aba e
+// limpava os campos um instante antes do preenchimento, mesmo o app
+// reportando "Preenchido" (já que o preenchimento ocorre em um setTimeout
+// separado, sobre uma aba que acabou de ser fechada). Esta função sempre
+// garante que a aba certa fique aberta, nunca alternando para fechar.
+function mdAbrirLancSectionForcado(tipo){
+  const secGanhos = document.getElementById("secGanhos");
+  const secGastos = document.getElementById("secGastos");
+  const secCombustivel = document.getElementById("secCombustivel");
+  const secRetiradas = document.getElementById("secRetiradas");
+  const btnG = document.getElementById("btnSubGanhos");
+  const btnS = document.getElementById("btnSubGastos");
+  const btnR = document.getElementById("btnSubRetiradas");
+  const btnC = document.getElementById("btnSubCombustivel");
+  if(!secGanhos || !secGastos || !secRetiradas || !secCombustivel || !btnG || !btnS || !btnR || !btnC) return;
+
+  const ganhosOpen = !secGanhos.classList.contains("subcard-hidden");
+  const gastosOpen = !secGastos.classList.contains("subcard-hidden");
+  const combustivelOpen = !secCombustivel.classList.contains("subcard-hidden");
+  const retiradasOpen = !secRetiradas.classList.contains("subcard-hidden");
+
+  // Já está na aba certa: não faz nada (preserva o que já estiver lá).
+  if((tipo === "ganhos" && ganhosOpen) || (tipo === "gastos" && gastosOpen) || (tipo === "retiradas" && retiradasOpen) || (tipo === "combustivel" && combustivelOpen)){
+    return;
+  }
+
+  iaLancamentosLimparFormularioAberto(secGanhos, "formGanho");
+  iaLancamentosLimparFormularioAberto(secGastos, "formGasto");
+  iaLancamentosLimparFormularioAberto(secCombustivel, "formAbastecimento");
+  iaLancamentosLimparFormularioAberto(secRetiradas, "formRetirada");
+  secGanhos.classList.add("subcard-hidden");
+  secGastos.classList.add("subcard-hidden");
+  secCombustivel.classList.add("subcard-hidden");
+  secRetiradas.classList.add("subcard-hidden");
+  btnG.classList.remove("active");
+  btnS.classList.remove("active");
+  btnR.classList.remove("active");
+  btnC.classList.remove("active");
+
+  if(tipo === "ganhos"){
+    secGanhos.classList.remove("subcard-hidden");
+    btnG.classList.add("active");
+  }else if(tipo === "gastos"){
+    secGastos.classList.remove("subcard-hidden");
+    btnS.classList.add("active");
+  }else if(tipo === "retiradas"){
+    secRetiradas.classList.remove("subcard-hidden");
+    btnR.classList.add("active");
+  }else{
+    secCombustivel.classList.remove("subcard-hidden");
+    btnC.classList.add("active");
+  }
+}
+
 function openLancSection(tipo){
   const secGanhos = document.getElementById("secGanhos");
   const secGastos = document.getElementById("secGastos");
