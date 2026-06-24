@@ -1,3 +1,23 @@
+vBeta1.38 - Confirmações nativas substituídas pelo padrão MetaDriver em todo o app
+- Solicitado: o modal de confirmação ao importar um backup ainda era o nativo do navegador (mostrando o endereço do app). Pedido para transformar em modal MetaDriver, igual ao usado em outras confirmações do app.
+- Encontradas e corrigidas TODAS as 5 confirmações nativas (confirm()) existentes no app: importar backup, apagar todos os dados, excluir uma sessão do histórico, apagar o histórico inteiro, e a confirmação compartilhada de "Zerar dados" (MetaDriver/Manutenção/Tudo) no menu.
+- Criado um modal de confirmação MetaDriver genérico e reutilizável, com título, mensagem e botão de confirmação personalizáveis (incluindo um estilo vermelho para ações destrutivas, como apagar dados).
+- Corrigido durante a implementação: identificado e eliminado um cenário de dupla confirmação em sequência (zerar tudo pelo menu já confirmava uma vez, e a função interna confirmaria de novo) — agora há apenas uma confirmação por ação, como esperado.
+- Testado o modal genérico isoladamente: abrir e cancelar (ação não executada), abrir e confirmar (ação executada corretamente), e confirmar sem nenhuma confirmação pendente (não gera erro).
+- Conforme prática estabelecida: 22 funções relacionadas à virada das 4h, sincronização com a nuvem, lançamento por voz, edição de sessões e meta foram comparadas byte a byte contra a versão anterior — todas confirmadas idênticas.
+- Nenhuma outra tela ou fluxo foi alterada.
+- Base oficial: vBeta1.37.
+
+vBeta1.37 - Editar valor de sessão finalizada: tecla "Tab"/"Concluído" do teclado agora fecha o teclado sem precisar do botão Voltar do celular
+- Solicitado: no modal de "Editar valor" (usado ao editar uma sessão finalizada no Relatório Diário), apertar a tecla de ação do teclado virtual (Tab/Concluído) não fazia nada — era preciso usar o botão Voltar do Android para fechar o teclado e conseguir tocar em "Salvar".
+- Identificado que o campo de edição não tinha nenhum tratamento para essa tecla, diferente dos campos de Meta (Descrição/Valor), que já tratam corretamente Tab e Enter desde versões anteriores.
+- Corrigido: estendido o mesmo tratamento já usado nos campos de Meta para o campo de "Editar valor" — apertar Tab ou a tecla "Concluído" do teclado virtual agora apenas fecha o teclado (tira o foco do campo), sem salvar nem fechar o modal automaticamente. O modal continua aberto, com o valor digitado preservado, para o usuário tocar em "Salvar" manualmente.
+- Como o campo de edição é compartilhado por todos os contextos de edição de valor (sessão finalizada do dia, sessão do histórico, e os demais), a correção vale automaticamente para todos eles.
+- Testado em navegador real: confirmado que apertar Enter (o que o teclado virtual realmente dispara) fecha o foco do campo, mantém o modal visível, e preserva o valor digitado.
+- Conforme prática estabelecida: 24 funções relacionadas à virada das 4h, sincronização com a nuvem, lançamento por voz e edição de sessões foram comparadas byte a byte contra a versão anterior — todas confirmadas idênticas.
+- Nenhuma outra tela ou fluxo foi alterada.
+- Base oficial: vBeta1.36.
+
 vBeta1.36 - Aviso de manutenção ao atingir o KM: convertido para o padrão visual MetaDriver
 - Solicitado: o popup que avisa quando o KM atual atinge uma manutenção programada ainda destoava visualmente do restante do app.
 - Identificado que esse popup já não era o modal nativo do navegador (não usava prompt/alert), mas era construído com estilos próprios "inline" diferentes dos demais modais do app, dando a impressão de ser nativo.

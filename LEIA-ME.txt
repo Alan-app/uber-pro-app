@@ -1,3 +1,45 @@
+MetaDriver vBeta1.38
+
+Solicitado:
+- Ao importar um backup, o modal de confirmação ainda era o nativo do navegador (aparecia o endereço do app). Pedido para transformar em modal de confirmação padrão MetaDriver.
+
+Confirmado com o usuário antes de implementar:
+- Aplicar a correção em todas as confirmações nativas do app, não só na de importar backup, já que era o mesmo tipo de problema.
+
+Investigação:
+- Encontradas 5 confirmações nativas no total: importar backup, apagar todos os dados do aparelho, excluir uma sessão do histórico, apagar todo o histórico, e a confirmação compartilhada usada pelos botões "Zerar MetaDriver", "Zerar Manutenção" e "Zerar Tudo" no menu.
+
+Feito:
+- Criado um modal de confirmação MetaDriver genérico e reutilizável (título, mensagem e botão personalizáveis), no mesmo padrão visual dos demais modais do app — sem nenhuma referência ao navegador ou ao endereço do site.
+- Convertidas as 5 confirmações nativas para usar esse novo modal.
+- Identificado e corrigido, durante a implementação, um problema que teria surgido: zerar tudo pelo menu já pedia confirmação uma vez, e a função interna pediria confirmação de novo em seguida — ajustado para que a confirmação aconteça apenas uma vez por ação, como já era o comportamento esperado.
+- Botões de confirmação para ações destrutivas (apagar dados) agora aparecem em vermelho, diferenciando visualmente de confirmações neutras (como importar backup).
+- Testado o modal genérico isoladamente, cobrindo os cenários de cancelar, confirmar, e tentar confirmar sem nenhuma ação pendente.
+- Seguindo a prática já estabelecida: 22 funções relacionadas à virada das 4h, sincronização com a nuvem, lançamento por voz, edição de sessões e meta foram comparadas byte a byte contra a versão anterior — todas confirmadas idênticas.
+
+Status atual:
+- Pronto para teste. Importar um backup, apagar dados, excluir sessão do histórico, apagar histórico e zerar dados pelo menu devem mostrar o modal de confirmação no padrão MetaDriver, sem nenhuma referência ao navegador.
+
+MetaDriver vBeta1.37
+
+Solicitado:
+- No modal de "Editar valor" (usado ao editar o valor de uma sessão finalizada no Relatório Diário), ao tocar na tecla de ação do teclado virtual (Tab/Concluído), nada acontecia. Era necessário usar o botão Voltar do celular para fechar o teclado e conseguir tocar em "Salvar" no modal.
+
+Confirmado com o usuário antes de implementar:
+- A tecla deve apenas fechar o teclado virtual, sem salvar nem fechar o modal automaticamente — o usuário continua tocando em "Salvar" manualmente.
+
+Investigação:
+- Identificado que o campo de edição de valor não tinha nenhum tratamento para a tecla Tab ou Enter. Os campos de Meta (Descrição e Valor) já tratam essas teclas corretamente desde versões anteriores — faltava aplicar o mesmo tratamento a este campo.
+
+Feito:
+- Estendido o mesmo código já usado para os campos de Meta, agora também reconhecendo o campo de "Editar valor". Ao apertar Tab ou Enter (o que o teclado virtual do Android realmente envia ao tocar em "Concluído"), o campo perde o foco e o teclado fecha, mas o modal permanece aberto com o valor digitado preservado.
+- Como esse campo é reaproveitado em todos os contextos de edição de valor (sessão finalizada do dia atual, sessão do histórico, e os demais já existentes), a correção vale automaticamente para todos eles, sem precisar duplicar código.
+- Testado em navegador real: confirmado que apertar Enter fecha o foco do campo (equivalente ao teclado fechando no celular), o modal continua visível, e o valor digitado não se perde.
+- Seguindo a prática já estabelecida: 24 funções relacionadas à virada das 4h, sincronização com a nuvem, lançamento por voz e edição de sessões foram comparadas byte a byte contra a versão anterior — todas confirmadas idênticas.
+
+Status atual:
+- Pronto para teste. Ao editar o valor de uma sessão finalizada e tocar na tecla de ação do teclado, o teclado deve fechar imediatamente, sem precisar do botão Voltar do celular.
+
 MetaDriver vBeta1.36
 
 Solicitado:

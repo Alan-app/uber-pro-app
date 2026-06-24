@@ -43,7 +43,7 @@ try{
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver vBeta1.36</title>
+<title>MetaDriver vBeta1.38</title>
 <style id="md-hydration-lock">
 body.preload > *:not(#mdBootOverlay){visibility:hidden!important;}
 #mdBootOverlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#0f172a;color:#fff;z-index:2147483647;font-family:Inter,system-ui,sans-serif;font-weight:800;letter-spacing:.2px;}
@@ -1051,6 +1051,13 @@ button[onclick="salvarMeta()"]{
 .successText{
   color:#22c55e !important;
   font-weight:800;
+}
+/* vBeta1.38 - botão vermelho para confirmações destrutivas no modal genérico
+   de confirmação (a classe ".danger" isolada não tem regra própria, só
+   dentro de contextos específicos como ".menu-item button.danger"). */
+.mdConfirm-danger{
+  background:#ef4444 !important;
+  color:#ffffff !important;
 }
 
 .negative-value{
@@ -3895,7 +3902,7 @@ body[data-tema$="claro"] .historico-report-line{border-bottom-color:rgba(0,0,0,.
   <div class="menu-item"><button class="secondary" onclick="abrirSaldoAtualButtonMenu(); closeMenu();">Botão de saldo atual</button></div>
   <div class="menu-item"><button class="secondary" onclick="abrirTemas(); closeMenu();">Temas</button></div>
   <div class="menu-item menu-user-row"><span class="menu-user-name" id="menuUserName">Usuário</span><button class="danger" onclick="forceLogout(); return false;">Sair</button></div>
-  <div class="menu-note" style="text-align:center;">vBeta1.36</div>
+  <div class="menu-note" style="text-align:center;">vBeta1.38</div>
 </div>
 
 
@@ -4233,7 +4240,7 @@ body[data-tema$="claro"] .historico-report-line{border-bottom-color:rgba(0,0,0,.
 <div id="editValorOverlay" class="editvalor-overlay" role="dialog" aria-modal="true" aria-label="Editar valor">
   <div class="editvalor-modal">
     <div class="editvalor-title">Editar valor (R$)</div>
-    <input type="number" id="editValorInput" inputmode="decimal" pattern="[0-9]*" step="0.01" placeholder="0,00">
+    <input type="number" id="editValorInput" inputmode="decimal" pattern="[0-9]*" step="0.01" placeholder="0,00" enterkeyhint="done">
     <div class="editvalor-actions">
       <button type="button" class="cancel" onclick="closeEditValor()">Cancelar</button>
       <button type="button" onclick="confirmEditValor()">Salvar</button>
@@ -4272,6 +4279,18 @@ body[data-tema$="claro"] .historico-report-line{border-bottom-color:rgba(0,0,0,.
 </div>
 
 <!-- vBeta1.35 - modal MetaDriver para concluir manutenção (Data + Valor gasto), substituindo o prompt() nativo do navegador -->
+<!-- vBeta1.38 - modal MetaDriver genérico de confirmação, substituindo o confirm() nativo do navegador em todo o app -->
+<div id="mdConfirmOverlay" class="edit-data-overlay" onclick="if(event.target.id==='mdConfirmOverlay')mdConfirmCancelar()">
+  <div class="edit-data-modal" onclick="event.stopPropagation()">
+    <div class="edit-data-title" id="mdConfirmTitulo">Confirmar</div>
+    <div id="mdConfirmMensagem" style="margin-bottom:14px; opacity:0.9; line-height:1.4;"></div>
+    <div class="edit-data-actions">
+      <button type="button" class="btn-cancelar" onclick="mdConfirmCancelar()">Cancelar</button>
+      <button type="button" id="mdConfirmBotaoOk" onclick="mdConfirmAceitar()">Confirmar</button>
+    </div>
+  </div>
+</div>
+
 <div id="concluirManutOverlay" class="edit-data-overlay" onclick="if(event.target.id==='concluirManutOverlay')fecharConcluirManutModal()">
   <div class="edit-data-modal" onclick="event.stopPropagation()">
     <div class="edit-data-title">Concluir manutenção</div>
@@ -5381,7 +5400,7 @@ function mdBuildDiagnosticsObject(){
     const durableObj = mdSafeJsonParse(durableRaw);
     const diag = {
       generated_at: mdNowIso(),
-      app_version: 'MetaDriver vBeta1.36',
+      app_version: 'MetaDriver vBeta1.38',
       cloud_table: CLOUD_TABLE,
       device_id: mdEnsureDeviceId(),
       visibility_state: document.visibilityState,
@@ -6640,13 +6659,18 @@ function updateMetaDetalhadaValorFromInput(inputId){
 // Encerra a edição do campo atual sem navegar para outro campo, meta ou tela.
 // vBeta1.9 - também trata Enter: no celular, o botão "Concluído" do teclado
 // virtual (habilitado por enterkeyhint="done") dispara Enter, não Tab.
+// vBeta1.37 - estende a mesma lógica para o campo de "Editar valor" (usado ao
+// editar uma sessão finalizada no Relatório Diário): Tab/Enter apenas fecha
+// o teclado virtual (blur), sem salvar nem fechar o modal — o usuário ainda
+// precisa tocar em "Salvar" manualmente, como já era esperado.
 window.addEventListener("keydown", function(e){
   if(e.key !== "Tab" && e.key !== "Enter") return;
   const t = e.target;
   if(!t || !t.id) return;
   const isMetaDesc = t.id.indexOf("metaGoalDesc_") === 0;
   const isMetaValor = t.id.indexOf("metaGoalValor_") === 0;
-  if(!isMetaDesc && !isMetaValor) return;
+  const isEditValor = t.id === "editValorInput";
+  if(!isMetaDesc && !isMetaValor && !isEditValor) return;
   e.preventDefault();
   e.stopPropagation();
   if(isMetaDesc){
@@ -6656,6 +6680,8 @@ window.addEventListener("keydown", function(e){
     salvar();
     atualizar();
   }
+  // isEditValor: nenhuma ação extra além do blur() abaixo - só fecha o
+  // teclado, mantendo o modal aberto para o usuário confirmar manualmente.
   try{ t.blur(); }catch(err){}
 }, true);
 
@@ -7381,7 +7407,7 @@ function mdCommitLancamentoMutation(reason){
   try{ atualizar(); }catch(e){}
   try{ if(typeof refreshQuickBalanceFabMiniDisplay === "function") refreshQuickBalanceFabMiniDisplay(); }catch(e){}
   try{ if(typeof updateQuickBalanceFabUI === "function") updateQuickBalanceFabUI(); }catch(e){}
-  try{ if(typeof toast === "function" && reason) console.info("MetaDriver vBeta1.36 mutation:", reason); }catch(e){}
+  try{ if(typeof toast === "function" && reason) console.info("MetaDriver vBeta1.38 mutation:", reason); }catch(e){}
 }
 
 
@@ -7904,16 +7930,22 @@ function importarBackup(ev){
         motivo: (n.motivo && String(n.motivo)) || "Dia não trabalhado"
       })).filter(n => /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(n.data));
 
-      const ok = confirm("Importar vai SUBSTITUIR seus dados atuais por esse backup. Confirmar?");
-      if(!ok) return;
-
-      try{ safe.__skip_operational_day_turn = true; }catch(e){}
-      const applied = mdApplyExternalSnapshot(safe, "import-backup", true);
-      if(!applied) throw new Error("Falha ao aplicar backup");
-      try{ mdRestaurarSaldoBotaoDoBackupV36(safe); }catch(e){}
-      try{ if(typeof salvarDados === "function") salvarDados(); else if(typeof salvar === "function") salvar(); }catch(e){}
-      toast("✅ Backup importado com sucesso.");
-      closeMenu();
+      mdConfirmar(
+        "Importar vai SUBSTITUIR seus dados atuais por esse backup. Confirmar?",
+        function(){
+          try{ safe.__skip_operational_day_turn = true; }catch(e){}
+          const applied = mdApplyExternalSnapshot(safe, "import-backup", true);
+          if(!applied){
+            toast("❌ Arquivo inválido. Escolha um backup .json exportado pelo app.");
+            return;
+          }
+          try{ mdRestaurarSaldoBotaoDoBackupV36(safe); }catch(e){}
+          try{ if(typeof salvarDados === "function") salvarDados(); else if(typeof salvar === "function") salvar(); }catch(e){}
+          toast("✅ Backup importado com sucesso.");
+          closeMenu();
+        },
+        { titulo: "Importar backup", textoConfirmar: "Importar", destrutivo: true }
+      );
     }catch(e){
       try{ console.warn("importarBackup", e); }catch(_e){}
       toast("❌ Arquivo inválido. Escolha um backup .json exportado pelo app.");
@@ -7923,10 +7955,11 @@ function importarBackup(ev){
 }
 
 function zerarTudo(){
+  // vBeta1.38 - zerarTudo() só é chamada por confirmZerar('tudo'), que já
+  // confirma com o usuário antes de chegar aqui — por isso não pede
+  // confirmação própria (evita pedir confirmação duas vezes em sequência).
   try{ mdZerarSaldoBotaoFlutuanteV36(); }catch(e){}
   try{ mdZerarSaldoBotaoFlutuanteV36(); }catch(e){}
-  const ok = confirm("Tem certeza? Isso vai apagar TODOS os dados deste aparelho.");
-  if(!ok) return;
   try{ pararTimerGanhoHoraTempoReal(); }catch(e){}
   try{
     mdRemoveLS(CLOUD_PENDING_KEY);
@@ -8113,17 +8146,22 @@ function editarHorarioSessaoHistorico(diaUber, indice, campo){
 
 // v57 - excluir sessão do histórico
 function excluirSessaoHistorico(diaUber, indice){
-  if(!confirm('Excluir esta sessão do histórico?')) return;
-  const idx = (dados.ganhoHoraHistorico || []).findIndex(function(h){ return String((h && h.diaUber) || '').trim() === String(diaUber || '').trim(); });
-  if(idx === -1) return;
-  dados.ganhoHoraHistorico[idx].sessoes.splice(indice, 1);
-  // Remove dia se ficou sem sessões
-  if(!dados.ganhoHoraHistorico[idx].sessoes.length){
-    dados.ganhoHoraHistorico.splice(idx, 1);
-  }
-  salvar();
-  atualizar();
-  toast('✅ Sessão do histórico excluída.');
+  mdConfirmar(
+    "Excluir esta sessão do histórico?",
+    function(){
+      const idx = (dados.ganhoHoraHistorico || []).findIndex(function(h){ return String((h && h.diaUber) || '').trim() === String(diaUber || '').trim(); });
+      if(idx === -1) return;
+      dados.ganhoHoraHistorico[idx].sessoes.splice(indice, 1);
+      // Remove dia se ficou sem sessões
+      if(!dados.ganhoHoraHistorico[idx].sessoes.length){
+        dados.ganhoHoraHistorico.splice(idx, 1);
+      }
+      salvar();
+      atualizar();
+      toast('✅ Sessão do histórico excluída.');
+    },
+    { titulo: "Excluir sessão", textoConfirmar: "Excluir", destrutivo: true }
+  );
 }
 
 // v57 - limpar todo o histórico
@@ -8132,12 +8170,17 @@ function limparHistoricoGanhoHora(){
     toast('Histórico já está vazio.');
     return;
   }
-  if(!confirm('Apagar todo o histórico de sessões? Esta ação não pode ser desfeita.')) return;
-  dados.ganhoHoraHistorico = [];
-  dados.ganhoHoraHistoricoAberto = false;
-  salvar();
-  atualizar();
-  toast('✅ Histórico apagado.');
+  mdConfirmar(
+    "Apagar todo o histórico de sessões? Esta ação não pode ser desfeita.",
+    function(){
+      dados.ganhoHoraHistorico = [];
+      dados.ganhoHoraHistoricoAberto = false;
+      salvar();
+      atualizar();
+      toast('✅ Histórico apagado.');
+    },
+    { titulo: "Apagar histórico", textoConfirmar: "Apagar", destrutivo: true }
+  );
 }
 
 function editarValorSessaoHistorico(diaUber, indice){
@@ -9189,7 +9232,7 @@ function exportarRelatorioPDF(){
       <script>
         setTimeout(()=>window.print(), 250);
       <\/script>
-    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver vBeta1.36 · app</div>
+    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver vBeta1.38 · app</div>
 
 
 <script>
@@ -11156,6 +11199,44 @@ function abrirConcluirManutModal(id){
   setTimeout(()=>{ try{ dataEl && dataEl.focus(); }catch(e){} }, 50);
 }
 
+// vBeta1.38 - substitui o confirm() nativo do navegador (que mostra o
+// endereço do app no título, fora do padrão visual MetaDriver) por um modal
+// próprio. Como confirm() é síncrono (pausa o código até responder) e um
+// modal HTML é assíncrono, o padrão de uso muda de:
+//   if(!confirm("...")) return;  [restante do código aqui]
+// para:
+//   mdConfirmar("...", function(){ [restante do código aqui] });
+// O código que viria depois do confirm() entra dentro do callback, que só é
+// executado se o usuário tocar em "Confirmar".
+window.__mdConfirmCallback = null;
+function mdConfirmar(mensagem, callback, opcoes){
+  opcoes = opcoes || {};
+  window.__mdConfirmCallback = callback;
+  const tituloEl = document.getElementById("mdConfirmTitulo");
+  const msgEl = document.getElementById("mdConfirmMensagem");
+  const btnOk = document.getElementById("mdConfirmBotaoOk");
+  if(tituloEl) tituloEl.textContent = opcoes.titulo || "Confirmar";
+  if(msgEl) msgEl.textContent = mensagem || "Tem certeza?";
+  if(btnOk){
+    btnOk.textContent = opcoes.textoConfirmar || "Confirmar";
+    btnOk.className = opcoes.destrutivo ? "mdConfirm-danger" : "";
+  }
+  const ov = document.getElementById("mdConfirmOverlay");
+  if(ov) ov.classList.add("show");
+}
+function mdConfirmCancelar(){
+  window.__mdConfirmCallback = null;
+  const ov = document.getElementById("mdConfirmOverlay");
+  if(ov) ov.classList.remove("show");
+}
+function mdConfirmAceitar(){
+  const cb = window.__mdConfirmCallback;
+  window.__mdConfirmCallback = null;
+  const ov = document.getElementById("mdConfirmOverlay");
+  if(ov) ov.classList.remove("show");
+  if(typeof cb === "function") cb();
+}
+
 function fecharConcluirManutModal(){
   concluirManutIdAtual = null;
   const ov = document.getElementById("concluirManutOverlay");
@@ -12065,21 +12146,31 @@ function zerarManutencaoCarro(){
 }
 
 function confirmZerar(tipo){
-  if(!confirm("Tem certeza? Essa ação não pode ser desfeita.")) return;
-  if(tipo === "uber"){
-    zerarControleUber();
-    salvar(); atualizar();
-    toast("✅ MetaDriver zerado.");
-  }else if(tipo === "carro"){
-    zerarManutencaoCarro();
-    salvar();
-    try{ atualizarCarro(); }catch(e){}
-    toast("✅ Manutenção zerada.");
-  }else{
-    zerarTudo();
-    toast("✅ Tudo zerado.");
-  }
-  closeZerar();
+  const mensagens = {
+    uber: "Tem certeza? Isso vai zerar os dados do MetaDriver (ganhos, gastos, metas). Essa ação não pode ser desfeita.",
+    carro: "Tem certeza? Isso vai apagar todas as manutenções cadastradas. Essa ação não pode ser desfeita.",
+    tudo: "Tem certeza? Isso vai apagar TODOS os dados deste aparelho (MetaDriver e Manutenção). Essa ação não pode ser desfeita."
+  };
+  mdConfirmar(
+    mensagens[tipo] || "Tem certeza? Essa ação não pode ser desfeita.",
+    function(){
+      if(tipo === "uber"){
+        zerarControleUber();
+        salvar(); atualizar();
+        toast("✅ MetaDriver zerado.");
+      }else if(tipo === "carro"){
+        zerarManutencaoCarro();
+        salvar();
+        try{ atualizarCarro(); }catch(e){}
+        toast("✅ Manutenção zerada.");
+      }else{
+        zerarTudo();
+        toast("✅ Tudo zerado.");
+      }
+      closeZerar();
+    },
+    { titulo: "Zerar dados", textoConfirmar: "Zerar", destrutivo: true }
+  );
 }
 
 // fecha ao tocar fora
