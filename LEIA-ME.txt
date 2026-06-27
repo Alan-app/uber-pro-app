@@ -1,3 +1,22 @@
+MetaDriver vBeta1.41
+
+Situação atual:
+- O usuário relatou que a vBeta1.40 (tentativa de correção do painel de "Saldo atual") apresentou o mesmo problema visual (teclado e botões Uber/99 esticados) no próprio aparelho do usuário — onde antes, na vBeta1.38, esse problema nunca havia ocorrido.
+- Isso indica que as duas tentativas de correção feitas até agora (vBeta1.39 e vBeta1.40) não resolveram o problema relatado originalmente por outro usuário, e podem ter introduzido o mesmo tipo de problema em um aparelho onde ele não existia antes.
+
+Decisão tomada:
+- Revertido o painel de "Saldo atual" exatamente ao estado da vBeta1.38, descartando completamente as duas tentativas anteriores. Confirmado, por comparação direta de arquivo, que o conteúdo do app30_app.html desta versão é idêntico à vBeta1.38 (apenas os números de versão exibidos foram atualizados).
+
+Por que isso foi necessário:
+- As duas tentativas anteriores foram desenvolvidas e testadas em um ambiente de simulação (não em aparelhos físicos reais), o que não foi suficiente para capturar o comportamento real que ocorre nos aparelhos onde o problema acontece. Antes de tentar uma nova correção, é necessário confirmar exatamente em qual situação o problema ocorre e em qual não ocorre.
+
+Próximo passo (depende do usuário):
+- Testar esta versão (vBeta1.41, idêntica à vBeta1.38) no aparelho onde a vBeta1.40 apresentou o problema, e confirmar se o problema desaparece ao voltar a este estado exato.
+- Se for possível, also confirmar com o outro usuário (aquele que enviou o print original do problema) se o problema dele também está presente nesta versão, para entender se o problema é exatamente o mesmo nos dois casos ou se são situações diferentes.
+
+Status atual:
+- Aguardando confirmação de teste do usuário antes de qualquer nova tentativa de correção.
+
 MetaDriver vBeta1.40
 
 Solicitado:

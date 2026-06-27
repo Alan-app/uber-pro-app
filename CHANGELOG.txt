@@ -1,4 +1,12 @@
-vBeta1.40 - CORREÇÃO DE CAUSA RAIZ: painel de "Saldo atual" rápido (revisão da vBeta1.39, que teve efeito colateral)
+vBeta1.41 - Revertido para vBeta1.38 (descartadas as correções 1.39 e 1.40) - aguardando confirmação de teste
+- O usuário relatou que a vBeta1.40 apresentou o mesmo problema visual (teclado/botões esticados) no próprio aparelho do usuário, onde antes (vBeta1.38) nunca havia ocorrido. Isso indica que as duas tentativas de correção anteriores (vBeta1.39 e vBeta1.40) não resolveram o problema relatado pelo outro usuário e, pelo contrário, podem ter introduzido o mesmo problema visual no aparelho do próprio desenvolvedor.
+- Decisão tomada: revertido o painel de "Saldo atual" exatamente ao estado da vBeta1.38 (nenhuma das duas tentativas de correção foi mantida), para isolar a causa real antes de tentar uma nova correção.
+- Esta versão é idêntica à vBeta1.38 no painel de "Saldo atual" (e em todo o restante do app) — serve para o usuário confirmar, no próprio aparelho, se o problema desaparece voltando a esse estado exato.
+- Próximo passo: com a confirmação do usuário sobre o comportamento desta versão, investigar a causa raiz novamente, com mais informação sobre em quais condições exatas o problema ocorre.
+- Nenhuma outra tela ou fluxo foi alterada.
+- Base oficial: vBeta1.38.
+
+vBeta1.40 - CORREÇÃO DE CAUSA RAIZ: painel de "Saldo atual" rápido (revisão da vBeta1.39, que teve efeito colateral) - NÃO RESOLVEU, ver vBeta1.41
 - A correção da vBeta1.39 resolveu o esticamento dos botões Uber/99, mas alterou também a aparência do painel no aparelho do próprio usuário, que já funcionava corretamente — efeito colateral não intencional. A vBeta1.39 foi descartada e investigada novamente, com mais cuidado.
 - Identificada a causa raiz mais precisa: o painel tem 7 elementos diretos, mas a definição de "linhas" do layout (grid) só nomeia 3 delas — as 4 linhas extras ficavam sem tamanho definido, deixando o navegador livre para decidir como distribuir o espaço entre elas. Essa decisão pode variar entre aparelhos/navegadores, fazendo alguns elementos ficarem esticados em certos aparelhos e não em outros.
 - Corrigido de forma mais robusta na raiz do problema: todas as linhas (incluindo as extras) agora usam explicitamente o tamanho natural do próprio conteúdo, eliminando a ambiguidade por completo, em vez de apenas limitar elementos específicos com valores fixos (abordagem mais frágil, usada por engano na vBeta1.39).

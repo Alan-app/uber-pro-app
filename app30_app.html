@@ -43,7 +43,7 @@ try{
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver vBeta1.40</title>
+<title>MetaDriver vBeta1.41</title>
 <style id="md-hydration-lock">
 body.preload > *:not(#mdBootOverlay){visibility:hidden!important;}
 #mdBootOverlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#0f172a;color:#fff;z-index:2147483647;font-family:Inter,system-ui,sans-serif;font-weight:800;letter-spacing:.2px;}
@@ -1307,18 +1307,6 @@ input.negative-value, input.negative-value::placeholder{
   overflow:hidden;
   box-sizing:border-box;
   grid-template-rows:auto 1fr auto;
-  /* vBeta1.40 - CORREÇÃO DE CAUSA RAIZ: o painel tem 7 filhos diretos, mas
-     grid-template-rows só nomeia 3 linhas. As 4 linhas extras (implícitas)
-     ficavam sem tamanho definido, e o navegador decidia livremente como
-     distribuir o espaço entre elas — decisão que pode variar entre
-     aparelhos/navegadores, fazendo elementos como os blocos Uber/99 e o
-     card de saldo ficarem esticados em alguns aparelhos e não em outros.
-     grid-auto-rows:auto força TODAS as linhas implícitas a usarem o
-     tamanho natural do próprio conteúdo, eliminando essa ambiguidade de
-     forma definitiva, igual em qualquer aparelho. align-items:start evita
-     que os itens dentro de cada linha estiquem verticalmente. */
-  grid-auto-rows:auto;
-  align-items:start;
   gap:8px;
 }
 .quick-balance-panel.show{display:grid;}
@@ -3509,7 +3497,6 @@ body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff3b0; }
 }
 .quick-balance-display{
   min-height:88px !important;
-  max-height:88px !important;
   flex:0 0 auto;
   margin-bottom:8px !important;
 }
@@ -3915,7 +3902,7 @@ body[data-tema$="claro"] .historico-report-line{border-bottom-color:rgba(0,0,0,.
   <div class="menu-item"><button class="secondary" onclick="abrirSaldoAtualButtonMenu(); closeMenu();">Botão de saldo atual</button></div>
   <div class="menu-item"><button class="secondary" onclick="abrirTemas(); closeMenu();">Temas</button></div>
   <div class="menu-item menu-user-row"><span class="menu-user-name" id="menuUserName">Usuário</span><button class="danger" onclick="forceLogout(); return false;">Sair</button></div>
-  <div class="menu-note" style="text-align:center;">vBeta1.40</div>
+  <div class="menu-note" style="text-align:center;">vBeta1.41</div>
 </div>
 
 
@@ -5413,7 +5400,7 @@ function mdBuildDiagnosticsObject(){
     const durableObj = mdSafeJsonParse(durableRaw);
     const diag = {
       generated_at: mdNowIso(),
-      app_version: 'MetaDriver vBeta1.40',
+      app_version: 'MetaDriver vBeta1.41',
       cloud_table: CLOUD_TABLE,
       device_id: mdEnsureDeviceId(),
       visibility_state: document.visibilityState,
@@ -7420,7 +7407,7 @@ function mdCommitLancamentoMutation(reason){
   try{ atualizar(); }catch(e){}
   try{ if(typeof refreshQuickBalanceFabMiniDisplay === "function") refreshQuickBalanceFabMiniDisplay(); }catch(e){}
   try{ if(typeof updateQuickBalanceFabUI === "function") updateQuickBalanceFabUI(); }catch(e){}
-  try{ if(typeof toast === "function" && reason) console.info("MetaDriver vBeta1.40 mutation:", reason); }catch(e){}
+  try{ if(typeof toast === "function" && reason) console.info("MetaDriver vBeta1.41 mutation:", reason); }catch(e){}
 }
 
 
@@ -9245,7 +9232,7 @@ function exportarRelatorioPDF(){
       <script>
         setTimeout(()=>window.print(), 250);
       <\/script>
-    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver vBeta1.40 · app</div>
+    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver vBeta1.41 · app</div>
 
 
 <script>
