@@ -1,3 +1,42 @@
+MetaDriver vBeta1.40
+
+Solicitado:
+- A correção da vBeta1.39 (para o esticamento dos botões Uber/99) resolveu o problema relatado, mas alterou também a aparência do painel no próprio aparelho do usuário, que já estava correto antes — efeito colateral indesejado. Pedido para descartar essa versão e corrigir sem alterar nada do tamanho/layout que já funcionava, em nenhum aparelho.
+
+Esclarecimento importante do usuário:
+- O que precisa ser garantido é que nada relacionado a layout, tamanho de blocos ou aparência da tela mude dependendo do aparelho usado — nem para melhor, nem para pior, em nenhum dos dois sentidos.
+
+Investigação (revisada, mais cuidadosa):
+- A vBeta1.39 foi completamente descartada e o problema investigado de novo, desta vez identificando a causa raiz com mais precisão.
+- Confirmado: o painel de "Saldo atual" tem 7 elementos diretos dentro dele, mas a configuração de "linhas" do layout (uma técnica chamada CSS Grid) só nomeia explicitamente 3 dessas linhas. As 4 linhas restantes (chamadas de "implícitas") ficavam sem nenhum tamanho definido — e quando isso acontece, cada navegador é livre para decidir como distribuir o espaço sobrando entre essas linhas. Essa "decisão" pode ser diferente entre navegadores/aparelhos, o que explica por que o mesmo código produzia resultados diferentes.
+
+Feito:
+- Corrigido na raiz do problema (não em pontos isolados, abordagem usada por engano na vBeta1.39, que causou o efeito colateral): agora TODAS as linhas do layout, incluindo as 4 que não tinham tamanho definido, usam explicitamente o tamanho natural do próprio conteúdo. Isso elimina a ambiguidade de uma vez, sem depender de limites fixos artificiais em elementos específicos.
+- Testado de forma automatizada, comparando diretamente as medidas de antes e depois da correção: confirmado que a largura dos botões Uber/99 (metade para cada) e o tamanho de todos os demais elementos do painel permanecem exatamente os mesmos — apenas a ambiguidade que causava o esticamento foi eliminada.
+- Seguindo a prática já estabelecida: 23 funções relacionadas à virada das 4h, sincronização com a nuvem, lançamento por voz e edição de sessões/meta foram comparadas byte a byte contra a versão anterior — todas confirmadas idênticas, já que esta foi uma correção exclusivamente visual (CSS).
+
+Status atual:
+- Pronto para teste. O painel de "Saldo atual" deve aparecer exatamente como sempre apareceu no aparelho do usuário, e de forma compacta e correta em qualquer outro aparelho também.
+
+MetaDriver vBeta1.39
+
+Solicitado:
+- O usuário relatou que, em um teste com outra pessoa, o painel de "Saldo atual" rápido (aberto pelo botão flutuante) apareceu com o card de valor e os botões Uber/99 enormes e distorcidos, ocupando quase a tela inteira — mesmo funcionando normalmente no aparelho do próprio usuário.
+- Destacado que o app precisa funcionar corretamente em qualquer aparelho, independentemente de onde o problema foi notado primeiro.
+
+Investigação:
+- Reproduzido o problema de forma isolada e controlada (fora do aparelho onde foi visto), confirmando que não era um caso único nem dependente de um aparelho específico, mas sim um conflito real no CSS desse painel.
+- Identificadas várias camadas de ajustes de CSS acumuladas nesse painel ao longo de versões anteriores, incluindo uma regra (apelidada de "v09" no código) que reativa os botões Uber/99 dentro do teclado numérico, mas que não definia nenhum limite de altura para eles.
+- Sem esse limite, o navegador precisa "decidir" quanto espaço dar a cada elemento dentro do painel — e essa decisão pode variar de um navegador para outro em casos ambíguos como esse, explicando por que o problema apareceu em um aparelho e não em outro.
+
+Feito:
+- Corrigido fixando explicitamente a altura do card de "Saldo atual" e dos botões Uber/99 dentro do painel, eliminando a ambiguidade que permitia ao navegador calcular tamanhos muito maiores que o esperado.
+- Testado com simulação automatizada (sem depender de testar em múltiplos aparelhos reais) que a correção produz o tamanho correto e compacto de forma consistente, independente de como o navegador resolveria o cálculo internamente.
+- Seguindo a prática já estabelecida: 22 funções relacionadas à virada das 4h, sincronização com a nuvem, lançamento por voz e edição de sessões/meta foram comparadas byte a byte contra a versão anterior — todas confirmadas idênticas, já que esta foi uma correção exclusivamente visual (CSS).
+
+Status atual:
+- Pronto para teste. O painel de "Saldo atual" deve aparecer compacto e correto, com o card de valor e os botões Uber/99 no tamanho normal, independente do aparelho usado.
+
 MetaDriver vBeta1.38
 
 Solicitado:

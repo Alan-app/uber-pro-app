@@ -1,3 +1,21 @@
+vBeta1.40 - CORREÇÃO DE CAUSA RAIZ: painel de "Saldo atual" rápido (revisão da vBeta1.39, que teve efeito colateral)
+- A correção da vBeta1.39 resolveu o esticamento dos botões Uber/99, mas alterou também a aparência do painel no aparelho do próprio usuário, que já funcionava corretamente — efeito colateral não intencional. A vBeta1.39 foi descartada e investigada novamente, com mais cuidado.
+- Identificada a causa raiz mais precisa: o painel tem 7 elementos diretos, mas a definição de "linhas" do layout (grid) só nomeia 3 delas — as 4 linhas extras ficavam sem tamanho definido, deixando o navegador livre para decidir como distribuir o espaço entre elas. Essa decisão pode variar entre aparelhos/navegadores, fazendo alguns elementos ficarem esticados em certos aparelhos e não em outros.
+- Corrigido de forma mais robusta na raiz do problema: todas as linhas (incluindo as extras) agora usam explicitamente o tamanho natural do próprio conteúdo, eliminando a ambiguidade por completo, em vez de apenas limitar elementos específicos com valores fixos (abordagem mais frágil, usada por engano na vBeta1.39).
+- Confirmado, com testes automatizados comparando diretamente a aparência antes e depois da correção, que a largura dos botões Uber/99 (50/50) e o tamanho de todos os elementos do painel permanecem exatamente os mesmos de antes — apenas a ambiguidade que causava o esticamento foi eliminada.
+- Conforme prática estabelecida: 23 funções relacionadas à virada das 4h, sincronização com a nuvem, lançamento por voz e edição de sessões/meta foram comparadas byte a byte contra a versão anterior — todas confirmadas idênticas (esta correção foi exclusivamente de CSS).
+- Nenhuma outra tela ou fluxo foi alterada.
+- Base oficial: vBeta1.38 (a vBeta1.39 foi descartada).
+
+vBeta1.39 - CORREÇÃO: painel de "Saldo atual" rápido aparecia esticado/distorcido em alguns aparelhos (DESCARTADA - ver vBeta1.40)
+- Relatado: em um aparelho específico, o painel de "Saldo atual" (acessado pelo botão flutuante) apareceu com o card de valor e os botões Uber/99 enormes e distorcidos, ocupando quase a tela inteira — mesmo o painel funcionando normalmente em outros aparelhos.
+- Investigado e reproduzido o problema isoladamente: identificado um conflito real entre múltiplas camadas de CSS que se acumularam neste painel ao longo de versões anteriores. Uma regra mais recente, que reativa a visibilidade dos botões Uber/99 dentro do teclado numérico, não incluía limites de altura — deixando esses elementos vulneráveis a serem esticados pelo comportamento de distribuição de espaço do navegador (CSS Grid), que alguns navegadores resolvem de forma diferente em casos ambíguos como esse.
+- Corrigido fixando explicitamente a altura do card de "Saldo atual" e dos botões Uber/99, eliminando a ambiguidade que fazia alguns navegadores calcularem tamanhos muito maiores que o esperado.
+- Testado e confirmado, com simulação automatizada, que a correção produz o tamanho compacto correto, sem depender de como cada navegador resolve esse cálculo internamente.
+- Conforme prática estabelecida: 22 funções relacionadas à virada das 4h, sincronização com a nuvem, lançamento por voz e edição de sessões/meta foram comparadas byte a byte contra a versão anterior — todas confirmadas idênticas (esta correção foi exclusivamente de CSS).
+- Nenhuma outra tela ou fluxo foi alterada.
+- Base oficial: vBeta1.38.
+
 vBeta1.38 - Confirmações nativas substituídas pelo padrão MetaDriver em todo o app
 - Solicitado: o modal de confirmação ao importar um backup ainda era o nativo do navegador (mostrando o endereço do app). Pedido para transformar em modal MetaDriver, igual ao usado em outras confirmações do app.
 - Encontradas e corrigidas TODAS as 5 confirmações nativas (confirm()) existentes no app: importar backup, apagar todos os dados, excluir uma sessão do histórico, apagar o histórico inteiro, e a confirmação compartilhada de "Zerar dados" (MetaDriver/Manutenção/Tudo) no menu.
