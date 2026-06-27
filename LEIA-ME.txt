@@ -1,3 +1,22 @@
+MetaDriver vBeta1.39
+
+Solicitado:
+- O usuário relatou que, em um teste com outra pessoa, o painel de "Saldo atual" rápido (aberto pelo botão flutuante) apareceu com o card de valor e os botões Uber/99 enormes e distorcidos, ocupando quase a tela inteira — mesmo funcionando normalmente no aparelho do próprio usuário.
+- Destacado que o app precisa funcionar corretamente em qualquer aparelho, independentemente de onde o problema foi notado primeiro.
+
+Investigação:
+- Reproduzido o problema de forma isolada e controlada (fora do aparelho onde foi visto), confirmando que não era um caso único nem dependente de um aparelho específico, mas sim um conflito real no CSS desse painel.
+- Identificadas várias camadas de ajustes de CSS acumuladas nesse painel ao longo de versões anteriores, incluindo uma regra (apelidada de "v09" no código) que reativa os botões Uber/99 dentro do teclado numérico, mas que não definia nenhum limite de altura para eles.
+- Sem esse limite, o navegador precisa "decidir" quanto espaço dar a cada elemento dentro do painel — e essa decisão pode variar de um navegador para outro em casos ambíguos como esse, explicando por que o problema apareceu em um aparelho e não em outro.
+
+Feito:
+- Corrigido fixando explicitamente a altura do card de "Saldo atual" e dos botões Uber/99 dentro do painel, eliminando a ambiguidade que permitia ao navegador calcular tamanhos muito maiores que o esperado.
+- Testado com simulação automatizada (sem depender de testar em múltiplos aparelhos reais) que a correção produz o tamanho correto e compacto de forma consistente, independente de como o navegador resolveria o cálculo internamente.
+- Seguindo a prática já estabelecida: 22 funções relacionadas à virada das 4h, sincronização com a nuvem, lançamento por voz e edição de sessões/meta foram comparadas byte a byte contra a versão anterior — todas confirmadas idênticas, já que esta foi uma correção exclusivamente visual (CSS).
+
+Status atual:
+- Pronto para teste. O painel de "Saldo atual" deve aparecer compacto e correto, com o card de valor e os botões Uber/99 no tamanho normal, independente do aparelho usado.
+
 MetaDriver vBeta1.38
 
 Solicitado:

@@ -1,3 +1,12 @@
+vBeta1.39 - CORREÇÃO: painel de "Saldo atual" rápido aparecia esticado/distorcido em alguns aparelhos
+- Relatado: em um aparelho específico, o painel de "Saldo atual" (acessado pelo botão flutuante) apareceu com o card de valor e os botões Uber/99 enormes e distorcidos, ocupando quase a tela inteira — mesmo o painel funcionando normalmente em outros aparelhos.
+- Investigado e reproduzido o problema isoladamente: identificado um conflito real entre múltiplas camadas de CSS que se acumularam neste painel ao longo de versões anteriores. Uma regra mais recente, que reativa a visibilidade dos botões Uber/99 dentro do teclado numérico, não incluía limites de altura — deixando esses elementos vulneráveis a serem esticados pelo comportamento de distribuição de espaço do navegador (CSS Grid), que alguns navegadores resolvem de forma diferente em casos ambíguos como esse.
+- Corrigido fixando explicitamente a altura do card de "Saldo atual" e dos botões Uber/99, eliminando a ambiguidade que fazia alguns navegadores calcularem tamanhos muito maiores que o esperado.
+- Testado e confirmado, com simulação automatizada, que a correção produz o tamanho compacto correto, sem depender de como cada navegador resolve esse cálculo internamente.
+- Conforme prática estabelecida: 22 funções relacionadas à virada das 4h, sincronização com a nuvem, lançamento por voz e edição de sessões/meta foram comparadas byte a byte contra a versão anterior — todas confirmadas idênticas (esta correção foi exclusivamente de CSS).
+- Nenhuma outra tela ou fluxo foi alterada.
+- Base oficial: vBeta1.38.
+
 vBeta1.38 - Confirmações nativas substituídas pelo padrão MetaDriver em todo o app
 - Solicitado: o modal de confirmação ao importar um backup ainda era o nativo do navegador (mostrando o endereço do app). Pedido para transformar em modal MetaDriver, igual ao usado em outras confirmações do app.
 - Encontradas e corrigidas TODAS as 5 confirmações nativas (confirm()) existentes no app: importar backup, apagar todos os dados, excluir uma sessão do histórico, apagar o histórico inteiro, e a confirmação compartilhada de "Zerar dados" (MetaDriver/Manutenção/Tudo) no menu.
