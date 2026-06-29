@@ -1,3 +1,12 @@
+vBeta1.42 - CORREÇÃO: cadastro mostrava "Erro no cadastro." quando o e-mail já estava cadastrado
+- Relatado: mesmo após corrigir a configuração de envio de e-mails (domínio próprio e SMTP), uma tentativa de criar conta continuava mostrando a mensagem genérica "Erro no cadastro."
+- Investigado e identificado um comportamento documentado do Supabase: quando alguém tenta criar conta com um e-mail que já existe e já está confirmado, o Supabase não retorna um erro — por segurança (para não revelar quais e-mails já estão cadastrados a quem está tentando adivinhar), ele retorna um objeto de usuário "de aparência normal", mas vazio por dentro (sem nenhuma identidade vinculada).
+- O app, ao receber esse objeto, via que existia e mostrava "Conta criada" — só que não era esse o caso real desta vez: a verificação anterior não distinguia entre "conta criada de verdade" e esse objeto de segurança do Supabase, e em algum ponto dessa cadeia a mensagem genérica de erro aparecia.
+- Corrigido: o app agora identifica corretamente esse caso específico (usuário existente, sem identidade vinculada) e mostra uma mensagem clara: "Este email já está cadastrado. Toque em Entrar ou em Esqueci para recuperar a senha."
+- Testado com 4 cenários (cadastro novo, e-mail já existente, erro real de rede/API, e um caso de robustez sem o campo de identidade) — todos com o comportamento correto.
+- Nenhuma outra tela ou fluxo foi alterada.
+- Base oficial: vBeta1.41.
+
 vBeta1.41 - Revertido para vBeta1.38 (descartadas as correções 1.39 e 1.40) - aguardando confirmação de teste
 - O usuário relatou que a vBeta1.40 apresentou o mesmo problema visual (teclado/botões esticados) no próprio aparelho do usuário, onde antes (vBeta1.38) nunca havia ocorrido. Isso indica que as duas tentativas de correção anteriores (vBeta1.39 e vBeta1.40) não resolveram o problema relatado pelo outro usuário e, pelo contrário, podem ter introduzido o mesmo problema visual no aparelho do próprio desenvolvedor.
 - Decisão tomada: revertido o painel de "Saldo atual" exatamente ao estado da vBeta1.38 (nenhuma das duas tentativas de correção foi mantida), para isolar a causa real antes de tentar uma nova correção.

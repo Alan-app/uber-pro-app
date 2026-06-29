@@ -1,3 +1,20 @@
+MetaDriver vBeta1.42
+
+Solicitado:
+- Mesmo depois de configurar o envio de e-mails com domínio próprio (Resend + Supabase), uma tentativa de criar conta continuava mostrando "Erro no cadastro.", sem indicar a causa real.
+
+Investigação:
+- Confirmado, na documentação oficial do Supabase, um comportamento intencional de segurança: quando alguém tenta criar conta com um e-mail que já existe e já está confirmado, o Supabase não retorna um erro comum. Em vez disso, ele devolve um objeto de usuário com aparência normal, mas vazio por dentro (sem nenhuma identidade vinculada) — isso é proposital, para não revelar a quem está tentando se cadastrar se aquele e-mail específico já tem conta ou não (evita que alguém mal-intencionado descubra quais e-mails já estão cadastrados em um sistema).
+- O código do app verificava apenas se esse objeto "existia", sem checar se ele era um cadastro de verdade ou esse caso especial de segurança — por isso a mensagem mostrada era a genérica "Erro no cadastro.", sem explicar a real situação (e-mail já cadastrado).
+
+Feito:
+- O app agora verifica corretamente esse caso específico, checando se o objeto retornado tem alguma identidade vinculada de verdade.
+- Quando detectado que o e-mail já está cadastrado, a mensagem agora mostra: "Este email já está cadastrado. Toque em Entrar ou em Esqueci para recuperar a senha." — orientando o usuário sobre o que fazer.
+- Testados 4 cenários possíveis (cadastro novo de verdade, e-mail já cadastrado, erro real de rede/API, e um caso de segurança extra) — todos com o comportamento correto confirmado.
+
+Status atual:
+- Pronto para teste. Se o e-mail usado no print (asr-a1@hotmail.com) já tiver sido cadastrado antes em algum teste anterior, a nova mensagem deve aparecer claramente orientando a usar "Entrar" em vez de criar uma nova conta. Se for realmente um e-mail novo, o cadastro deve funcionar normalmente e enviar o e-mail de confirmação.
+
 MetaDriver vBeta1.41
 
 Situação atual:

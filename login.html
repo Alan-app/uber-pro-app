@@ -6,7 +6,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>MetaDriver vBeta1.41</title>
+<title>MetaDriver vBeta1.42</title>
 <style>
 :root {
   color-scheme: dark;
@@ -417,9 +417,19 @@ function cloudRestoreToLocal(payload, userId) {
           password: pass,
           data: { nome: nome }
         }, null);
-        if (data.user) {
+        // vBeta1.42 - quando o e-mail já existe e já está confirmado, o
+        // Supabase, por segurança (para não revelar quais e-mails já estão
+        // cadastrados), retorna um objeto de usuário "falso" em vez de um
+        // erro - mas esse objeto sempre vem com identities: [] (vazio).
+        // Antes, o app via que "data.user" existia e mostrava "conta
+        // criada" mesmo nesse caso, escondendo a real situação do usuário.
+        const identidadesVazias = data && data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0;
+        if (data.user && !identidadesVazias) {
           showMsg("Conta criada. Verifique seu email para confirmar.", "ok");
           setStatus("conta criada");
+        } else if (data.user && identidadesVazias) {
+          showMsg("Este email já está cadastrado. Toque em \"Entrar\" ou em \"Esqueci\" para recuperar a senha.", "danger");
+          setStatus("email já cadastrado");
         } else {
           showMsg("Erro no cadastro.", "danger");
           setStatus("erro");
@@ -516,6 +526,6 @@ function cloudRestoreToLocal(payload, userId) {
   }
 })();
 </script>
-<div class="version-debug-badge" id="versionDebugBadge">MetaDriver vBeta1.41 · login</div>
+<div class="version-debug-badge" id="versionDebugBadge">MetaDriver vBeta1.42 · login</div>
 </body>
 </html>
