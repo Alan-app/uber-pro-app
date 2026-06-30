@@ -1,3 +1,19 @@
+vBeta1.47 - CORREÇÃO: número da versão aparecia no nome do app ao instalar (ícone da tela inicial)
+- Relatado: ao instalar o app na tela inicial do celular, o nome exibido embaixo do ícone incluía o número da versão (ex.: "MetaDriver vBeta1.46"), quando deveria mostrar só "MetaDriver".
+- Identificado que o arquivo de configuração do app (manifest.json) tinha os campos de nome ("name" e "short_name") atualizados com a versão a cada nova entrega — esses são exatamente os campos que o sistema operacional usa para nomear o ícone instalado.
+- Corrigido: esses dois campos agora ficam fixos como "MetaDriver", sem nenhuma versão. O número da versão continua aparecendo normalmente apenas na tela de login e no menu do app, como já era o comportamento esperado.
+- A partir desta versão, o processo de atualizar o número da versão a cada entrega não altera mais esses dois campos do manifest.json (só o campo interno "version", que é apenas um metadado e não aparece em nenhuma tela do sistema).
+- Nenhuma outra tela ou fluxo foi alterada.
+- Base oficial: vBeta1.46.
+
+vBeta1.46 - CORREÇÃO: tela de abertura (splash) do app aparecia com fundo preto atrás da logo
+- Relatado: ao abrir o app, antes de carregar a tela principal, a logo aparecia com baixa definição e um fundo preto quadrado por trás dela, em vez do fundo azul esperado.
+- Investigado e identificado que os arquivos de ícone do app (icon-192.png e icon-512.png) tinham um fundo preto sólido "embutido" na própria imagem, ocupando toda a área ao redor do desenho da logo — não era uma questão de configuração, e sim da imagem em si.
+- Corrigido removendo o fundo preto das duas imagens de ícone e substituindo pela cor azul exata já usada como fundo em todo o app (a mesma do manifest.json), preservando o desenho original da logo (moldura, bússola verde e barra) intacto.
+- Testado visualmente, renderizando o resultado tanto isolado quanto sobre o fundo real do app, confirmando que a logo aparece limpa, sem nenhum contraste de fundo preto.
+- Nenhuma outra tela ou fluxo foi alterada.
+- Base oficial: vBeta1.45.
+
 vBeta1.45 - CORREÇÃO CRÍTICA: recuperação de senha "zerava" os dados do app + tela de reset visualmente corrigida
 - Relatado: depois de usar "Esqueci minha senha" e definir uma nova senha, ao voltar para o app, todos os dados (ganhos, gastos, metas, histórico) pareciam ter sido apagados.
 - Investigado e identificada a causa raiz: o app armazena os dados de cada usuário em uma área separada do aparelho, identificada pelo ID do usuário (para impedir que os dados de uma pessoa apareçam para outra no mesmo celular). A tela de redefinição de senha (reset.html) atualizava a senha corretamente no Supabase, mas nunca salvava esse ID do usuário no aparelho. Sem esse ID, o app, ao reabrir, não sabia de qual "área" buscar os dados, e acabava aplicando um estado vazio por cima.

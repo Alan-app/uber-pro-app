@@ -1,3 +1,33 @@
+MetaDriver vBeta1.47
+
+Solicitado:
+- Ao instalar o app na tela inicial do celular, o nome exibido junto ao ícone incluía o número da versão (ex.: "MetaDriver vBeta1.46"). A versão deve aparecer apenas na tela de login e no menu do app, não no nome usado pelo sistema para o ícone instalado.
+
+Investigação:
+- Confirmado que o arquivo de configuração do app (manifest.json) tinha os campos "name" e "short_name" — exatamente os campos que o Android usa para nomear o ícone na tela inicial — sendo atualizados com o número da versão a cada nova entrega, junto com os demais indicadores de versão do app.
+
+Feito:
+- Os campos "name" e "short_name" do manifest.json agora ficam fixos como "MetaDriver", sem nenhuma versão.
+- Ajustado o processo de atualização de versão: a partir desta entrega, ao bumpar a versão a cada nova correção, esses dois campos não são mais alterados — apenas o campo interno "version" do manifest (que é só um metadado de controle, não exibido em nenhuma tela do sistema) continua sendo atualizado normalmente.
+
+Status atual:
+- Pronto para teste. Pode ser necessário desinstalar e reinstalar o atalho da tela inicial para o nome novo (sem versão) ser reconhecido pelo Android, já que o nome do ícone instalado costuma ficar em cache no sistema.
+
+MetaDriver vBeta1.46
+
+Solicitado:
+- Ao abrir o app, a tela de abertura (que mostra a logo brevemente antes de carregar a tela principal) aparecia com a logo em baixa definição e um fundo preto quadrado atrás dela, em vez do fundo azul esperado, deixando o visual inconsistente.
+
+Investigação:
+- Confirmado que o problema estava nos próprios arquivos de imagem do ícone do app (icon-192.png e icon-512.png), não em nenhuma configuração: as imagens tinham um fundo preto sólido ocupando toda a área ao redor do desenho da logo, em vez de fundo transparente ou da cor azul correta.
+
+Feito:
+- Recriados os dois arquivos de ícone, removendo o fundo preto e substituindo pela cor azul exata já usada em todo o app (a mesma definida no manifest.json), mantendo o desenho original da logo intacto (a moldura, a bússola verde e a barra azul).
+- Testado visualmente o resultado, tanto isolado quanto posicionado sobre o fundo real do app, confirmando que a logo aparece limpa e consistente, sem nenhum contraste indesejado de fundo preto.
+
+Status atual:
+- Pronto para teste. Ao reabrir o app (pode ser necessário reinstalar o atalho da tela inicial ou limpar o cache do navegador para o ícone novo ser reconhecido), a tela de abertura deve mostrar a logo sobre o fundo azul, sem nenhum quadrado preto.
+
 MetaDriver vBeta1.45
 
 Solicitado:
