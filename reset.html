@@ -75,10 +75,25 @@ button {
 }
 .hidden { display: none; }
 .small { font-size: 12px; opacity: .9; margin-top: 8px; }
+/* vBeta1.45 - badge de versão sem estilo nenhum antes, aparecia como texto
+   solto no canto da tela. Agora segue o mesmo padrão visual discreto usado
+   nos demais arquivos do app (version-debug-badge). */
+#badge {
+  position: fixed;
+  right: 10px;
+  bottom: 10px;
+  font-size: 11px;
+  opacity: .55;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.10);
+  border-radius: 8px;
+  padding: 4px 8px;
+  pointer-events: none;
+}
 </style>
 </head>
 <body>
-<div id="badge">RESET 45</div>
+<div id="badge">MetaDriver vBeta1.45 · reset</div>
 
 <div class="card">
   <h1>MetaDriver</h1>
@@ -186,7 +201,17 @@ button {
     }
     try {
       setStatus("salvando");
-      await api("/auth/v1/user", "PUT", { password: p1 }, token);
+      // vBeta1.45 - CORREÇÃO CRÍTICA: a resposta desta chamada já vem com o
+      // usuário atualizado (incluindo o id), mas antes essa resposta era
+      // descartada sem salvar "sb_user_id" no localStorage. Sem esse dado,
+      // o app (app30_app.html), ao reabrir, não encontrava o escopo do
+      // usuário em cache e podia ler/gravar dados na chave de
+      // armazenamento errada (vazia), dando a impressão de que todos os
+      // dados haviam sido apagados após a recuperação de senha.
+      const userData = await api("/auth/v1/user", "PUT", { password: p1 }, token);
+      try{
+        if(userData && userData.id) localStorage.setItem("sb_user_id", String(userData.id));
+      }catch(e){}
       showMsg("Senha atualizada com sucesso. Agora você pode entrar.", "ok");
       setStatus("OK");
       setTimeout(function() { location.href = LOGIN_PAGE; }, 1200);

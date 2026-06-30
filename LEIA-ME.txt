@@ -1,3 +1,22 @@
+MetaDriver vBeta1.45
+
+Solicitado:
+- Depois de usar "Esqueci minha senha", definir uma nova senha e voltar para o app, todos os dados (ganhos, gastos, metas, histórico) pareciam ter sido apagados.
+- Também pedido: ajeitar a aparência da tela de redefinição de senha, que estava com um elemento de texto solto e sem estilo no canto da tela.
+
+Investigação:
+- Confirmado que o app guarda os dados de cada usuário separadamente no aparelho, usando o ID do usuário como parte da identificação de onde os dados ficam salvos — isso é proposital, para impedir que os dados de uma pessoa apareçam para outra que use o app no mesmo celular.
+- Identificado que a tela de redefinição de senha (reset.html) atualizava a senha corretamente no Supabase, mas nunca salvava o ID do usuário no aparelho depois disso — diferente da tela de login normal, que sempre salva esse ID. Sem esse ID disponível, o app, ao reabrir após o reset de senha, não conseguia identificar de qual "área" buscar os dados do usuário, e podia acabar aplicando um estado vazio por cima dos dados reais.
+
+Feito:
+- A tela de redefinição de senha agora salva corretamente o ID do usuário, extraído da própria resposta que o servidor já devolve ao atualizar a senha (informação que antes era recebida, mas descartada sem uso).
+- Corrigido também o elemento de selo de versão na tela de redefinição de senha, que não tinha nenhum estilo definido e por isso aparecia como texto solto no canto da tela. Agora segue o mesmo padrão visual discreto das demais telas do app.
+- Testado isoladamente que o ID do usuário é corretamente extraído e salvo a partir da resposta da chamada de redefinição de senha.
+- Conferida, de forma rigorosa, a consistência do número de versão exibido em todos os 6 arquivos do app (incluindo reset.html, que não tinha sido conferido em correções anteriores) — todos confirmados em vBeta1.45.
+
+Status atual:
+- Pronto para teste. Use "Esqueci minha senha" novamente, defina uma nova senha e confirme que os dados do app continuam aparecendo normalmente ao voltar para a tela principal.
+
 MetaDriver vBeta1.42
 
 Solicitado:

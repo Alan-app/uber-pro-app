@@ -1,3 +1,12 @@
+vBeta1.45 - CORREÇÃO CRÍTICA: recuperação de senha "zerava" os dados do app + tela de reset visualmente corrigida
+- Relatado: depois de usar "Esqueci minha senha" e definir uma nova senha, ao voltar para o app, todos os dados (ganhos, gastos, metas, histórico) pareciam ter sido apagados.
+- Investigado e identificada a causa raiz: o app armazena os dados de cada usuário em uma área separada do aparelho, identificada pelo ID do usuário (para impedir que os dados de uma pessoa apareçam para outra no mesmo celular). A tela de redefinição de senha (reset.html) atualizava a senha corretamente no Supabase, mas nunca salvava esse ID do usuário no aparelho. Sem esse ID, o app, ao reabrir, não sabia de qual "área" buscar os dados, e acabava aplicando um estado vazio por cima.
+- Corrigido: a tela de redefinição de senha agora salva corretamente o ID do usuário (extraído da própria resposta de atualização de senha), eliminando a lacuna que causava a aparente perda de dados.
+- Também corrigido: o selo de versão na tela de redefinição de senha (que aparecia como texto solto, sem estilo, boiando no canto da tela) agora segue o mesmo padrão visual discreto usado em todas as outras telas do app.
+- Testado isoladamente: confirmado que o ID do usuário é corretamente extraído e salvo a partir da resposta da própria chamada de redefinição de senha.
+- Nenhuma outra tela ou fluxo foi alterada (a correção ficou isolada em reset.html).
+- Base oficial: vBeta1.44.
+
 vBeta1.42 - CORREÇÃO: cadastro mostrava "Erro no cadastro." quando o e-mail já estava cadastrado
 - Relatado: mesmo após corrigir a configuração de envio de e-mails (domínio próprio e SMTP), uma tentativa de criar conta continuava mostrando a mensagem genérica "Erro no cadastro."
 - Investigado e identificado um comportamento documentado do Supabase: quando alguém tenta criar conta com um e-mail que já existe e já está confirmado, o Supabase não retorna um erro — por segurança (para não revelar quais e-mails já estão cadastrados a quem está tentando adivinhar), ele retorna um objeto de usuário "de aparência normal", mas vazio por dentro (sem nenhuma identidade vinculada).
