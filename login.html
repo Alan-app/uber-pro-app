@@ -417,17 +417,22 @@ function cloudRestoreToLocal(payload, userId) {
           password: pass,
           data: { nome: nome }
         }, null);
-        // vBeta1.42 - quando o e-mail já existe e já está confirmado, o
-        // Supabase, por segurança (para não revelar quais e-mails já estão
-        // cadastrados), retorna um objeto de usuário "falso" em vez de um
-        // erro - mas esse objeto sempre vem com identities: [] (vazio).
-        // Antes, o app via que "data.user" existia e mostrava "conta
-        // criada" mesmo nesse caso, escondendo a real situação do usuário.
-        const identidadesVazias = data && data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0;
-        if (data.user && !identidadesVazias) {
+        // vBeta1.43 - CORREÇÃO DE CAUSA RAIZ REAL: a chamada direta ao
+        // endpoint REST /auth/v1/signup (sem a biblioteca JS oficial do
+        // Supabase, que abstrai isso) retorna o objeto do usuário direto na
+        // raiz da resposta (ex.: {"id":"...","email":"...",...}), e NÃO
+        // dentro de um campo "user" (isso só acontece com a biblioteca JS
+        // supabase-js, que reembala a resposta). O código sempre checou
+        // "data.user", que por isso sempre foi undefined - fazendo cair
+        // sempre no "Erro no cadastro." genérico, mesmo quando o cadastro
+        // (ou reenvio de confirmação) funcionava perfeitamente no servidor.
+        const usuario = data && data.user ? data.user : data;
+        const temId = usuario && typeof usuario.id === "string" && usuario.id.length > 0;
+        const identidadesVazias = temId && Array.isArray(usuario.identities) && usuario.identities.length === 0;
+        if (temId && !identidadesVazias) {
           showMsg("Conta criada. Verifique seu email para confirmar.", "ok");
           setStatus("conta criada");
-        } else if (data.user && identidadesVazias) {
+        } else if (temId && identidadesVazias) {
           showMsg("Este email já está cadastrado. Toque em \"Entrar\" ou em \"Esqueci\" para recuperar a senha.", "danger");
           setStatus("email já cadastrado");
         } else {
