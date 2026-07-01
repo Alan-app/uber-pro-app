@@ -1,3 +1,21 @@
+MetaDriver vBeta1.49
+
+Solicitado:
+- Aplicar no MetaDriver a mesma correção da tela de instalação já feita no app Nautilus: iPhone com Chrome (em vez de Safari) não recebia nenhuma instrução válida, e a explicação em geral era fraca.
+
+Investigação:
+- Confirmado que o código só reconhecia "iPhone + Safari" como caso válido para mostrar instruções manuais. Qualquer outro navegador no iPhone (Chrome, Firefox, Edge) caía numa mensagem genérica de "instalação indisponível".
+- Verificado que, desde o iOS 16.4, "Adicionar à Tela de Início" funciona em qualquer navegador do iPhone, não só no Safari — só muda onde fica o botão Compartilhar em cada um.
+- Verificado que o iOS às vezes esconde a ação "Adicionar à Tela de Início" atrás de "Mais"/"Editar Ações" na folha de compartilhamento, quando ela nunca foi usada antes naquele app.
+
+Feito:
+- A tela de instalação agora detecta iPhone de forma geral e mostra os passos certos para cada navegador (Safari, Chrome, Firefox, Edge) e também para Android.
+- As instruções agora aparecem como lista numerada de passos direto na tela (em vez de alert), com um aviso destacado explicando o caminho "Mais"/"Editar Ações" para quando a opção não aparece de primeira.
+- Correção aplicada tanto no botão "Instalar aplicativo" quanto no link "Como instalar".
+
+Status atual:
+- Pronto para teste. Testar no iPhone abrindo o link pelo Chrome e Safari (e Firefox/Edge se possível), conferindo se os passos batem com o navegador usado e se o aviso de fallback aparece corretamente.
+
 MetaDriver vBeta1.47
 
 Solicitado:

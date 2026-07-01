@@ -1,0 +1,438 @@
+vBeta1.49 - CORREÇÃO + MELHORIA: tela de instalação não orientava iPhone com Chrome e a explicação era fraca (mesma correção já aplicada no Nautilus)
+- Relatado (1): na tela de instalação, quando o usuário está no iPhone mas usando o Google Chrome (em vez do Safari), o app não mostrava nenhuma instrução válida — caía numa mensagem genérica de "instalação indisponível", já que o código só reconhecia iPhone + Safari como caso válido para instruções manuais.
+- Relatado (2): mesmo com a detecção corrigida, a instrução aparecia como uma única frase corrida (via alert nativo do navegador), sem explicar que a opção "Adicionar à Tela de Início" pode ficar escondida atrás de "Mais"/"Editar Ações" na folha de compartilhamento do iOS.
+- Investigado: desde o iOS 16.4, "Adicionar à Tela de Início" funciona em qualquer navegador no iPhone (Safari, Chrome, Firefox, Edge), só muda onde fica o botão Compartilhar em cada um. E o iOS às vezes esconde essa ação atrás de "Mais"/"Editar Ações" quando ela nunca foi usada antes naquele app.
+- Corrigido/Melhorado:
+  - Detecção agora cobre iPhone de forma geral (Safari, Chrome, Firefox, Edge) e Android, cada um com seus passos certos.
+  - A instrução agora aparece como lista numerada de passos direto na tela (não mais como alert), com um aviso destacado explicando como achar "Adicionar à Tela de Início" caso ela não apareça de primeira na folha de compartilhamento.
+  - Tanto o botão "Instalar aplicativo" quanto o link "Como instalar" usam a mesma lista de passos.
+- Nenhuma outra tela ou fluxo foi alterada (mudança isolada em index.html, tela de instalação).
+- Base oficial: vBeta1.47.
+
+vBeta1.47 - CORREÇÃO: número da versão aparecia no nome do app ao instalar (ícone da tela inicial)
+- Relatado: ao instalar o app na tela inicial do celular, o nome exibido embaixo do ícone incluía o número da versão (ex.: "MetaDriver vBeta1.46"), quando deveria mostrar só "MetaDriver".
+- Identificado que o arquivo de configuração do app (manifest.json) tinha os campos de nome ("name" e "short_name") atualizados com a versão a cada nova entrega — esses são exatamente os campos que o sistema operacional usa para nomear o ícone instalado.
+- Corrigido: esses dois campos agora ficam fixos como "MetaDriver", sem nenhuma versão. O número da versão continua aparecendo normalmente apenas na tela de login e no menu do app, como já era o comportamento esperado.
+- A partir desta versão, o processo de atualizar o número da versão a cada entrega não altera mais esses dois campos do manifest.json (só o campo interno "version", que é apenas um metadado e não aparece em nenhuma tela do sistema).
+- Nenhuma outra tela ou fluxo foi alterada.
+- Base oficial: vBeta1.46.
+
+vBeta1.46 - CORREÇÃO: tela de abertura (splash) do app aparecia com fundo preto atrás da logo
+- Relatado: ao abrir o app, antes de carregar a tela principal, a logo aparecia com baixa definição e um fundo preto quadrado por trás dela, em vez do fundo azul esperado.
+- Investigado e identificado que os arquivos de ícone do app (icon-192.png e icon-512.png) tinham um fundo preto sólido "embutido" na própria imagem, ocupando toda a área ao redor do desenho da logo — não era uma questão de configuração, e sim da imagem em si.
+- Corrigido removendo o fundo preto das duas imagens de ícone e substituindo pela cor azul exata já usada como fundo em todo o app (a mesma do manifest.json), preservando o desenho original da logo (moldura, bússola verde e barra) intacto.
+- Testado visualmente, renderizando o resultado tanto isolado quanto sobre o fundo real do app, confirmando que a logo aparece limpa, sem nenhum contraste de fundo preto.
+- Nenhuma outra tela ou fluxo foi alterada.
+- Base oficial: vBeta1.45.
+
+vBeta1.45 - CORREÇÃO CRÍTICA: recuperação de senha "zerava" os dados do app + tela de reset visualmente corrigida
+- Relatado: depois de usar "Esqueci minha senha" e definir uma nova senha, ao voltar para o app, todos os dados (ganhos, gastos, metas, histórico) pareciam ter sido apagados.
+- Investigado e identificada a causa raiz: o app armazena os dados de cada usuário em uma área separada do aparelho, identificada pelo ID do usuário (para impedir que os dados de uma pessoa apareçam para outra no mesmo celular). A tela de redefinição de senha (reset.html) atualizava a senha corretamente no Supabase, mas nunca salvava esse ID do usuário no aparelho. Sem esse ID, o app, ao reabrir, não sabia de qual "área" buscar os dados, e acabava aplicando um estado vazio por cima.
+- Corrigido: a tela de redefinição de senha agora salva corretamente o ID do usuário (extraído da própria resposta de atualização de senha), eliminando a lacuna que causava a aparente perda de dados.
+- Também corrigido: o selo de versão na tela de redefinição de senha (que aparecia como texto solto, sem estilo, boiando no canto da tela) agora segue o mesmo padrão visual discreto usado em todas as outras telas do app.
+- Testado isoladamente: confirmado que o ID do usuário é corretamente extraído e salvo a partir da resposta da própria chamada de redefinição de senha.
+- Nenhuma outra tela ou fluxo foi alterada (a correção ficou isolada em reset.html).
+- Base oficial: vBeta1.44.
+
+vBeta1.42 - CORREÇÃO: cadastro mostrava "Erro no cadastro." quando o e-mail já estava cadastrado
+- Relatado: mesmo após corrigir a configuração de envio de e-mails (domínio próprio e SMTP), uma tentativa de criar conta continuava mostrando a mensagem genérica "Erro no cadastro."
+- Investigado e identificado um comportamento documentado do Supabase: quando alguém tenta criar conta com um e-mail que já existe e já está confirmado, o Supabase não retorna um erro — por segurança (para não revelar quais e-mails já estão cadastrados a quem está tentando adivinhar), ele retorna um objeto de usuário "de aparência normal", mas vazio por dentro (sem nenhuma identidade vinculada).
+- O app, ao receber esse objeto, via que existia e mostrava "Conta criada" — só que não era esse o caso real desta vez: a verificação anterior não distinguia entre "conta criada de verdade" e esse objeto de segurança do Supabase, e em algum ponto dessa cadeia a mensagem genérica de erro aparecia.
+- Corrigido: o app agora identifica corretamente esse caso específico (usuário existente, sem identidade vinculada) e mostra uma mensagem clara: "Este email já está cadastrado. Toque em Entrar ou em Esqueci para recuperar a senha."
+- Testado com 4 cenários (cadastro novo, e-mail já existente, erro real de rede/API, e um caso de robustez sem o campo de identidade) — todos com o comportamento correto.
+- Nenhuma outra tela ou fluxo foi alterada.
+- Base oficial: vBeta1.41.
+
+vBeta1.41 - Revertido para vBeta1.38 (descartadas as correções 1.39 e 1.40) - aguardando confirmação de teste
+- O usuário relatou que a vBeta1.40 apresentou o mesmo problema visual (teclado/botões esticados) no próprio aparelho do usuário, onde antes (vBeta1.38) nunca havia ocorrido. Isso indica que as duas tentativas de correção anteriores (vBeta1.39 e vBeta1.40) não resolveram o problema relatado pelo outro usuário e, pelo contrário, podem ter introduzido o mesmo problema visual no aparelho do próprio desenvolvedor.
+- Decisão tomada: revertido o painel de "Saldo atual" exatamente ao estado da vBeta1.38 (nenhuma das duas tentativas de correção foi mantida), para isolar a causa real antes de tentar uma nova correção.
+- Esta versão é idêntica à vBeta1.38 no painel de "Saldo atual" (e em todo o restante do app) — serve para o usuário confirmar, no próprio aparelho, se o problema desaparece voltando a esse estado exato.
+- Próximo passo: com a confirmação do usuário sobre o comportamento desta versão, investigar a causa raiz novamente, com mais informação sobre em quais condições exatas o problema ocorre.
+- Nenhuma outra tela ou fluxo foi alterada.
+- Base oficial: vBeta1.38.
+
+vBeta1.40 - CORREÇÃO DE CAUSA RAIZ: painel de "Saldo atual" rápido (revisão da vBeta1.39, que teve efeito colateral) - NÃO RESOLVEU, ver vBeta1.41
+- A correção da vBeta1.39 resolveu o esticamento dos botões Uber/99, mas alterou também a aparência do painel no aparelho do próprio usuário, que já funcionava corretamente — efeito colateral não intencional. A vBeta1.39 foi descartada e investigada novamente, com mais cuidado.
+- Identificada a causa raiz mais precisa: o painel tem 7 elementos diretos, mas a definição de "linhas" do layout (grid) só nomeia 3 delas — as 4 linhas extras ficavam sem tamanho definido, deixando o navegador livre para decidir como distribuir o espaço entre elas. Essa decisão pode variar entre aparelhos/navegadores, fazendo alguns elementos ficarem esticados em certos aparelhos e não em outros.
+- Corrigido de forma mais robusta na raiz do problema: todas as linhas (incluindo as extras) agora usam explicitamente o tamanho natural do próprio conteúdo, eliminando a ambiguidade por completo, em vez de apenas limitar elementos específicos com valores fixos (abordagem mais frágil, usada por engano na vBeta1.39).
+- Confirmado, com testes automatizados comparando diretamente a aparência antes e depois da correção, que a largura dos botões Uber/99 (50/50) e o tamanho de todos os elementos do painel permanecem exatamente os mesmos de antes — apenas a ambiguidade que causava o esticamento foi eliminada.
+- Conforme prática estabelecida: 23 funções relacionadas à virada das 4h, sincronização com a nuvem, lançamento por voz e edição de sessões/meta foram comparadas byte a byte contra a versão anterior — todas confirmadas idênticas (esta correção foi exclusivamente de CSS).
+- Nenhuma outra tela ou fluxo foi alterada.
+- Base oficial: vBeta1.38 (a vBeta1.39 foi descartada).
+
+vBeta1.39 - CORREÇÃO: painel de "Saldo atual" rápido aparecia esticado/distorcido em alguns aparelhos (DESCARTADA - ver vBeta1.40)
+- Relatado: em um aparelho específico, o painel de "Saldo atual" (acessado pelo botão flutuante) apareceu com o card de valor e os botões Uber/99 enormes e distorcidos, ocupando quase a tela inteira — mesmo o painel funcionando normalmente em outros aparelhos.
+- Investigado e reproduzido o problema isoladamente: identificado um conflito real entre múltiplas camadas de CSS que se acumularam neste painel ao longo de versões anteriores. Uma regra mais recente, que reativa a visibilidade dos botões Uber/99 dentro do teclado numérico, não incluía limites de altura — deixando esses elementos vulneráveis a serem esticados pelo comportamento de distribuição de espaço do navegador (CSS Grid), que alguns navegadores resolvem de forma diferente em casos ambíguos como esse.
+- Corrigido fixando explicitamente a altura do card de "Saldo atual" e dos botões Uber/99, eliminando a ambiguidade que fazia alguns navegadores calcularem tamanhos muito maiores que o esperado.
+- Testado e confirmado, com simulação automatizada, que a correção produz o tamanho compacto correto, sem depender de como cada navegador resolve esse cálculo internamente.
+- Conforme prática estabelecida: 22 funções relacionadas à virada das 4h, sincronização com a nuvem, lançamento por voz e edição de sessões/meta foram comparadas byte a byte contra a versão anterior — todas confirmadas idênticas (esta correção foi exclusivamente de CSS).
+- Nenhuma outra tela ou fluxo foi alterada.
+- Base oficial: vBeta1.38.
+
+vBeta1.38 - Confirmações nativas substituídas pelo padrão MetaDriver em todo o app
+- Solicitado: o modal de confirmação ao importar um backup ainda era o nativo do navegador (mostrando o endereço do app). Pedido para transformar em modal MetaDriver, igual ao usado em outras confirmações do app.
+- Encontradas e corrigidas TODAS as 5 confirmações nativas (confirm()) existentes no app: importar backup, apagar todos os dados, excluir uma sessão do histórico, apagar o histórico inteiro, e a confirmação compartilhada de "Zerar dados" (MetaDriver/Manutenção/Tudo) no menu.
+- Criado um modal de confirmação MetaDriver genérico e reutilizável, com título, mensagem e botão de confirmação personalizáveis (incluindo um estilo vermelho para ações destrutivas, como apagar dados).
+- Corrigido durante a implementação: identificado e eliminado um cenário de dupla confirmação em sequência (zerar tudo pelo menu já confirmava uma vez, e a função interna confirmaria de novo) — agora há apenas uma confirmação por ação, como esperado.
+- Testado o modal genérico isoladamente: abrir e cancelar (ação não executada), abrir e confirmar (ação executada corretamente), e confirmar sem nenhuma confirmação pendente (não gera erro).
+- Conforme prática estabelecida: 22 funções relacionadas à virada das 4h, sincronização com a nuvem, lançamento por voz, edição de sessões e meta foram comparadas byte a byte contra a versão anterior — todas confirmadas idênticas.
+- Nenhuma outra tela ou fluxo foi alterada.
+- Base oficial: vBeta1.37.
+
+vBeta1.37 - Editar valor de sessão finalizada: tecla "Tab"/"Concluído" do teclado agora fecha o teclado sem precisar do botão Voltar do celular
+- Solicitado: no modal de "Editar valor" (usado ao editar uma sessão finalizada no Relatório Diário), apertar a tecla de ação do teclado virtual (Tab/Concluído) não fazia nada — era preciso usar o botão Voltar do Android para fechar o teclado e conseguir tocar em "Salvar".
+- Identificado que o campo de edição não tinha nenhum tratamento para essa tecla, diferente dos campos de Meta (Descrição/Valor), que já tratam corretamente Tab e Enter desde versões anteriores.
+- Corrigido: estendido o mesmo tratamento já usado nos campos de Meta para o campo de "Editar valor" — apertar Tab ou a tecla "Concluído" do teclado virtual agora apenas fecha o teclado (tira o foco do campo), sem salvar nem fechar o modal automaticamente. O modal continua aberto, com o valor digitado preservado, para o usuário tocar em "Salvar" manualmente.
+- Como o campo de edição é compartilhado por todos os contextos de edição de valor (sessão finalizada do dia, sessão do histórico, e os demais), a correção vale automaticamente para todos eles.
+- Testado em navegador real: confirmado que apertar Enter (o que o teclado virtual realmente dispara) fecha o foco do campo, mantém o modal visível, e preserva o valor digitado.
+- Conforme prática estabelecida: 24 funções relacionadas à virada das 4h, sincronização com a nuvem, lançamento por voz e edição de sessões foram comparadas byte a byte contra a versão anterior — todas confirmadas idênticas.
+- Nenhuma outra tela ou fluxo foi alterada.
+- Base oficial: vBeta1.36.
+
+vBeta1.36 - Aviso de manutenção ao atingir o KM: convertido para o padrão visual MetaDriver
+- Solicitado: o popup que avisa quando o KM atual atinge uma manutenção programada ainda destoava visualmente do restante do app.
+- Identificado que esse popup já não era o modal nativo do navegador (não usava prompt/alert), mas era construído com estilos próprios "inline" diferentes dos demais modais do app, dando a impressão de ser nativo.
+- Convertido para usar exatamente as mesmas classes visuais dos demais modais padrão MetaDriver (mesmo fundo, borda, título e botões usados em "Editar lançamento", "Editar manutenção", etc.), eliminando a inconsistência visual.
+- Testado o fluxo completo: aviso de manutenção pendente aparece corretamente no padrão MetaDriver, o botão "Concluir" dentro do aviso abre o modal de Data + Valor (já corrigido na vBeta1.35), e ao confirmar, tanto o modal de conclusão quanto o aviso de manutenção pendente são fechados corretamente.
+- Conforme prática estabelecida: 28 funções relacionadas à virada das 4h, sincronização com a nuvem, lançamento por voz e manutenção do carro foram comparadas byte a byte contra a versão anterior — todas confirmadas idênticas.
+- Nenhuma outra tela ou fluxo foi alterada.
+- Base oficial: vBeta1.35.
+
+vBeta1.35 - Manutenção do carro: modal MetaDriver ao concluir (substitui o prompt nativo) + pede o valor gasto
+- Solicitado: ao clicar em "Concluir" em uma manutenção, o app abria um modal nativo do navegador pedindo só a data, e nunca solicitava o valor gasto. Pedido um modal padrão MetaDriver (igual ao de editar lançamento), pedindo Data e Valor juntos.
+- Criado um novo modal MetaDriver dedicado para concluir manutenção, com campos de Data e Valor gasto exibidos ao mesmo tempo, no mesmo padrão visual dos demais modais de edição do app.
+- Corrigido tanto o botão "Concluir" da lista quanto o checkbox "Manutenção concluída" (mesmo destino, ambos agora abrem o mesmo modal novo).
+- Identificado e corrigido um terceiro lugar com o mesmo problema: ao criar uma manutenção nova já marcando a caixa "concluída", o app também usava um prompt nativo pedindo apenas a data. Substituído por um modal MetaDriver dedicado, menor (já que o valor nesse caso já existe no formulário de criação).
+- Eliminados todos os prompt() nativos do navegador relacionados a manutenção do carro.
+- Testado: abertura do modal com a data já preenchida, confirmação salvando Data + Valor + KM corretamente, validação de data vazia bloqueando a confirmação, e os dois cenários de criação de manutenção nova (concluída na hora vs. planejada).
+- Conforme prática estabelecida: 23 funções relacionadas à virada das 4h, sincronização com a nuvem, lançamento por voz e edição de meta/manutenção foram comparadas byte a byte contra a versão anterior — todas confirmadas idênticas.
+- Nenhuma outra tela ou fluxo foi alterada.
+- Base oficial: vBeta1.34.
+
+vBeta1.34 - Meta com data inicial futura: agora calcula e exibe os valores de planejamento
+- Solicitado: ao definir uma data inicial de meta no futuro, o status mostrava corretamente "Aguardando início da meta", mas os campos Meta diária, Tempo para meta diária, Dias restantes e Tempo restante ficavam vazios — mesmo já existindo todos os dados necessários (data inicial, data limite, meta total, dias não trabalhados) para calculá-los, útil para planejar metas futuras com antecedência.
+- Corrigido: os cálculos de dias restantes e meta diária automática não são mais zerados à força quando a meta ainda não começou. O período considerado já usava corretamente a data inicial configurada como base (em vez de "hoje"); só faltava parar de descartar esse cálculo já correto.
+- Confirmado com o usuário: os valores são calculados considerando o período completo desde já (como se a meta já estivesse em andamento), mesmo antes da data inicial chegar.
+- A linha de status "Aguardando início da meta" continua aparecendo normalmente, agora junto com os valores calculados, em vez de substituí-los por "—".
+- Testado o cenário completo (data inicial em 3 dias, data limite 10 dias depois, meta de R$3000, 1 dia não trabalhado no período): confirmado que "Dias restantes" e "Meta diária" calculam corretamente mesmo a meta ainda não tendo começado.
+- Conforme prática estabelecida: 22 funções relacionadas à virada das 4h, sincronização com a nuvem, lançamento por voz e cálculo de meta foram comparadas byte a byte contra a versão anterior — todas confirmadas idênticas.
+- Nenhuma outra tela ou fluxo foi alterada.
+- Base oficial: vBeta1.33.
+
+vBeta1.33 - Cor do Ganho/hora baseada na meta + campos sempre selecionados ao focar
+- Ganho por hora (sessão em andamento, sessão finalizada do dia e sessões do histórico) agora aparece em VERMELHO quando está abaixo do valor de "Ganho por hora" configurado em Configurar Meta, e em VERDE quando está igual ou acima. Na sessão em andamento, isso é recalculado em tempo real, junto com a atualização periódica já existente da tela.
+- Em todos os campos de texto e número editáveis do app, ao tocar/focar o campo, o conteúdo já digitado agora é automaticamente selecionado por completo. Isso faz a primeira tecla digitada substituir o valor anterior inteiro, em vez de só posicionar o cursor — facilita digitar enquanto dirige, sem precisar apagar o conteúdo antigo manualmente antes. Campos somente leitura (que abrem teclados/seletores próprios) e campos auxiliares ocultos do app não são afetados.
+- Testado em navegador real: confirmado que tocar e digitar substitui o conteúdo por completo, tanto em campos de texto quanto em campos numéricos, e que campos somente leitura permanecem intocados.
+- Conforme prática estabelecida: 23 funções relacionadas à virada das 4h, sincronização com a nuvem, lançamento por voz e edição de sessões foram comparadas byte a byte contra a versão anterior — todas confirmadas idênticas.
+- Nenhuma outra tela ou fluxo foi alterada.
+- Base oficial: vBeta1.32.
+
+vBeta1.32 - Editar valor de sessão finalizada: agora pelo saldo acumulado, não pelo valor isolado
+- Solicitado: ao editar o valor de uma sessão finalizada que não é a primeira do dia, o usuário precisava calcular manualmente a diferença em relação às sessões anteriores antes de digitar (já que o campo guardava o ganho isolado da sessão, não o saldo total que aparece na tela).
+- Corrigido: o campo de edição agora mostra o saldo ACUMULADO até aquela sessão (soma das sessões anteriores do mesmo dia + a própria sessão) — o mesmo número que já aparece como "saldo atual" na tela. Ao salvar, o app calcula automaticamente a diferença e guarda o valor isolado correto internamente, sem o usuário precisar fazer essa conta.
+- Essa correção aplica a MESMA regra que já existia para a sessão em andamento (que já subtraía o saldo das sessões anteriores automaticamente) — agora sessões finalizadas (do dia atual e do histórico) seguem a mesma lógica.
+- A primeira sessão do dia continua funcionando exatamente como antes (sem nenhuma subtração, já que não há sessão anterior).
+- Testado o cenário completo (3 sessões no dia, editando a segunda pelo saldo acumulado) confirmando que o valor isolado calculado e salvo internamente está correto, e que a primeira sessão não foi afetada.
+- Conforme prática estabelecida: 20 funções relacionadas à virada das 4h, sincronização com a nuvem, lançamento por voz e cálculo de saldo foram comparadas byte a byte contra a versão anterior — todas confirmadas idênticas.
+- Nenhuma outra tela ou fluxo foi alterada.
+- Base oficial: vBeta1.31.
+
+vBeta1.31 - Mescla: correção de tema (Retiradas/Combustível) + correção do bug de voz
+- Recebida e validada uma correção de tema (vBeta1.27) feita pelo usuário em outra sessão: nos 4 temas visuais, os botões Retiradas e Combustível não recebiam cor de destaque ao serem selecionados. Confirmada por comparação byte a byte que essa correção é exclusivamente CSS, sem alterar nenhuma lógica, e validada visualmente nos 4 temas.
+- Identificado que essa versão foi criada a partir de uma base anterior à correção do bug de lançamento por voz "funciona uma vez, falha na próxima" (vBeta1.28). A pedido do usuário, essa correção de voz foi aplicada por cima das correções de tema, preservando ambas.
+- Confirmado, por comparação byte a byte com a vBeta1.26, que nenhuma função crítica foi alterada além das 5 linhas do lançamento por voz, substituídas pelas versões corrigidas já validadas anteriormente.
+- Testado novamente o cenário do bug de voz (múltiplos comandos em sequência, sem clicar em Salvar entre eles): confirmado funcionando sem falhas alternadas.
+- Nenhuma outra tela ou fluxo foi alterada.
+- Base oficial: vBeta1.27 (recebida do usuário) + correção de voz da vBeta1.28.
+
+vBeta1.27 - CORREÇÃO: botões de Retiradas e Combustível em Lançamentos ficavam "sem cor" ao serem selecionados em 4 dos temas visuais
+- Investigado relato de que, na tela de Lançamentos, os botões Ganho/Gasto/Retirada/Combustível deveriam mudar de cor ao serem clicados (selecionados), mas Combustível era o único que mantinha sua cor de destaque — os demais pareciam "perder a cor" ao ficar ativos.
+- Causa raiz encontrada: nos 4 temas visuais "preto-escuro", "preto-claro", "amarelo-escuro" e "amarelo-claro", cada bloco de tema redefine a cor base dos botões da aba (.subtab-btn) e só tinha regras de cor para o estado selecionado (.active) dos botões Ganhos e Gastos — Retiradas e Combustível nunca receberam essa regra dentro de cada tema. Como o seletor de tema tem mais força (especificidade) que a regra genérica de "selecionado", os dois botões ficavam sem destaque visual ao serem clicados nesses 4 temas. Combustível tinha uma proteção parcial fora dos blocos de tema (por isso parecia funcionar), mas Retiradas não tinha proteção alguma.
+- Corrigido: adicionadas as 8 regras de cor faltantes (Retiradas e Combustível × 4 temas), usando a mesma paleta e convenção visual já estabelecida para Ganhos (verde) e Gastos (vermelho) em cada tema — Retiradas em azul/roxo e Combustível em marrom.
+- Alteração 100% CSS/visual. Nenhuma função de lógica foi tocada — confirmado por comparação byte a byte da função openLancSection (responsável por abrir/fechar e marcar os botões como selecionados) contra a vBeta1.26, e validação de sintaxe (chaves balanceadas e node --check nos scripts) no arquivo completo.
+- Nenhuma outra tela ou fluxo foi alterada.
+- Base oficial: vBeta1.26.
+
+vBeta1.26 - CORREÇÃO CRÍTICA REAL: virada das 4h não era verificada ao voltar para o app depois de trocar de tela
+- Investigado novo relato (mais preciso) de que a virada das 4h não funcionava ao mudar a data do celular com o app já aberto. A correção da vBeta1.25 (timeout de rede) não resolveu porque não era essa a causa.
+- Confirmado, com testes automatizados diretos no código real (não apenas comparação de texto), que a lógica de cálculo da virada das 4h está correta e sempre esteve.
+- Causa raiz real encontrada: ao trocar de tela ou de aplicativo no celular, o navegador suspende ou desacelera o temporizador que verifica a virada das 4h a cada 15 segundos (comportamento padrão de economia de bateria do Android/Chrome, não um bug introduzido pelo MetaDriver). Como nada forçava uma nova verificação ao voltar para o app, a virada só seria detectada quando esse temporizador retomasse sua cadência normal — o que podia demorar bastante ou não ser percebido pelo usuário.
+- Corrigido: ao voltar para o MetaDriver depois de estar em outra tela/app, a verificação da virada das 4h agora é forçada imediatamente, sem depender apenas do temporizador de 15 segundos.
+- Testado com simulação completa do cenário relatado (app aberto → trocar de tela → mudar a data do celular → voltar para o app), confirmando que a virada agora é detectada e executada imediatamente ao retornar.
+- Nenhuma outra tela ou fluxo foi alterada.
+- Base oficial: vBeta1.25.
+
+vBeta1.25 - CORREÇÃO CRÍTICA: virada operacional das 4h podia ficar travada indefinidamente (introduzida na correção de token da vBeta1.21)
+- Investigado relato de que a virada das 4h parou de funcionar: ao passar das 4h, o saldo não zerava, o ganho do dia não era lançado no histórico, e a sessão em aberto não era encerrada — nada do que normalmente acontece na virada ocorreu.
+- Confirmado que a lógica de cálculo da virada das 4h em si (qual é "hoje", comparação de chaves, etc.) NÃO foi alterada em nenhuma correção anterior — comparação byte a byte confirmou que essas funções permanecem idênticas desde a vBeta1.15.
+- Causa raiz real encontrada: a correção de renovação de token (vBeta1.21) adicionou uma chamada de rede (fetch) sem nenhum limite de tempo (timeout). Em rede lenta ou instável (comum em conexão móvel no trânsito), essa chamada podia nunca terminar — nem com sucesso, nem com erro — travando para sempre o processo de inicialização do app (mdInitialHydrateAndRender). Como a virada das 4h só é liberada para executar depois que esse processo termina, ela ficava bloqueada silenciosamente por toda a sessão, mesmo com o app aberto e funcionando normalmente em outros aspectos.
+- Corrigido: todas as chamadas de rede dentro do processo de inicialização agora têm um limite de tempo (8 segundos) — se a rede não responder dentro desse prazo, o app segue adiante normalmente em vez de travar.
+- Adicionada uma proteção extra (rede de segurança): mesmo que algum problema de rede não previsto ainda trave o processo de inicialização, o app força a liberação da virada das 4h após 12 segundos do início, garantindo que essa lógica nunca fique bloqueada por tempo indefinido.
+- Testado com simulação de rede travada (nunca responde): confirmado que a correção interrompe a espera corretamente após o tempo limite, e que a proteção extra libera a virada das 4h mesmo em cenário de falha total da rede.
+- Nenhuma outra tela ou fluxo foi alterada.
+- Base oficial: vBeta1.24.
+
+vBeta1.24 - Admin: botões diretos para teste grátis, plano de 30 dias e dias extras (sem precisar editar nada no Supabase)
+- Botão "Liberar" renomeado para "Liberar 30 dias" (comportamento já existente desde a vBeta1.23, sem mudança de lógica).
+- Botão "Resetar trial" renomeado para "Teste grátis 7 dias" (comportamento já existente, sem mudança de lógica).
+- NOVO botão "+1 dia": adiciona 1 dia ao prazo atual do usuário (assinatura paga ou teste grátis, conforme o status atual), sem resetar o que já estava valendo. Pode ser clicado várias vezes para somar mais dias (ex.: 3 cliques = +3 dias). Se o prazo já tiver vencido, o novo dia é somado a partir de agora, não do passado.
+- Destaque visual "⚠️ Vence em breve" (borda âmbar) na lista do admin agora também aparece para usuários em teste grátis (trial) com menos de 1 dia restante, além de assinatura paga (active) — antes só cobria assinatura paga.
+- O aviso dentro do app do motorista (banner ao abrir o MetaDriver) também passou a avisar quando o teste grátis está acabando, com texto e botão diferenciados ("Assinar" em vez de "Renovar").
+- Com esta versão, todo o controle de prazos (liberar, dar teste grátis, adicionar dias) é feito inteiramente pelos botões do admin — nenhuma edição manual no Supabase é mais necessária no dia a dia.
+- Nenhuma outra tela ou fluxo foi alterada.
+- Base oficial: vBeta1.23.
+
+vBeta1.23 - Alerta de vencimento de assinatura (admin + app do motorista)
+- AÇÃO MANUAL NECESSÁRIA: execute o arquivo supabase_v22_user_access_until.sql no SQL Editor do Supabase antes de usar esta versão (adiciona a coluna access_until na tabela user_access).
+- No admin: ao clicar em "Liberar", o usuário passa a ter 30 dias de acesso a partir desse momento (access_until = hoje + 30 dias).
+- No admin: usuários com status "active" cuja assinatura vence em até 1 dia agora aparecem destacados (borda âmbar) com o selo "⚠️ Vence em breve" na lista, e a data de vencimento aparece nos detalhes do usuário.
+- No app do motorista: ao abrir o MetaDriver, se a assinatura estiver a até 1 dia de vencer, aparece um aviso no topo da tela com a contagem de horas restantes e um botão "Renovar" que leva direto para a tela de Assinatura/Renovação (WhatsApp). O aviso pode ser fechado e não volta a aparecer na mesma sessão do navegador.
+- Nenhuma outra tela ou fluxo foi alterada.
+- Base oficial: vBeta1.22.
+
+vBeta1.22 - Botões de Lançamentos: corrige compressão do botão "Combustível"
+- Corrigido: os 4 botões de aba em Lançamentos (Ganhos/Gastos/Retiradas/Combustível) tinham largura igual entre si; como "Combustível" é a palavra mais longa, o texto ficava comprimido e, em telas mais estreitas, podia até ser cortado.
+- Cada botão agora recebe uma largura proporcional ao tamanho do próprio texto (Combustível ganha mais espaço, Ganhos/Gastos ganham um pouco menos), mantendo os 4 botões centralizados em conjunto e com o mesmo espaçamento entre eles.
+- Testado em três larguras de tela (320px, 360px, 390px) confirmando que o texto de todos os botões, incluindo "Combustível", aparece completo sem cortes.
+- Nenhuma outra tela ou fluxo foi alterada.
+- Base oficial: vBeta1.21.
+
+vBeta1.21 - CORREÇÃO CRÍTICA: token de sessão nunca era renovado, causando perda de horas de dados ao limpar o navegador
+- Corrigida a causa raiz real da perda de dados relatada (perda de HORAS de dados, não segundos): o app chamava uma função de renovação de sessão (mdEnsureActiveSession) que nunca havia sido implementada — ela simplesmente não existia no código.
+- Sem essa renovação, o token de acesso à nuvem (Supabase) expirava após aproximadamente 1 hora de uso (padrão do serviço), e a partir desse momento TODA tentativa de salvar na nuvem falhava silenciosamente (erro de autenticação), sem nenhum aviso. Os dados continuavam sendo salvos no aparelho, mas nunca chegavam à nuvem.
+- Ao limpar o cache/dados do Chrome horas depois, o app perdia o token e o token de atualização salvos localmente, e ao fazer login de novo recebia da nuvem a última versão que ela realmente tinha recebido — que podia ser de horas atrás, antes do token expirar.
+- Implementada a função de renovação de sessão de verdade, usando o mesmo mecanismo de "refresh token" que login.html já utiliza: quando o token de acesso está perto de expirar, o app renova automaticamente em segundo plano, sem necessidade de novo login.
+- Protegido contra múltiplas renovações simultâneas (ex.: vários salvamentos em sequência não disparam pedidos de renovação duplicados).
+- Testado nos quatro cenários relevantes: token válido (não renova), token expirado com renovação bem-sucedida, token e renovação ambos expirados (login manual necessário, como esperado), e chamadas simultâneas (sem duplicar pedidos à rede).
+- Nenhuma outra tela ou fluxo foi alterada. O indicador visual de sincronização proposto anteriormente (vBeta1.20) foi removido a pedido do usuário — o foco desta versão é a correção da causa raiz, sem mudança visual.
+- Base oficial: vBeta1.19.
+
+vBeta1.19 - Painel da conta (Gerenciar Conta): limpeza de botões redundantes
+- Removido o botão "Sair" do painel da conta — já existe um botão Sair no menu do app, este era redundante.
+- Removida a linha "Status técnico: OK".
+- Removido o botão "WhatsApp" — já era redundante com "Assinar / Renovar", que abre o mesmo número de WhatsApp.
+- Botão "Assinar / Renovar" renomeado para "Assinatura / Renovação — fale conosco no WhatsApp", deixando claro para onde o botão leva.
+- Nenhuma outra tela ou fluxo foi alterada.
+- Base oficial: vBeta1.18.
+
+vBeta1.18 - Voz: corrige captura intermitente do microfone e reconhecimento de "abasteci"
+- Corrigido microfone intermitente: cada toque criava uma instância NOVA de reconhecimento de voz, e no Chrome/Android isso podia deixar o microfone temporariamente bloqueado para a tentativa seguinte (padrão "grava, não grava, grava"). Agora a mesma instância é reaproveitada, com uma pequena pausa de segurança caso o navegador ainda considere o microfone em uso.
+- Corrigido reconhecimento de "abasteci" (e variações: abasteceu, abastecendo) para o tipo Combustível — antes funcionava apenas com a palavra "combustível" explícita. A detecção agora usa o radical da palavra em vez de exigir a forma exata, cobrindo naturalmente conjugações verbais.
+- A mesma técnica de radical foi aplicada às demais categorias (Gasto, Ganho, Retirada), tornando o reconhecimento mais resistente a variações de transcrição.
+- Testado contra todos os casos de uso anteriores para confirmar que nada deixou de funcionar.
+- Nenhuma outra tela ou fluxo foi alterada.
+- Base oficial: vBeta1.17.
+
+vBeta1.17 - Temas Uber e 99: paletas corretas, com contraste validado
+- Pesquisadas as cores oficiais de marca: Uber (preto #000000 / branco #FFFFFF, azul de ação #276EF1) e 99 (amarelo #FFDD00 / preto #121212, conforme 99app.com/imprensa).
+- Refeitas as 4 paletas de tema (Uber escuro/claro, 99 escuro/claro) com essas cores, validando cada combinação de texto/fundo por contraste real (padrão WCAG), não apenas visualmente.
+- Removido o bloco de patch antigo com `!important` que forçava cores incorretas por cima do sistema de temas (causa do efeito "parece forçado" relatado) — esse bloco tinha cores diferentes das oficiais (ex.: amarelo genérico em vez do amarelo 99 real) e competia com outras regras.
+- Corrigidos elementos que usavam cores fixas e não respeitavam tema nenhum: barra superior (topbar), menu lateral, itens de lista, painel de saldo rápido e texto de botões sobre cor de destaque — todos agora usam variáveis de tema (--topbar-bg, --tabbtn-bg, --on-accent), com valores corretos calculados por tema.
+- Validação visual feita tema por tema (Uber escuro, Uber claro, 99 escuro, 99 claro), confirmando texto sempre legível sobre o fundo correspondente.
+- Nenhuma outra tela, cálculo ou fluxo foi alterado.
+- Base oficial: vBeta1.16.
+
+vBeta1.16 - Data Inicial da meta: obrigatória e congelada (não muda mais todo dia)
+- Corrigido: o app usava a data atual como valor temporário sempre que a Data Inicial da meta estava vazia, e como esse cálculo era refeito a cada atualização da tela, na prática a data "mudava" todo dia.
+- Nova regra: a Data Inicial é obrigatória. Se estiver vazia no momento de salvar a meta, é preenchida UMA ÚNICA VEZ com a data atual (e o campo na tela também é atualizado para mostrar isso) — depois disso, o valor fica congelado e não é mais recalculado.
+- Corrigido também um caminho onde registrar um "dia não trabalhado" podia sobrescrever a Data Inicial já salva com um valor vazio (se o campo da tela estivesse vazio nesse momento); agora isso nunca apaga o valor já salvo.
+- Nenhuma outra tela, cálculo ou fluxo foi alterado.
+- Base oficial: vBeta1.15 (recebida do usuário com o ajuste do botão de voz já aplicado).
+
+vBeta1.15 - Botão de voz: redondo de verdade (64px)
+- Consolidado e organizado o CSS do botão de voz: 64px, perfeitamente redondo, sem risco de achatamento mesmo com outras regras globais de botão do app.
+- Posição mantida: dentro do card Lançamentos, centralizado, acima das abas.
+- Causa raiz do achatamento anterior: a regra global de botões do app define padding e largura por padrão; o botão de voz precisa de regras explícitas (com prioridade reforçada) para não herdar esse padding/largura.
+
+vBeta1.14 - Captação de voz (dica + leve melhoria) e limpeza de Lançamentos não salvos
+- Ao tocar no microfone, o aviso de "ouvindo" agora inclui uma dica: se o celular estiver no suporte do carro, falar um pouco mais perto da tela ajuda a captação (a animação de cor/pulso já existente foi mantida sem alteração).
+- O reconhecimento de voz passou a considerar até 3 hipóteses de transcrição do motor de voz do sistema, escolhendo a de maior confiança — ajuda um pouco em ambientes ruidosos, mas não substitui um microfone físico melhor (limite da Web Speech API do navegador, fora do controle do app).
+- Corrigido: ao abrir um lançamento (Ganho, Gasto, Retirada ou Combustível), digitar algo e trocar de aba/opção ou fechar a seção SEM salvar, os campos digitados agora são limpos automaticamente — não ficam mais "esperando" como se estivessem salvos.
+- Essa limpeza ocorre tanto ao clicar em "Adicionar" de outro tipo quanto ao trocar de aba pelos botões Ganhos/Gastos/Retiradas/Combustível, ou ao fechar a aba atual.
+- Corrigido de passagem: "Retirada" não estava na lista de formulários fechados automaticamente ao abrir outro tipo (bug pré-existente, relacionado ao mesmo trecho de código).
+- Nenhuma outra tela ou fluxo foi alterada.
+- Base oficial: vBeta1.13.
+
+vBeta1.13 - Botão de voz: ajuste de tamanho (somente formato)
+- Botão de voz reduzido para um círculo menor e mais discreto (40px, antes 56px), com proteção para nunca ficar oval (largura e altura sempre iguais).
+- Posição mantida exatamente como estava: dentro do card "Lançamentos", centralizado, acima das abas Ganhos/Gastos/Retiradas/Combustível.
+- Ajuste somente visual (CSS) — nenhuma lógica, comportamento ou outra tela foi alterada.
+- Base oficial: vBeta1.12.
+
+vBeta1.12 - Lançamento por voz: corrige cifrão na descrição e entende mais formas de falar
+- Corrigido bug que fazia "R$" aparecer dentro da descrição (ex.: "gastei R$ 50 de gasolina" preenchia descrição como "R$ gasolina"). Causa: o reconhecimento de voz às vezes transcreve "reais"/o som do cifrão como o símbolo literal "R$", que não estava sendo removido na limpeza da descrição.
+- Reconhecimento de mais formas de falar, sem precisar de comando mecanizado: mais sinônimos para gasto, ganho, retirada e combustível, incluindo itens comuns sem verbo explícito (ex.: "20 reais de estacionamento", "vinte e cinco de água").
+- Suporte a números falados por extenso, além de dígitos (ex.: "cinquenta reais", "cem reais", "duzentos e cinquenta").
+- Descrição extraída com mais precisão, sem perder letras acentuadas no final de palavras (ex.: "manutenção", "almoço") e sem deixar artigos residuais (ex.: "para o aluguel" agora gera "Aluguel", não "O aluguel").
+- Continua sendo o mesmo protótipo de teste por regras (sem IA real, sem custo) — frases muito fora do padrão ainda podem não ser reconhecidas; esse é o limite natural dessa abordagem, sem IA real.
+- Nenhuma outra tela ou fluxo foi alterada.
+- Base oficial: vBeta1.11.
+
+vBeta1.11 - Botão de voz (Lançamentos): novo visual e posição
+- Substituído o botão flutuante de microfone (emoji antigo) por um botão circular com ícone moderno (SVG) e gradiente azul/ciano, com animação de pulso ao ouvir.
+- Botão movido para dentro do card "Lançamentos", centralizado, acima das abas Ganhos/Gastos/Retiradas/Combustível (antes ficava flutuando fixo no canto da tela).
+- Por estar dentro do próprio card, o botão agora aparece/desaparece naturalmente junto com a seção "Lançamentos" (sem necessidade da lógica de verificação periódica usada antes).
+- Continua sendo o mesmo protótipo de teste (sem IA real, sem custo) já validado na vBeta1.10 — só o visual e a posição foram lapidados.
+- Nenhuma outra tela ou fluxo foi alterada.
+- Base oficial: vBeta1.10.
+
+vBeta1.10 - PROTÓTIPO DE TESTE: preenchimento de Lançamentos por voz (sem IA real, sem custo)
+- Adicionado botão de microfone fixo, visível enquanto o card "Lançamentos" estiver aberto na tela.
+- Ao falar um lançamento (ex.: "gastei 50 de gasolina hoje"), o app tenta identificar o tipo (Ganho/Gasto/Retirada/Combustível), o valor e a descrição, abre a aba correspondente e preenche os campos — sem salvar automaticamente, para revisão antes de confirmar.
+- IMPORTANTE: esta versão usa apenas reconhecimento de voz do navegador (gratuito) + um interpretador simples por palavras-chave, SEM IA real e SEM custo de API. O objetivo é validar a experiência de uso antes de decidir investir na versão com IA paga (recurso Premium futuro).
+- Funciona melhor no Chrome para Android; suporte no Safari/iPhone pode ser limitado ou indisponível (mostra aviso nesse caso).
+- Frases fora do padrão esperado podem não ser interpretadas corretamente — isso é esperado nesta fase de teste.
+- Nenhuma outra tela ou fluxo foi alterada.
+- Base oficial: vBeta1.9.
+
+vBeta1.9 - TAB/Concluído no celular: corrige avanço indevido entre campos das metas
+- Em "Configurar meta", no celular o botão "Avançar" do teclado virtual movia o foco da Descrição para o Valor, e do Valor para a Descrição da meta seguinte (a correção da vBeta1.6, baseada em Tab, não se aplicava a esse botão, pois ele não dispara a tecla Tab no celular).
+- Adicionado enterkeyhint="done" aos campos Descrição e Valor das metas, fazendo o teclado virtual exibir "Concluído" em vez de "Avançar".
+- O botão "Concluído" agora também finaliza a edição do campo atual (salva e sai do campo), sem avançar para outro campo, sem abrir o próximo e sem entrar em outra meta — mesmo comportamento já garantido para a tecla Tab física.
+- Nenhuma outra tela ou fluxo foi alterada.
+- Base oficial: vBeta1.8.
+
+vBeta1.8 - Valor das metas exibido com cifrão e duas casas decimais
+- Na seção "Configurar meta", o campo Valor de cada meta agora exibe o valor formatado como o restante do app (ex.: 150,00 em vez de 150), seguindo o mesmo padrão de "Total das metas: R$ 0,00".
+- Placeholder do campo atualizado para "Valor (R$)", igual aos demais campos de valor do app (ex.: Manutenção).
+- Corrigido também o cálculo do valor digitado para aceitar corretamente números com separador de milhar no formato brasileiro (ex.: 1.234,56), evitando que valores acima de R$ 1.000 fossem truncados.
+- Nenhuma outra tela ou cálculo foi alterado.
+- Base oficial: vBeta1.7.
+
+vBeta1.7 - Correção crítica: vazamento de dados entre usuários no mesmo aparelho
+- Corrigido vazamento de dados ao trocar o login no mesmo celular: dados de um usuário podiam ser herdados por outro.
+- Causa: os dados eram lidos de uma chave local global (não isolada por usuário) antes do escopo do usuário ser ativado, pois essa ativação só ocorria depois, de forma assíncrona.
+- Agora, se já existe um usuário em cache no aparelho, o escopo por usuário é ativado de forma síncrona antes de qualquer leitura de dados.
+- A chave global é removida após a migração para a chave isolada do usuário, evitando que volte a ser herdada por outra conta.
+- Chaves de dados antigas (pré multi-usuário) não são mais usadas como fallback quando já há um usuário autenticado no aparelho.
+- Base oficial: vBeta1.6.
+
+vBeta1.6 - TAB funciona como OK/Concluir nos campos de metas
+- Nos campos Descrição e Valor de cada meta, a tecla TAB agora finaliza a edição do campo atual (como um botão OK/Concluir).
+- A alteração é salva normalmente, o campo perde o foco e o teclado é fechado quando aplicável.
+- TAB não avança mais para o próximo campo, não abre outro campo e não entra em outra meta.
+- Nenhuma outra tela ou fluxo foi alterado (Sessões, Histórico Detalhado, Dashboard, Relatórios, Manutenções, Retiradas, Sincronização, Login, Gerenciar Conta e navegação geral permanecem como estavam).
+- Base oficial: vBeta1.5.
+
+vBeta1.5 - Histórico Detalhado: dia selecionado destacado
+- Corrigido destaque visual do botão do dia selecionado no Histórico Detalhado.
+- Apenas o dia com relatório aberto recebe azul destacado.
+- Não altera cálculos, filtros, datas operacionais ou relatórios.
+
+vBeta1.5 - Primeira versão beta para testes
+- Versão pública alterada para vBeta1.5.
+- Menu passa a mostrar o nome do usuário ao lado do botão Sair.
+- Botão Gerenciar APP renomeado para Gerenciar conta.
+- Gerenciar conta permite alterar o nome do usuário e acessar o painel da conta.
+
+vBeta1.5 - Teclado nativo em metas e modal MetaDriver em manutenção
+- Campo Valor das metas passa a usar teclado numérico nativo do sistema.
+- Edição de manutenções lançadas substitui prompts/modais nativos por modal padrão MetaDriver.
+- Base oficial: v70.
+
+v70 - Minutos compactos no seletor de horário
+- Minutos agora aparecem de 5 em 5 no seletor rápido.
+- Layout dos minutos ajustado para 3 linhas x 4 colunas: 00 15 30 45 / 05 20 35 50 / 10 25 40 55.
+- Mantido fluxo em etapas: primeiro horas, depois minutos.
+- Versão do menu/app, manifest e cache atualizados para v70.
+
+v70 - Seletor de horário em duas etapas
+- Modal de horário agora abre mostrando apenas horas (00-23).
+- Ao tocar na hora, troca automaticamente para minutos (00-59).
+- Relógio superior HH:MM ficou clicável: HH volta para horas e MM abre minutos.
+- Mantido visual MetaDriver, sem teclado, sem seletor nativo e sem rolagem excessiva.
+- Preservada a animação verde da sessão em andamento e regras de cálculo existentes.
+
+MetaDriver vBeta1.5 - Seletor rápido de horários em grade
+- Base utilizada: v67 enviada pelo usuário.
+- Substituída a roldana de horário por seleção rápida em grade.
+- Horas exibidas de 00 a 23 em botões de toque único.
+- Minutos exibidos de 00 a 59 em botões de toque único.
+- Aplicado ao início de sessão e à edição de horário de início/término.
+- Mantida a animação/brilho verde da sessão em andamento.
+- Versão visível do menu/app, manifest e cache atualizados para v70.
+
+MetaDriver v67 - Brilho verde em sessão em andamento
+
+- Aplicada a opção 4 escolhida: brilho verde suave no card da sessão em andamento.
+- Sessões finalizadas permanecem sem animação para diferenciar visualmente da sessão ativa.
+- Versão visível do menu/app atualizada para v67.
+- Manifest/cache atualizados para v67.
+- README/LEIA-ME atualizado.
+- LDS ignorado, por pertencer a outro projeto.
+
+MetaDriver v63 - Retiradas isoladas do relatório diário e metas
+- Retiradas passam a ser tratadas exclusivamente como saques do Livro Líquido.
+- Retiradas não alteram horas restantes, metas diárias, meta bruta restante ou redistribuição de meta.
+- No Histórico Detalhado/relatório diário, Retiradas continuam listadas, mas não reduzem Lucro líquido nem Saldo total do dia.
+- Versão visível do menu/app atualizada para v63.
+
+v62 - Correção de versão no menu e restauração da logo original
+- Menu interno do app atualizado para exibir v62.
+- Ícones icon-192.png e icon-512.png restaurados com base na logo original enviada.
+- Corrigida a imagem quebrada no splash sem alterar a identidade visual do MetaDriver.
+
+v61 - Correção de versionamento e logo de abertura
+- Corrigida versão visível no menu/app para v61.
+- Atualizados title, badges de versão, manifest e service worker/cache.
+- Recriados icon-192.png e icon-512.png como PNG válidos para corrigir o piscar inicial com imagem quebrada.
+- Mantida correção da v60 no Histórico Detalhado.
+- LDS permanece fora do escopo do MetaDriver.
+
+v58 - Correção de salvamento local
+- Corrigido erro "Falha ao salvar localmente" ao alterar qualquer dado.
+- Compactados caches auxiliares quando o localStorage do PWA fica cheio/corrompido.
+- Journal local deixou de duplicar snapshots completos a cada salvamento.
+- Mantidas as correções da v57: botões de Lançamentos em linha centralizados e placeholder "Descrição".
+- LDS ignorado por pertencer a outro projeto.
+
+MetaDriver v52
+- Criada página Histórico no menu.
+- Histórico mostra botões quadrados apenas para dias com lançamentos.
+- Ao clicar no dia, exibe relatório filtrado com ganhos, gastos, retiradas e combustível.
+- Versão visual/interna atualizada para v52.
+
+v53 revisão: pacote recomposto com todos os 14 arquivos da estrutura completa, preservando a alteração do Histórico detalhado na tela inicial.
+
+
+v54 - Corrige recálculo do tempo restante da meta diária após lançamento manual de ganho, sem alterar saldo atual ou demais lógicas.
+
+
+v55 - Histórico Detalhado: saldo para abastecer passa a ser acumulado até a data selecionada, preservando combustível disponível do dia.
+
+
+v56 - Ajuste visual em Lançamentos: centraliza botões Ganhos/Gastos/Retiradas/Combustível e campos dos modais de edição.
+
+v57 - Ajuste visual em Lançamentos
+- Botões Ganhos/Gastos/Retiradas/Combustível mantidos lado a lado em uma única linha e centralizados dentro do card.
+- Removido comportamento visual que quebrava os botões em duas linhas.
+- Placeholder do campo de descrição no modal de alteração de data/motivo alterado para "Descrição".
+- Sem alteração nas regras de cálculo, lançamentos, retiradas, excedente, metas ou Livro Líquido.
+
+v59 - HISTÓRICO DETALHADO COM VIRADA ÀS 4H
+- Histórico Detalhado passa a agrupar e calcular os registros seguindo o padrão operacional do app: o dia começa às 04:00.
+- Cálculos do relatório diário e saldo acumulado para abastecer usam a mesma referência operacional.
+- Abastecimentos lançados de madrugada passam a respeitar a data operacional igual aos demais lançamentos.
+- LDS permanece fora do escopo do MetaDriver.
+
+
+v60 - Removido texto 'Modo % do bruto ativo... Manutenção na meta...' do Histórico Detalhado.
+
+
+V67 - Horários com roldana MetaDriver a partir da v64
+- Descartada a v66.
+- Preservada a animação verde da sessão em andamento da v64.
+- Substituído o seletor nativo de hora por roldana MetaDriver sem botão de teclado.
+- Corrigido modal de início de sessão para não cortar o botão Definir/OK.
+
+
+vBeta1.5
+- Corrigido Gerenciar conta: após salvar o nome, o campo volta ao modo visualização.
+- Modal de Gerenciar conta não abre teclado automaticamente e o botão Editar reaparece após salvar.
+
+
+vBeta1.5
+- Corrigido comportamento do campo Nome do usuário em Gerenciar conta.
+- Ao clicar em Editar, o texto não é mais selecionado; o cursor fica no final do nome.
+- Após salvar, o campo sai da edição sem permanecer selecionado.
+- Botão Editar alinhado verticalmente com o campo de nome.
