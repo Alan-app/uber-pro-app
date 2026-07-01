@@ -1,3 +1,12 @@
+vBeta1.50 - MELHORIA: tela de instalação refeita no mesmo formato do Nautilus, com escolha manual do sistema (Android/Apple)
+- Solicitado: deixar a tela de instalação do MetaDriver igual à do Nautilus — uma tela inicial pedindo para o usuário escolher entre "Android" e "Apple", em vez de detectar tudo automaticamente num único botão.
+- Feito: a tela de instalação agora tem 3 telas, como no Nautilus — Tela 1 (escolha do sistema, com os dois botões e ícones), Tela 2 (Android: botão "Instalar aplicativo" com o prompt nativo do navegador, e o painel de passos manuais como fallback) e Tela 3 (Apple: passo a passo numerado, com os círculos amarelos/verdes e a dica de "Mais"/"Editar Ações"). Ambas as telas 2 e 3 têm um link "← Escolher outro sistema" para voltar à Tela 1.
+- Mantida toda a lógica já corrigida na vBeta1.49: detecção de Safari, Chrome, Firefox e Edge no iPhone, passos certos para cada navegador, e o aviso de fallback do "Mais"/"Editar Ações".
+- Mantida intacta a lógica de sessão/redirecionamento (app instalado abre direto no app ou no login, dependendo se há sessão salva) e o registro do service worker — nada disso foi alterado.
+- Nenhuma outra tela ou fluxo do app foi tocada (mudança isolada em index.html, tela de instalação).
+- Validação: sintaxe JS de index.html validada (node --check); confirmado visualmente que a Tela 1 mostra os dois botões, que cada um leva à tela certa, que o link de voltar funciona nas duas telas seguintes, e que a Tela 3 mostra o navegador certo (Safari/Chrome/Firefox/Edge) simulando cada user agent.
+- Base oficial: vBeta1.49.
+
 vBeta1.49 - CORREÇÃO + MELHORIA: tela de instalação não orientava iPhone com Chrome e a explicação era fraca (mesma correção já aplicada no Nautilus)
 - Relatado (1): na tela de instalação, quando o usuário está no iPhone mas usando o Google Chrome (em vez do Safari), o app não mostrava nenhuma instrução válida — caía numa mensagem genérica de "instalação indisponível", já que o código só reconhecia iPhone + Safari como caso válido para instruções manuais.
 - Relatado (2): mesmo com a detecção corrigida, a instrução aparecia como uma única frase corrida (via alert nativo do navegador), sem explicar que a opção "Adicionar à Tela de Início" pode ficar escondida atrás de "Mais"/"Editar Ações" na folha de compartilhamento do iOS.

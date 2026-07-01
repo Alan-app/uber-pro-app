@@ -1,3 +1,17 @@
+MetaDriver vBeta1.50
+
+Solicitado:
+- Refazer a tela de instalação do MetaDriver no mesmo formato usado no Nautilus, com uma tela de escolha manual entre "Android" e "Apple".
+
+Feito:
+- Tela 1 nova: escolha do sistema, com os dois botões (Android/Apple) e ícones, igual ao Nautilus.
+- Tela 2 (Android): mantém o botão "Instalar aplicativo" com o prompt nativo do navegador e o painel de passos manuais como fallback; agora com link "← Escolher outro sistema".
+- Tela 3 (Apple): passo a passo numerado com círculos, detectando o navegador real (Safari/Chrome/Firefox/Edge) e mostrando os passos certos, com a dica de "Mais"/"Editar Ações"; também com link "← Escolher outro sistema".
+- Mantida intacta toda a lógica de sessão/redirecionamento e o registro do service worker.
+
+Status atual:
+- Pronto para teste. Testar a navegação entre as 3 telas (escolher Android, escolher Apple, voltar em cada uma) e, no iPhone, testar pelo Chrome e Safari para confirmar que a Tela 3 mostra o navegador certo.
+
 MetaDriver vBeta1.49
 
 Solicitado:
