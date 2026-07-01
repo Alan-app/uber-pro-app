@@ -1,0 +1,2 @@
+Nautilus V.Beta.48
+Corrigida a tela de instalação (index.html): ao escolher "Apple", o passo a passo agora reconhece o navegador real do iPhone (Safari, Chrome, Firefox ou Edge) e mostra os passos certos para cada um, em vez de assumir sempre Safari. Também adicionado um aviso explicando como achar "Adicionar à Tela de Início" quando ela vem escondida atrás de "Mais"/"Editar Ações" na folha de compartilhamento do iOS. Veja CHANGELOG.txt para o histórico completo de mudanças.
