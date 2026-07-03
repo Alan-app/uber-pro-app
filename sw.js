@@ -1,4 +1,4 @@
-const METADRIVER_CACHE_VERSION = "metadriver-cache-vBeta1-49";
+const METADRIVER_CACHE_VERSION = "metadriver-cache-vBeta1-50";
 self.addEventListener("install", (event) => { self.skipWaiting(); });
 self.addEventListener("activate", (event) => {
   event.waitUntil((async()=>{

@@ -43,7 +43,7 @@ try{
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver vBeta1.49</title>
+<title>MetaDriver vBeta1.50</title>
 <style id="md-hydration-lock">
 body.preload > *:not(#mdBootOverlay){visibility:hidden!important;}
 #mdBootOverlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#0f172a;color:#fff;z-index:2147483647;font-family:Inter,system-ui,sans-serif;font-weight:800;letter-spacing:.2px;}
@@ -3658,6 +3658,52 @@ body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff3b0; }
   opacity:1 !important;
 }
 
+/* ===== vBeta1.50 - refinamento visual global (somente acabamento: cor, sombra,
+   borda e transição — NENHUM tamanho, grid, altura ou espaçamento é alterado).
+   Usa as variáveis de tema existentes, então se adapta aos 4 temas sozinho. ===== */
+
+/* Fundo com profundidade sutil (brilho suave derivado da cor de destaque do tema) */
+body{
+  background-image:
+    radial-gradient(900px 480px at 85% -8%, color-mix(in srgb, var(--accent2, var(--accent)) 9%, transparent), transparent 62%),
+    radial-gradient(760px 420px at -12% 30%, color-mix(in srgb, var(--accent) 7%, transparent), transparent 58%);
+  background-attachment:fixed;
+  background-repeat:no-repeat;
+}
+
+/* Cards: borda fina do tema + sombra mais suave e difusa */
+.card{
+  border:1px solid var(--line);
+  box-shadow:0 10px 28px rgba(0,0,0,0.22);
+}
+body[data-tema$="claro"] .card{
+  box-shadow:0 6px 20px rgba(0,0,0,0.10);
+}
+
+/* Botões: transição suave + retorno tátil ao toque (transform não afeta layout) */
+.card button, .tab-btn, .menu-btn{
+  transition:filter .15s ease, transform .1s ease, box-shadow .15s ease;
+}
+.card button:active, .tab-btn:active{
+  transform:scale(0.985);
+  filter:brightness(1.08);
+}
+
+/* Campos: anel de foco na cor do tema (box-shadow não afeta layout) */
+.card input:focus, .card select:focus, .card textarea:focus{
+  outline:none;
+  border-color:var(--accent);
+  box-shadow:0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent);
+}
+
+/* Menu lateral: mesma linguagem dos cards */
+.menu-panel{
+  box-shadow:0 14px 38px rgba(0,0,0,0.42);
+}
+
+@media (prefers-reduced-motion: reduce){
+  .card button, .tab-btn, .menu-btn{ transition:none; }
+}
 </style>
 
 <script id="auth-guard">
@@ -3902,7 +3948,7 @@ body[data-tema$="claro"] .historico-report-line{border-bottom-color:rgba(0,0,0,.
   <div class="menu-item"><button class="secondary" onclick="abrirSaldoAtualButtonMenu(); closeMenu();">Botão de saldo atual</button></div>
   <div class="menu-item"><button class="secondary" onclick="abrirTemas(); closeMenu();">Temas</button></div>
   <div class="menu-item menu-user-row"><span class="menu-user-name" id="menuUserName">Usuário</span><button class="danger" onclick="forceLogout(); return false;">Sair</button></div>
-  <div class="menu-note" style="text-align:center;">vBeta1.49</div>
+  <div class="menu-note" style="text-align:center;">vBeta1.50</div>
 </div>
 
 
@@ -5400,7 +5446,7 @@ function mdBuildDiagnosticsObject(){
     const durableObj = mdSafeJsonParse(durableRaw);
     const diag = {
       generated_at: mdNowIso(),
-      app_version: 'MetaDriver vBeta1.49',
+      app_version: 'MetaDriver vBeta1.50',
       cloud_table: CLOUD_TABLE,
       device_id: mdEnsureDeviceId(),
       visibility_state: document.visibilityState,
@@ -7407,7 +7453,7 @@ function mdCommitLancamentoMutation(reason){
   try{ atualizar(); }catch(e){}
   try{ if(typeof refreshQuickBalanceFabMiniDisplay === "function") refreshQuickBalanceFabMiniDisplay(); }catch(e){}
   try{ if(typeof updateQuickBalanceFabUI === "function") updateQuickBalanceFabUI(); }catch(e){}
-  try{ if(typeof toast === "function" && reason) console.info("MetaDriver vBeta1.49 mutation:", reason); }catch(e){}
+  try{ if(typeof toast === "function" && reason) console.info("MetaDriver vBeta1.50 mutation:", reason); }catch(e){}
 }
 
 
@@ -9232,7 +9278,7 @@ function exportarRelatorioPDF(){
       <script>
         setTimeout(()=>window.print(), 250);
       <\/script>
-    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver vBeta1.49 · app</div>
+    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver vBeta1.50 · app</div>
 
 
 <script>

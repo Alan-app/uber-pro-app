@@ -1,3 +1,14 @@
+vBeta1.50 - MELHORIA VISUAL: refinamento de acabamento global (sem nenhuma mudança de layout)
+- Fundo do app com profundidade sutil (brilhos suaves derivados da cor de destaque do tema ativo, adaptando-se automaticamente aos 4 temas).
+- Cards com borda fina do tema e sombra mais suave/difusa (mais leve nos temas claros).
+- Botões com retorno tátil ao toque (leve escala + brilho ao pressionar, via transform — não afeta layout).
+- Campos com anel de foco na cor do tema ao serem tocados.
+- Menu lateral com sombra mais profunda, na mesma linguagem dos cards.
+- IMPORTANTE: nenhum tamanho, grid, altura ou espaçamento foi alterado — somente cor, sombra, borda e transição, para evitar o tipo de regressão de layout ocorrido nas vBeta1.39/1.40.
+- Preferência de acessibilidade "reduzir movimento" respeitada.
+- Verificado por renderização automatizada em 5 temas (cores de fundo, cards, campos e botões corretas em todos).
+- Base oficial: vBeta1.49.
+
 vBeta1.49 - NOVO: tela de instalação virou um site completo de apresentação do app
 - A tela de instalação (index.html) agora apresenta o MetaDriver para qualquer motorista interessado: título de impacto, botão "Instalar aplicativo grátis" no topo e no final, e 7 seções explicando cada função (Sessões, Metas, Lançamentos por voz, Relatórios/Histórico, Manutenção do carro, Saldo rápido Uber/99, Temas e sincronização na nuvem).
 - Cada função é ilustrada com um mockup de celular do menu correspondente, recriado direto no código da página (sem imagens externas) — sempre nítido, usando as cores e elementos reais do app.

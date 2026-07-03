@@ -1,3 +1,22 @@
+MetaDriver vBeta1.50
+
+Solicitado:
+- Melhorar o visual do app: mais bonito, mais tecnológico e mais agradável para motoristas de aplicativo. Combinado começar pelo caminho mais seguro, dado o histórico de regressões visuais em mudanças de layout (vBeta1.39/1.40).
+
+Feito:
+- Refinamento visual global de ACABAMENTO apenas — nenhum tamanho, grid, altura ou espaçamento foi alterado (exatamente o tipo de mudança que causou problemas no passado foi evitado por completo). As mudanças são só de cor, sombra, borda e transição:
+  - Fundo do app agora tem profundidade sutil: dois brilhos suaves derivados da própria cor de destaque do tema ativo (verde/azul no tema padrão, azul no tema Uber, amarelo no tema 99), em vez de uma cor 100% chapada.
+  - Cards ganharam borda fina na cor de linha do tema e sombra mais suave e difusa (mais leve ainda nos temas claros, para não pesar).
+  - Botões ganharam retorno tátil ao toque: leve escala e brilho ao pressionar (usando transform, que não afeta o layout).
+  - Campos de digitação ganharam anel de foco na cor de destaque do tema ao serem tocados.
+  - Menu lateral com sombra mais profunda, na mesma linguagem dos cards.
+- Tudo implementado com as variáveis de tema já existentes, então o refinamento se adapta automaticamente aos 4 temas (Preto Profissional e Amarelo Dinâmico, claro e escuro) sem nenhuma regra especial por tema além do ajuste de sombra nos claros.
+- Respeitada a preferência de acessibilidade "reduzir movimento" do sistema (transições desativadas nesse caso).
+- Verificado por renderização automatizada nos temas escuro padrão, Uber escuro, 99 escuro, claro padrão e 99 claro — cores de fundo, cards, campos e botões confirmadas corretas em todos.
+
+Status atual:
+- Pronto para teste no aparelho. Como as mudanças são só de acabamento (nenhuma medida foi alterada), o layout deve estar idêntico ao da vBeta1.49 — apenas com aparência mais polida. Se qualquer coisa parecer diferente de posição ou tamanho, avise que reverto imediatamente.
+
 MetaDriver vBeta1.49
 
 Solicitado:
