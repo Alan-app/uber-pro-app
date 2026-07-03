@@ -1,3 +1,14 @@
+vBeta1.51 - UPGRADE VISUAL: painel de progresso da meta, destaque do lucro e refinamentos
+- Configurar Meta: status da meta virou painel visual — percentual da meta bruta em destaque, barra de progresso na cor do tema, selo de dias restantes (vermelho quando prazo vencido) e linhas alinhadas de rótulo/valor.
+- Resumo geral: Lucro líquido em painel de destaque próprio (valor grande na cor do tema; vermelho quando negativo); demais linhas no novo padrão alinhado.
+- Relatório Diário: resumo de meta/tempo no mesmo padrão de linhas.
+- Cabeçalhos dos cards com filete de destaque na cor do tema (sombra interna, sem deslocamento).
+- Botões com leve relevo (gradiente sutil sobre a cor existente).
+- Todos os valores exibidos anteriormente continuam presentes — mudou a apresentação, não os dados.
+- Alterações de conteúdo restritas aos três blocos de resumo re-renderizados por JavaScript (statusMeta, horasResumo, resumo); nenhuma estrutura de grid/tamanho foi alterada.
+- Testado por renderização automatizada em 3 temas.
+- Base oficial: vBeta1.50.
+
 vBeta1.50 - MELHORIA VISUAL: refinamento de acabamento global (sem nenhuma mudança de layout)
 - Fundo do app com profundidade sutil (brilhos suaves derivados da cor de destaque do tema ativo, adaptando-se automaticamente aos 4 temas).
 - Cards com borda fina do tema e sombra mais suave/difusa (mais leve nos temas claros).

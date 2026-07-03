@@ -1,3 +1,21 @@
+MetaDriver vBeta1.51
+
+Solicitado:
+- Continuar o upgrade visual do app com mudanças realmente perceptíveis (a vBeta1.50 foi sutil demais), incluindo trazer para o app o card de progresso da meta apresentado no site de instalação (percentual atingido, barra de progresso e dias restantes).
+
+Feito:
+- Configurar Meta: o status da meta virou um painel visual de progresso — percentual da meta bruta em destaque grande, barra de progresso animada na cor do tema, selo de "dias restantes" (fica vermelho como "Prazo vencido" quando o prazo passou), e as demais informações (data inicial, meta bruta total/restante, meta diária, tempo para meta diária) organizadas em linhas alinhadas de rótulo e valor, em vez de texto corrido.
+- Resumo geral: o Lucro líquido ganhou um painel de destaque próprio, centralizado, com o valor grande na cor do tema (fica vermelho quando negativo). As demais linhas (Bruto, Gastos, Retiradas, Saldos) seguem o novo padrão de linhas alinhadas.
+- Relatório Diário: o resumo de meta diária/tempo restante segue o mesmo padrão visual de linhas.
+- Cabeçalhos de todos os cards ganharam um filete de destaque na cor do tema (aplicado por sombra interna, sem deslocar nada).
+- Botões ganharam leve relevo (gradiente sutil por cima da cor existente de cada botão, qualquer que seja).
+- Nenhum dado deixou de ser exibido: todos os valores que apareciam antes continuam aparecendo, apenas com hierarquia visual melhor.
+- Nenhuma estrutura de grid/tamanho de painéis foi alterada; as mudanças de conteúdo ficaram restritas a três blocos de resumo (statusMeta, horasResumo e resumo), que são gerados por JavaScript e re-renderizados a cada atualização de tela.
+- Testado por renderização automatizada nos temas escuro padrão, 99 escuro e Uber claro: percentual, barra, selo, painel de lucro e linhas confirmados corretos em todos.
+
+Status atual:
+- Pronto para teste. Confira principalmente: Configurar Meta (novo painel de progresso), Resumo geral (destaque do Lucro líquido) e os cabeçalhos dos cards. Compare os valores exibidos com os da versão anterior — devem ser exatamente os mesmos números, só apresentados melhor.
+
 MetaDriver vBeta1.50
 
 Solicitado:
