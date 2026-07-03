@@ -3,50 +3,190 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>MetaDriver vBeta1.50</title>
+<title>MetaDriver vBeta1.49</title>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0f172a">
+<meta name="description" content="MetaDriver: controle de ganhos, metas, gastos e manutenção para motoristas de aplicativo (Uber e 99).">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <link rel="apple-touch-icon" href="icon-192.png">
 <style>
-:root{color-scheme:dark}
+:root{
+  color-scheme:dark;
+  --bg:#0f172a;
+  --bg2:#111827;
+  --card:#1e293b;
+  --card-soft:rgba(30,41,59,.55);
+  --input:#334155;
+  --accent:#22c55e;
+  --accent-soft:rgba(34,197,94,.14);
+  --blue:#3b82f6;
+  --blue-soft:rgba(59,130,246,.14);
+  --warn:#facc15;
+  --danger:#fb7185;
+  --text:#ffffff;
+  --muted:rgba(255,255,255,.72);
+  --muted2:rgba(255,255,255,.55);
+  --line:rgba(255,255,255,.10);
+}
 *{box-sizing:border-box}
-body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,#0f172a 0%, #111827 100%);font-family:Arial,Helvetica,sans-serif;color:#fff;padding:20px}
-.wrap{width:min(420px,100%);text-align:center}
-.logo-img{width:120px;height:120px;object-fit:contain;border-radius:28px;margin:0 auto 18px;display:block;box-shadow:0 10px 28px rgba(0,0,0,.30)}
-.title{font-size:28px;font-weight:800;margin-bottom:10px}
-.sub{opacity:.86;line-height:1.45;margin-bottom:18px;font-size:14px}
-button{width:100%;padding:14px 16px;border:none;border-radius:14px;font:inherit;font-weight:700}
-#installBtn{background:#22c55e;color:#0b1220}
-#openLoginBtn{background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.14);margin-top:10px}
-.note{margin-top:12px;font-size:12px;opacity:.8;line-height:1.4}
-.install-helper{margin-top:12px;padding:12px 14px;border-radius:14px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);font-size:12px;line-height:1.45;display:none;text-align:left}
-.install-helper.show{display:block}
-.install-actions{display:grid;grid-template-columns:1fr;gap:10px;margin-top:10px}
-.install-actions button{margin-top:0;padding:12px 14px}
-.steps-list{margin:8px 0 0;padding-left:20px;display:grid;gap:8px}
-.steps-list li{font-size:13px;line-height:1.5}
-.steps-tip{margin-top:10px;padding:10px 12px;border-radius:10px;background:rgba(250,204,21,.12);border:1px solid rgba(250,204,21,.35);font-size:12px;line-height:1.5}
-.os-choice{display:flex;gap:12px;margin-bottom:4px}
-.os-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:8px;padding:18px 10px;border:1px solid rgba(255,255,255,.16);border-radius:16px;background:rgba(255,255,255,.06);color:#fff;font:inherit;font-weight:700;cursor:pointer}
-.os-btn:active{transform:scale(.97)}
-.os-btn svg{width:34px;height:34px}
-.back-link{display:inline-block;margin-top:16px;font-size:13px;color:#8fd9a8;opacity:.9;text-decoration:underline;background:none;border:none;width:auto;padding:4px 8px;font-weight:400}
-.steps{text-align:left;margin:0 0 18px;padding-left:0;list-style:none;font-size:14px;line-height:1.6}
-.steps li{display:flex;gap:10px;margin-bottom:12px}
-.steps .num{flex:0 0 24px;height:24px;border-radius:50%;background:#22c55e;color:#0b1220;font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center}
-.ios-tip{margin:0 0 18px;padding:10px 12px;border-radius:10px;background:rgba(250,204,21,.12);border:1px solid rgba(250,204,21,.35);font-size:12px;line-height:1.5;text-align:left}
-.screen{display:none}
-.screen.active{display:block}
-.hidden{display:none !important}
-.splash .sub{margin-bottom:0}
-.version-debug-badge{position:fixed;right:10px;bottom:10px;z-index:2147483647;padding:6px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.14);background:rgba(15,23,42,.88);color:#fff;font-size:11px;font-weight:700;letter-spacing:.2px;opacity:.95}
-
+html{scroll-behavior:smooth}
+body{
+  margin:0;min-height:100vh;
+  background:
+    radial-gradient(1000px 500px at 85% -10%, rgba(59,130,246,.18), transparent 60%),
+    radial-gradient(900px 480px at -10% 25%, rgba(34,197,94,.10), transparent 55%),
+    linear-gradient(180deg,#0f172a 0%, #111827 100%);
+  font-family:Arial,Helvetica,sans-serif;color:var(--text);
+}
 body.boot-lock #bootWrap{visibility:hidden}
 body.boot-lock{background:linear-gradient(180deg,#0f172a 0%, #111827 100%)}
 body.boot-ready #bootWrap{visibility:visible}
+.hidden{display:none !important}
+
+/* ===== splash (app instalado abrindo) ===== */
+.boot-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.wrap{width:min(420px,100%);text-align:center}
+.logo-img{width:120px;height:120px;object-fit:contain;border-radius:28px;margin:0 auto 18px;display:block;box-shadow:0 10px 28px rgba(0,0,0,.30)}
+.title{font-size:28px;font-weight:800;margin-bottom:10px}
+.sub{opacity:.86;line-height:1.45;margin-bottom:0;font-size:14px}
+
+/* ===== site de instalação ===== */
+.site{display:none}
+.site.show{display:block}
+.container{width:min(1060px,100%);margin:0 auto;padding:0 20px}
+
+.hero{padding:52px 0 34px;text-align:center;position:relative;overflow:hidden}
+.hero .logo-img{width:96px;height:96px;margin-bottom:16px}
+.badge-beta{display:inline-block;padding:5px 12px;border-radius:999px;font-size:11px;font-weight:700;letter-spacing:.6px;
+  background:var(--blue-soft);border:1px solid rgba(59,130,246,.35);color:#93c5fd;margin-bottom:14px;text-transform:uppercase}
+h1{font-size:clamp(30px,6vw,44px);font-weight:800;margin:0 0 12px;line-height:1.12}
+h1 .grad{background:linear-gradient(90deg,#22c55e,#3b82f6);-webkit-background-clip:text;background-clip:text;color:transparent}
+.lead{font-size:clamp(15px,2.4vw,18px);color:var(--muted);max-width:620px;margin:0 auto 26px;line-height:1.55}
+
+button{font:inherit}
+.btn-install{
+  display:inline-block;width:min(360px,100%);padding:16px 20px;border:none;border-radius:14px;
+  background:linear-gradient(135deg,#22c55e,#16a34a);color:#0b1220;font-weight:800;font-size:16px;cursor:pointer;
+  box-shadow:0 8px 26px rgba(34,197,94,.35);transition:transform .15s ease, box-shadow .15s ease;
+}
+.btn-install:active{transform:scale(.98)}
+.note{margin-top:12px;font-size:12px;color:var(--muted2);line-height:1.4}
+.install-helper{width:min(360px,100%);margin:12px auto 0;padding:12px 14px;border-radius:14px;background:rgba(255,255,255,.06);
+  border:1px solid var(--line);font-size:12px;line-height:1.45;display:none;text-align:left}
+.install-helper.show{display:block}
+.install-actions{display:grid;grid-template-columns:1fr;gap:10px;margin-top:10px}
+.install-actions button{padding:12px 14px;border:none;border-radius:12px;background:rgba(255,255,255,.10);color:#fff;font-weight:700;cursor:pointer}
+
+.hero-stats{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:30px}
+.chip{padding:8px 14px;border-radius:999px;background:var(--card-soft);border:1px solid var(--line);font-size:12.5px;color:var(--muted)}
+.chip b{color:var(--text)}
+
+/* ===== seções de funcionalidades ===== */
+.features{padding:26px 0 10px}
+.sec-head{text-align:center;margin:26px 0 8px}
+.sec-head h2{font-size:clamp(22px,4.2vw,30px);margin:0 0 8px;font-weight:800}
+.sec-head p{color:var(--muted);margin:0 auto;max-width:560px;font-size:14.5px;line-height:1.55}
+
+.feature{
+  display:grid;grid-template-columns:1fr 1fr;gap:34px;align-items:center;
+  padding:42px 0;border-bottom:1px solid var(--line);
+}
+.feature:last-of-type{border-bottom:none}
+.feature.flip .f-text{order:2}
+.feature.flip .f-shot{order:1}
+@media (max-width:760px){
+  .feature{grid-template-columns:1fr;gap:22px;padding:34px 0}
+  .feature.flip .f-text{order:1}
+  .feature.flip .f-shot{order:2}
+}
+.f-eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;
+  color:#86efac;margin-bottom:10px}
+.f-eyebrow.blue{color:#93c5fd}
+.f-eyebrow.warnc{color:#fde047}
+.f-eyebrow .dot{width:8px;height:8px;border-radius:50%;background:currentColor;box-shadow:0 0 10px currentColor}
+.f-text h3{font-size:clamp(19px,3.4vw,24px);margin:0 0 10px;font-weight:800}
+.f-text p{color:var(--muted);line-height:1.6;font-size:14.5px;margin:0 0 12px}
+.f-list{list-style:none;padding:0;margin:0}
+.f-list li{position:relative;padding-left:24px;margin-bottom:8px;color:var(--muted);font-size:13.5px;line-height:1.5}
+.f-list li::before{content:"";position:absolute;left:0;top:6px;width:12px;height:12px;border-radius:4px;background:var(--accent-soft);
+  border:1.5px solid var(--accent)}
+.f-list.bluel li::before{background:var(--blue-soft);border-color:var(--blue)}
+
+/* ===== mockup de celular ===== */
+.f-shot{display:flex;justify-content:center}
+.phone{
+  width:min(290px,86vw);border-radius:34px;padding:12px;background:#0b1220;
+  border:1px solid rgba(255,255,255,.12);
+  box-shadow:0 24px 60px rgba(0,0,0,.5), 0 0 0 6px rgba(255,255,255,.03), 0 0 60px rgba(59,130,246,.10);
+}
+.screen{border-radius:24px;overflow:hidden;background:var(--bg);border:1px solid rgba(255,255,255,.06)}
+.statusbar{display:flex;justify-content:space-between;padding:8px 14px 6px;font-size:9.5px;color:var(--muted2)}
+.appbar{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:rgba(255,255,255,.03);border-bottom:1px solid var(--line)}
+.appbar .brand{font-size:12px;font-weight:800;letter-spacing:.3px}
+.appbar .burger{width:16px;display:grid;gap:3px}
+.appbar .burger span{height:2px;border-radius:2px;background:var(--muted)}
+.scr-body{padding:12px;display:grid;gap:10px}
+.mcard{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:11px 12px}
+.mcard.glow{border-color:rgba(34,197,94,.55);box-shadow:0 0 18px rgba(34,197,94,.22), inset 0 0 12px rgba(34,197,94,.06)}
+.mrow{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.mlabel{font-size:9.5px;color:var(--muted2);text-transform:uppercase;letter-spacing:.4px;font-weight:700}
+.mtitle{font-size:11px;font-weight:800}
+.mval{font-size:17px;font-weight:800}
+.mval.green{color:#4ade80}
+.mval.red{color:var(--danger)}
+.msub{font-size:9.5px;color:var(--muted2);margin-top:2px}
+.mbtn{border:none;border-radius:9px;padding:7px 10px;font-size:10px;font-weight:800;color:#0b1220;background:var(--accent)}
+.mbtn.blue{background:var(--blue);color:#fff}
+.mbtn.ghost{background:rgba(255,255,255,.08);color:#fff;border:1px solid var(--line)}
+.mbtn.red{background:var(--danger);color:#0b1220}
+.mtag{font-size:8.5px;font-weight:800;padding:3px 7px;border-radius:999px}
+.mtag.g{background:var(--accent-soft);color:#86efac}
+.mtag.b{background:var(--blue-soft);color:#93c5fd}
+.mtag.y{background:rgba(250,204,21,.14);color:#fde047}
+.mtag.r{background:rgba(251,113,133,.14);color:#fda4af}
+.mbar{height:7px;border-radius:999px;background:var(--input);overflow:hidden;margin-top:7px}
+.mbar i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,#22c55e,#4ade80)}
+.mtabs{display:flex;gap:6px}
+.mtab{flex:1;text-align:center;font-size:9px;font-weight:800;padding:7px 4px;border-radius:9px;background:var(--input);color:var(--muted)}
+.mtab.on-g{background:var(--accent);color:#0b1220}
+.mtab.on-r{background:var(--danger);color:#0b1220}
+.mline{display:flex;justify-content:space-between;font-size:10px;padding:6px 0;border-bottom:1px dashed var(--line);color:var(--muted)}
+.mline:last-child{border-bottom:none}
+.mline b{color:var(--text)}
+.mline .neg{color:var(--danger);font-weight:700}
+.mline .pos{color:#4ade80;font-weight:700}
+.minput{background:var(--input);border-radius:9px;padding:8px 10px;font-size:10px;color:var(--muted2);margin-top:6px}
+.mic-wrap{display:flex;justify-content:center;padding:2px 0 6px}
+.mic{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#3b82f6,#06b6d4);display:flex;align-items:center;justify-content:center;
+  box-shadow:0 0 0 5px rgba(59,130,246,.15), 0 0 18px rgba(6,182,212,.35)}
+.mic svg{width:15px;height:15px}
+.fab{position:absolute;right:14px;bottom:16px;width:40px;height:40px;border-radius:50%;background:var(--accent);color:#0b1220;
+  display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;box-shadow:0 6px 18px rgba(34,197,94,.45)}
+.screen-rel{position:relative}
+.mwheel{display:flex;gap:5px;justify-content:center;flex-wrap:wrap}
+.mwheel span{width:26px;height:26px;border-radius:8px;background:var(--input);display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--muted)}
+.mwheel span.sel{background:var(--blue);color:#fff;font-weight:800}
+.theme-strip{display:flex;gap:6px}
+.tsw{flex:1;height:38px;border-radius:10px;border:1px solid var(--line);position:relative;overflow:hidden}
+.tsw i{position:absolute;left:8px;bottom:6px;font-style:normal;font-size:7.5px;font-weight:800;letter-spacing:.3px}
+.tsw.t1{background:#000}.tsw.t1 i{color:#fff}
+.tsw.t2{background:#f7f7f7}.tsw.t2 i{color:#000}
+.tsw.t3{background:#121212}.tsw.t3 i{color:#FFDD00}
+.tsw.t4{background:#FFDD00}.tsw.t4 i{color:#121212}
+
+/* ===== rodapé / CTA final ===== */
+.cta-final{padding:50px 0 40px;text-align:center}
+.cta-final h2{font-size:clamp(22px,4.5vw,30px);margin:0 0 10px;font-weight:800}
+.cta-final p{color:var(--muted);margin:0 0 22px;font-size:14.5px}
+.footer{padding:18px 0 26px;text-align:center;color:var(--muted2);font-size:11.5px;border-top:1px solid var(--line)}
+.version-debug-badge{position:fixed;right:10px;bottom:10px;z-index:2147483647;padding:6px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.14);background:rgba(15,23,42,.88);color:#fff;font-size:11px;font-weight:700;letter-spacing:.2px;opacity:.95}
+
+@media (prefers-reduced-motion: no-preference){
+  .feature .f-shot .phone{transition:transform .25s ease}
+  .feature .f-shot .phone:hover{transform:translateY(-4px)}
+}
 </style>
 <script>
 (function(){
@@ -67,101 +207,340 @@ body.boot-ready #bootWrap{visibility:visible}
 </script>
 </head>
 <body class="boot-lock">
-<div class="wrap splash" id="bootWrap">
-  <img class="logo-img" src="icon-512.png" alt="Logo MetaDriver">
-  <div class="title">MetaDriver</div>
-  <div class="sub" id="subText">Abrindo aplicativo...</div>
+
+<!-- ===== SPLASH: app instalado abrindo ===== -->
+<div class="boot-screen" id="bootScreen">
+  <div class="wrap" id="bootWrap">
+    <img class="logo-img" src="icon-512.png" alt="Logo MetaDriver">
+    <div class="title">MetaDriver</div>
+    <div class="sub" id="subText">Abrindo aplicativo...</div>
+  </div>
 </div>
 
-<div class="wrap hidden" id="installWrap">
-  <img class="logo-img" src="icon-512.png" alt="Logo MetaDriver">
-  <div class="title">MetaDriver</div>
+<!-- ===== SITE DE INSTALAÇÃO ===== -->
+<div class="site" id="installWrap">
 
-  <!-- TELA 1: escolha do sistema -->
-  <div class="screen active" id="screenChoice">
-    <div class="sub">Para usar o MetaDriver da forma correta, instale o aplicativo. Selecione o sistema do seu celular:</div>
-    <div class="os-choice">
-      <button class="os-btn" type="button" id="btnAndroid">
-        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.6 9.48l1.84-3.18a.5.5 0 0 0-.86-.5l-1.86 3.22a8.5 8.5 0 0 0-7.44 0L7.42 5.8a.5.5 0 0 0-.86.5l1.84 3.18A8.45 8.45 0 0 0 4 16.5h16a8.45 8.45 0 0 0-2.4-7.02zM9 13a1 1 0 1 1 0-2 1 1 0 0 1 0 2zm6 0a1 1 0 1 1 0-2 1 1 0 0 1 0 2zM4 18v3a1 1 0 0 0 1 1h1v-4H4zm14 0v4h1a1 1 0 0 0 1-1v-3h-2zM6 18h12v4a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1v-4z"/></svg>
-        Android
-      </button>
-      <button class="os-btn" type="button" id="btnApple">
-        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.36 1.43c.1 1-.3 2-1 2.78-.7.8-1.84 1.42-2.93 1.34-.12-.98.36-2 1.04-2.74.74-.8 1.97-1.4 2.9-1.38zM20.6 17.18c-.3.72-.65 1.4-1.07 2.04-.85 1.3-1.9 2.9-3.26 2.92-1.2.02-1.6-.78-3.06-.78-1.46 0-1.9.76-3.05.8-1.32.04-2.3-1.43-3.16-2.72-1.7-2.6-3.02-7.32-1.26-10.52a4.7 4.7 0 0 1 3.96-2.4c1.18-.02 1.92.78 3.04.78 1.1 0 1.66-.78 3.06-.76 1 .02 2.6.45 3.55 1.93-3.04 1.78-2.55 6.18.25 8.7z"/></svg>
-        Apple
-      </button>
-    </div>
-  </div>
+  <header class="hero container">
+    <img class="logo-img" src="icon-512.png" alt="Logo MetaDriver">
+    <div class="badge-beta">Versão Beta</div>
+    <h1>Você dirige.<br><span class="grad">O MetaDriver cuida dos números.</span></h1>
+    <p class="lead">O aplicativo de controle financeiro feito para motoristas de aplicativo. Ganhos, gastos, metas, combustível e manutenção do carro — tudo em um só lugar, direto no seu celular.</p>
 
-  <!-- TELA 2: instalação Android -->
-  <div class="screen" id="screenAndroid">
-    <div class="sub" id="installSubText">Instale o aplicativo para usar da forma correta.</div>
-    <button id="installBtn" type="button">Instalar aplicativo</button>
-    <div class="note" id="noteText">O uso pelo navegador fica bloqueado. Depois de instalar, abra pelo ícone do app.</div>
+    <button id="installBtn" class="btn-install" type="button">Instalar aplicativo grátis</button>
+    <div class="note" id="noteText">Use o Chrome para instalar o aplicativo.</div>
     <div class="install-helper" id="installHelper">
       <div id="installHelperText">Instalação automática indisponível neste momento.</div>
-      <ol class="steps-list" id="stepsList" style="display:none"></ol>
-      <div class="steps-tip" id="stepsTip" style="display:none"></div>
       <div class="install-actions">
         <button id="showStepsBtn" type="button">Como instalar</button>
       </div>
     </div>
-    <button class="back-link" type="button" data-back>← Escolher outro sistema</button>
-  </div>
 
-  <!-- TELA 3: instrução Apple/iOS -->
-  <div class="screen" id="screenApple">
-    <div class="sub" id="appleSubText">No iPhone/iPad não é possível instalar pelo navegador automaticamente. Siga estes passos no <b>Safari</b>:</div>
-    <ol class="steps" id="appleSteps">
-      <li><span class="num">1</span><span>Toque no ícone Compartilhar (quadrado com seta para cima) na barra inferior do Safari.</span></li>
-      <li><span class="num">2</span><span>Na lista que abrir, toque em "Adicionar à Tela de Início".</span></li>
-      <li><span class="num">3</span><span>Confirme o nome e toque em "Adicionar".</span></li>
-    </ol>
-    <div class="ios-tip" id="appleTip">Não achou "Adicionar à Tela de Início" na lista? Role até o final dela e toque em "Mais" ou "Editar Ações" (ícone "..."). Ative "Adicionar à Tela de Início" nessa lista, toque em "Concluído" e volte para a folha de compartilhamento — a opção vai aparecer.</div>
-    <div class="note">O ícone do MetaDriver vai aparecer na sua tela inicial. Abra sempre por ele, e não mais pelo navegador.</div>
-    <button class="back-link" type="button" data-back>← Escolher outro sistema</button>
-  </div>
+    <div class="hero-stats">
+      <div class="chip"><b>Uber &amp; 99</b> compatível</div>
+      <div class="chip"><b>Lançamento por voz</b> sem tirar a mão do volante</div>
+      <div class="chip"><b>Sincronizado</b> na nuvem</div>
+    </div>
+  </header>
+
+  <main class="features container">
+    <div class="sec-head">
+      <h2>Tudo que o motorista precisa, em um só app</h2>
+      <p>Conheça cada função do MetaDriver antes de instalar.</p>
+    </div>
+
+    <!-- 1. Sessões de trabalho -->
+    <section class="feature">
+      <div class="f-text">
+        <span class="f-eyebrow"><span class="dot"></span>Sessões de trabalho</span>
+        <h3>Comece a rodar e veja seu ganho por hora em tempo real</h3>
+        <p>Inicie uma sessão quando pegar o carro e finalize quando parar. O MetaDriver calcula automaticamente quanto você está ganhando por hora — em verde quando está dentro da sua meta, em vermelho quando está abaixo.</p>
+        <ul class="f-list">
+          <li>Ganho por hora atualizado em tempo real durante a sessão</li>
+          <li>Seletor de horário rápido, feito para usar com poucos toques</li>
+          <li>Várias sessões no mesmo dia, com o dia operacional virando às 4h da manhã</li>
+        </ul>
+      </div>
+      <div class="f-shot">
+        <div class="phone"><div class="screen">
+          <div class="statusbar"><span>21:47</span><span>▲ 4G ▮</span></div>
+          <div class="appbar"><span class="brand">MetaDriver</span><span class="burger"><span></span><span></span><span></span></span></div>
+          <div class="scr-body">
+            <div class="mcard glow">
+              <div class="mrow"><span class="mtitle">Sessão em andamento</span><span class="mtag g">● AO VIVO</span></div>
+              <div class="mrow" style="margin-top:8px">
+                <div><div class="mlabel">Ganho da sessão</div><div class="mval">R$ 187,50</div></div>
+                <div style="text-align:right"><div class="mlabel">R$/hora</div><div class="mval green">R$ 46,80</div></div>
+              </div>
+              <div class="msub">Início: 18:00 · 4h 00min rodando</div>
+            </div>
+            <div class="mcard">
+              <div class="mrow"><span class="mtitle">Iniciar sessão</span></div>
+              <div class="mwheel" style="margin-top:8px">
+                <span>16</span><span>17</span><span class="sel">18</span><span>19</span><span>20</span>
+                <span>00</span><span class="sel">00</span><span>15</span><span>30</span><span>45</span>
+              </div>
+            </div>
+            <div class="mrow" style="gap:8px">
+              <button class="mbtn" style="flex:1">Iniciar sessão</button>
+              <button class="mbtn ghost" style="flex:1">Finalizar sessão</button>
+            </div>
+          </div>
+        </div></div>
+      </div>
+    </section>
+
+    <!-- 2. Metas -->
+    <section class="feature flip">
+      <div class="f-text">
+        <span class="f-eyebrow blue"><span class="dot"></span>Metas</span>
+        <h3>Defina sua meta e saiba exatamente quanto falta</h3>
+        <p>Configure quanto quer ganhar, até quando, e quais dias não vai trabalhar. O app calcula sozinho sua meta diária e o tempo de trabalho necessário para batê-la — e recalcula todo dia conforme seu progresso.</p>
+        <ul class="f-list bluel">
+          <li>Meta diária automática com base no período e nos dias de folga</li>
+          <li>Tempo estimado para bater a meta do dia, no seu ritmo de R$/hora</li>
+          <li>Várias metas ao mesmo tempo, com progresso individual</li>
+        </ul>
+      </div>
+      <div class="f-shot">
+        <div class="phone"><div class="screen">
+          <div class="statusbar"><span>07:12</span><span>▲ 4G ▮</span></div>
+          <div class="appbar"><span class="brand">Configurar Meta</span><span class="burger"><span></span><span></span><span></span></span></div>
+          <div class="scr-body">
+            <div class="mcard">
+              <div class="mrow"><span class="mtitle">Meta do mês</span><span class="mtag b">18 dias restantes</span></div>
+              <div class="mrow" style="margin-top:8px">
+                <div><div class="mlabel">Objetivo</div><div class="mval">R$ 6.000,00</div></div>
+                <div style="text-align:right"><div class="mlabel">Alcançado</div><div class="mval green">R$ 3.420,00</div></div>
+              </div>
+              <div class="mbar"><i style="width:57%"></i></div>
+              <div class="msub">57% concluído</div>
+            </div>
+            <div class="mcard">
+              <div class="mline"><span>Meta diária (automática)</span><b>R$ 143,33</b></div>
+              <div class="mline"><span>Ganho por hora (meta)</span><b>R$ 40,00</b></div>
+              <div class="mline"><span>Tempo p/ meta diária</span><b>3h 35min</b></div>
+              <div class="mline"><span>Dias não trabalhados</span><b>Domingos</b></div>
+            </div>
+            <button class="mbtn blue" style="width:100%">+ Adicionar meta</button>
+          </div>
+        </div></div>
+      </div>
+    </section>
+
+    <!-- 3. Lançamentos + voz -->
+    <section class="feature">
+      <div class="f-text">
+        <span class="f-eyebrow"><span class="dot"></span>Lançamentos</span>
+        <h3>Registre ganhos e gastos falando com o app</h3>
+        <p>Ganhos, gastos, retiradas e combustível organizados em abas. E o melhor: com o lançamento por voz, basta falar — "gastei 30 reais de estacionamento" — que o app entende, preenche os campos e você só confirma.</p>
+        <ul class="f-list">
+          <li>4 categorias: Ganhos, Gastos, Retiradas e Combustível</li>
+          <li>Lançamento por voz em português, feito para usar no trânsito</li>
+          <li>Entende frases naturais e valores falados por extenso</li>
+        </ul>
+      </div>
+      <div class="f-shot">
+        <div class="phone"><div class="screen">
+          <div class="statusbar"><span>14:33</span><span>▲ 4G ▮</span></div>
+          <div class="appbar"><span class="brand">Lançamentos</span><span class="burger"><span></span><span></span><span></span></span></div>
+          <div class="scr-body">
+            <div class="mic-wrap"><span class="mic">
+              <svg viewBox="0 0 24 24" fill="none"><rect x="9" y="3" width="6" height="11" rx="3" fill="#fff"/><path d="M5 11a7 7 0 0 0 14 0" stroke="#fff" stroke-width="2" stroke-linecap="round"/><path d="M12 18v3" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
+            </span></div>
+            <div class="mtabs">
+              <span class="mtab on-g">Ganhos</span><span class="mtab">Gastos</span><span class="mtab">Retiradas</span><span class="mtab">Combustível</span>
+            </div>
+            <div class="mcard">
+              <div class="mlabel">Ouvindo…</div>
+              <div class="minput">"gastei trinta reais de estacionamento"</div>
+              <div class="mline" style="margin-top:8px"><span>Categoria</span><b>Gasto</b></div>
+              <div class="mline"><span>Descrição</span><b>Estacionamento</b></div>
+              <div class="mline"><span>Valor</span><span class="neg">R$ 30,00</span></div>
+            </div>
+            <button class="mbtn" style="width:100%">Salvar gasto</button>
+          </div>
+        </div></div>
+      </div>
+    </section>
+
+    <!-- 4. Relatório diário e histórico -->
+    <section class="feature flip">
+      <div class="f-text">
+        <span class="f-eyebrow blue"><span class="dot"></span>Relatórios e histórico</span>
+        <h3>Seu dia fechado, seu mês na palma da mão</h3>
+        <p>Relatório diário com todas as sessões e lançamentos do dia, e um histórico detalhado por data — só os dias em que você realmente trabalhou. Exporte tudo em PDF quando precisar.</p>
+        <ul class="f-list bluel">
+          <li>Relatório diário com ganho líquido, sessões e lançamentos</li>
+          <li>Histórico por dia, com edição de valores e horários</li>
+          <li>Exportação de relatório em PDF e backup completo dos dados</li>
+        </ul>
+      </div>
+      <div class="f-shot">
+        <div class="phone"><div class="screen">
+          <div class="statusbar"><span>23:58</span><span>▲ 4G ▮</span></div>
+          <div class="appbar"><span class="brand">Relatório Diário</span><span class="burger"><span></span><span></span><span></span></span></div>
+          <div class="scr-body">
+            <div class="mcard">
+              <div class="mrow"><span class="mtitle">Hoje · 03/07</span><span class="mtag g">Dia finalizado</span></div>
+              <div class="mrow" style="margin-top:8px">
+                <div><div class="mlabel">Ganho bruto</div><div class="mval">R$ 312,00</div></div>
+                <div style="text-align:right"><div class="mlabel">Líquido</div><div class="mval green">R$ 246,50</div></div>
+              </div>
+            </div>
+            <div class="mcard">
+              <div class="mline"><span>Sessão 06:10 – 11:40</span><span class="pos">+ R$ 178,00</span></div>
+              <div class="mline"><span>Sessão 17:00 – 21:30</span><span class="pos">+ R$ 134,00</span></div>
+              <div class="mline"><span>Combustível</span><span class="neg">− R$ 55,50</span></div>
+              <div class="mline"><span>Estacionamento</span><span class="neg">− R$ 10,00</span></div>
+            </div>
+            <button class="mbtn ghost" style="width:100%">Exportar relatório (PDF)</button>
+          </div>
+        </div></div>
+      </div>
+    </section>
+
+    <!-- 5. Manutenção do carro -->
+    <section class="feature">
+      <div class="f-text">
+        <span class="f-eyebrow warnc"><span class="dot"></span>Manutenção do carro</span>
+        <h3>Seu carro é sua ferramenta. O app avisa antes de virar prejuízo</h3>
+        <p>Cadastre as manutenções do carro por quilometragem — troca de óleo, pneus, revisão — e mantenha o KM atual em dia. Quando chegar a hora, o MetaDriver avisa na tela para você não deixar passar.</p>
+        <ul class="f-list">
+          <li>Alertas automáticos quando o KM da manutenção chega</li>
+          <li>Registro de data e valor gasto em cada manutenção concluída</li>
+          <li>Controle de combustível separado, com histórico de abastecimentos</li>
+        </ul>
+      </div>
+      <div class="f-shot">
+        <div class="phone"><div class="screen">
+          <div class="statusbar"><span>09:20</span><span>▲ 4G ▮</span></div>
+          <div class="appbar"><span class="brand">Manutenção do carro</span><span class="burger"><span></span><span></span><span></span></span></div>
+          <div class="scr-body">
+            <div class="mcard">
+              <div class="mlabel">KM atual do carro</div>
+              <div class="mval">87.450 km</div>
+            </div>
+            <div class="mcard" style="border-color:rgba(250,204,21,.5)">
+              <div class="mrow"><span class="mtitle">⚠️ Troca de óleo</span><span class="mtag y">Na hora!</span></div>
+              <div class="msub">Programada para 87.000 km</div>
+              <div class="mrow" style="margin-top:8px;gap:8px">
+                <button class="mbtn" style="flex:1">Concluir</button>
+                <button class="mbtn ghost" style="flex:1">Lembrar depois</button>
+              </div>
+            </div>
+            <div class="mcard">
+              <div class="mline"><span>Pneus dianteiros</span><b>92.000 km</b></div>
+              <div class="mline"><span>Revisão completa</span><b>95.000 km</b></div>
+              <div class="mline"><span>Filtro de ar</span><b>90.000 km</b></div>
+            </div>
+          </div>
+        </div></div>
+      </div>
+    </section>
+
+    <!-- 6. Saldo rápido Uber/99 -->
+    <section class="feature flip">
+      <div class="f-text">
+        <span class="f-eyebrow"><span class="dot"></span>Saldo rápido</span>
+        <h3>Atualize seu saldo entre uma corrida e outra</h3>
+        <p>Um botão flutuante abre o painel de saldo atual: você digita o valor que está vendo no app da Uber ou da 99 e pronto — o MetaDriver calcula o ganho da sessão sozinho, descontando o que já tinha antes.</p>
+        <ul class="f-list">
+          <li>Botão flutuante sempre à mão, sem navegar por menus</li>
+          <li>Teclado numérico grande, feito para o carro</li>
+          <li>Atalhos Uber e 99 para alternar rapidamente entre plataformas</li>
+        </ul>
+      </div>
+      <div class="f-shot">
+        <div class="phone"><div class="screen screen-rel">
+          <div class="statusbar"><span>19:05</span><span>▲ 4G ▮</span></div>
+          <div class="appbar"><span class="brand">Saldo atual</span><span class="burger"><span></span><span></span><span></span></span></div>
+          <div class="scr-body">
+            <div class="mcard glow" style="text-align:center">
+              <div class="mlabel">Saldo atual</div>
+              <div class="mval" style="font-size:22px">R$ 214,70</div>
+            </div>
+            <div class="mrow" style="gap:8px">
+              <button class="mbtn" style="flex:1;background:#000;color:#fff;border:1px solid rgba(255,255,255,.25)">Uber</button>
+              <button class="mbtn" style="flex:1;background:#FFDD00;color:#121212">99</button>
+            </div>
+            <div class="mwheel">
+              <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
+              <span>6</span><span>7</span><span>8</span><span>9</span><span class="sel">0</span>
+            </div>
+            <div class="fab">R$</div>
+          </div>
+        </div></div>
+      </div>
+    </section>
+
+    <!-- 7. Temas + conta/nuvem -->
+    <section class="feature">
+      <div class="f-text">
+        <span class="f-eyebrow blue"><span class="dot"></span>Do seu jeito, sempre seguro</span>
+        <h3>Temas Uber e 99, dados sincronizados na nuvem</h3>
+        <p>Escolha entre 4 temas visuais — incluindo os estilos das cores oficiais da Uber e da 99, em versão clara e escura. E fique tranquilo: seus dados são salvos na nuvem e protegidos por conta com login, cada motorista com seus próprios dados.</p>
+        <ul class="f-list bluel">
+          <li>4 temas: Preto Profissional e Amarelo Dinâmico, claros e escuros</li>
+          <li>Sincronização automática na nuvem — trocou de celular, seus dados vão junto</li>
+          <li>Backup e restauração completos com um toque</li>
+        </ul>
+      </div>
+      <div class="f-shot">
+        <div class="phone"><div class="screen">
+          <div class="statusbar"><span>12:00</span><span>▲ 4G ▮</span></div>
+          <div class="appbar"><span class="brand">Temas</span><span class="burger"><span></span><span></span><span></span></span></div>
+          <div class="scr-body">
+            <div class="mcard">
+              <div class="mtitle" style="margin-bottom:8px">Escolha seu tema</div>
+              <div class="theme-strip">
+                <div class="tsw t1"><i>PRETO ESCURO</i></div>
+                <div class="tsw t2"><i>PRETO CLARO</i></div>
+              </div>
+              <div class="theme-strip" style="margin-top:6px">
+                <div class="tsw t3"><i>AMARELO ESCURO</i></div>
+                <div class="tsw t4"><i>AMARELO CLARO</i></div>
+              </div>
+            </div>
+            <div class="mcard">
+              <div class="mline"><span>Sincronização</span><span class="pos">● Conectado</span></div>
+              <div class="mline"><span>Último backup</span><b>Hoje, 11:42</b></div>
+              <div class="mline"><span>Conta</span><b>Protegida por login</b></div>
+            </div>
+            <button class="mbtn blue" style="width:100%">Exportar / Backup</button>
+          </div>
+        </div></div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- CTA final -->
+  <section class="cta-final container">
+    <h2>Pronto para saber quanto você realmente ganha?</h2>
+    <p>Instale grátis agora e comece a controlar seus números na próxima corrida.</p>
+    <button id="installBtnBottom" class="btn-install" type="button">Instalar aplicativo grátis</button>
+  </section>
+
+  <footer class="footer container">
+    MetaDriver · Feito para motoristas de aplicativo · Uber e 99 são marcas de seus respectivos donos.
+  </footer>
 </div>
 
-<div class="version-debug-badge">MetaDriver vBeta1.50 · boot</div>
+<div class="version-debug-badge">MetaDriver vBeta1.49 · boot</div>
 
 <script>
 (function(){
   var deferredPrompt = null;
-  var bootWrap = document.getElementById('bootWrap');
+  var bootScreen = document.getElementById('bootScreen');
   var installWrap = document.getElementById('installWrap');
   var subText = document.getElementById('subText');
-  var installSubText = document.getElementById('installSubText');
   var noteText = document.getElementById('noteText');
   var installHelper = document.getElementById('installHelper');
   var installHelperText = document.getElementById('installHelperText');
-  var stepsList = document.getElementById('stepsList');
-  var stepsTip = document.getElementById('stepsTip');
 
   function isIOS(){ return /iphone|ipad|ipod/i.test(navigator.userAgent); }
   function isSafari(){ return /^((?!chrome|android).)*safari/i.test(navigator.userAgent); }
-  function isChromeIOS(){ return isIOS() && /crios/i.test(navigator.userAgent); }
-  function isFirefoxIOS(){ return isIOS() && /fxios/i.test(navigator.userAgent); }
-  function isEdgeIOS(){ return isIOS() && /edgios/i.test(navigator.userAgent); }
   function isStandalone(){ return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true; }
-  // v.Beta1.50 - iPhone: desde o iOS 16.4, "Adicionar à Tela de Início" funciona em qualquer navegador
-  // (Chrome, Firefox, Edge), não só no Safari. Cada um só muda ONDE fica o botão Compartilhar.
-  // Tela de escolha do sistema (Android/Apple) no mesmo formato usado no Nautilus.
-  function iosShareSteps(){
-    if (isChromeIOS()) return ['Toque no menu ⋮ (três pontos) no canto superior direito do Chrome.', 'Toque em "Compartilhar".', 'Na lista que abrir, toque em "Adicionar à Tela de Início".', 'Confirme o nome e toque em "Adicionar".'];
-    if (isFirefoxIOS()) return ['Toque no menu ≡ na parte de baixo do Firefox.', 'Toque em "Compartilhar".', 'Na lista que abrir, toque em "Adicionar à Tela de Início".', 'Confirme o nome e toque em "Adicionar".'];
-    if (isEdgeIOS()) return ['Toque no ícone "..." na parte de baixo do Edge.', 'Toque em "Compartilhar".', 'Na lista que abrir, toque em "Adicionar à Tela de Início".', 'Confirme o nome e toque em "Adicionar".'];
-    return ['Toque no ícone Compartilhar (quadrado com seta para cima) na barra inferior do Safari.', 'Na lista que abrir, toque em "Adicionar à Tela de Início".', 'Confirme o nome e toque em "Adicionar".'];
-  }
-  function iosBrowserName(){
-    if (isChromeIOS()) return 'Chrome';
-    if (isFirefoxIOS()) return 'Firefox';
-    if (isEdgeIOS()) return 'Edge';
-    return 'Safari';
-  }
-  var IOS_SHARE_TIP = 'Não achou "Adicionar à Tela de Início" na lista? Role até o final dela e toque em "Mais" ou "Editar Ações" (ícone "..."). Ative "Adicionar à Tela de Início" nessa lista, toque em "Concluído" e volte para a folha de compartilhamento — a opção vai aparecer.';
-  function androidChromeSteps(){
-    return ['Toque no menu ⋮ (três pontos) no canto superior direito do Chrome.', 'Toque em "Instalar aplicativo" ou "Adicionar à tela inicial".', 'Confirme tocando em "Instalar".'];
-  }
   function hasSavedSession(){
     try{
       return !!(localStorage.getItem('sb_token') || localStorage.getItem('sb_refresh_token') || localStorage.getItem('supabase.auth.token'));
@@ -169,64 +548,19 @@ body.boot-ready #bootWrap{visibility:visible}
   }
   function go(url){ window.location.replace(url); }
   function showInstall(){
-    bootWrap.classList.add('hidden');
-    installWrap.classList.remove('hidden');
+    bootScreen.classList.add('hidden');
+    installWrap.classList.add('show');
   }
-  function renderSteps(list, container){
-    container.innerHTML = '';
-    list.forEach(function(txt){
-      var li = document.createElement('li');
-      li.textContent = txt;
-      container.appendChild(li);
-    });
-    container.style.display = list.length ? 'grid' : 'none';
-  }
-  function showHelper(message, steps, tip){
+  function showHelper(message){
     if(message) installHelperText.textContent = message;
-    if (steps && steps.length) {
-      renderSteps(steps, stepsList);
-    } else {
-      stepsList.style.display = 'none';
-    }
-    if (tip) {
-      stepsTip.textContent = tip;
-      stepsTip.style.display = 'block';
-    } else {
-      stepsTip.style.display = 'none';
-    }
     installHelper.classList.add('show');
   }
   function showManualSteps(){
-    if (isIOS()) {
-      showHelper('Como instalar no iPhone:', iosShareSteps(), IOS_SHARE_TIP);
-    } else {
-      showHelper('Como instalar no Android:', androidChromeSteps(), null);
-    }
+    var steps = (isIOS() && isSafari())
+      ? 'No iPhone: Compartilhar → Adicionar à Tela de Início. Depois abra o ícone instalado.'
+      : 'No Chrome Android: menu ⋮ → Instalar aplicativo ou Adicionar à tela inicial.';
+    alert(steps);
   }
-
-  function renderAppleScreen(){
-    document.getElementById('appleSubText').innerHTML = 'No iPhone/iPad não é possível instalar pelo navegador automaticamente. Siga estes passos no <b>' + iosBrowserName() + '</b>:';
-    var ol = document.getElementById('appleSteps');
-    ol.innerHTML = '';
-    iosShareSteps().forEach(function(txt, i){
-      var li = document.createElement('li');
-      li.innerHTML = '<span class="num">' + (i+1) + '</span><span>' + txt + '</span>';
-      ol.appendChild(li);
-    });
-    document.getElementById('appleTip').textContent = IOS_SHARE_TIP;
-  }
-
-  function showScreen(id){
-    document.querySelectorAll('.screen').forEach(function(el){ el.classList.remove('active'); });
-    if (id === 'screenApple') renderAppleScreen();
-    document.getElementById(id).classList.add('active');
-  }
-
-  document.getElementById('btnAndroid').addEventListener('click', function(){ showScreen('screenAndroid'); });
-  document.getElementById('btnApple').addEventListener('click', function(){ showScreen('screenApple'); });
-  document.querySelectorAll('[data-back]').forEach(function(btn){
-    btn.addEventListener('click', function(){ showScreen('screenChoice'); });
-  });
 
   window.addEventListener('beforeinstallprompt', function(e){
     e.preventDefault();
@@ -236,30 +570,38 @@ body.boot-ready #bootWrap{visibility:visible}
   window.addEventListener('appinstalled', function(){
     deferredPrompt = null;
     try{
-      installSubText.textContent = 'Aplicativo instalado com sucesso. Abra o app instalado para entrar.';
-      noteText.textContent = 'Depois de instalar, use o ícone do MetaDriver na tela inicial.';
+      noteText.textContent = 'Aplicativo instalado com sucesso! Use o ícone do MetaDriver na tela inicial.';
       document.getElementById('installBtn').style.display = 'none';
+      var b2 = document.getElementById('installBtnBottom');
+      if(b2) b2.style.display = 'none';
     }catch(e){}
   });
 
-  document.getElementById('installBtn').addEventListener('click', async function(){
+  async function handleInstallClick(){
     if (deferredPrompt) {
       deferredPrompt.prompt();
       try { await deferredPrompt.userChoice; } catch(e) {}
       return;
     }
-    if (isIOS()) {
-      showScreen('screenApple');
+    if (isIOS() && isSafari()) {
+      noteText.textContent = 'No iPhone, instale pelo menu Compartilhar do Safari e depois “Adicionar à Tela de Início”.';
+      showHelper('No iPhone/Safari a instalação é manual pelo menu Compartilhar.');
+      try{ window.scrollTo({top:0, behavior:'smooth'}); }catch(e){ window.scrollTo(0,0); }
       return;
     }
-    showHelper('Instalação automática indisponível neste momento.', androidChromeSteps(), null);
-  }, true);
+    showHelper('Instalação automática indisponível neste momento.');
+    try{ window.scrollTo({top:0, behavior:'smooth'}); }catch(e){ window.scrollTo(0,0); }
+  }
+
+  document.getElementById('installBtn').addEventListener('click', handleInstallClick, true);
+  var btnBottom = document.getElementById('installBtnBottom');
+  if(btnBottom) btnBottom.addEventListener('click', handleInstallClick, true);
 
   document.getElementById('showStepsBtn').addEventListener('click', showManualSteps, true);
 
   // Fluxo correto:
   // - app instalado: abre direto no app se houver sessão; senão vai pro login
-  // - navegador comum: mostra tela de escolha do sistema
+  // - navegador comum: mostra o site de instalação
   if (isStandalone()) {
     subText.textContent = 'Verificando sessão...';
     setTimeout(function(){

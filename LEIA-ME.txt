@@ -1,34 +1,17 @@
-MetaDriver vBeta1.50
-
-Solicitado:
-- Refazer a tela de instalação do MetaDriver no mesmo formato usado no Nautilus, com uma tela de escolha manual entre "Android" e "Apple".
-
-Feito:
-- Tela 1 nova: escolha do sistema, com os dois botões (Android/Apple) e ícones, igual ao Nautilus.
-- Tela 2 (Android): mantém o botão "Instalar aplicativo" com o prompt nativo do navegador e o painel de passos manuais como fallback; agora com link "← Escolher outro sistema".
-- Tela 3 (Apple): passo a passo numerado com círculos, detectando o navegador real (Safari/Chrome/Firefox/Edge) e mostrando os passos certos, com a dica de "Mais"/"Editar Ações"; também com link "← Escolher outro sistema".
-- Mantida intacta toda a lógica de sessão/redirecionamento e o registro do service worker.
-
-Status atual:
-- Pronto para teste. Testar a navegação entre as 3 telas (escolher Android, escolher Apple, voltar em cada uma) e, no iPhone, testar pelo Chrome e Safari para confirmar que a Tela 3 mostra o navegador certo.
-
 MetaDriver vBeta1.49
 
 Solicitado:
-- Aplicar no MetaDriver a mesma correção da tela de instalação já feita no app Nautilus: iPhone com Chrome (em vez de Safari) não recebia nenhuma instrução válida, e a explicação em geral era fraca.
-
-Investigação:
-- Confirmado que o código só reconhecia "iPhone + Safari" como caso válido para mostrar instruções manuais. Qualquer outro navegador no iPhone (Chrome, Firefox, Edge) caía numa mensagem genérica de "instalação indisponível".
-- Verificado que, desde o iOS 16.4, "Adicionar à Tela de Início" funciona em qualquer navegador do iPhone, não só no Safari — só muda onde fica o botão Compartilhar em cada um.
-- Verificado que o iOS às vezes esconde a ação "Adicionar à Tela de Início" atrás de "Mais"/"Editar Ações" na folha de compartilhamento, quando ela nunca foi usada antes naquele app.
+- Transformar a tela de instalação (index.html) em um site completo de apresentação do app, explicando cada função com uma imagem de cada menu, voltado para qualquer motorista interessado — visual mais bonito, tecnológico e agradável para motoristas de aplicativo.
 
 Feito:
-- A tela de instalação agora detecta iPhone de forma geral e mostra os passos certos para cada navegador (Safari, Chrome, Firefox, Edge) e também para Android.
-- As instruções agora aparecem como lista numerada de passos direto na tela (em vez de alert), com um aviso destacado explicando o caminho "Mais"/"Editar Ações" para quando a opção não aparece de primeira.
-- Correção aplicada tanto no botão "Instalar aplicativo" quanto no link "Como instalar".
+- A tela de instalação agora é uma página de apresentação completa: título de impacto, botão de instalar em destaque no topo e no final, e 7 seções explicando cada função do app (Sessões de trabalho, Metas, Lançamentos com voz, Relatórios e histórico, Manutenção do carro, Saldo rápido Uber/99, Temas e nuvem).
+- Cada seção tem uma "imagem" do menu correspondente: em vez de capturas de tela (que ficariam borradas), as telas foram recriadas como mockups de celular direto no código da página — sempre nítidas em qualquer tamanho de tela, e usando as mesmas cores e elementos reais do app.
+- Identidade visual mantida e refinada: mesmo fundo azul-escuro e verde do app, com brilhos suaves de fundo, botão de instalar com gradiente verde e selo "Versão Beta".
+- Toda a lógica original de instalação foi preservada intacta: prompt de instalação do Chrome, instruções manuais para iPhone/Safari, redirecionamento automático quando o app já está instalado (sessão salva → app; sem sessão → login), e a tela de abertura (splash) para o app instalado.
+- Versão atualizada para vBeta1.49 nos 6 arquivos HTML, manifest.json e no cache do service worker (sw.js), de forma consistente.
 
 Status atual:
-- Pronto para teste. Testar no iPhone abrindo o link pelo Chrome e Safari (e Firefox/Edge se possível), conferindo se os passos batem com o navegador usado e se o aviso de fallback aparece corretamente.
+- Pronto para teste. Abra o endereço do app em um navegador comum (não instalado) e confira o novo site de apresentação. O app instalado continua abrindo normalmente direto na tela de abertura.
 
 MetaDriver vBeta1.47
 

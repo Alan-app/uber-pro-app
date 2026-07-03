@@ -1,21 +1,16 @@
-vBeta1.50 - MELHORIA: tela de instalação refeita no mesmo formato do Nautilus, com escolha manual do sistema (Android/Apple)
-- Solicitado: deixar a tela de instalação do MetaDriver igual à do Nautilus — uma tela inicial pedindo para o usuário escolher entre "Android" e "Apple", em vez de detectar tudo automaticamente num único botão.
-- Feito: a tela de instalação agora tem 3 telas, como no Nautilus — Tela 1 (escolha do sistema, com os dois botões e ícones), Tela 2 (Android: botão "Instalar aplicativo" com o prompt nativo do navegador, e o painel de passos manuais como fallback) e Tela 3 (Apple: passo a passo numerado, com os círculos amarelos/verdes e a dica de "Mais"/"Editar Ações"). Ambas as telas 2 e 3 têm um link "← Escolher outro sistema" para voltar à Tela 1.
-- Mantida toda a lógica já corrigida na vBeta1.49: detecção de Safari, Chrome, Firefox e Edge no iPhone, passos certos para cada navegador, e o aviso de fallback do "Mais"/"Editar Ações".
-- Mantida intacta a lógica de sessão/redirecionamento (app instalado abre direto no app ou no login, dependendo se há sessão salva) e o registro do service worker — nada disso foi alterado.
-- Nenhuma outra tela ou fluxo do app foi tocada (mudança isolada em index.html, tela de instalação).
-- Validação: sintaxe JS de index.html validada (node --check); confirmado visualmente que a Tela 1 mostra os dois botões, que cada um leva à tela certa, que o link de voltar funciona nas duas telas seguintes, e que a Tela 3 mostra o navegador certo (Safari/Chrome/Firefox/Edge) simulando cada user agent.
-- Base oficial: vBeta1.49.
+vBeta1.49 - NOVO: tela de instalação virou um site completo de apresentação do app
+- A tela de instalação (index.html) agora apresenta o MetaDriver para qualquer motorista interessado: título de impacto, botão "Instalar aplicativo grátis" no topo e no final, e 7 seções explicando cada função (Sessões, Metas, Lançamentos por voz, Relatórios/Histórico, Manutenção do carro, Saldo rápido Uber/99, Temas e sincronização na nuvem).
+- Cada função é ilustrada com um mockup de celular do menu correspondente, recriado direto no código da página (sem imagens externas) — sempre nítido, usando as cores e elementos reais do app.
+- Toda a lógica de instalação e abertura foi preservada intacta: prompt do Chrome, instruções manuais no iPhone/Safari, redirecionamento automático quando instalado (com sessão → app; sem sessão → login) e a tela de abertura (splash).
+- Versão atualizada de forma consistente nos 6 arquivos HTML, manifest.json e sw.js (cache).
+- Nenhuma tela ou função do app em si foi alterada.
+- Base oficial: vBeta1.48.
 
-vBeta1.49 - CORREÇÃO + MELHORIA: tela de instalação não orientava iPhone com Chrome e a explicação era fraca (mesma correção já aplicada no Nautilus)
-- Relatado (1): na tela de instalação, quando o usuário está no iPhone mas usando o Google Chrome (em vez do Safari), o app não mostrava nenhuma instrução válida — caía numa mensagem genérica de "instalação indisponível", já que o código só reconhecia iPhone + Safari como caso válido para instruções manuais.
-- Relatado (2): mesmo com a detecção corrigida, a instrução aparecia como uma única frase corrida (via alert nativo do navegador), sem explicar que a opção "Adicionar à Tela de Início" pode ficar escondida atrás de "Mais"/"Editar Ações" na folha de compartilhamento do iOS.
-- Investigado: desde o iOS 16.4, "Adicionar à Tela de Início" funciona em qualquer navegador no iPhone (Safari, Chrome, Firefox, Edge), só muda onde fica o botão Compartilhar em cada um. E o iOS às vezes esconde essa ação atrás de "Mais"/"Editar Ações" quando ela nunca foi usada antes naquele app.
-- Corrigido/Melhorado:
-  - Detecção agora cobre iPhone de forma geral (Safari, Chrome, Firefox, Edge) e Android, cada um com seus passos certos.
-  - A instrução agora aparece como lista numerada de passos direto na tela (não mais como alert), com um aviso destacado explicando como achar "Adicionar à Tela de Início" caso ela não apareça de primeira na folha de compartilhamento.
-  - Tanto o botão "Instalar aplicativo" quanto o link "Como instalar" usam a mesma lista de passos.
-- Nenhuma outra tela ou fluxo foi alterada (mudança isolada em index.html, tela de instalação).
+vBeta1.48 - CORREÇÃO: tela de abertura (splash) com logo em baixa definição
+- Relatado: a tela azul de abertura (antes da tela inicial carregar) aparecia com a logo em qualidade inferior à da tela de instalação.
+- Identificado que os arquivos de ícone (icon-192.png e icon-512.png) estavam cheios de ruído/granulação (mais de 25 mil cores distintas em um desenho de cores chapadas), o que ficava evidente quando o sistema ampliava o ícone para montar a tela de abertura.
+- Corrigido recriando os dois ícones com formas limpas (vetoriais, com suavização de alta qualidade), mantendo o mesmo desenho. Adicionado "purpose": "any" nos ícones do manifest.json para o Android usar a versão em alta definição na tela de abertura.
+- Confirmado resolvido pelo usuário após reinstalar o atalho da tela inicial (o ícone antigo fica em cache no sistema).
 - Base oficial: vBeta1.47.
 
 vBeta1.47 - CORREÇÃO: número da versão aparecia no nome do app ao instalar (ícone da tela inicial)
