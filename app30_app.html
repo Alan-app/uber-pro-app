@@ -43,7 +43,7 @@ try{
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver vBeta1.51</title>
+<title>MetaDriver vBeta1.52</title>
 <style id="md-hydration-lock">
 body.preload > *:not(#mdBootOverlay){visibility:hidden!important;}
 #mdBootOverlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#0f172a;color:#fff;z-index:2147483647;font-family:Inter,system-ui,sans-serif;font-weight:800;letter-spacing:.2px;}
@@ -3658,7 +3658,7 @@ body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff3b0; }
   opacity:1 !important;
 }
 
-/* ===== vBeta1.51 - refinamento visual global (somente acabamento: cor, sombra,
+/* ===== vBeta1.52 - refinamento visual global (somente acabamento: cor, sombra,
    borda e transição — NENHUM tamanho, grid, altura ou espaçamento é alterado).
    Usa as variáveis de tema existentes, então se adapta aos 4 temas sozinho. ===== */
 
@@ -3680,13 +3680,10 @@ body[data-tema$="claro"] .card{
   box-shadow:0 6px 20px rgba(0,0,0,0.10);
 }
 
-/* Botões: transição suave + retorno tátil ao toque (transform não afeta layout) */
-.card button, .tab-btn, .menu-btn{
-  transition:filter .15s ease, transform .1s ease, box-shadow .15s ease;
-}
-.card button:active, .tab-btn:active{
-  transform:scale(0.985);
-  filter:brightness(1.08);
+/* Botões: transição apenas de sombra (sem filter/transform, que conflitam com o
+   mecanismo de habilitar/desabilitar dos botões de sessão - corrigido vBeta1.52) */
+.menu-btn{
+  transition:opacity .15s, background .15s;
 }
 
 /* Campos: anel de foco na cor do tema (box-shadow não afeta layout) */
@@ -3705,8 +3702,8 @@ body[data-tema$="claro"] .card{
   .card button, .tab-btn, .menu-btn{ transition:none; }
 }
 
-/* ===== vBeta1.51 - upgrade visual: painel de progresso da meta, resumo com
-   destaque no lucro, cabeçalhos com filete de destaque e botões com relevo.
+/* ===== vBeta1.52 - upgrade visual: barra de progresso da meta bruta (Relatório
+   Diário), cabeçalhos com filete de destaque e botões com relevo.
    Continua sem alterar grid/estrutura dos layouts existentes. ===== */
 
 /* Painel de progresso da meta */
@@ -3744,37 +3741,6 @@ body[data-tema$="claro"] .card{
   box-shadow:0 0 10px color-mix(in srgb, var(--accent) 45%, transparent);
   transition:width .5s ease;
 }
-
-/* Linhas rotulo/valor padronizadas (meta, horas, resumo) */
-.meta-row{
-  display:flex;align-items:baseline;justify-content:space-between;gap:12px;
-  padding:7px 0;border-bottom:1px dashed var(--line);
-  font-size:13.5px;color:var(--muted);
-}
-.meta-row:last-child{border-bottom:none;}
-.meta-row b{font-weight:800;color:var(--text);text-align:right;}
-.meta-row b.warning{color:var(--warn);}
-.meta-row b.dangerText{color:var(--danger);}
-.meta-row b.highlight{color:var(--accent);}
-
-/* Destaque do Lucro líquido no Resumo geral */
-.resumo-hero{
-  margin:10px 0;padding:12px 14px;border-radius:14px;text-align:center;
-  background:color-mix(in srgb, var(--accent) 10%, transparent);
-  border:1px solid color-mix(in srgb, var(--accent) 32%, transparent);
-}
-.resumo-hero-label{
-  font-size:11px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;
-  color:var(--muted);margin-bottom:3px;
-}
-.resumo-hero-value{
-  font-size:27px;font-weight:900;line-height:1.1;color:var(--accent);
-}
-.resumo-hero.neg{
-  background:color-mix(in srgb, var(--danger) 10%, transparent);
-  border-color:color-mix(in srgb, var(--danger) 34%, transparent);
-}
-.resumo-hero.neg .resumo-hero-value{color:var(--danger);}
 
 /* Cabeçalhos de card: filete de destaque (via box-shadow interno, sem afetar layout) */
 .card-header{
@@ -4030,7 +3996,7 @@ body[data-tema$="claro"] .historico-report-line{border-bottom-color:rgba(0,0,0,.
   <div class="menu-item"><button class="secondary" onclick="abrirSaldoAtualButtonMenu(); closeMenu();">Botão de saldo atual</button></div>
   <div class="menu-item"><button class="secondary" onclick="abrirTemas(); closeMenu();">Temas</button></div>
   <div class="menu-item menu-user-row"><span class="menu-user-name" id="menuUserName">Usuário</span><button class="danger" onclick="forceLogout(); return false;">Sair</button></div>
-  <div class="menu-note" style="text-align:center;">vBeta1.51</div>
+  <div class="menu-note" style="text-align:center;">vBeta1.52</div>
 </div>
 
 
@@ -4238,6 +4204,8 @@ body[data-tema$="claro"] .historico-report-line{border-bottom-color:rgba(0,0,0,.
 <label>Saldo anterior (R$)</label>
 <input type="number" id="saldoAnteriorFora" inputmode="decimal" placeholder="Automático" step="0.01" readonly>
 </div>
+
+<div id="metaProgressoDia" style="display:none;margin-top:0;margin-bottom:12px;"></div>
 
 <div id="horasResumo" class="muted" style="margin-top:0;margin-bottom:10px;"></div>
 
@@ -5528,7 +5496,7 @@ function mdBuildDiagnosticsObject(){
     const durableObj = mdSafeJsonParse(durableRaw);
     const diag = {
       generated_at: mdNowIso(),
-      app_version: 'MetaDriver vBeta1.51',
+      app_version: 'MetaDriver vBeta1.52',
       cloud_table: CLOUD_TABLE,
       device_id: mdEnsureDeviceId(),
       visibility_state: document.visibilityState,
@@ -7535,7 +7503,7 @@ function mdCommitLancamentoMutation(reason){
   try{ atualizar(); }catch(e){}
   try{ if(typeof refreshQuickBalanceFabMiniDisplay === "function") refreshQuickBalanceFabMiniDisplay(); }catch(e){}
   try{ if(typeof updateQuickBalanceFabUI === "function") updateQuickBalanceFabUI(); }catch(e){}
-  try{ if(typeof toast === "function" && reason) console.info("MetaDriver vBeta1.51 mutation:", reason); }catch(e){}
+  try{ if(typeof toast === "function" && reason) console.info("MetaDriver vBeta1.52 mutation:", reason); }catch(e){}
 }
 
 
@@ -9360,7 +9328,7 @@ function exportarRelatorioPDF(){
       <script>
         setTimeout(()=>window.print(), 250);
       <\/script>
-    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver vBeta1.51 · app</div>
+    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver vBeta1.52 · app</div>
 
 
 <script>
@@ -9881,50 +9849,66 @@ const fuelCfg = getCombustivelConfig(bruto);
     ? ("Status: <span class='warning'>Aguardando início da meta</span><br>")
     : "";
   if(metaSalvaAgora){
-    // vBeta1.51 - painel visual de progresso da meta (percentual + barra + linhas)
-    var metaPctNum = (metaBrutaComGastos > 0) ? Math.max(0, Math.min(100, (bruto / metaBrutaComGastos) * 100)) : 0;
-    var diasChip = (diasRestantes < 0)
-      ? "<span class='meta-chip meta-chip-danger'>Prazo vencido</span>"
-      : "<span class='meta-chip'>" + diasRestantes + (diasRestantes === 1 ? " dia restante" : " dias restantes") + "</span>";
     document.getElementById("statusMeta").innerHTML =
-      "<div class='meta-progress-head'>" +
-        "<div class='meta-progress-pct'>" + metaPctNum.toFixed(0) + "%<span class='meta-progress-pct-label'>da meta bruta</span></div>" +
-        diasChip +
-      "</div>" +
-      "<div class='meta-progress-bar'><i style='width:" + metaPctNum.toFixed(1) + "%'></i></div>" +
-      (statusAguardandoLinha ? "<div class='meta-row'><span>Status</span><b class='warning'>Aguardando início da meta</b></div>" : "") +
-      "<div class='meta-row'><span>Data inicial</span><b class='warning'>" + (dados.dataInicialMeta || hojeISO()) + "</b></div>" +
-      "<div class='meta-row'><span>Meta bruta total</span><b class='" + (metaBrutaComGastos < 0 ? "dangerText" : "warning") + "'>R$ " + metaBrutaComGastos.toFixed(2) + "</b></div>" +
-      "<div class='meta-row'><span>Meta bruta restante</span><b class='" + (metaRestante < 0 ? "dangerText" : "warning") + "'>R$ " + metaRestante.toFixed(2) + "</b></div>" +
-      "<div class='meta-row'><span>Meta diária (automática)</span><b class='" + (metaDiariaAuto < 0 ? "dangerText" : "warning") + "'>R$ " + metaDiariaAuto.toFixed(2) + "</b></div>" +
-      "<div class='meta-row'><span>Tempo para meta diária</span><b class='" + (horasNecessarias < 0 ? "dangerText" : "warning") + "'>" + formatHorasMinutos(horasNecessarias) + "</b></div>";
+      "Data inicial: <span class='warning'>" + (dados.dataInicialMeta || hojeISO()) + "</span><br>" +
+      statusAguardandoLinha +
+      "Dias restantes: <span class='" + (diasRestantes < 0 ? "dangerText" : "warning") + "'>" + diasRestantes + "</span><br>" +
+      "Meta bruta total: <span class='" + (metaBrutaComGastos < 0 ? "dangerText" : "warning") + "'>R$ " + metaBrutaComGastos.toFixed(2) + "</span><br>" +
+      "Meta bruta restante: <span class='" + (metaRestante < 0 ? "dangerText" : "warning") + "'>R$ " + metaRestante.toFixed(2) + "</span><br>" +
+      "Meta diária (automática): <span class='" + (metaDiariaAuto < 0 ? "dangerText" : "warning") + "'>R$ " + metaDiariaAuto.toFixed(2) + "</span><br>" +
+      "Tempo para meta diária: <span class='" + (horasNecessarias < 0 ? "dangerText" : "warning") + "'>" + formatHorasMinutos(horasNecessarias) + "</span>";
   }else{
     document.getElementById("statusMeta").innerHTML =
-      "<div class='meta-row'><span>Dias restantes</span><b>—</b></div>" +
-      "<div class='meta-row'><span>Meta bruta total</span><b>—</b></div>" +
-      "<div class='meta-row'><span>Meta bruta restante</span><b>—</b></div>" +
-      "<div class='meta-row'><span>Meta diária (automática)</span><b>—</b></div>" +
-      "<div class='meta-row'><span>Tempo para meta diária</span><b>—</b></div>";
+      "Dias restantes: —<br>" +
+      "Meta bruta total: —<br>" +
+      "Meta bruta restante: —<br>" +
+      "Meta diária (automática): —<br>" +
+      "Tempo para meta diária: —";
   }
   const valorRestanteHoras = Math.max(0, metaDia - ganhoDia);
-  const excedenteLinha = (excedenteDia > 0) ? ("<div class='meta-row'><span>Meta batida</span><b class='highlight'>Excedente R$ " + excedenteDia.toFixed(2) + "</b></div>") : "";
+  const excedenteLinha = (excedenteDia > 0) ? ("<br>Meta batida: <span class='highlight'>Excedente R$ " + excedenteDia.toFixed(2) + "</span>") : "";
   const notaAguardandoLinha = (metaPeriodo && metaPeriodo.futura)
-    ? ("<div class='meta-row'><span>Aguardando início em</span><b class='warning'>" + metaPeriodo.inicioISO + "</b></div>")
+    ? ("Aguardando início em <span class='warning'>" + metaPeriodo.inicioISO + "</span><br>")
     : "";
   if(metaSalvaAgora){
     document.getElementById("horasResumo").innerHTML =
       notaAguardandoLinha +
-      "<div class='meta-row'><span>Meta diária (automática)</span><b class='" + (metaDia < 0 ? "dangerText" : "warning") + "'>R$ " + metaDia.toFixed(2) + "</b></div>" +
-      "<div class='meta-row'><span>Valor restante</span><b class='warning'>R$ " + valorRestanteHoras.toFixed(2) + "</b></div>" + excedenteLinha +
-      "<div class='meta-row'><span>Tempo para meta diária</span><b class='" + (horasNecessarias < 0 ? "dangerText" : "warning") + "'>" + formatHorasMinutos(horasNecessarias) + "</b></div>" +
-      "<div class='meta-row'><span>Tempo restante</span><b class='" + (horasRestantes < 0 ? "dangerText" : "warning") + "'>" + formatHorasMinutos(horasRestantes) + "</b></div>";
+      "Meta diária (automática): <span class='" + (metaDia < 0 ? "dangerText" : "warning") + "'>R$ " + metaDia.toFixed(2) + "</span><br>" +
+      "Valor restante: <span class='warning'>R$ " + valorRestanteHoras.toFixed(2) + "</span>" + excedenteLinha + "<br>" +
+      "Tempo para meta diária: <span class='" + (horasNecessarias < 0 ? "dangerText" : "warning") + "'>" + formatHorasMinutos(horasNecessarias) + "</span><br>" +
+      "Tempo restante: <span class='" + (horasRestantes < 0 ? "dangerText" : "warning") + "'>" + formatHorasMinutos(horasRestantes) + "</span>";
   }else{
     document.getElementById("horasResumo").innerHTML =
-      "<div class='meta-row'><span>Meta diária (automática)</span><b>—</b></div>" +
-      "<div class='meta-row'><span>Valor restante</span><b>—</b></div>" +
-      "<div class='meta-row'><span>Tempo para meta diária</span><b>—</b></div>" +
-      "<div class='meta-row'><span>Tempo restante</span><b>—</b></div>";
+      "Meta diária (automática): —<br>" +
+      "Valor restante: —<br>" +
+      "Tempo para meta diária: —<br>" +
+      "Tempo restante: —";
   }
+
+  // vBeta1.52 - barra de progresso da meta bruta no Relatório Diário.
+  // Totalmente isolada em try/catch: qualquer falha aqui não interrompe o
+  // restante da atualização de tela (sessões, listas, saldos).
+  try{
+    var mpdEl = document.getElementById("metaProgressoDia");
+    if(mpdEl){
+      if(metaSalvaAgora && metaBrutaComGastos > 0){
+        var mpdPct = Math.max(0, Math.min(100, (bruto / metaBrutaComGastos) * 100));
+        var mpdChip = (diasRestantes < 0)
+          ? "<span class='meta-chip meta-chip-danger'>Prazo vencido</span>"
+          : "<span class='meta-chip'>" + diasRestantes + (diasRestantes === 1 ? " dia restante" : " dias restantes") + "</span>";
+        mpdEl.style.display = "";
+        mpdEl.innerHTML =
+          "<div class='meta-progress-head'>" +
+            "<div class='meta-progress-pct'>" + mpdPct.toFixed(0) + "%<span class='meta-progress-pct-label'>da meta bruta</span></div>" +
+            mpdChip +
+          "</div>" +
+          "<div class='meta-progress-bar'><i style='width:" + mpdPct.toFixed(1) + "%'></i></div>";
+      }else{
+        mpdEl.style.display = "none";
+        mpdEl.innerHTML = "";
+      }
+    }
+  }catch(e){}
 
   const totalAbastecidoLanc = document.getElementById("totalAbastecidoLanc");
   if(totalAbastecidoLanc){
@@ -9933,15 +9917,13 @@ const fuelCfg = getCombustivelConfig(bruto);
   }
 
   document.getElementById("resumo").innerHTML =
-    "<div class='meta-row'><span>Bruto total</span><b class='" + (bruto < 0 ? "dangerText" : "warning") + "'>R$ " + bruto.toFixed(2) + "</b></div>" +
-    "<div class='meta-row'><span>Gastos extras</span><b class='" + (gastosExtras < 0 ? "dangerText" : "warning") + "'>R$ " + gastosExtras.toFixed(2) + "</b></div>" +
-    "<div class='meta-row'><span>Retiradas</span><b class='warning'>R$ " + totalRetiradas.toFixed(2) + "</b></div>" +
-    "<div class='resumo-hero " + (liquido < 0 ? "neg" : "") + "'>" +
-      "<div class='resumo-hero-label'>Lucro líquido</div>" +
-      "<div class='resumo-hero-value'>R$ " + liquido.toFixed(2) + "</div>" +
-    "</div>" +
-    "<div class='meta-row'><span>Saldo disponível p/ abastecer</span><b class='" + (saldoCombustivel < 0 ? "dangerText" : "highlight") + "'>R$ " + saldoCombustivel.toFixed(2) + "</b></div>" +
-    "<div class='meta-row'><span style=\"white-space:nowrap;\">Saldo total 💰+⛽</span><b class='" + ((liquido + saldoCombustivel) < 0 ? "dangerText" : "highlight") + "'>R$ " + (liquido + saldoCombustivel).toFixed(2) + "</b></div>"
+    "Bruto total: <span class='" + (bruto < 0 ? "dangerText" : "warning") + "'>R$ " + bruto.toFixed(2) + "</span><br>" +
+    "Gastos extras: <span class='" + (gastosExtras < 0 ? "dangerText" : "warning") + "'>R$ " + gastosExtras.toFixed(2) + "</span><br>" +
+    "Retiradas: <span class='warning'>R$ " + totalRetiradas.toFixed(2) + "</span><br>" +
+    
+    "<span class='" + (liquido < 0 ? "dangerText" : "highlight") + "'>Lucro líquido: R$ " + liquido.toFixed(2) + "</span><br>" +
+    "Saldo disponível p/ abastecer: <span class='" + (saldoCombustivel < 0 ? "dangerText" : "highlight") + "'>R$ " + saldoCombustivel.toFixed(2) + "</span><br>" +
+    "<span style=\"white-space:nowrap;\">Saldo total 💰+⛽: <span class='" + ((liquido + saldoCombustivel) < 0 ? "dangerText" : "highlight") + "'>R$ " + (liquido + saldoCombustivel).toFixed(2) + "</span></span>"
 
   document.getElementById("listaGanhos").innerHTML =
     dados.ganhos.slice().sort((a,b)=> itemOrderTs(b) - itemOrderTs(a)).map(item=>{

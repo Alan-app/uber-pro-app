@@ -1,3 +1,12 @@
+vBeta1.52 - CORREÇÃO (bug de sessões da vBeta1.51) + barra de progresso refeita no lugar certo
+- Revertidos os três blocos de resumo ao estado exato da vBeta1.50 (comparação byte a byte) e removido o efeito de filter/transform nos botões que conflitava com o mecanismo de habilitar/desabilitar dos botões de sessão — as duas causas prováveis do bug de iniciar/finalizar/excluir sessão.
+- Todas as 20 funções de sessão verificadas byte a byte contra a vBeta1.50 — idênticas.
+- Barra de progresso da meta bruta refeita no RELATÓRIO DIÁRIO (local correto), no estilo do site: percentual grande, selo de dias restantes (vermelho quando prazo vencido) e barra com gradiente na cor do tema.
+- Código da barra totalmente isolado em try/catch — qualquer falha nela não afeta sessões, listas ou saldos.
+- Testada em 6 cenários (percentual, prazo vencido, singular/plural, trava em 100%, sem meta, meta zero) — todos corretos.
+- Mantidos os refinamentos inofensivos (fundo, cards, foco, filete dos cabeçalhos, relevo estático dos botões).
+- Base oficial: vBeta1.51 (com reversões pontuais à vBeta1.50).
+
 vBeta1.51 - UPGRADE VISUAL: painel de progresso da meta, destaque do lucro e refinamentos
 - Configurar Meta: status da meta virou painel visual — percentual da meta bruta em destaque, barra de progresso na cor do tema, selo de dias restantes (vermelho quando prazo vencido) e linhas alinhadas de rótulo/valor.
 - Resumo geral: Lucro líquido em painel de destaque próprio (valor grande na cor do tema; vermelho quando negativo); demais linhas no novo padrão alinhado.

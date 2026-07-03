@@ -1,3 +1,25 @@
+MetaDriver vBeta1.52
+
+Solicitado:
+- A vBeta1.51 apresentou dois problemas: (1) a barra de progresso da meta bruta não ficou igual à do site e estava no lugar errado (em Configurar Meta, quando deveria estar no Relatório Diário); (2) as funções de sessão (iniciar, finalizar, excluir) ficaram bugadas — às vezes não finalizava, não excluía, ou finalizava e continuava em andamento.
+
+Investigação:
+- Identificadas duas causas prováveis do bug de sessões, ambas introduzidas na vBeta1.51:
+  1. O efeito de "relevo ao pressionar" dos botões usava a propriedade "filter" com transição — exatamente a mesma propriedade que o mecanismo de habilitar/desabilitar dos botões de sessão usa para indicar estado. Esse conflito podia dessincronizar o estado visual/clicável dos botões Iniciar/Finalizar sessão.
+  2. Os três blocos de resumo reescritos ficavam dentro da função central de atualização de tela: qualquer falha ali interrompia a função no meio, deixando a tela sem refletir o estado real da sessão (o sintoma exato de "finaliza e continua em andamento").
+
+Feito:
+- REVERTIDO: os três blocos de resumo (status da meta, resumo de horas e resumo geral) voltaram EXATAMENTE ao estado da vBeta1.50, confirmado por comparação byte a byte. O painel de destaque do lucro e as linhas alinhadas foram descartados por ora.
+- REVERTIDO: removido o efeito de filter/transform nos botões que conflitava com o mecanismo dos botões de sessão (mantido apenas o leve relevo por gradiente, que é estático e não interfere).
+- Verificadas byte a byte TODAS as 20 funções relacionadas a sessões (iniciar, finalizar, excluir, editar, recalcular em tempo real, etc.) contra a vBeta1.50 — todas confirmadas idênticas.
+- REFEITO no lugar certo: a barra de progresso da meta bruta agora está no RELATÓRIO DIÁRIO (acima do resumo de meta diária), no mesmo estilo do site — percentual grande, selo de dias restantes (vermelho como "Prazo vencido" quando o prazo passou) e barra com gradiente na cor do tema.
+- A barra é atualizada por um código totalmente isolado em try/catch: mesmo que algo falhe nela, o restante da atualização de tela (sessões, listas, saldos) continua normalmente — impossível ela travar as sessões.
+- Testada isoladamente em 6 cenários: percentual correto (57%), prazo vencido, 1 dia (singular), ganho acima da meta (trava em 100%), sem meta salva (barra escondida) e meta zero (escondida). Todos corretos.
+- Mantidos da vBeta1.50/1.51 (inofensivos e confirmados sem relação com o bug): fundo com profundidade, borda/sombra dos cards, anel de foco nos campos, filete de destaque nos cabeçalhos e relevo estático nos botões.
+
+Status atual:
+- Pronto para teste. Verifique primeiro as sessões (iniciar, finalizar, excluir, várias vezes seguidas) — devem voltar a funcionar 100%. Depois confira a barra de progresso da meta bruta no Relatório Diário.
+
 MetaDriver vBeta1.51
 
 Solicitado:
