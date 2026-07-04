@@ -1,3 +1,20 @@
+MetaDriver vBeta1.53
+
+Solicitado:
+1. Avaliar se mudar a fonte do app melhora o visual (a fonte dos mockups do site pareceu melhor).
+2. Deixar o card de "Sessão em andamento" igual ao mockup do site de instalação.
+3. Corrigir o microfone do lançamento por voz, que ficou preto (deveria ser azul claro como nas versões anteriores).
+
+Investigação e decisões:
+1. FONTE: constatado que app e site renderizam a MESMA fonte no Android (Roboto) — o app usa a pilha Inter/system-ui e o site Arial/Helvetica, e ambas caem em Roboto no celular. O que parecia "fonte melhor" no site é a hierarquia tipográfica dos mockups (rótulos pequenos em maiúsculas + valores grandes e pesados). Por isso NÃO foi trocada a fonte; a hierarquia do site foi aplicada onde solicitado (card de sessão). Se aprovado, o mesmo padrão pode ser levado a outras áreas gradualmente.
+2. MICROFONE (corrigido): a causa era a regra genérica de "relevo" nos botões adicionada na vBeta1.51/1.52 — ela sobrescrevia o gradiente azul→ciano que dá a cor do microfone (e poderia afetar outros botões coloridos por gradiente). A regra genérica foi REMOVIDA por completo; o microfone volta ao azul claro original e o estado de gravação (vermelho pulsante) permanece intacto. Registrada a lição no código: nenhuma regra genérica de background em botões deve ser adicionada.
+3. SESSÃO EM ANDAMENTO (refeita no estilo do site): cabeçalho com o título da sessão + selo "● AO VIVO"; "Ganho da sessão" como valor grande em branco (vermelho se negativo); "R$/hora" como valor grande à direita, verde quando na meta e vermelho quando abaixo (regra de cor da vBeta1.33 mantida); linha inferior "Início: HH:MM · Xh XXmin rodando". Nenhum dado foi perdido — hora de início, valor, ganho/hora e tempo decorrido continuam todos visíveis ("hora de término: -" foi absorvida, pois numa sessão em andamento nunca há término).
+- As classes CSS do novo card são novas e exclusivas (md-sess-live-*), sem nenhuma interação com regras existentes. A mudança de conteúdo ficou restrita ao bloco do card em andamento, que já era protegido por try/catch. As 20 funções de sessão NÃO foram tocadas.
+- Verificado por renderização automatizada: card com borda verde brilhante, selo AO VIVO, valor grande branco e R$/hora verde — igual ao mockup do site.
+
+Status atual:
+- Pronto para teste: (1) microfone azul de novo, (2) inicie uma sessão e veja o novo card ao vivo, (3) confirme que iniciar/finalizar/excluir sessão seguem 100%.
+
 MetaDriver vBeta1.52
 
 Solicitado:

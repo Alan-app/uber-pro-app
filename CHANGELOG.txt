@@ -1,3 +1,10 @@
+vBeta1.53 - CORREÇÃO do microfone preto + card "Sessão em andamento" no estilo do site
+- Microfone do lançamento por voz de volta ao azul claro: removida a regra genérica de relevo nos botões (vBeta1.51/1.52) que sobrescrevia o gradiente de cor dele. Lição registrada no código: nenhuma regra genérica de background em botões.
+- Card de sessão em andamento refeito igual ao mockup do site: título + selo "● AO VIVO", "Ganho da sessão" grande em branco, "R$/hora" grande (verde na meta / vermelho abaixo — regra da vBeta1.33 mantida) e linha "Início: HH:MM · tempo rodando". Todos os dados anteriores continuam visíveis.
+- Fonte NÃO alterada: app e site já renderizam a mesma fonte no Android (Roboto); a diferença percebida era a hierarquia tipográfica dos mockups, que foi aplicada ao card de sessão.
+- Classes CSS novas e exclusivas (md-sess-live-*); funções de sessão intocadas; bloco alterado já protegido por try/catch.
+- Base oficial: vBeta1.52.
+
 vBeta1.52 - CORREÇÃO (bug de sessões da vBeta1.51) + barra de progresso refeita no lugar certo
 - Revertidos os três blocos de resumo ao estado exato da vBeta1.50 (comparação byte a byte) e removido o efeito de filter/transform nos botões que conflitava com o mecanismo de habilitar/desabilitar dos botões de sessão — as duas causas prováveis do bug de iniciar/finalizar/excluir sessão.
 - Todas as 20 funções de sessão verificadas byte a byte contra a vBeta1.50 — idênticas.

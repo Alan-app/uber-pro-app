@@ -43,7 +43,7 @@ try{
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver vBeta1.52</title>
+<title>MetaDriver vBeta1.53</title>
 <style id="md-hydration-lock">
 body.preload > *:not(#mdBootOverlay){visibility:hidden!important;}
 #mdBootOverlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#0f172a;color:#fff;z-index:2147483647;font-family:Inter,system-ui,sans-serif;font-weight:800;letter-spacing:.2px;}
@@ -3658,7 +3658,7 @@ body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff3b0; }
   opacity:1 !important;
 }
 
-/* ===== vBeta1.52 - refinamento visual global (somente acabamento: cor, sombra,
+/* ===== vBeta1.53 - refinamento visual global (somente acabamento: cor, sombra,
    borda e transição — NENHUM tamanho, grid, altura ou espaçamento é alterado).
    Usa as variáveis de tema existentes, então se adapta aos 4 temas sozinho. ===== */
 
@@ -3681,7 +3681,7 @@ body[data-tema$="claro"] .card{
 }
 
 /* Botões: transição apenas de sombra (sem filter/transform, que conflitam com o
-   mecanismo de habilitar/desabilitar dos botões de sessão - corrigido vBeta1.52) */
+   mecanismo de habilitar/desabilitar dos botões de sessão - corrigido vBeta1.53) */
 .menu-btn{
   transition:opacity .15s, background .15s;
 }
@@ -3702,7 +3702,7 @@ body[data-tema$="claro"] .card{
   .card button, .tab-btn, .menu-btn{ transition:none; }
 }
 
-/* ===== vBeta1.52 - upgrade visual: barra de progresso da meta bruta (Relatório
+/* ===== vBeta1.53 - upgrade visual: barra de progresso da meta bruta (Relatório
    Diário), cabeçalhos com filete de destaque e botões com relevo.
    Continua sem alterar grid/estrutura dos layouts existentes. ===== */
 
@@ -3747,11 +3747,36 @@ body[data-tema$="claro"] .card{
   box-shadow:inset 3px 0 0 var(--accent);
 }
 
-/* Botões: leve relevo com gradiente por cima da cor existente (qualquer cor) */
-.card button, .tab-btn{
-  background-image:linear-gradient(180deg, rgba(255,255,255,.10), rgba(0,0,0,.10));
+/* vBeta1.53 - a regra genérica de "relevo" nos botões foi removida: ela
+   sobrescrevia o gradiente de cor de botões específicos (ex.: microfone do
+   lançamento por voz, que ficou preto). Nenhuma regra genérica de
+   background em botões deve ser adicionada aqui. */
+
+/* vBeta1.53 - card "Sessão em andamento" no estilo do site de instalação.
+   Classes novas e exclusivas (md-sess-live-*): não interferem em nada. */
+.md-sess-live-head{
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
+  margin-bottom:9px;flex-wrap:wrap;
 }
-.menu-item button{ background-image:none; }
+.md-sess-live-head b{font-size:14px;letter-spacing:.1px;}
+.md-sess-live-tag{
+  font-size:10px;font-weight:800;letter-spacing:.5px;white-space:nowrap;
+  padding:3px 9px;border-radius:999px;
+  background:rgba(30,215,96,.16);color:#4ade80;
+  border:1px solid rgba(30,215,96,.42);
+}
+.md-sess-live-vals{
+  display:flex;justify-content:space-between;align-items:flex-end;gap:12px;
+  flex-wrap:wrap;
+}
+.md-sess-live-label{
+  font-size:10px;font-weight:800;letter-spacing:.55px;text-transform:uppercase;
+  opacity:.68;margin-bottom:2px;
+}
+.md-sess-live-val{font-size:23px;font-weight:900;line-height:1.1;}
+.md-sess-live-val.successText{color:var(--success, #4ade80);}
+.md-sess-live-right{text-align:right;}
+.md-sess-live-sub{margin-top:9px;font-size:11.5px;opacity:.72;}
 </style>
 
 <script id="auth-guard">
@@ -3996,7 +4021,7 @@ body[data-tema$="claro"] .historico-report-line{border-bottom-color:rgba(0,0,0,.
   <div class="menu-item"><button class="secondary" onclick="abrirSaldoAtualButtonMenu(); closeMenu();">Botão de saldo atual</button></div>
   <div class="menu-item"><button class="secondary" onclick="abrirTemas(); closeMenu();">Temas</button></div>
   <div class="menu-item menu-user-row"><span class="menu-user-name" id="menuUserName">Usuário</span><button class="danger" onclick="forceLogout(); return false;">Sair</button></div>
-  <div class="menu-note" style="text-align:center;">vBeta1.52</div>
+  <div class="menu-note" style="text-align:center;">vBeta1.53</div>
 </div>
 
 
@@ -5496,7 +5521,7 @@ function mdBuildDiagnosticsObject(){
     const durableObj = mdSafeJsonParse(durableRaw);
     const diag = {
       generated_at: mdNowIso(),
-      app_version: 'MetaDriver vBeta1.52',
+      app_version: 'MetaDriver vBeta1.53',
       cloud_table: CLOUD_TABLE,
       device_id: mdEnsureDeviceId(),
       visibility_state: document.visibilityState,
@@ -7503,7 +7528,7 @@ function mdCommitLancamentoMutation(reason){
   try{ atualizar(); }catch(e){}
   try{ if(typeof refreshQuickBalanceFabMiniDisplay === "function") refreshQuickBalanceFabMiniDisplay(); }catch(e){}
   try{ if(typeof updateQuickBalanceFabUI === "function") updateQuickBalanceFabUI(); }catch(e){}
-  try{ if(typeof toast === "function" && reason) console.info("MetaDriver vBeta1.52 mutation:", reason); }catch(e){}
+  try{ if(typeof toast === "function" && reason) console.info("MetaDriver vBeta1.53 mutation:", reason); }catch(e){}
 }
 
 
@@ -9328,7 +9353,7 @@ function exportarRelatorioPDF(){
       <script>
         setTimeout(()=>window.print(), 250);
       <\/script>
-    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver vBeta1.52 · app</div>
+    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver vBeta1.53 · app</div>
 
 
 <script>
@@ -9627,12 +9652,14 @@ function atualizar(){
         const ganhoHoraMetaRef = Math.max(0, Number(dados.ganhoHoraManual || 40));
         const horaClass = ganhoHora < ganhoHoraMetaRef ? "dangerText" : "successText";
         resumoEl.innerHTML =
-          "<div class='md-sessao-andamento-glow'><b>" + tituloSessao + " em andamento</b><br>" +
-          "Hora de início: " + horario + "<br>" +
-          "Hora de término: -<br>" +
-          "Valor total: <span class='" + valorClass + "'>R$ " + valorSessaoAtual.toFixed(2) + "</span><br>" +
-          "Ganho por hora: <span class='" + horaClass + "'>R$ " + ganhoHora.toFixed(2) + "</span><br>" +
-          "Tempo decorrido: <span class='warning'>" + formatHorasMinutos(horas) + "</span></div>";
+          "<div class='md-sessao-andamento-glow'>" +
+            "<div class='md-sess-live-head'><b>" + tituloSessao + " em andamento</b><span class='md-sess-live-tag'>● AO VIVO</span></div>" +
+            "<div class='md-sess-live-vals'>" +
+              "<div><div class='md-sess-live-label'>Ganho da sessão</div><div class='md-sess-live-val " + (valorSessaoAtual < 0 ? "dangerText" : "") + "'>R$ " + valorSessaoAtual.toFixed(2) + "</div></div>" +
+              "<div class='md-sess-live-right'><div class='md-sess-live-label'>R$/hora</div><div class='md-sess-live-val " + horaClass + "'>R$ " + ganhoHora.toFixed(2) + "</div></div>" +
+            "</div>" +
+            "<div class='md-sess-live-sub'>Início: " + horario + " · " + formatHorasMinutos(horas) + " rodando</div>" +
+          "</div>";
       }else{
         resumoEl.innerHTML = "";
       }
@@ -9885,7 +9912,7 @@ const fuelCfg = getCombustivelConfig(bruto);
       "Tempo restante: —";
   }
 
-  // vBeta1.52 - barra de progresso da meta bruta no Relatório Diário.
+  // vBeta1.53 - barra de progresso da meta bruta no Relatório Diário.
   // Totalmente isolada em try/catch: qualquer falha aqui não interrompe o
   // restante da atualização de tela (sessões, listas, saldos).
   try{
