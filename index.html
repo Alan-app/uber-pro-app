@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>MetaDriver vBeta1.54</title>
+<title>MetaDriver vBeta1.56</title>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0f172a">
 <meta name="description" content="MetaDriver: controle de ganhos, metas, gastos e manutenção para motoristas de aplicativo (Uber e 99).">
@@ -55,15 +55,16 @@ body.boot-ready #bootWrap{visibility:visible}
 /* ===== site de instalação ===== */
 .site{display:none}
 .site.show{display:block}
-.container{width:min(1060px,100%);margin:0 auto;padding:0 20px}
+.container{width:min(1060px,100%);margin:0 auto;padding:0 28px}
+@media (max-width:480px){.container{padding:0 22px}}
 
-.hero{padding:52px 0 34px;text-align:center;position:relative;overflow:hidden}
+.hero{padding-top:64px;padding-bottom:44px;text-align:center;position:relative;overflow:hidden}
 .hero .logo-img{width:96px;height:96px;margin-bottom:16px}
 .badge-beta{display:inline-block;padding:5px 12px;border-radius:999px;font-size:11px;font-weight:700;letter-spacing:.6px;
   background:var(--blue-soft);border:1px solid rgba(59,130,246,.35);color:#93c5fd;margin-bottom:14px;text-transform:uppercase}
 h1{font-size:clamp(30px,6vw,44px);font-weight:800;margin:0 0 12px;line-height:1.12}
 h1 .grad{background:linear-gradient(90deg,#22c55e,#3b82f6);-webkit-background-clip:text;background-clip:text;color:transparent}
-.lead{font-size:clamp(15px,2.4vw,18px);color:var(--muted);max-width:620px;margin:0 auto 26px;line-height:1.55}
+.lead{font-size:clamp(15px,2.4vw,18px);color:var(--muted);max-width:600px;margin:0 auto 30px;line-height:1.65}
 
 button{font:inherit}
 .btn-install{
@@ -73,6 +74,18 @@ button{font:inherit}
 }
 .btn-install:active{transform:scale(.98)}
 .note{margin-top:12px;font-size:12px;color:var(--muted2);line-height:1.4}
+.price-line{
+  margin-top:14px;font-size:13.5px;color:var(--muted);line-height:1.5;
+}
+.price-line b{color:var(--text)}
+.no-card-note{
+  width:min(460px,100%);margin:16px auto 4px;padding:13px 16px;border-radius:14px;
+  background:var(--accent-soft);border:1px solid rgba(34,197,94,.30);
+  font-size:12.5px;line-height:1.6;color:var(--muted);text-align:left;
+  display:flex;gap:10px;align-items:flex-start;
+}
+.no-card-note b{color:var(--text)}
+.no-card-emoji{font-size:17px;line-height:1.3}
 .install-helper{width:min(360px,100%);margin:12px auto 0;padding:12px 14px;border-radius:14px;background:rgba(255,255,255,.06);
   border:1px solid var(--line);font-size:12px;line-height:1.45;display:none;text-align:left}
 .install-helper.show{display:block}
@@ -84,20 +97,20 @@ button{font:inherit}
 .chip b{color:var(--text)}
 
 /* ===== seções de funcionalidades ===== */
-.features{padding:26px 0 10px}
-.sec-head{text-align:center;margin:26px 0 8px}
+.features{padding-top:26px;padding-bottom:10px}
+.sec-head{text-align:center;margin:40px 0 14px}
 .sec-head h2{font-size:clamp(22px,4.2vw,30px);margin:0 0 8px;font-weight:800}
-.sec-head p{color:var(--muted);margin:0 auto;max-width:560px;font-size:14.5px;line-height:1.55}
+.sec-head p{color:var(--muted);margin:0 auto;max-width:540px;font-size:14.5px;line-height:1.65}
 
 .feature{
   display:grid;grid-template-columns:1fr 1fr;gap:34px;align-items:center;
-  padding:42px 0;border-bottom:1px solid var(--line);
+  padding:52px 0;border-bottom:1px solid var(--line);
 }
 .feature:last-of-type{border-bottom:none}
 .feature.flip .f-text{order:2}
 .feature.flip .f-shot{order:1}
 @media (max-width:760px){
-  .feature{grid-template-columns:1fr;gap:22px;padding:34px 0}
+  .feature{grid-template-columns:1fr;gap:26px;padding:42px 0}
   .feature.flip .f-text{order:1}
   .feature.flip .f-shot{order:2}
 }
@@ -107,9 +120,9 @@ button{font:inherit}
 .f-eyebrow.warnc{color:#fde047}
 .f-eyebrow .dot{width:8px;height:8px;border-radius:50%;background:currentColor;box-shadow:0 0 10px currentColor}
 .f-text h3{font-size:clamp(19px,3.4vw,24px);margin:0 0 10px;font-weight:800}
-.f-text p{color:var(--muted);line-height:1.6;font-size:14.5px;margin:0 0 12px}
+.f-text p{color:var(--muted);line-height:1.7;font-size:14.5px;margin:0 0 14px}
 .f-list{list-style:none;padding:0;margin:0}
-.f-list li{position:relative;padding-left:24px;margin-bottom:8px;color:var(--muted);font-size:13.5px;line-height:1.5}
+.f-list li{position:relative;padding-left:26px;margin-bottom:10px;color:var(--muted);font-size:13.5px;line-height:1.6}
 .f-list li::before{content:"";position:absolute;left:0;top:6px;width:12px;height:12px;border-radius:4px;background:var(--accent-soft);
   border:1.5px solid var(--accent)}
 .f-list.bluel li::before{background:var(--blue-soft);border-color:var(--blue)}
@@ -177,10 +190,10 @@ button{font:inherit}
 .tsw.t4{background:#FFDD00}.tsw.t4 i{color:#121212}
 
 /* ===== rodapé / CTA final ===== */
-.cta-final{padding:50px 0 40px;text-align:center}
+.cta-final{padding-top:64px;padding-bottom:52px;text-align:center}
 .cta-final h2{font-size:clamp(22px,4.5vw,30px);margin:0 0 10px;font-weight:800}
 .cta-final p{color:var(--muted);margin:0 0 22px;font-size:14.5px}
-.footer{padding:18px 0 26px;text-align:center;color:var(--muted2);font-size:11.5px;border-top:1px solid var(--line)}
+.footer{padding-top:24px;padding-bottom:32px;text-align:center;color:var(--muted2);font-size:11.5px;border-top:1px solid var(--line);line-height:1.6}
 .version-debug-badge{position:fixed;right:10px;bottom:10px;z-index:2147483647;padding:6px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.14);background:rgba(15,23,42,.88);color:#fff;font-size:11px;font-weight:700;letter-spacing:.2px;opacity:.95}
 
 @media (prefers-reduced-motion: no-preference){
@@ -226,7 +239,12 @@ button{font:inherit}
     <h1>Você dirige.<br><span class="grad">O MetaDriver cuida dos números.</span></h1>
     <p class="lead">O aplicativo de controle financeiro feito para motoristas de aplicativo. Ganhos, gastos, metas, combustível e manutenção do carro — tudo em um só lugar, direto no seu celular.</p>
 
-    <button id="installBtn" class="btn-install" type="button">Instalar aplicativo grátis</button>
+    <button id="installBtn" class="btn-install" type="button">Instalar e testar grátis por 7 dias</button>
+    <div class="price-line">Depois do teste, apenas <b>R$ 10/mês</b> — assinatura via Pix, cancela quando quiser.</div>
+    <div class="no-card-note">
+      <span class="no-card-emoji">🔓</span>
+      <span><b>Sem pegadinha do cartão:</b> sabe aquele "teste grátis" que pede o cartão e te cobra se você esquecer de cancelar? Aqui <b>não tem isso</b>. Você instala, se cadastra e testa — sem cadastrar cartão nenhum. Gostou? Aí sim você assina, pelo Pix.</span>
+    </div>
     <div class="note" id="noteText">Use o Chrome para instalar o aplicativo.</div>
     <div class="install-helper" id="installHelper">
       <div id="installHelperText">Instalação automática indisponível neste momento.</div>
@@ -517,8 +535,8 @@ button{font:inherit}
   <!-- CTA final -->
   <section class="cta-final container">
     <h2>Pronto para saber quanto você realmente ganha?</h2>
-    <p>Instale grátis agora e comece a controlar seus números na próxima corrida.</p>
-    <button id="installBtnBottom" class="btn-install" type="button">Instalar aplicativo grátis</button>
+    <p>Teste grátis por 7 dias — sem cadastrar cartão. Depois, apenas <b>R$ 10/mês</b> via Pix.</p>
+    <button id="installBtnBottom" class="btn-install" type="button">Instalar e testar grátis por 7 dias</button>
   </section>
 
   <footer class="footer container">
@@ -526,7 +544,7 @@ button{font:inherit}
   </footer>
 </div>
 
-<div class="version-debug-badge">MetaDriver vBeta1.54 · boot</div>
+<div class="version-debug-badge">MetaDriver vBeta1.56 · boot</div>
 
 <script>
 (function(){

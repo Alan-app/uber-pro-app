@@ -1,3 +1,39 @@
+MetaDriver vBeta1.56
+
+Solicitado:
+- Revisão geral da formatação do site de instalação (textos colados nas margens), deixando-o o mais agradável, bonito e profissional possível.
+- Perto do botão de instalação: oferta "instale e teste grátis por 7 dias; depois, apenas R$ 10 mensais".
+- Aviso meio informal/provocativo: no teste grátis NÃO precisa cadastrar cartão (diferente dos apps que pedem cartão e cobram se a pessoa esquecer de cancelar) — a assinatura é por Pix; basta instalar e se cadastrar para testar.
+
+Feito:
+- CAUSA RAIZ dos textos colados identificada e corrigida: as seções .hero, .features, .cta-final e .footer usavam padding abreviado com "0" nas laterais, o que ANULAVA o respiro lateral do .container no mesmo elemento. Corrigido usando padding-top/bottom específicos; agora todas as seções têm 22–28px de margem lateral garantida (verificado por medição no navegador).
+- Revisão geral de ritmo e respiro: hero com mais folga vertical, seções de funcionalidades mais espaçadas, entrelinhas maiores nos parágrafos e listas, rodapé com mais respiro.
+- Botões de instalar (topo e final) renomeados para "Instalar e testar grátis por 7 dias".
+- Linha de preço abaixo do botão do topo: "Depois do teste, apenas R$ 10/mês — assinatura via Pix, cancela quando quiser."
+- Aviso provocativo em caixinha verde abaixo do botão: "🔓 Sem pegadinha do cartão: sabe aquele 'teste grátis' que pede o cartão e te cobra se você esquecer de cancelar? Aqui não tem isso. Você instala, se cadastra e testa — sem cadastrar cartão nenhum. Gostou? Aí sim você assina, pelo Pix."
+- CTA final atualizada com a mesma oferta ("Teste grátis por 7 dias — sem cadastrar cartão. Depois, apenas R$ 10/mês via Pix.").
+- Toda a lógica de instalação permanece intacta.
+
+Próximo combinado:
+- O usuário vai enviar prints de todas as telas do aplicativo para substituírem os mockups do site, deixando as imagens reais do app.
+
+Status atual:
+- Pronto para teste: abrir o site num navegador comum e conferir margens, respiro, oferta de preço e o aviso do cartão.
+
+MetaDriver vBeta1.55
+
+Solicitado:
+- No Resumo geral: adicionar "Líquido total" abaixo de "Bruto total" (lucro líquido SEM descontar gastos extras e retiradas) e renomear "Lucro líquido" para "Lucro líquido disponível".
+
+Feito:
+- Nova linha "Líquido total" logo abaixo de "Bruto total", calculada como bruto − combustível estimado (ou seja, o líquido antes de descontar gastos extras e retiradas), com as mesmas regras de cor (amarelo normal, vermelho se negativo).
+- Painel de destaque renomeado de "Lucro líquido" para "Lucro líquido disponível" (fórmula inalterada: bruto − combustível − gastos extras − retiradas).
+- Aplicado nas DUAS versões do bloco (estilizada e reserva de segurança), mantendo o mecanismo de proteção da vBeta1.54.
+- Observação registrada: "Lucro líquido" também aparece no relatório PDF e no Histórico, mas lá a fórmula é diferente (não desconta retiradas) — NÃO foi renomeado nesses lugares para não rotular errado; decisão pendente com o usuário.
+
+Status atual:
+- Pronto para teste: conferir a nova linha "Líquido total" e o novo rótulo do painel de destaque no Resumo geral.
+
 MetaDriver vBeta1.54
 
 Solicitado:

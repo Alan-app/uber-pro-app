@@ -1,3 +1,18 @@
+vBeta1.56 - SITE: correção das margens (causa raiz), respiro geral e oferta de teste grátis
+- Corrigida a causa raiz dos textos colados nas margens: seções com padding lateral zerado anulando o respiro do container. Agora 22-28px garantidos em todas as seções (verificado por medição).
+- Revisão de ritmo: mais folga vertical no hero e nas seções, entrelinhas maiores, rodapé mais espaçado.
+- Botões: "Instalar e testar grátis por 7 dias" (topo e final). Linha de preço: "Depois do teste, apenas R$ 10/mês — assinatura via Pix, cancela quando quiser."
+- Aviso provocativo em destaque: no teste grátis NÃO precisa cadastrar cartão (assinatura por Pix) — instala, se cadastra e testa.
+- Lógica de instalação intacta. Mockups serão substituídos por prints reais do app (a enviar pelo usuário).
+- Base oficial: vBeta1.55.
+
+vBeta1.55 - Resumo geral: nova linha "Líquido total" + rótulo "Lucro líquido disponível"
+- "Líquido total" (bruto − combustível estimado, sem descontar gastos extras e retiradas) adicionado abaixo de "Bruto total".
+- Painel de destaque renomeado para "Lucro líquido disponível" (fórmula inalterada).
+- Aplicado na versão estilizada e na reserva de segurança.
+- "Lucro líquido" do PDF e do Histórico NÃO renomeados (fórmula diferente lá — não desconta retiradas); pendente decisão.
+- Base oficial: vBeta1.54.
+
 vBeta1.54 - UNIFICAÇÃO VISUAL: resumos no mesmo estilo do card de sessão ao vivo
 - Relatório Diário, Configurar Meta e Resumo geral agora usam o mesmo vocabulário do card de sessão: rótulos pequenos em maiúsculas, valores grandes à direita, divisores tracejados sutis.
 - Lucro líquido em painel de destaque central no Resumo geral (cor do tema; vermelho quando negativo).
