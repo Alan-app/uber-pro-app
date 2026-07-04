@@ -1,3 +1,11 @@
+vBeta1.54 - UNIFICAÇÃO VISUAL: resumos no mesmo estilo do card de sessão ao vivo
+- Relatório Diário, Configurar Meta e Resumo geral agora usam o mesmo vocabulário do card de sessão: rótulos pequenos em maiúsculas, valores grandes à direita, divisores tracejados sutis.
+- Lucro líquido em painel de destaque central no Resumo geral (cor do tema; vermelho quando negativo).
+- SEGURANÇA: cada bloco estilizado é isolado em try/catch com o formato antigo gerado antes como reserva — qualquer falha mostra o formato anterior em vez de quebrar (lição da vBeta1.51).
+- Cores de estado (amarelo/vermelho/verde) preservadas com o mesmo significado.
+- Funções de sessão verificadas byte a byte contra a vBeta1.50: idênticas. Nenhuma regra genérica de CSS em botões (lição do microfone, vBeta1.53).
+- Base oficial: vBeta1.53.
+
 vBeta1.53 - CORREÇÃO do microfone preto + card "Sessão em andamento" no estilo do site
 - Microfone do lançamento por voz de volta ao azul claro: removida a regra genérica de relevo nos botões (vBeta1.51/1.52) que sobrescrevia o gradiente de cor dele. Lição registrada no código: nenhuma regra genérica de background em botões.
 - Card de sessão em andamento refeito igual ao mockup do site: título + selo "● AO VIVO", "Ganho da sessão" grande em branco, "R$/hora" grande (verde na meta / vermelho abaixo — regra da vBeta1.33 mantida) e linha "Início: HH:MM · tempo rodando". Todos os dados anteriores continuam visíveis.
