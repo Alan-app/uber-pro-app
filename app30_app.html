@@ -43,7 +43,7 @@ try{
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver vBeta1.56</title>
+<title>MetaDriver vBeta1.57</title>
 <style id="md-hydration-lock">
 body.preload > *:not(#mdBootOverlay){visibility:hidden!important;}
 #mdBootOverlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#0f172a;color:#fff;z-index:2147483647;font-family:Inter,system-ui,sans-serif;font-weight:800;letter-spacing:.2px;}
@@ -4256,7 +4256,7 @@ body[data-tema$="claro"] .historico-report-line{border-bottom-color:rgba(0,0,0,.
 
 <div class="card">
   <div class="card-header collapsible-header" onclick="toggleSection(this)">
-        <h3>Relatório Diário</h3>
+        <h3>Relatório Diário e Sessões</h3>
         <span class="collapse-arrow">▼</span>
       </div>
   <div class="card-body">
@@ -8294,6 +8294,10 @@ function editarHorarioSessaoHistorico(diaUber, indice, campo){
         sessao.ganhoHora = ganhoSessao / sessao.tempoDecorrido;
       }
     }catch(e){}
+    // vBeta1.57 - correção: recalcular também os totais do dia (totalSaldoBase,
+    // totalHoras, totalGanhoHora), que ficavam desatualizados após editar o
+    // horário de uma sessão isolada do histórico.
+    try{ reprocessarResumoHistoricoGanhoHora(diaUber); }catch(e){}
     salvar();
     atualizar();
     toast('✅ Sessão do histórico atualizada.');
@@ -8311,6 +8315,11 @@ function excluirSessaoHistorico(diaUber, indice){
       // Remove dia se ficou sem sessões
       if(!dados.ganhoHoraHistorico[idx].sessoes.length){
         dados.ganhoHoraHistorico.splice(idx, 1);
+      }else{
+        // vBeta1.57 - correção: recalcular totais do dia (totalSaldoBase,
+        // totalHoras, totalGanhoHora) após excluir uma sessão, senão o
+        // resumo do dia continuava contando a sessão já apagada.
+        try{ reprocessarResumoHistoricoGanhoHora(diaUber); }catch(e){}
       }
       salvar();
       atualizar();
@@ -9388,7 +9397,7 @@ function exportarRelatorioPDF(){
       <script>
         setTimeout(()=>window.print(), 250);
       <\/script>
-    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver vBeta1.56 · app</div>
+    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver vBeta1.57 · app</div>
 
 
 <script>
