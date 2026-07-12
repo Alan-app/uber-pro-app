@@ -43,7 +43,7 @@ try{
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver vBeta1.58</title>
+<title>MetaDriver vBeta1.59</title>
 <style id="md-hydration-lock">
 body.preload > *:not(#mdBootOverlay){visibility:hidden!important;}
 #mdBootOverlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#0f172a;color:#fff;z-index:2147483647;font-family:Inter,system-ui,sans-serif;font-weight:800;letter-spacing:.2px;}
@@ -3742,17 +3742,22 @@ body[data-tema$="claro"] .card{
   transition:width .5s ease;
 }
 
-/* vBeta1.58 - saldos por app (Uber/99) no Relatório Diário e Sessões, abaixo
+/* vBeta1.59 - saldos por app (Uber/99) no Relatório Diário e Sessões, abaixo
    da barra de progresso da meta. Mesma identidade visual dos cards do
    teclado do botão flutuante (.quick-balance-split-card). */
-.meta-saldo-apps{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 12px;}
-.meta-saldo-app-card{border-radius:14px;padding:9px 12px;border:1px solid rgba(255,255,255,.10);}
-.meta-saldo-app-label{font-size:11px;font-weight:900;opacity:.9;margin-bottom:4px;letter-spacing:.3px;}
-.meta-saldo-app-value{font-size:18px;line-height:1;font-weight:900;}
-.meta-saldo-app-card.uber{background:rgba(0,0,0,.55);border-color:rgba(255,255,255,.12);}
-.meta-saldo-app-card.uber .meta-saldo-app-label,.meta-saldo-app-card.uber .meta-saldo-app-value{color:#fff;}
-.meta-saldo-app-card.n99{background:rgba(255,221,0,.55);border-color:rgba(0,0,0,.10);}
-.meta-saldo-app-card.n99 .meta-saldo-app-label,.meta-saldo-app-card.n99 .meta-saldo-app-value{color:#111827;}
+.meta-saldo-apps{display:flex;gap:18px;margin:0 0 12px;flex-wrap:wrap;}
+.meta-saldo-app-item{display:flex;align-items:center;gap:9px;}
+.meta-saldo-app-badge{
+  width:40px;height:40px;flex:0 0 40px;border-radius:11px;
+  display:flex;align-items:center;justify-content:center;
+  border:1px solid rgba(255,255,255,.10);
+}
+.meta-saldo-app-badge-label{font-weight:900;letter-spacing:.2px;}
+.meta-saldo-app-badge.uber{background:rgba(0,0,0,.72);border-color:rgba(255,255,255,.14);}
+.meta-saldo-app-badge.uber .meta-saldo-app-badge-label{color:#fff;font-size:8.5px;}
+.meta-saldo-app-badge.n99{background:rgba(255,221,0,.72);border-color:rgba(0,0,0,.12);}
+.meta-saldo-app-badge.n99 .meta-saldo-app-badge-label{color:#111827;font-size:14px;}
+.meta-saldo-app-value{font-size:15.5px;font-weight:900;}
 
 /* Cabeçalhos de card: filete de destaque (via box-shadow interno, sem afetar layout) */
 .card-header{
@@ -4068,7 +4073,7 @@ body[data-tema$="claro"] .historico-report-line{border-bottom-color:rgba(0,0,0,.
   <div class="menu-item"><button class="secondary" onclick="abrirSaldoAtualButtonMenu(); closeMenu();">Botão de saldo atual</button></div>
   <div class="menu-item"><button class="secondary" onclick="abrirTemas(); closeMenu();">Temas</button></div>
   <div class="menu-item menu-user-row"><span class="menu-user-name" id="menuUserName">Usuário</span><button class="danger" onclick="forceLogout(); return false;">Sair</button></div>
-  <div class="menu-note" style="text-align:center;">vBeta1.58</div>
+  <div class="menu-note" style="text-align:center;">vBeta1.59</div>
 </div>
 
 
@@ -5570,7 +5575,7 @@ function mdBuildDiagnosticsObject(){
     const durableObj = mdSafeJsonParse(durableRaw);
     const diag = {
       generated_at: mdNowIso(),
-      app_version: 'MetaDriver vBeta1.58',
+      app_version: 'MetaDriver vBeta1.59',
       cloud_table: CLOUD_TABLE,
       device_id: mdEnsureDeviceId(),
       visibility_state: document.visibilityState,
@@ -7577,7 +7582,7 @@ function mdCommitLancamentoMutation(reason){
   try{ atualizar(); }catch(e){}
   try{ if(typeof refreshQuickBalanceFabMiniDisplay === "function") refreshQuickBalanceFabMiniDisplay(); }catch(e){}
   try{ if(typeof updateQuickBalanceFabUI === "function") updateQuickBalanceFabUI(); }catch(e){}
-  try{ if(typeof toast === "function" && reason) console.info("MetaDriver vBeta1.58 mutation:", reason); }catch(e){}
+  try{ if(typeof toast === "function" && reason) console.info("MetaDriver vBeta1.59 mutation:", reason); }catch(e){}
 }
 
 
@@ -9411,7 +9416,7 @@ function exportarRelatorioPDF(){
       <script>
         setTimeout(()=>window.print(), 250);
       <\/script>
-    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver vBeta1.58 · app</div>
+    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver vBeta1.59 · app</div>
 
 
 <script>
@@ -10032,7 +10037,7 @@ const fuelCfg = getCombustivelConfig(bruto);
     }
   }catch(e){}
 
-  // vBeta1.58 - saldos por app (Uber/99) logo abaixo da barra de progresso da
+  // vBeta1.59 - saldos por app (Uber/99) logo abaixo da barra de progresso da
   // meta, no Relatório Diário e Sessões. Mesma fonte de dados do teclado do
   // botão flutuante (dados.saldoUber/dados.saldo99). Isolado em try/catch:
   // qualquer falha aqui não interrompe o restante da atualização de tela.
@@ -10046,13 +10051,13 @@ const fuelCfg = getCombustivelConfig(bruto);
         msaWrap.style.display = "";
         msaWrap.innerHTML =
           "<div class='meta-saldo-apps'>" +
-            "<div class='meta-saldo-app-card uber'>" +
-              "<div class='meta-saldo-app-label'>UBER</div>" +
-              "<div class='meta-saldo-app-value'>R$ " + saldoUberMsa.toFixed(2) + "</div>" +
+            "<div class='meta-saldo-app-item'>" +
+              "<div class='meta-saldo-app-badge uber'><span class='meta-saldo-app-badge-label'>UBER</span></div>" +
+              "<span class='meta-saldo-app-value " + (saldoUberMsa < 0 ? "dangerText" : "warning") + "'>R$ " + saldoUberMsa.toFixed(2) + "</span>" +
             "</div>" +
-            "<div class='meta-saldo-app-card n99'>" +
-              "<div class='meta-saldo-app-label'>99</div>" +
-              "<div class='meta-saldo-app-value'>R$ " + saldo99Msa.toFixed(2) + "</div>" +
+            "<div class='meta-saldo-app-item'>" +
+              "<div class='meta-saldo-app-badge n99'><span class='meta-saldo-app-badge-label'>99</span></div>" +
+              "<span class='meta-saldo-app-value " + (saldo99Msa < 0 ? "dangerText" : "warning") + "'>R$ " + saldo99Msa.toFixed(2) + "</span>" +
             "</div>" +
           "</div>";
       }else{
