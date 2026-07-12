@@ -43,7 +43,7 @@ try{
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver vBeta1.59</title>
+<title>MetaDriver vBeta1.61</title>
 <style id="md-hydration-lock">
 body.preload > *:not(#mdBootOverlay){visibility:hidden!important;}
 #mdBootOverlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#0f172a;color:#fff;z-index:2147483647;font-family:Inter,system-ui,sans-serif;font-weight:800;letter-spacing:.2px;}
@@ -3436,7 +3436,7 @@ body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff3b0; }
 .quick-balance-split-card{border:1px solid rgba(255,255,255,.10);border-radius:16px;padding:10px 12px;cursor:pointer;user-select:none;transition:opacity .15s ease, box-shadow .15s ease;}
 .quick-balance-split-card.active{box-shadow:0 0 0 2px rgba(255,255,255,.14) inset;opacity:1;}
 .quick-balance-split-label{font-size:12px;font-weight:900;opacity:.9;margin-bottom:6px;letter-spacing:.2px;}
-.quick-balance-split-card.uber{background:rgba(0,0,0,.55);border-color:rgba(255,255,255,.12);}
+.quick-balance-split-card.uber{background:rgba(0,0,0,.55);border:1.5px solid rgba(255,255,255,.34);}
 .quick-balance-split-card.uber .quick-balance-split-label,.quick-balance-split-card.uber .quick-balance-split-value{color:#fff;}
 .quick-balance-split-card.n99{background:rgba(255,221,0,.55);border-color:rgba(0,0,0,.10);}
 .quick-balance-split-card.n99 .quick-balance-split-label,.quick-balance-split-card.n99 .quick-balance-split-value{color:#111827;}
@@ -3468,6 +3468,7 @@ body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff3b0; }
 }
 .quick-balance-split-card.uber.active{
   background:rgba(0,0,0,.72) !important;
+  border-color:rgba(255,255,255,.55) !important;
 }
 .quick-balance-split-card.n99.active{
   background:rgba(255,221,0,.72) !important;
@@ -3753,10 +3754,13 @@ body[data-tema$="claro"] .card{
   border:1px solid rgba(255,255,255,.10);
 }
 .meta-saldo-app-badge-label{font-weight:900;letter-spacing:.2px;}
-.meta-saldo-app-badge.uber{background:rgba(0,0,0,.72);border-color:rgba(255,255,255,.14);}
-.meta-saldo-app-badge.uber .meta-saldo-app-badge-label{color:#fff;font-size:8.5px;}
+.meta-saldo-app-badge.uber{
+  background:#000;
+  border:1.5px solid rgba(255,255,255,.45);
+}
+.meta-saldo-app-badge.uber .meta-saldo-app-badge-label{color:#fff;font-size:10.5px;letter-spacing:0;}
 .meta-saldo-app-badge.n99{background:rgba(255,221,0,.72);border-color:rgba(0,0,0,.12);}
-.meta-saldo-app-badge.n99 .meta-saldo-app-badge-label{color:#111827;font-size:14px;}
+.meta-saldo-app-badge.n99 .meta-saldo-app-badge-label{color:#111827;font-size:13px;}
 .meta-saldo-app-value{font-size:15.5px;font-weight:900;}
 
 /* Cabeçalhos de card: filete de destaque (via box-shadow interno, sem afetar layout) */
@@ -4073,7 +4077,7 @@ body[data-tema$="claro"] .historico-report-line{border-bottom-color:rgba(0,0,0,.
   <div class="menu-item"><button class="secondary" onclick="abrirSaldoAtualButtonMenu(); closeMenu();">Botão de saldo atual</button></div>
   <div class="menu-item"><button class="secondary" onclick="abrirTemas(); closeMenu();">Temas</button></div>
   <div class="menu-item menu-user-row"><span class="menu-user-name" id="menuUserName">Usuário</span><button class="danger" onclick="forceLogout(); return false;">Sair</button></div>
-  <div class="menu-note" style="text-align:center;">vBeta1.59</div>
+  <div class="menu-note" style="text-align:center;">vBeta1.61</div>
 </div>
 
 
@@ -5575,7 +5579,7 @@ function mdBuildDiagnosticsObject(){
     const durableObj = mdSafeJsonParse(durableRaw);
     const diag = {
       generated_at: mdNowIso(),
-      app_version: 'MetaDriver vBeta1.59',
+      app_version: 'MetaDriver vBeta1.61',
       cloud_table: CLOUD_TABLE,
       device_id: mdEnsureDeviceId(),
       visibility_state: document.visibilityState,
@@ -7582,7 +7586,7 @@ function mdCommitLancamentoMutation(reason){
   try{ atualizar(); }catch(e){}
   try{ if(typeof refreshQuickBalanceFabMiniDisplay === "function") refreshQuickBalanceFabMiniDisplay(); }catch(e){}
   try{ if(typeof updateQuickBalanceFabUI === "function") updateQuickBalanceFabUI(); }catch(e){}
-  try{ if(typeof toast === "function" && reason) console.info("MetaDriver vBeta1.59 mutation:", reason); }catch(e){}
+  try{ if(typeof toast === "function" && reason) console.info("MetaDriver vBeta1.61 mutation:", reason); }catch(e){}
 }
 
 
@@ -9416,7 +9420,7 @@ function exportarRelatorioPDF(){
       <script>
         setTimeout(()=>window.print(), 250);
       <\/script>
-    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver vBeta1.59 · app</div>
+    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver vBeta1.61 · app</div>
 
 
 <script>
