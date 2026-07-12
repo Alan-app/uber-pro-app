@@ -43,7 +43,7 @@ try{
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver vBeta1.57</title>
+<title>MetaDriver vBeta1.58</title>
 <style id="md-hydration-lock">
 body.preload > *:not(#mdBootOverlay){visibility:hidden!important;}
 #mdBootOverlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#0f172a;color:#fff;z-index:2147483647;font-family:Inter,system-ui,sans-serif;font-weight:800;letter-spacing:.2px;}
@@ -3742,6 +3742,18 @@ body[data-tema$="claro"] .card{
   transition:width .5s ease;
 }
 
+/* vBeta1.58 - saldos por app (Uber/99) no Relatório Diário e Sessões, abaixo
+   da barra de progresso da meta. Mesma identidade visual dos cards do
+   teclado do botão flutuante (.quick-balance-split-card). */
+.meta-saldo-apps{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 12px;}
+.meta-saldo-app-card{border-radius:14px;padding:9px 12px;border:1px solid rgba(255,255,255,.10);}
+.meta-saldo-app-label{font-size:11px;font-weight:900;opacity:.9;margin-bottom:4px;letter-spacing:.3px;}
+.meta-saldo-app-value{font-size:18px;line-height:1;font-weight:900;}
+.meta-saldo-app-card.uber{background:rgba(0,0,0,.55);border-color:rgba(255,255,255,.12);}
+.meta-saldo-app-card.uber .meta-saldo-app-label,.meta-saldo-app-card.uber .meta-saldo-app-value{color:#fff;}
+.meta-saldo-app-card.n99{background:rgba(255,221,0,.55);border-color:rgba(0,0,0,.10);}
+.meta-saldo-app-card.n99 .meta-saldo-app-label,.meta-saldo-app-card.n99 .meta-saldo-app-value{color:#111827;}
+
 /* Cabeçalhos de card: filete de destaque (via box-shadow interno, sem afetar layout) */
 .card-header{
   box-shadow:inset 3px 0 0 var(--accent);
@@ -4056,7 +4068,7 @@ body[data-tema$="claro"] .historico-report-line{border-bottom-color:rgba(0,0,0,.
   <div class="menu-item"><button class="secondary" onclick="abrirSaldoAtualButtonMenu(); closeMenu();">Botão de saldo atual</button></div>
   <div class="menu-item"><button class="secondary" onclick="abrirTemas(); closeMenu();">Temas</button></div>
   <div class="menu-item menu-user-row"><span class="menu-user-name" id="menuUserName">Usuário</span><button class="danger" onclick="forceLogout(); return false;">Sair</button></div>
-  <div class="menu-note" style="text-align:center;">vBeta1.56</div>
+  <div class="menu-note" style="text-align:center;">vBeta1.58</div>
 </div>
 
 
@@ -4266,6 +4278,8 @@ body[data-tema$="claro"] .historico-report-line{border-bottom-color:rgba(0,0,0,.
 </div>
 
 <div id="metaProgressoDia" style="display:none;margin-top:0;margin-bottom:12px;"></div>
+
+<div id="metaSaldoAppsWrap" style="display:none;margin-top:0;margin-bottom:12px;"></div>
 
 <div id="horasResumo" class="muted" style="margin-top:0;margin-bottom:10px;"></div>
 
@@ -5556,7 +5570,7 @@ function mdBuildDiagnosticsObject(){
     const durableObj = mdSafeJsonParse(durableRaw);
     const diag = {
       generated_at: mdNowIso(),
-      app_version: 'MetaDriver vBeta1.56',
+      app_version: 'MetaDriver vBeta1.58',
       cloud_table: CLOUD_TABLE,
       device_id: mdEnsureDeviceId(),
       visibility_state: document.visibilityState,
@@ -7563,7 +7577,7 @@ function mdCommitLancamentoMutation(reason){
   try{ atualizar(); }catch(e){}
   try{ if(typeof refreshQuickBalanceFabMiniDisplay === "function") refreshQuickBalanceFabMiniDisplay(); }catch(e){}
   try{ if(typeof updateQuickBalanceFabUI === "function") updateQuickBalanceFabUI(); }catch(e){}
-  try{ if(typeof toast === "function" && reason) console.info("MetaDriver vBeta1.56 mutation:", reason); }catch(e){}
+  try{ if(typeof toast === "function" && reason) console.info("MetaDriver vBeta1.58 mutation:", reason); }catch(e){}
 }
 
 
@@ -9397,7 +9411,7 @@ function exportarRelatorioPDF(){
       <script>
         setTimeout(()=>window.print(), 250);
       <\/script>
-    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver vBeta1.57 · app</div>
+    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver vBeta1.58 · app</div>
 
 
 <script>
@@ -10014,6 +10028,36 @@ const fuelCfg = getCombustivelConfig(bruto);
       }else{
         mpdEl.style.display = "none";
         mpdEl.innerHTML = "";
+      }
+    }
+  }catch(e){}
+
+  // vBeta1.58 - saldos por app (Uber/99) logo abaixo da barra de progresso da
+  // meta, no Relatório Diário e Sessões. Mesma fonte de dados do teclado do
+  // botão flutuante (dados.saldoUber/dados.saldo99). Isolado em try/catch:
+  // qualquer falha aqui não interrompe o restante da atualização de tela.
+  try{
+    var msaWrap = document.getElementById("metaSaldoAppsWrap");
+    if(msaWrap){
+      var parseSaldoApp = (typeof mdParseMoneyV19 === "function") ? mdParseMoneyV19 : function(v){ return Number(v || 0) || 0; };
+      var saldoUberMsa = parseSaldoApp(dados.saldoUber);
+      var saldo99Msa = parseSaldoApp(dados.saldo99);
+      if(saldoUberMsa || saldo99Msa){
+        msaWrap.style.display = "";
+        msaWrap.innerHTML =
+          "<div class='meta-saldo-apps'>" +
+            "<div class='meta-saldo-app-card uber'>" +
+              "<div class='meta-saldo-app-label'>UBER</div>" +
+              "<div class='meta-saldo-app-value'>R$ " + saldoUberMsa.toFixed(2) + "</div>" +
+            "</div>" +
+            "<div class='meta-saldo-app-card n99'>" +
+              "<div class='meta-saldo-app-label'>99</div>" +
+              "<div class='meta-saldo-app-value'>R$ " + saldo99Msa.toFixed(2) + "</div>" +
+            "</div>" +
+          "</div>";
+      }else{
+        msaWrap.style.display = "none";
+        msaWrap.innerHTML = "";
       }
     }
   }catch(e){}
