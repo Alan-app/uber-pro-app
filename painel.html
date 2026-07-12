@@ -6,7 +6,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>MetaDriver vBeta1.56 · painel</title>
+<title>MetaDriver vBeta1.63 · painel</title>
 <style>
 :root { color-scheme: dark; }
 * { box-sizing: border-box; }
@@ -56,8 +56,17 @@ button.secondary { background:rgba(255,255,255,.06); color:#fff; border:1px soli
   <div class="row">
     <button class="action" id="openAppBtn" type="button">Voltar</button>
   </div>
+  <!-- vBeta1.63 - renovação automatizada via Pix (Asaas); o WhatsApp deixou de
+       ser canal de assinatura e virou apenas suporte. Esta página é a única
+       porta de renovação para conta bloqueada (o login barra antes do app). -->
+  <div id="renovarBox" style="display:none;margin-top:14px;text-align:left;">
+    <label style="display:block;margin-bottom:6px;font-size:13px;opacity:.85;">CPF (necessário para gerar o Pix)</label>
+    <input id="cpfInput" type="text" inputmode="numeric" placeholder="Somente números" style="width:100%;padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);color:#fff;font:inherit;margin-bottom:10px;" />
+    <button class="action" id="assinarBtn" type="button">Assinar agora com Pix</button>
+    <div id="assinarErro" style="display:none;color:#f87171;font-size:13px;margin-top:8px;"></div>
+  </div>
   <div class="row">
-    <button class="action" id="subscribeBtn" type="button">Assinatura / Renovação — fale conosco no WhatsApp</button>
+    <button class="secondary action" id="suporteBtn" type="button">Falar com o suporte</button>
   </div>
 </div>
 <script>
@@ -142,18 +151,54 @@ button.secondary { background:rgba(255,255,255,.06); color:#fff; border:1px soli
       }
       $("statusValue").textContent = access.status;
       $("daysValue").textContent = access.status === "trial" ? getDaysRemaining(access.trial_end) : "-";
-      $("endValue").textContent = access.trial_end ? new Date(access.trial_end).toLocaleString("pt-BR") : "-";
-      if(access.status === "blocked") showMsg("Seu acesso expirou. Entre em contato para renovar.", "danger");
+      $("endValue").textContent = access.status === "active" && access.access_until
+        ? new Date(access.access_until).toLocaleString("pt-BR")
+        : (access.trial_end ? new Date(access.trial_end).toLocaleString("pt-BR") : "-");
+      var assinaturaEmDia = access.status === "active" && access.access_until && !isExpired(access.access_until);
+      if(!assinaturaEmDia){
+        $("renovarBox").style.display = "block";
+        if(access.cpf) $("cpfInput").value = String(access.cpf);
+      }
+      if(access.status === "blocked") showMsg("Seu acesso expirou. Assine abaixo para reativar na hora.", "danger");
+      window.__mdUser = user;
     } catch(e) {
       showMsg(e.message || "Erro ao carregar painel.", "danger");
     }
   }
   $("openAppBtn").addEventListener("click", function(){ location.href = APP_PAGE; }, true);
-  var s=$("subscribeBtn");
-  if(s) s.addEventListener("click", function(){ window.open("https://wa.me/5521920075291", "_blank"); }, true);
+  $("suporteBtn").addEventListener("click", function(){ window.open("https://wa.me/5521920075291", "_blank"); }, true);
+  $("assinarBtn").addEventListener("click", async function(){
+    var erroEl = $("assinarErro"); erroEl.style.display = "none"; erroEl.textContent = "";
+    var cpf = ($("cpfInput").value || "").replace(/\D/g, "");
+    if(cpf.length !== 11){ erroEl.textContent = "Digite um CPF válido, só números."; erroEl.style.display = "block"; return; }
+    var btn = $("assinarBtn");
+    try{
+      var token = await getToken();
+      var user = window.__mdUser;
+      if(!token || !user){ erroEl.textContent = "Sessão expirada. Faça login novamente."; erroEl.style.display = "block"; return; }
+      btn.disabled = true; btn.textContent = "Gerando cobrança...";
+      var resp = await fetch(SUPABASE_URL + "/functions/v1/criar-assinatura", {
+        method: "POST",
+        headers: { "apikey": SUPABASE_KEY, "Authorization": "Bearer " + token, "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: user.id, nome: (user.user_metadata && user.user_metadata.nome) || "Motorista MetaDriver", cpf: cpf, email: user.email || "" })
+      });
+      var data = null; try{ data = await resp.json(); }catch(e){ data = null; }
+      if(!resp.ok || !data){ erroEl.textContent = "Não foi possível gerar a cobrança agora. Tente novamente em instantes."; erroEl.style.display = "block"; return; }
+      if(data.invoiceUrl){
+        window.open(data.invoiceUrl, "_blank");
+        showMsg("Cobrança gerada. Finalize o pagamento na aba que abriu; o acesso libera automaticamente após a confirmação.");
+      }else{
+        showMsg("Assinatura criada. Aguarde a confirmação do pagamento.");
+      }
+    }catch(e){
+      erroEl.textContent = "Não foi possível gerar a cobrança agora. Tente novamente em instantes."; erroEl.style.display = "block";
+    }finally{
+      btn.disabled = false; btn.textContent = "Assinar agora com Pix";
+    }
+  }, true);
   loadPanel();
 })();
 </script>
-<div class="version-debug-badge" id="versionDebugBadge">MetaDriver vBeta1.56 · painel</div>
+<div class="version-debug-badge" id="versionDebugBadge">MetaDriver vBeta1.63 · painel</div>
 </body>
 </html>

@@ -43,7 +43,7 @@ try{
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver vBeta1.62</title>
+<title>MetaDriver vBeta1.63</title>
 <style id="md-hydration-lock">
 body.preload > *:not(#mdBootOverlay){visibility:hidden!important;}
 #mdBootOverlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#0f172a;color:#fff;z-index:2147483647;font-family:Inter,system-ui,sans-serif;font-weight:800;letter-spacing:.2px;}
@@ -4077,35 +4077,37 @@ body[data-tema$="claro"] .historico-report-line{border-bottom-color:rgba(0,0,0,.
   <div class="menu-item"><button class="secondary" onclick="abrirSaldoAtualButtonMenu(); closeMenu();">Botão de saldo atual</button></div>
   <div class="menu-item"><button class="secondary" onclick="abrirTemas(); closeMenu();">Temas</button></div>
   <div class="menu-item menu-user-row"><span class="menu-user-name" id="menuUserName">Usuário</span><button class="danger" onclick="forceLogout(); return false;">Sair</button></div>
-  <div class="menu-note" style="text-align:center;">vBeta1.62</div>
+  <div class="menu-note" style="text-align:center;">vBeta1.63</div>
 </div>
 
 
-<div id="contaOverlay" class="editvalor-overlay" role="dialog" aria-modal="true" aria-label="Gerenciar conta">
+<div id="contaOverlay" class="editvalor-overlay" role="dialog" aria-modal="true" aria-label="Minha conta">
   <div class="editvalor-modal">
-    <div class="editvalor-title">Gerenciar conta</div>
-    <div class="account-hint">Altere o nome que aparece no menu do MetaDriver.</div>
+    <div class="editvalor-title">Minha conta</div>
+
     <label style="display:block;margin-bottom:6px;text-align:left;">Nome do usuário</label>
     <div class="account-name-row">
       <input id="contaNomeInput" type="text" placeholder="Digite seu nome" autocomplete="name" readonly />
       <button id="btnEditarNome" type="button" onclick="mdContaSetEditing(true)">Editar</button>
     </div>
-    <div class="editvalor-actions" style="flex-direction:column;">
-      <button id="btnSalvarNome" style="display:none;" type="button" onclick="salvarNomeUsuarioConta()">Salvar nome</button>
-      <button type="button" class="secondary" onclick="location.href='painel.html'">Abrir painel da conta</button>
-      <button type="button" class="cancel" onclick="fecharGerenciarConta()">Cancelar</button>
-    </div>
+    <button id="btnSalvarNome" style="display:none;width:100%;margin-top:8px;" type="button" onclick="salvarNomeUsuarioConta()">Salvar nome</button>
 
-    <!-- vBeta1.62 - assinatura Pix automatizada via Asaas -->
+    <!-- vBeta1.63 - seção de assinatura integrada (status, dias restantes, Pix);
+         substitui o antigo painel.html dentro do app e o fluxo manual via WhatsApp -->
     <div style="margin-top:18px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.10);text-align:left;">
       <div style="font-weight:600;margin-bottom:6px;">Assinatura</div>
       <div id="assinaturaStatusTexto" class="account-hint" style="margin-bottom:10px;">Carregando status...</div>
-      <div id="assinaturaFormBox">
+      <div id="assinaturaFormBox" style="display:none;">
         <label style="display:block;margin-bottom:6px;">CPF (necessário para gerar o Pix)</label>
         <input id="assinaturaCpfInput" type="text" inputmode="numeric" placeholder="Somente números" style="width:100%;margin-bottom:10px;" />
         <button id="btnAssinarAgora" type="button" onclick="mdIniciarAssinatura()">Assinar agora com Pix</button>
-        <div id="assinaturaErro" style="color:#f87171;font-size:13px;margin-top:8px;display:none;"></div>
       </div>
+      <div id="assinaturaErro" style="color:#f87171;font-size:13px;margin-top:8px;display:none;"></div>
+    </div>
+
+    <div class="editvalor-actions" style="flex-direction:column;margin-top:18px;">
+      <button type="button" class="secondary" onclick="window.open('https://wa.me/5521920075291','_blank')">Falar com o suporte</button>
+      <button type="button" class="cancel" onclick="fecharGerenciarConta()">Fechar</button>
     </div>
   </div>
 </div>
@@ -5591,7 +5593,7 @@ function mdBuildDiagnosticsObject(){
     const durableObj = mdSafeJsonParse(durableRaw);
     const diag = {
       generated_at: mdNowIso(),
-      app_version: 'MetaDriver vBeta1.62',
+      app_version: 'MetaDriver vBeta1.63',
       cloud_table: CLOUD_TABLE,
       device_id: mdEnsureDeviceId(),
       visibility_state: document.visibilityState,
@@ -6446,12 +6448,23 @@ async function mdVerificarVencimentoAssinatura(){
     if(bar) bar.classList.add("show");
   }catch(e){}
 }
-// vBeta1.62 - status e início da assinatura Pix automatizada via Asaas.
+// vBeta1.63 - status e início da assinatura Pix automatizada via Asaas.
+// Correção do bug do token expirado: agora usa mdEnsureActiveSession() para
+// renovar a sessão antes de consultar/assinar (antes lia sb_token cru do
+// localStorage; após ~1h o token vencia, a consulta falhava em silêncio e o
+// formulário de assinar reaparecia mesmo para assinante ativo). Fail-safe:
+// se o status não puder ser carregado, o formulário fica escondido.
 function mdFmtDataCurta(iso){
   try{
     const d = new Date(iso);
     return d.toLocaleDateString("pt-BR");
   }catch(e){ return ""; }
+}
+function mdDiasRestantes(iso){
+  try{
+    const dias = Math.ceil((new Date(iso).getTime() - Date.now()) / 86400000);
+    return dias > 0 ? dias : 0;
+  }catch(e){ return 0; }
 }
 async function mdCarregarStatusAssinatura(){
   const textoEl = document.getElementById("assinaturaStatusTexto");
@@ -6459,33 +6472,41 @@ async function mdCarregarStatusAssinatura(){
   const cpfInput = document.getElementById("assinaturaCpfInput");
   const erroEl = document.getElementById("assinaturaErro");
   if(erroEl){ erroEl.style.display = "none"; erroEl.textContent = ""; }
+  if(formBox) formBox.style.display = "none";
   try{
-    const token = localStorage.getItem("sb_token") || "";
+    const token = await mdEnsureActiveSession();
     const userId = localStorage.getItem("sb_user_id") || "";
     if(!token || !userId || typeof CLOUD_SUPABASE_URL === "undefined"){
-      if(textoEl) textoEl.textContent = "Não foi possível carregar o status da assinatura.";
+      if(textoEl) textoEl.textContent = "Não foi possível carregar o status. Verifique sua conexão e reabra esta tela.";
       return;
     }
     const resp = await fetch(CLOUD_SUPABASE_URL + "/rest/v1/user_access?select=status,trial_end,access_until,cpf&user_id=eq." + encodeURIComponent(userId) + "&limit=1", {
       headers:{ "apikey": CLOUD_SUPABASE_KEY, "Authorization":"Bearer " + token, "Accept":"application/json" }
     });
     if(!resp.ok){
-      if(textoEl) textoEl.textContent = "Não foi possível carregar o status da assinatura.";
+      if(textoEl) textoEl.textContent = "Não foi possível carregar o status. Verifique sua conexão e reabra esta tela.";
       return;
     }
     const rows = await resp.json();
     const row = Array.isArray(rows) && rows[0] ? rows[0] : null;
     if(!row){
-      if(textoEl) textoEl.textContent = "Não foi possível carregar o status da assinatura.";
+      if(textoEl) textoEl.textContent = "Não foi possível carregar o status. Verifique sua conexão e reabra esta tela.";
       return;
     }
     if(cpfInput && row.cpf) cpfInput.value = String(row.cpf);
 
-    if(row.status === "active" && row.access_until){
+    if(row.status === "active" && row.access_until && new Date(row.access_until).getTime() > Date.now()){
       if(textoEl) textoEl.textContent = "Assinatura ativa até " + mdFmtDataCurta(row.access_until) + ".";
-      if(formBox) formBox.style.display = "none";
+      // assinante em dia: formulário permanece escondido
+    }else if(row.status === "active"){
+      // active sem access_until (liberação manual antiga) ou já vencida
+      if(textoEl) textoEl.textContent = row.access_until
+        ? "Sua assinatura venceu em " + mdFmtDataCurta(row.access_until) + ". Renove para continuar."
+        : "Assinatura ativa.";
+      if(row.access_until && formBox) formBox.style.display = "block";
     }else if(row.status === "trial" && row.trial_end){
-      if(textoEl) textoEl.textContent = "Teste grátis até " + mdFmtDataCurta(row.trial_end) + ". Assine para não perder o acesso depois.";
+      const dias = mdDiasRestantes(row.trial_end);
+      if(textoEl) textoEl.textContent = "Teste grátis: " + dias + (dias === 1 ? " dia restante" : " dias restantes") + " (até " + mdFmtDataCurta(row.trial_end) + "). Assine para não perder o acesso.";
       if(formBox) formBox.style.display = "block";
     }else if(row.status === "blocked"){
       if(textoEl) textoEl.textContent = "Acesso bloqueado. Assine para reativar.";
@@ -6495,7 +6516,7 @@ async function mdCarregarStatusAssinatura(){
       if(formBox) formBox.style.display = "block";
     }
   }catch(e){
-    if(textoEl) textoEl.textContent = "Não foi possível carregar o status da assinatura.";
+    if(textoEl) textoEl.textContent = "Não foi possível carregar o status. Verifique sua conexão e reabra esta tela.";
   }
 }
 async function mdIniciarAssinatura(){
@@ -6512,12 +6533,12 @@ async function mdIniciarAssinatura(){
   }
 
   try{
-    const token = localStorage.getItem("sb_token") || "";
+    const token = await mdEnsureActiveSession();
     const userId = localStorage.getItem("sb_user_id") || "";
     const email = localStorage.getItem("sb_user_email") || "";
     const nome = (typeof getNomeUsuarioConta === "function" ? getNomeUsuarioConta() : "") || "Motorista MetaDriver";
     if(!token || !userId || typeof CLOUD_SUPABASE_URL === "undefined"){
-      if(erroEl){ erroEl.textContent = "Não foi possível identificar sua sessão. Saia e entre de novo."; erroEl.style.display = "block"; }
+      if(erroEl){ erroEl.textContent = "Sua sessão expirou. Saia e entre de novo para assinar."; erroEl.style.display = "block"; }
       return;
     }
 
@@ -7700,7 +7721,7 @@ function mdCommitLancamentoMutation(reason){
   try{ atualizar(); }catch(e){}
   try{ if(typeof refreshQuickBalanceFabMiniDisplay === "function") refreshQuickBalanceFabMiniDisplay(); }catch(e){}
   try{ if(typeof updateQuickBalanceFabUI === "function") updateQuickBalanceFabUI(); }catch(e){}
-  try{ if(typeof toast === "function" && reason) console.info("MetaDriver vBeta1.62 mutation:", reason); }catch(e){}
+  try{ if(typeof toast === "function" && reason) console.info("MetaDriver vBeta1.63 mutation:", reason); }catch(e){}
 }
 
 
@@ -9534,7 +9555,7 @@ function exportarRelatorioPDF(){
       <script>
         setTimeout(()=>window.print(), 250);
       <\/script>
-    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver vBeta1.62 · app</div>
+    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver vBeta1.63 · app</div>
 
 
 <script>
