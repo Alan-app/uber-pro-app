@@ -43,7 +43,7 @@ try{
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver vBeta1.63</title>
+<title>MetaDriver vBeta1.64</title>
 <style id="md-hydration-lock">
 body.preload > *:not(#mdBootOverlay){visibility:hidden!important;}
 #mdBootOverlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#0f172a;color:#fff;z-index:2147483647;font-family:Inter,system-ui,sans-serif;font-weight:800;letter-spacing:.2px;}
@@ -3324,6 +3324,16 @@ body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff3b0; }
 
 
 
+/* vBeta1.64 - datas da meta: teclado numérico no Android + máscara DD/MM/AAAA.
+   O armazenamento continua em ISO (AAAA-MM-DD), preservando todos os cálculos existentes. */
+.md-meta-date-input{
+  cursor:text !important;
+  -webkit-appearance:none !important;
+  appearance:none !important;
+  font-variant-numeric:tabular-nums;
+}
+.md-meta-date-input::placeholder{opacity:.55;}
+
 /* PADRONIZAÇÃO FINA - Configurar Meta */
 .config-meta-label{
   display:block;
@@ -4077,7 +4087,7 @@ body[data-tema$="claro"] .historico-report-line{border-bottom-color:rgba(0,0,0,.
   <div class="menu-item"><button class="secondary" onclick="abrirSaldoAtualButtonMenu(); closeMenu();">Botão de saldo atual</button></div>
   <div class="menu-item"><button class="secondary" onclick="abrirTemas(); closeMenu();">Temas</button></div>
   <div class="menu-item menu-user-row"><span class="menu-user-name" id="menuUserName">Usuário</span><button class="danger" onclick="forceLogout(); return false;">Sair</button></div>
-  <div class="menu-note" style="text-align:center;">vBeta1.63</div>
+  <div class="menu-note" style="text-align:center;">vBeta1.64</div>
 </div>
 
 
@@ -4092,7 +4102,7 @@ body[data-tema$="claro"] .historico-report-line{border-bottom-color:rgba(0,0,0,.
     </div>
     <button id="btnSalvarNome" style="display:none;width:100%;margin-top:8px;" type="button" onclick="salvarNomeUsuarioConta()">Salvar nome</button>
 
-    <!-- vBeta1.63 - seção de assinatura integrada (status, dias restantes, Pix);
+    <!-- vBeta1.64 - seção de assinatura integrada (status, dias restantes, Pix);
          substitui o antigo painel.html dentro do app e o fluxo manual via WhatsApp -->
     <div style="margin-top:18px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.10);text-align:left;">
       <div style="font-weight:600;margin-bottom:6px;">Assinatura</div>
@@ -4254,10 +4264,10 @@ body[data-tema$="claro"] .historico-report-line{border-bottom-color:rgba(0,0,0,.
     </div>
 
     <label class="config-meta-label">Data inicial da meta</label>
-    <input class="config-meta-input" type="date" id="dataInicialMeta">
+    <input class="config-meta-input md-meta-date-input" type="text" id="dataInicialMeta" inputmode="numeric" autocomplete="off" maxlength="10" placeholder="DD/MM/AAAA" aria-label="Data inicial da meta">
 
     <label class="config-meta-label">Data limite para atingir a Meta</label>
-    <input class="config-meta-input" type="date" id="dataLimite">
+    <input class="config-meta-input md-meta-date-input" type="text" id="dataLimite" inputmode="numeric" autocomplete="off" maxlength="10" placeholder="DD/MM/AAAA" aria-label="Data limite para atingir a Meta">
 
     
     <div class="label-row" style="display:flex;justify-content:center;align-items:center;margin-top:10px;"><label style="margin:0;">Dias não trabalhados</label></div>
@@ -5593,7 +5603,7 @@ function mdBuildDiagnosticsObject(){
     const durableObj = mdSafeJsonParse(durableRaw);
     const diag = {
       generated_at: mdNowIso(),
-      app_version: 'MetaDriver vBeta1.63',
+      app_version: 'MetaDriver vBeta1.64',
       cloud_table: CLOUD_TABLE,
       device_id: mdEnsureDeviceId(),
       visibility_state: document.visibilityState,
@@ -6448,7 +6458,7 @@ async function mdVerificarVencimentoAssinatura(){
     if(bar) bar.classList.add("show");
   }catch(e){}
 }
-// vBeta1.63 - status e início da assinatura Pix automatizada via Asaas.
+// vBeta1.64 - status e início da assinatura Pix automatizada via Asaas.
 // Correção do bug do token expirado: agora usa mdEnsureActiveSession() para
 // renovar a sessão antes de consultar/assinar (antes lia sb_token cru do
 // localStorage; após ~1h o token vencia, a consulta falhava em silêncio e o
@@ -7005,13 +7015,16 @@ function salvarMeta(){
   // de salvar, é preenchida UMA VEZ com a data atual e fica congelada — não é
   // mais recalculada todo dia. Depois de preenchida, sempre permanece como está.
   const dataInicialInputEl = document.getElementById("dataInicialMeta");
-  let dataInicialValor = dataInicialInputEl?.value || "";
+  let dataInicialValor = mdGetMetaDateISO("dataInicialMeta") || "";
   if(!dataInicialValor){
     dataInicialValor = hojeISO();
-    if(dataInicialInputEl) dataInicialInputEl.value = dataInicialValor;
+    if(dataInicialInputEl){
+      dataInicialInputEl.value = mdFormatMetaDateDisplay(dataInicialValor);
+      dataInicialInputEl.dataset.isoValue = dataInicialValor;
+    }
   }
   dados.dataInicialMeta = dataInicialValor;
-  dados.dataLimite = document.getElementById("dataLimite").value || "";
+  dados.dataLimite = mdGetMetaDateISO("dataLimite") || "";
   dados.manutencaoPercentual = parsePercentInputValue(document.getElementById("percentualManutencao")?.value || "0");
   dados.metaSalva = !!(Number(dados.metaTotal || 0) > 0 || String(dados.dataLimite || '').trim());
   salvar();
@@ -7630,9 +7643,9 @@ function addNaoTrabalhado(){
   calcularTotalMetasDetalhadas();
   // vBeta1.16 - nunca sobrescreve a Data Inicial já salva com um valor vazio
   // (ela é obrigatória e congelada uma vez preenchida).
-  const dataInicialNT = document.getElementById("dataInicialMeta")?.value || "";
+  const dataInicialNT = mdGetMetaDateISO("dataInicialMeta");
   if(dataInicialNT) dados.dataInicialMeta = dataInicialNT;
-  dados.dataLimite = document.getElementById("dataLimite")?.value || "";
+  dados.dataLimite = mdGetMetaDateISO("dataLimite");
 
   dados.naoTrabalhados.push({data, motivo: motivo || "Dia não trabalhado"});
 
@@ -7721,7 +7734,7 @@ function mdCommitLancamentoMutation(reason){
   try{ atualizar(); }catch(e){}
   try{ if(typeof refreshQuickBalanceFabMiniDisplay === "function") refreshQuickBalanceFabMiniDisplay(); }catch(e){}
   try{ if(typeof updateQuickBalanceFabUI === "function") updateQuickBalanceFabUI(); }catch(e){}
-  try{ if(typeof toast === "function" && reason) console.info("MetaDriver vBeta1.63 mutation:", reason); }catch(e){}
+  try{ if(typeof toast === "function" && reason) console.info("MetaDriver vBeta1.64 mutation:", reason); }catch(e){}
 }
 
 
@@ -8286,6 +8299,7 @@ function zerarTudo(){
     naoTrabalhados: [],
     metaTotal: 0,
     metasDetalhadas: [],
+    dataInicialMeta: "",
     dataLimite: "",
     metaDiariaManual: 0,
     ganhoDiarioAtual: 0,
@@ -9555,7 +9569,7 @@ function exportarRelatorioPDF(){
       <script>
         setTimeout(()=>window.print(), 250);
       <\/script>
-    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver vBeta1.63 · app</div>
+    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver vBeta1.64 · app</div>
 
 
 <script>
@@ -9941,11 +9955,15 @@ function atualizar(){
   try{ lockSaldoAtualByFab(); }catch(e){}
   const elDataInicialMeta = document.getElementById("dataInicialMeta");
 if(elDataInicialMeta && document.activeElement !== elDataInicialMeta){
-  elDataInicialMeta.value = dados.dataInicialMeta || "";
+  const isoInicial = String(dados.dataInicialMeta || '').slice(0,10);
+  elDataInicialMeta.value = mdFormatMetaDateDisplay(isoInicial);
+  if(isoInicial) elDataInicialMeta.dataset.isoValue = isoInicial;
 }
   const elData = document.getElementById("dataLimite");
 if(elData && document.activeElement !== elData){
-  elData.value = dados.dataLimite || "";
+  const isoLimite = String(dados.dataLimite || '').slice(0,10);
+  elData.value = mdFormatMetaDateDisplay(isoLimite);
+  if(isoLimite) elData.dataset.isoValue = isoLimite;
 }
 const metaSalvaAgora = !!(
   Number(dados.metaTotal || 0) > 0 ||
@@ -10353,19 +10371,95 @@ document.getElementById("listaGastos").innerHTML =
 
 
 
+function mdFormatMetaDateDisplay(iso){
+  const v = String(iso || '').trim();
+  const m = v.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  return m ? (m[3] + '/' + m[2] + '/' + m[1]) : '';
+}
+
+function mdParseMetaDateInput(value){
+  const raw = String(value || '').trim();
+  if(!raw) return '';
+  if(/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw;
+  const d = raw.replace(/\D/g, '');
+  if(d.length !== 8) return '';
+  const day = Number(d.slice(0,2));
+  const month = Number(d.slice(2,4));
+  const year = Number(d.slice(4,8));
+  if(year < 1900 || year > 2100 || month < 1 || month > 12 || day < 1 || day > 31) return '';
+  const dt = new Date(year, month - 1, day);
+  if(dt.getFullYear() !== year || dt.getMonth() !== month - 1 || dt.getDate() !== day) return '';
+  return String(year).padStart(4,'0') + '-' + String(month).padStart(2,'0') + '-' + String(day).padStart(2,'0');
+}
+
+function mdHandleMetaDateInput(el){
+  if(!el) return;
+  let digits = String(el.value || '').replace(/\D/g, '').slice(0,8);
+  let out = '';
+  if(digits.length <= 2){
+    out = digits;
+  }else if(digits.length <= 4){
+    out = digits.slice(0,2) + '/' + digits.slice(2);
+  }else{
+    out = digits.slice(0,2) + '/' + digits.slice(2,4) + '/' + digits.slice(4);
+  }
+  el.value = out;
+  const iso = mdParseMetaDateInput(out);
+  if(iso){
+    el.dataset.isoValue = iso;
+    el.dataset.lastValidDisplay = out;
+  }else{
+    delete el.dataset.isoValue;
+  }
+}
+
+function mdGetMetaDateISO(id){
+  const el = document.getElementById(id);
+  if(!el) return '';
+  return String(el.dataset.isoValue || mdParseMetaDateInput(el.value) || '').trim();
+}
+
+function mdInitMetaDateFields(){
+  ['dataInicialMeta','dataLimite'].forEach(function(id){
+    const el = document.getElementById(id);
+    if(!el || el.__mdDateBound) return;
+    el.__mdDateBound = true;
+    el.addEventListener('input', function(){ mdHandleMetaDateInput(el); });
+    el.addEventListener('change', function(){
+      mdHandleMetaDateInput(el);
+      if(mdGetMetaDateISO(id)) syncMetaAutoFromInputs();
+    });
+    el.addEventListener('focus', function(){
+      setTimeout(function(){ try{ el.select(); }catch(e){} }, 0);
+    });
+    el.addEventListener('blur', function(){
+      mdHandleMetaDateInput(el);
+      if(el.value && !mdGetMetaDateISO(id)){
+        const prev = String(el.dataset.lastValidDisplay || '').trim();
+        el.value = prev;
+        if(prev) el.dataset.isoValue = mdParseMetaDateInput(prev);
+        else delete el.dataset.isoValue;
+        try{ toast('⚠️ Data inválida. Use DD/MM/AAAA.'); }catch(e){}
+        return;
+      }
+      syncMetaAutoFromInputs();
+    });
+  });
+}
+
 function syncMetaAutoFromInputs(){
   try{
     const dataInicialInput = document.getElementById("dataInicialMeta");
     // vBeta1.16 - mesma regra de salvarMeta(): Data Inicial obrigatória,
     // preenchida uma única vez com hoje se estiver vazia, sem recalcular depois.
-    let dataInicialValor = dataInicialInput?.value || "";
+    let dataInicialValor = mdGetMetaDateISO("dataInicialMeta") || "";
     if(!dataInicialValor){
       dataInicialValor = hojeISO();
       if(dataInicialInput) dataInicialInput.value = dataInicialValor;
     }
     dados.dataInicialMeta = dataInicialValor;
     const dataInput = document.getElementById("dataLimite");
-    dados.dataLimite = dataInput?.value || "";
+    dados.dataLimite = mdGetMetaDateISO("dataLimite") || "";
     const manutInput = document.getElementById("percentualManutencao");
     if(manutInput) dados.manutencaoPercentual = parsePercentInputValue(manutInput.value || "0");
     if(!updateMetaDetalhadaValorFromInput(metaTotalTargetId)){
@@ -11313,6 +11407,7 @@ function bindSectionHeaders(){
 
 try{ ensureGanhoHoraDiaAtual(); }catch(e){}
 mdInitialHydrateAndRender();
+try{ mdInitMetaDateFields(); }catch(e){}
 
 // vBeta1.33 - ao focar (tocar) em qualquer campo de texto/número editável do
 // app, seleciona automaticamente todo o conteúdo já digitado. Isso faz com
@@ -11358,13 +11453,14 @@ setTimeout(function(){
 setTimeout(function(){ try{ mdVerificarVencimentoAssinatura(); }catch(e){} }, 2500);
 
 (function(){
-  const metaIds = ["metaTotal", "dataInicialMeta", "dataLimite"];
+  const metaIds = ["metaTotal"];
   metaIds.forEach(function(id){
     const el = document.getElementById(id);
     if(!el) return;
     el.addEventListener("input", syncMetaAutoFromInputs);
     el.addEventListener("change", syncMetaAutoFromInputs);
   });
+  mdInitMetaDateFields();
 
   const ganhoIds = ["saldoAtualFora", "horarioInicioFora"];
   ganhoIds.forEach(function(id){
