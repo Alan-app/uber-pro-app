@@ -43,7 +43,7 @@ try{
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver vBeta1.64</title>
+<title>MetaDriver vBeta1.65</title>
 <style id="md-hydration-lock">
 body.preload > *:not(#mdBootOverlay){visibility:hidden!important;}
 #mdBootOverlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#0f172a;color:#fff;z-index:2147483647;font-family:Inter,system-ui,sans-serif;font-weight:800;letter-spacing:.2px;}
@@ -3324,7 +3324,7 @@ body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff3b0; }
 
 
 
-/* vBeta1.64 - datas da meta: teclado numérico no Android + máscara DD/MM/AAAA.
+/* vBeta1.65 - datas da meta: teclado numérico no Android + máscara DD/MM/AAAA.
    O armazenamento continua em ISO (AAAA-MM-DD), preservando todos os cálculos existentes. */
 .md-meta-date-input{
   cursor:text !important;
@@ -4040,6 +4040,7 @@ body[data-tema$="claro"] .historico-report-line{border-bottom-color:rgba(0,0,0,.
 </style>
 
 
+<meta name="metadriver-version" content="vBeta1.65">
 </head>
 <body class="preload"><div id="mdBootOverlay">Carregando dados...</div><script>window.mdFailsafeNoBlueScreen=true;window.addEventListener("error",function(){setTimeout(function(){try{mdReleaseBootOverlay();}catch(e){}},1200);},true);</script>
 
@@ -4087,7 +4088,7 @@ body[data-tema$="claro"] .historico-report-line{border-bottom-color:rgba(0,0,0,.
   <div class="menu-item"><button class="secondary" onclick="abrirSaldoAtualButtonMenu(); closeMenu();">Botão de saldo atual</button></div>
   <div class="menu-item"><button class="secondary" onclick="abrirTemas(); closeMenu();">Temas</button></div>
   <div class="menu-item menu-user-row"><span class="menu-user-name" id="menuUserName">Usuário</span><button class="danger" onclick="forceLogout(); return false;">Sair</button></div>
-  <div class="menu-note" style="text-align:center;">vBeta1.64</div>
+  <div class="menu-note" style="text-align:center;">vBeta1.65</div>
 </div>
 
 
@@ -4102,7 +4103,7 @@ body[data-tema$="claro"] .historico-report-line{border-bottom-color:rgba(0,0,0,.
     </div>
     <button id="btnSalvarNome" style="display:none;width:100%;margin-top:8px;" type="button" onclick="salvarNomeUsuarioConta()">Salvar nome</button>
 
-    <!-- vBeta1.64 - seção de assinatura integrada (status, dias restantes, Pix);
+    <!-- vBeta1.65 - seção de assinatura integrada (status, dias restantes, Pix);
          substitui o antigo painel.html dentro do app e o fluxo manual via WhatsApp -->
     <div style="margin-top:18px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.10);text-align:left;">
       <div style="font-weight:600;margin-bottom:6px;">Assinatura</div>
@@ -4264,10 +4265,10 @@ body[data-tema$="claro"] .historico-report-line{border-bottom-color:rgba(0,0,0,.
     </div>
 
     <label class="config-meta-label">Data inicial da meta</label>
-    <input class="config-meta-input md-meta-date-input" type="text" id="dataInicialMeta" inputmode="numeric" autocomplete="off" maxlength="10" placeholder="DD/MM/AAAA" aria-label="Data inicial da meta">
+    <input class="config-meta-input md-meta-date-input" type="date" id="dataInicialMeta" aria-label="Data inicial da meta">
 
     <label class="config-meta-label">Data limite para atingir a Meta</label>
-    <input class="config-meta-input md-meta-date-input" type="text" id="dataLimite" inputmode="numeric" autocomplete="off" maxlength="10" placeholder="DD/MM/AAAA" aria-label="Data limite para atingir a Meta">
+    <input class="config-meta-input md-meta-date-input" type="date" id="dataLimite" aria-label="Data limite para atingir a Meta">
 
     
     <div class="label-row" style="display:flex;justify-content:center;align-items:center;margin-top:10px;"><label style="margin:0;">Dias não trabalhados</label></div>
@@ -5603,7 +5604,7 @@ function mdBuildDiagnosticsObject(){
     const durableObj = mdSafeJsonParse(durableRaw);
     const diag = {
       generated_at: mdNowIso(),
-      app_version: 'MetaDriver vBeta1.64',
+      app_version: 'MetaDriver vBeta1.65',
       cloud_table: CLOUD_TABLE,
       device_id: mdEnsureDeviceId(),
       visibility_state: document.visibilityState,
@@ -6458,7 +6459,7 @@ async function mdVerificarVencimentoAssinatura(){
     if(bar) bar.classList.add("show");
   }catch(e){}
 }
-// vBeta1.64 - status e início da assinatura Pix automatizada via Asaas.
+// vBeta1.65 - status e início da assinatura Pix automatizada via Asaas.
 // Correção do bug do token expirado: agora usa mdEnsureActiveSession() para
 // renovar a sessão antes de consultar/assinar (antes lia sb_token cru do
 // localStorage; após ~1h o token vencia, a consulta falhava em silêncio e o
@@ -7734,7 +7735,7 @@ function mdCommitLancamentoMutation(reason){
   try{ atualizar(); }catch(e){}
   try{ if(typeof refreshQuickBalanceFabMiniDisplay === "function") refreshQuickBalanceFabMiniDisplay(); }catch(e){}
   try{ if(typeof updateQuickBalanceFabUI === "function") updateQuickBalanceFabUI(); }catch(e){}
-  try{ if(typeof toast === "function" && reason) console.info("MetaDriver vBeta1.64 mutation:", reason); }catch(e){}
+  try{ if(typeof toast === "function" && reason) console.info("MetaDriver vBeta1.65 mutation:", reason); }catch(e){}
 }
 
 
@@ -9569,7 +9570,7 @@ function exportarRelatorioPDF(){
       <script>
         setTimeout(()=>window.print(), 250);
       <\/script>
-    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver vBeta1.64 · app</div>
+    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver vBeta1.65 · app</div>
 
 
 <script>
@@ -9956,13 +9957,13 @@ function atualizar(){
   const elDataInicialMeta = document.getElementById("dataInicialMeta");
 if(elDataInicialMeta && document.activeElement !== elDataInicialMeta){
   const isoInicial = String(dados.dataInicialMeta || '').slice(0,10);
-  elDataInicialMeta.value = mdFormatMetaDateDisplay(isoInicial);
+  elDataInicialMeta.value = isoInicial;
   if(isoInicial) elDataInicialMeta.dataset.isoValue = isoInicial;
 }
   const elData = document.getElementById("dataLimite");
 if(elData && document.activeElement !== elData){
   const isoLimite = String(dados.dataLimite || '').slice(0,10);
-  elData.value = mdFormatMetaDateDisplay(isoLimite);
+  elData.value = isoLimite;
   if(isoLimite) elData.dataset.isoValue = isoLimite;
 }
 const metaSalvaAgora = !!(
@@ -10416,6 +10417,7 @@ function mdHandleMetaDateInput(el){
 function mdGetMetaDateISO(id){
   const el = document.getElementById(id);
   if(!el) return '';
+  if(el.type === 'date') return String(el.value || '').trim();
   return String(el.dataset.isoValue || mdParseMetaDateInput(el.value) || '').trim();
 }
 
@@ -10424,25 +10426,9 @@ function mdInitMetaDateFields(){
     const el = document.getElementById(id);
     if(!el || el.__mdDateBound) return;
     el.__mdDateBound = true;
-    el.addEventListener('input', function(){ mdHandleMetaDateInput(el); });
+    // type=date: no keyboard/mask. Tapping the field opens the native calendar.
     el.addEventListener('change', function(){
-      mdHandleMetaDateInput(el);
       if(mdGetMetaDateISO(id)) syncMetaAutoFromInputs();
-    });
-    el.addEventListener('focus', function(){
-      setTimeout(function(){ try{ el.select(); }catch(e){} }, 0);
-    });
-    el.addEventListener('blur', function(){
-      mdHandleMetaDateInput(el);
-      if(el.value && !mdGetMetaDateISO(id)){
-        const prev = String(el.dataset.lastValidDisplay || '').trim();
-        el.value = prev;
-        if(prev) el.dataset.isoValue = mdParseMetaDateInput(prev);
-        else delete el.dataset.isoValue;
-        try{ toast('⚠️ Data inválida. Use DD/MM/AAAA.'); }catch(e){}
-        return;
-      }
-      syncMetaAutoFromInputs();
     });
   });
 }
