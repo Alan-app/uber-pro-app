@@ -43,7 +43,7 @@ try{
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver vBeta1.65</title>
+<title>MetaDriver vBeta1.66</title>
 <style id="md-hydration-lock">
 body.preload > *:not(#mdBootOverlay){visibility:hidden!important;}
 #mdBootOverlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#0f172a;color:#fff;z-index:2147483647;font-family:Inter,system-ui,sans-serif;font-weight:800;letter-spacing:.2px;}
@@ -3324,15 +3324,17 @@ body[data-tema="amarelo-claro"] .quick-balance-panel{ background:#fff3b0; }
 
 
 
-/* vBeta1.65 - datas da meta: teclado numérico no Android + máscara DD/MM/AAAA.
+/* vBeta1.66 - datas da meta: teclado numérico no Android + máscara DD/MM/AAAA.
    O armazenamento continua em ISO (AAAA-MM-DD), preservando todos os cálculos existentes. */
 .md-meta-date-input{
-  cursor:text !important;
-  -webkit-appearance:none !important;
-  appearance:none !important;
+  cursor:pointer !important;
+  -webkit-appearance:auto !important;
+  appearance:auto !important;
   font-variant-numeric:tabular-nums;
 }
+.md-meta-date-input::-webkit-calendar-picker-indicator{display:block !important;opacity:1 !important;-webkit-appearance:auto !important;cursor:pointer !important;}
 .md-meta-date-input::placeholder{opacity:.55;}
+.md-meta-liquida{color:#22c55e !important;font-weight:800 !important;white-space:nowrap;}
 
 /* PADRONIZAÇÃO FINA - Configurar Meta */
 .config-meta-label{
@@ -4040,7 +4042,7 @@ body[data-tema$="claro"] .historico-report-line{border-bottom-color:rgba(0,0,0,.
 </style>
 
 
-<meta name="metadriver-version" content="vBeta1.65">
+<meta name="metadriver-version" content="vBeta1.66">
 </head>
 <body class="preload"><div id="mdBootOverlay">Carregando dados...</div><script>window.mdFailsafeNoBlueScreen=true;window.addEventListener("error",function(){setTimeout(function(){try{mdReleaseBootOverlay();}catch(e){}},1200);},true);</script>
 
@@ -4088,7 +4090,7 @@ body[data-tema$="claro"] .historico-report-line{border-bottom-color:rgba(0,0,0,.
   <div class="menu-item"><button class="secondary" onclick="abrirSaldoAtualButtonMenu(); closeMenu();">Botão de saldo atual</button></div>
   <div class="menu-item"><button class="secondary" onclick="abrirTemas(); closeMenu();">Temas</button></div>
   <div class="menu-item menu-user-row"><span class="menu-user-name" id="menuUserName">Usuário</span><button class="danger" onclick="forceLogout(); return false;">Sair</button></div>
-  <div class="menu-note" style="text-align:center;">vBeta1.65</div>
+  <div class="menu-note" style="text-align:center;">vBeta1.66</div>
 </div>
 
 
@@ -4103,7 +4105,7 @@ body[data-tema$="claro"] .historico-report-line{border-bottom-color:rgba(0,0,0,.
     </div>
     <button id="btnSalvarNome" style="display:none;width:100%;margin-top:8px;" type="button" onclick="salvarNomeUsuarioConta()">Salvar nome</button>
 
-    <!-- vBeta1.65 - seção de assinatura integrada (status, dias restantes, Pix);
+    <!-- vBeta1.66 - seção de assinatura integrada (status, dias restantes, Pix);
          substitui o antigo painel.html dentro do app e o fluxo manual via WhatsApp -->
     <div style="margin-top:18px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.10);text-align:left;">
       <div style="font-weight:600;margin-bottom:6px;">Assinatura</div>
@@ -4265,10 +4267,10 @@ body[data-tema$="claro"] .historico-report-line{border-bottom-color:rgba(0,0,0,.
     </div>
 
     <label class="config-meta-label">Data inicial da meta</label>
-    <input class="config-meta-input md-meta-date-input" type="date" id="dataInicialMeta" aria-label="Data inicial da meta">
+    <input class="config-meta-input md-meta-date-input" type="date" id="dataInicialMeta" aria-label="Data inicial da meta" onclick="try{this.showPicker()}catch(e){}">
 
     <label class="config-meta-label">Data limite para atingir a Meta</label>
-    <input class="config-meta-input md-meta-date-input" type="date" id="dataLimite" aria-label="Data limite para atingir a Meta">
+    <input class="config-meta-input md-meta-date-input" type="date" id="dataLimite" aria-label="Data limite para atingir a Meta" onclick="try{this.showPicker()}catch(e){}">
 
     
     <div class="label-row" style="display:flex;justify-content:center;align-items:center;margin-top:10px;"><label style="margin:0;">Dias não trabalhados</label></div>
@@ -5604,7 +5606,7 @@ function mdBuildDiagnosticsObject(){
     const durableObj = mdSafeJsonParse(durableRaw);
     const diag = {
       generated_at: mdNowIso(),
-      app_version: 'MetaDriver vBeta1.65',
+      app_version: 'MetaDriver vBeta1.66',
       cloud_table: CLOUD_TABLE,
       device_id: mdEnsureDeviceId(),
       visibility_state: document.visibilityState,
@@ -6459,7 +6461,7 @@ async function mdVerificarVencimentoAssinatura(){
     if(bar) bar.classList.add("show");
   }catch(e){}
 }
-// vBeta1.65 - status e início da assinatura Pix automatizada via Asaas.
+// vBeta1.66 - status e início da assinatura Pix automatizada via Asaas.
 // Correção do bug do token expirado: agora usa mdEnsureActiveSession() para
 // renovar a sessão antes de consultar/assinar (antes lia sb_token cru do
 // localStorage; após ~1h o token vencia, a consulta falhava em silêncio e o
@@ -7735,7 +7737,7 @@ function mdCommitLancamentoMutation(reason){
   try{ atualizar(); }catch(e){}
   try{ if(typeof refreshQuickBalanceFabMiniDisplay === "function") refreshQuickBalanceFabMiniDisplay(); }catch(e){}
   try{ if(typeof updateQuickBalanceFabUI === "function") updateQuickBalanceFabUI(); }catch(e){}
-  try{ if(typeof toast === "function" && reason) console.info("MetaDriver vBeta1.65 mutation:", reason); }catch(e){}
+  try{ if(typeof toast === "function" && reason) console.info("MetaDriver vBeta1.66 mutation:", reason); }catch(e){}
 }
 
 
@@ -9570,7 +9572,7 @@ function exportarRelatorioPDF(){
       <script>
         setTimeout(()=>window.print(), 250);
       <\/script>
-    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver vBeta1.65 · app</div>
+    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver vBeta1.66 · app</div>
 
 
 <script>
@@ -10061,6 +10063,8 @@ const fuelCfg = getCombustivelConfig(bruto);
   // Meta bruta restante:
   // quanto ainda falta em bruto para completar a meta total necessária
   const metaRestante = Math.max(0, metaBrutaComGastos - bruto);
+  const metaLiquidaTotal = Math.max(0, metaBrutaComGastos * divisorMeta - gastosExtras);
+  const metaLiquidaRestante = Math.max(0, metaRestante * divisorMeta);
 
   const ganhosHoje = (dados.ganhos || [])
     .filter(g => isHojeRegistro(g && g.data))
@@ -10101,8 +10105,8 @@ const fuelCfg = getCombustivelConfig(bruto);
       "Data inicial: <span class='warning'>" + (dados.dataInicialMeta || hojeISO()) + "</span><br>" +
       statusAguardandoLinha +
       "Dias restantes: <span class='" + (diasRestantes < 0 ? "dangerText" : "warning") + "'>" + diasRestantes + "</span><br>" +
-      "Meta bruta total: <span class='" + (metaBrutaComGastos < 0 ? "dangerText" : "warning") + "'>R$ " + metaBrutaComGastos.toFixed(2) + "</span><br>" +
-      "Meta bruta restante: <span class='" + (metaRestante < 0 ? "dangerText" : "warning") + "'>R$ " + metaRestante.toFixed(2) + "</span><br>" +
+      "Meta bruta total: <span class='" + (metaBrutaComGastos < 0 ? "dangerText" : "warning") + "'>R$ " + metaBrutaComGastos.toFixed(2) + "</span> <span class='md-meta-liquida'>(R$ " + metaLiquidaTotal.toFixed(2) + ")</span><br>" +
+      "Meta bruta restante: <span class='" + (metaRestante < 0 ? "dangerText" : "warning") + "'>R$ " + metaRestante.toFixed(2) + "</span> <span class='md-meta-liquida'>(R$ " + metaLiquidaRestante.toFixed(2) + ")</span><br>" +
       "Meta diária (automática): <span class='" + (metaDiariaAuto < 0 ? "dangerText" : "warning") + "'>R$ " + metaDiariaAuto.toFixed(2) + "</span><br>" +
       "Tempo para meta diária: <span class='" + (horasNecessarias < 0 ? "dangerText" : "warning") + "'>" + formatHorasMinutos(horasNecessarias) + "</span>";
     // vBeta1.56 - versão estilizada (linhas rótulo/valor). Isolada em try/catch:
@@ -10112,23 +10116,23 @@ const fuelCfg = getCombustivelConfig(bruto);
         (statusAguardandoLinha ? "<div class='md-row'><span class='md-row-k'>Status</span><span class='md-row-v warning'>Aguardando início da meta</span></div>" : "") +
         "<div class='md-row'><span class='md-row-k'>Data inicial</span><span class='md-row-v warning'>" + (dados.dataInicialMeta || hojeISO()) + "</span></div>" +
         "<div class='md-row'><span class='md-row-k'>Dias restantes</span><span class='md-row-v " + (diasRestantes < 0 ? "dangerText" : "warning") + "'>" + diasRestantes + "</span></div>" +
-        "<div class='md-row'><span class='md-row-k'>Meta bruta total</span><span class='md-row-v " + (metaBrutaComGastos < 0 ? "dangerText" : "warning") + "'>R$ " + metaBrutaComGastos.toFixed(2) + "</span></div>" +
-        "<div class='md-row'><span class='md-row-k'>Meta bruta restante</span><span class='md-row-v " + (metaRestante < 0 ? "dangerText" : "warning") + "'>R$ " + metaRestante.toFixed(2) + "</span></div>" +
+        "<div class='md-row'><span class='md-row-k'>Meta bruta total</span><span class='md-row-v " + (metaBrutaComGastos < 0 ? "dangerText" : "warning") + "'>R$ " + metaBrutaComGastos.toFixed(2) + "</span> <span class='md-meta-liquida'>(R$ " + metaLiquidaTotal.toFixed(2) + ")</span></div>" +
+        "<div class='md-row'><span class='md-row-k'>Meta bruta restante</span><span class='md-row-v " + (metaRestante < 0 ? "dangerText" : "warning") + "'>R$ " + metaRestante.toFixed(2) + "</span> <span class='md-meta-liquida'>(R$ " + metaLiquidaRestante.toFixed(2) + ")</span></div>" +
         "<div class='md-row'><span class='md-row-k'>Meta diária (automática)</span><span class='md-row-v " + (metaDiariaAuto < 0 ? "dangerText" : "warning") + "'>R$ " + metaDiariaAuto.toFixed(2) + "</span></div>" +
         "<div class='md-row'><span class='md-row-k'>Tempo para meta diária</span><span class='md-row-v " + (horasNecessarias < 0 ? "dangerText" : "warning") + "'>" + formatHorasMinutos(horasNecessarias) + "</span></div>";
     }catch(e){}
   }else{
     document.getElementById("statusMeta").innerHTML =
       "Dias restantes: —<br>" +
-      "Meta bruta total: —<br>" +
-      "Meta bruta restante: —<br>" +
+      "Meta bruta total: — <span class='md-meta-liquida'>(—)</span><br>" +
+      "Meta bruta restante: — <span class='md-meta-liquida'>(—)</span><br>" +
       "Meta diária (automática): —<br>" +
       "Tempo para meta diária: —";
     try{
       document.getElementById("statusMeta").innerHTML =
         "<div class='md-row'><span class='md-row-k'>Dias restantes</span><span class='md-row-v'>—</span></div>" +
-        "<div class='md-row'><span class='md-row-k'>Meta bruta total</span><span class='md-row-v'>—</span></div>" +
-        "<div class='md-row'><span class='md-row-k'>Meta bruta restante</span><span class='md-row-v'>—</span></div>" +
+        "<div class='md-row'><span class='md-row-k'>Meta bruta total</span><span class='md-row-v'>—</span> <span class='md-meta-liquida'>(—)</span></div>" +
+        "<div class='md-row'><span class='md-row-k'>Meta bruta restante</span><span class='md-row-v'>—</span> <span class='md-meta-liquida'>(—)</span></div>" +
         "<div class='md-row'><span class='md-row-k'>Meta diária (automática)</span><span class='md-row-v'>—</span></div>" +
         "<div class='md-row'><span class='md-row-k'>Tempo para meta diária</span><span class='md-row-v'>—</span></div>";
     }catch(e){}
@@ -10184,7 +10188,7 @@ const fuelCfg = getCombustivelConfig(bruto);
         mpdEl.style.display = "";
         mpdEl.innerHTML =
           "<div class='meta-progress-head'>" +
-            "<div class='meta-progress-pct'>" + mpdPct.toFixed(0) + "%<span class='meta-progress-pct-label'>da meta bruta</span></div>" +
+            "<div class='meta-progress-pct'>" + mpdPct.toFixed(0) + "%<span class='meta-progress-pct-label'>da meta bruta <span class='md-meta-liquida'>(líquida R$ " + metaLiquidaTotal.toFixed(2) + ")</span></span></div>" +
             mpdChip +
           "</div>" +
           "<div class='meta-progress-bar'><i style='width:" + mpdPct.toFixed(1) + "%'></i></div>";
