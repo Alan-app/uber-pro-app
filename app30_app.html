@@ -43,7 +43,7 @@ try{
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<title>MetaDriver vBeta1.68</title>
+<title>MetaDriver vBeta1.69</title>
 <style id="md-hydration-lock">
 body.preload > *:not(#mdBootOverlay){visibility:hidden!important;}
 #mdBootOverlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#0f172a;color:#fff;z-index:2147483647;font-family:Inter,system-ui,sans-serif;font-weight:800;letter-spacing:.2px;}
@@ -2735,14 +2735,22 @@ input.negative-value, input.negative-value::placeholder{
 .tempo-meta-stack label{margin-top:8px;}
 .tempo-meta-stack input{width:100%; margin-top:8px;}
 #cardTempoMeta button[onclick="salvarHoras()"]{width:100%; margin-top:8px;}
-/* remove setas visuais de data/hora - vBeta1.67: mantém o indicador
-   presente (apenas invisível) e preserva a aparência nativa do input,
-   pois "display:none" no indicador + "appearance:none" no próprio campo
-   desativava o seletor nativo de data em alguns WebViews (PWA instalado),
-   impedindo o toque de abrir o calendário. */
+/* vBeta1.69 - correção definitiva: a vBeta1.67 só parava de ESCONDER o
+   indicador nativo (opacity:0 em vez de display:none), mas no WebView do
+   PWA instalado isso não bastou sozinho; o que de fato reativa o seletor
+   nativo em todos os campos é forçar appearance:auto, igual já era feito
+   só para os dois campos de Configurar Meta (.md-meta-date-input). Agora
+   aplicado globalmente, em qualquer input de data/hora do app. */
 input[type="date"]::-webkit-calendar-picker-indicator,
-input[type="time"]::-webkit-calendar-picker-indicator{opacity:0;background-image:none;}
-input[type="date"],input[type="time"]{background-image:none;}
+input[type="time"]::-webkit-calendar-picker-indicator{
+  display:block !important;opacity:1 !important;
+  -webkit-appearance:auto !important;cursor:pointer !important;
+  background-image:none;
+}
+input[type="date"],input[type="time"]{
+  -webkit-appearance:auto !important;appearance:auto !important;
+  cursor:pointer !important;background-image:none;
+}
 /* neutraliza ajustes antigos que deixavam campos despadronizados */
 #metaDiariaManual,#ganhoDiarioAtual,
 body[data-tema="meta-escuro"]{
@@ -4107,7 +4115,7 @@ body[data-tema$="claro"] .historico-report-line{border-bottom-color:rgba(0,0,0,.
   <div class="menu-item"><button class="secondary" onclick="abrirSaldoAtualButtonMenu(); closeMenu();">Botão de saldo atual</button></div>
   <div class="menu-item"><button class="secondary" onclick="abrirTemas(); closeMenu();">Temas</button></div>
   <div class="menu-item menu-user-row"><span class="menu-user-name" id="menuUserName">Usuário</span><button class="danger" onclick="forceLogout(); return false;">Sair</button></div>
-  <div class="menu-note" style="text-align:center;">vBeta1.68</div>
+  <div class="menu-note" style="text-align:center;">vBeta1.69</div>
 </div>
 
 
@@ -4299,7 +4307,7 @@ body[data-tema$="claro"] .historico-report-line{border-bottom-color:rgba(0,0,0,.
 </button>
 
     <div id="formNaoTrabalhado" class="collapsible">
-      <input type="date" id="dataNaoTrabalhado" placeholder="Selecione a data">
+      <input type="date" id="dataNaoTrabalhado" placeholder="Selecione a data" onclick="try{this.showPicker()}catch(e){}">
       <input type="text" id="motivoNaoTrabalhado" placeholder="Motivo (ex: folga, manutenção, médico)">
       <button onclick="addNaoTrabalhado()" class="dias-link-add">Adicionar</button>
     </div>
@@ -4390,7 +4398,7 @@ body[data-tema$="claro"] .historico-report-line{border-bottom-color:rgba(0,0,0,.
 <div id="secGanhos" class="subcard-hidden"><div class="section-title ganhos-title">Ganhos</div>
     <button onclick="toggleForm('formGanho')">Adicionar</button>
     <div id="formGanho" class="collapsible">
-      <input type="date" id="dataGanho">
+      <input type="date" id="dataGanho" onclick="try{this.showPicker()}catch(e){}">
       <input type="text" id="descricaoGanho" placeholder="Descrição (ex: Uber, 99, Particular...)" />
       <input type="text" id="valorGanho" placeholder="Valor ganho" inputmode="decimal" pattern="[0-9.]*" enterkeyhint="done" autocomplete="off" oninput="sanitizeLancamentoValorInput(this)">
       <button onclick="addGanho()">Salvar ganho</button>
@@ -4403,7 +4411,7 @@ body[data-tema$="claro"] .historico-report-line{border-bottom-color:rgba(0,0,0,.
 <div id="secGastos" class="subcard-hidden"><div class="section-title gastos-title">Gastos</div>
     <button class="secondary" onclick="toggleForm('formGasto')">Adicionar</button>
     <div id="formGasto" class="collapsible">
-      <input type="date" id="dataGasto">
+      <input type="date" id="dataGasto" onclick="try{this.showPicker()}catch(e){}">
       <input type="text" id="descGasto" placeholder="Descrição (ex: lavagem, manutenção)">
       <input type="text" id="valorGasto" placeholder="Valor gasto" inputmode="decimal" pattern="[0-9.]*" enterkeyhint="done" autocomplete="off" oninput="sanitizeLancamentoValorInput(this)">
       <button onclick="addGasto()">Salvar gasto</button>
@@ -4413,7 +4421,7 @@ body[data-tema$="claro"] .historico-report-line{border-bottom-color:rgba(0,0,0,.
 <div id="secRetiradas" class="subcard-hidden"><div class="section-title gastos-title">Retiradas</div>
     <button class="secondary" onclick="toggleForm('formRetirada')">Adicionar retirada</button>
     <div id="formRetirada" class="collapsible">
-      <input type="date" id="dataRetirada">
+      <input type="date" id="dataRetirada" onclick="try{this.showPicker()}catch(e){}">
       <input type="text" id="descRetirada" placeholder="Descrição (ex: saque, aluguel, meta paga)">
       <input type="text" id="valorRetirada" placeholder="Valor retirado" inputmode="decimal" pattern="[0-9.]*" enterkeyhint="done" autocomplete="off" oninput="sanitizeLancamentoValorInput(this)">
       <button onclick="addRetirada()">Salvar retirada</button>
@@ -4423,7 +4431,7 @@ body[data-tema$="claro"] .historico-report-line{border-bottom-color:rgba(0,0,0,.
 <div id="secCombustivel" class="subcard-hidden"><div class="section-title gastos-title">Combustível</div>
     <button class="secondary" onclick="toggleForm('formAbastecimento')">Adicionar abastecimento</button>
     <div id="formAbastecimento" class="collapsible">
-      <input type="date" id="dataAbastecimento">
+      <input type="date" id="dataAbastecimento" onclick="try{this.showPicker()}catch(e){}">
       <input type="text" id="valorAbastecimento" placeholder="Valor abastecimento" inputmode="decimal" pattern="[0-9.]*" enterkeyhint="done" autocomplete="off" oninput="sanitizeLancamentoValorInput(this)">
       <button onclick="addAbastecimento()">Salvar abastecimento</button>
     </div>
@@ -4479,7 +4487,7 @@ body[data-tema$="claro"] .historico-report-line{border-bottom-color:rgba(0,0,0,.
 <div id="editDataOverlay" class="edit-data-overlay" onclick="if(event.target.id==='editDataOverlay')fecharEditData()">
   <div class="edit-data-modal" onclick="event.stopPropagation()">
     <div class="edit-data-title" id="editDataTitle">Editar data</div>
-    <input type="date" id="editDataInput" />
+    <input type="date" id="editDataInput" onclick="try{this.showPicker()}catch(e){}" />
     <input type="text" id="editMotivoInput" placeholder="Descrição" style="display:none;" />
     <div class="edit-data-actions">
       <button class="btn-cancelar" onclick="fecharEditData()">Cancelar</button>
@@ -4493,7 +4501,7 @@ body[data-tema$="claro"] .historico-report-line{border-bottom-color:rgba(0,0,0,.
   <div class="edit-data-modal" onclick="event.stopPropagation()">
     <div class="edit-data-title">Data da manutenção concluída</div>
     <label class="config-meta-label" for="novaManutDataConcluidaInput">Data</label>
-    <input type="date" id="novaManutDataConcluidaInput" />
+    <input type="date" id="novaManutDataConcluidaInput" onclick="try{this.showPicker()}catch(e){}" />
     <div class="edit-data-actions">
       <button class="btn-cancelar" onclick="fecharNovaManutDataConcluidaModal()">Cancelar</button>
       <button onclick="confirmarNovaManutDataConcluidaModal()">Salvar</button>
@@ -4518,7 +4526,7 @@ body[data-tema$="claro"] .historico-report-line{border-bottom-color:rgba(0,0,0,.
   <div class="edit-data-modal" onclick="event.stopPropagation()">
     <div class="edit-data-title">Concluir manutenção</div>
     <label class="config-meta-label" for="concluirManutData">Data</label>
-    <input type="date" id="concluirManutData" />
+    <input type="date" id="concluirManutData" onclick="try{this.showPicker()}catch(e){}" />
     <label class="config-meta-label" for="concluirManutValor">Valor gasto (R$)</label>
     <input type="text" id="concluirManutValor" inputmode="decimal" placeholder="0,00" />
     <div class="edit-data-actions">
@@ -4537,7 +4545,7 @@ body[data-tema$="claro"] .historico-report-line{border-bottom-color:rgba(0,0,0,.
     <label class="config-meta-label" for="editManutKm">KM</label>
     <input type="text" id="editManutKm" inputmode="numeric" placeholder="KM" />
     <label class="config-meta-label" for="editManutData">Data</label>
-    <input type="date" id="editManutData" />
+    <input type="date" id="editManutData" onclick="try{this.showPicker()}catch(e){}" />
     <label class="config-meta-label" for="editManutTipo">Tipo</label>
     <select id="editManutTipo">
       <option value="P">Pendente</option>
@@ -4604,7 +4612,7 @@ body[data-tema$="claro"] .historico-report-line{border-bottom-color:rgba(0,0,0,.
       <button class="secondary" type="button" onclick="toggleKmAtualForm()">Atualizar</button>
       <div id="formKmAtual" class="form hidden" style="display:none;">
         <div class="row">
-          <input type="date" id="kmAtualData" />
+          <input type="date" id="kmAtualData" onclick="try{this.showPicker()}catch(e){}" />
           <input type="number" id="kmAtualValor" inputmode="numeric" placeholder="KM atual" />
         </div>
         <button type="button" onclick="salvarKmAtual()">Salvar</button>
@@ -5623,7 +5631,7 @@ function mdBuildDiagnosticsObject(){
     const durableObj = mdSafeJsonParse(durableRaw);
     const diag = {
       generated_at: mdNowIso(),
-      app_version: 'MetaDriver vBeta1.68',
+      app_version: 'MetaDriver vBeta1.69',
       cloud_table: CLOUD_TABLE,
       device_id: mdEnsureDeviceId(),
       visibility_state: document.visibilityState,
@@ -7754,7 +7762,7 @@ function mdCommitLancamentoMutation(reason){
   try{ atualizar(); }catch(e){}
   try{ if(typeof refreshQuickBalanceFabMiniDisplay === "function") refreshQuickBalanceFabMiniDisplay(); }catch(e){}
   try{ if(typeof updateQuickBalanceFabUI === "function") updateQuickBalanceFabUI(); }catch(e){}
-  try{ if(typeof toast === "function" && reason) console.info("MetaDriver vBeta1.68 mutation:", reason); }catch(e){}
+  try{ if(typeof toast === "function" && reason) console.info("MetaDriver vBeta1.69 mutation:", reason); }catch(e){}
 }
 
 
@@ -9589,7 +9597,7 @@ function exportarRelatorioPDF(){
       <script>
         setTimeout(()=>window.print(), 250);
       <\/script>
-    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver vBeta1.68 · app</div>
+    <div class="version-debug-badge" id="versionDebugBadge">MetaDriver vBeta1.69 · app</div>
 
 
 <script>
